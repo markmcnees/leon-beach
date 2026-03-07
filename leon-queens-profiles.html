@@ -212,6 +212,10 @@ function initFB(){
       const val=snap.val();
       if(!val||!val.players||Object.keys(val.players).length===0){seedDB();return;}
       D={players:val.players||{},starDrills:val.starDrills||{},verticals:val.verticals||{},skills:val.skills||{},pairings:val.pairings||{},notes:val.notes||{}};
+      // Compatibility: compute name from firstName+lastName if needed
+      Object.entries(D.players).forEach(([id,p])=>{
+        if(!p.name&&(p.firstName||p.lastName)){p.name=((p.firstName||'')+' '+(p.lastName||'')).trim();}
+      });
       renderAll();
     },err=>{console.error(err);setSS(false);});
     db.ref('.info/connected').on('value',s=>{setSS(s.val()===true);});
