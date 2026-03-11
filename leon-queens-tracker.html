@@ -424,7 +424,8 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <button class="filter-btn active" data-court="all">All</button>
       <button class="filter-btn" data-court="1">CT 1</button><button class="filter-btn" data-court="2">CT 2</button>
       <button class="filter-btn" data-court="3">CT 3</button><button class="filter-btn" data-court="4">CT 4</button>
-      <button class="filter-btn" data-court="5">CT 5</button>
+      <button class="filter-btn" data-court="5">CT 5</button><button class="filter-btn" data-court="6">CT 6</button>
+      <button class="filter-btn" data-court="7">CT 7</button><button class="filter-btn" data-court="8">CT 8</button>
     </div>
     <div class="card" style="padding:8px 12px;"><div class="table-wrap">
       <table class="player-table" id="players-table"><thead><tr id="players-thead"></tr></thead><tbody></tbody></table>
@@ -437,12 +438,27 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="form-row" style="margin-bottom:14px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label><input type="date" class="form-input" id="q-date"></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Court</label>
-          <select class="form-select" id="q-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option></select></div></div>
+          <select class="form-select" id="q-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option><option value="6">Court 6 — Exhib</option><option value="7">Court 7 — Exhib</option><option value="8">Court 8 — Exhib</option></select></div></div>
+      <div id="q-split-pairs" style="display:none;"></div>
       <div class="team-section team-a"><div class="team-label">Team A</div>
         <div class="form-row"><select class="form-select" id="q-a1"><option value="">Player 1</option></select><select class="form-select" id="q-a2"><option value="">Player 2</option></select></div></div>
       <div class="vs-divider">VS</div>
       <div class="team-section team-b"><div class="team-label">Team B</div>
         <div class="form-row"><select class="form-select" id="q-b1"><option value="">Player 1</option></select><select class="form-select" id="q-b2"><option value="">Player 2</option></select></div></div>
+      <div id="q-split-toggle" style="display:none;margin-top:10px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--purple);cursor:pointer;">
+          <input type="checkbox" id="q-is-split" style="width:16px;height:16px;accent-color:var(--purple);" onchange="toggleSplitQ()">
+          🔀 Split Match — different pairs for Set 2
+        </label>
+      </div>
+      <div id="q-split-extra" style="display:none;margin-top:10px;padding:10px;background:#f5f3ff;border-radius:8px;border:1px solid #c4b5fd;">
+        <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;color:var(--purple);margin-bottom:8px;">SET 2 — DIFFERENT PAIRS</div>
+        <div class="team-section team-a" style="margin-bottom:6px;"><div class="team-label">Set 2 — Team A</div>
+          <div class="form-row"><select class="form-select" id="q-s2a1"><option value="">Player 1</option></select><select class="form-select" id="q-s2a2"><option value="">Player 2</option></select></div></div>
+        <div class="vs-divider" style="margin:4px 0;">VS</div>
+        <div class="team-section team-b"><div class="team-label">Set 2 — Team B</div>
+          <div class="form-row"><select class="form-select" id="q-s2b1"><option value="">Player 1</option></select><select class="form-select" id="q-s2b2"><option value="">Player 2</option></select></div></div>
+      </div>
       <div class="score-row">
         <div class="score-col"><div class="score-col-label label-a">Team A</div><input type="number" class="score-input" id="q-sa" placeholder="0" min="0" max="99"></div>
         <span class="score-dash">—</span>
@@ -453,7 +469,9 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="filter-row" id="court-filter-queens">
         <button class="filter-btn active" data-qcourt="all">All</button>
         <button class="filter-btn" data-qcourt="1">CT 1</button><button class="filter-btn" data-qcourt="2">CT 2</button>
-        <button class="filter-btn" data-qcourt="3">CT 3</button>
+        <button class="filter-btn" data-qcourt="3">CT 3</button><button class="filter-btn" data-qcourt="4">CT 4</button>
+        <button class="filter-btn" data-qcourt="5">CT 5</button><button class="filter-btn" data-qcourt="6">CT 6</button>
+        <button class="filter-btn" data-qcourt="7">CT 7</button><button class="filter-btn" data-qcourt="8">CT 8</button>
       </div>
       <div id="queens-log"></div>
     </div>
@@ -507,7 +525,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="form-row" style="margin-bottom:10px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Courts to fill</label>
           <select class="form-select" id="ai-pair-courts" style="padding:8px;font-size:13px;">
-            <option value="3">3 courts</option><option value="4">4 courts</option><option value="5">5 courts</option><option value="6">6 courts</option><option value="7">7 courts</option><option value="2">2 courts</option><option value="1">1 court</option>
+            <option value="3">3 courts</option><option value="4">4 courts</option><option value="5">5 courts</option><option value="6">6 courts</option><option value="7">7 courts</option><option value="8">8 courts</option><option value="2">2 courts</option><option value="1">1 court</option>
           </select></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Context</label>
           <select class="form-select" id="ai-pair-context" style="padding:8px;font-size:13px;">
@@ -534,7 +552,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label><input type="text" class="form-input" id="assign-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Courts</label>
             <select class="form-select" id="assign-courts" style="padding:8px;font-size:13px;">
-              <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="2">2</option><option value="1">1</option>
+              <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="2">2</option><option value="1">1</option>
             </select></div>
         </div>
         <div id="assign-court-slots"></div>
@@ -547,7 +565,20 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="form-row" style="margin-bottom:10px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label><input type="date" class="form-input" id="gd-date"></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Court</label>
-          <select class="form-select" id="gd-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option></select></div></div>
+          <select class="form-select" id="gd-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option><option value="6">Court 6 — Exhib</option><option value="7">Court 7 — Exhib</option><option value="8">Court 8 — Exhib</option></select></div></div>
+      <div id="gd-split-toggle" style="display:none;margin-top:8px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--purple);cursor:pointer;">
+          <input type="checkbox" id="gd-is-split" style="width:16px;height:16px;accent-color:var(--purple);" onchange="toggleSplitGD()">
+          🔀 Split Match — different pair for Set 2
+        </label>
+      </div>
+      <div id="gd-split-extra" style="display:none;margin-top:8px;padding:10px;background:#f5f3ff;border-radius:8px;border:1px solid #c4b5fd;">
+        <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;color:var(--purple);margin-bottom:8px;">SET 2 — DIFFERENT PAIR</div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label">Set 2 Player 1</label><select class="form-select" id="gd-s2p1"><option value="">Select</option></select></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label">Set 2 Player 2</label><select class="form-select" id="gd-s2p2"><option value="">Select</option></select></div>
+        </div>
+      </div>
       <div class="form-row" style="margin-bottom:10px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Player 1</label><select class="form-select" id="gd-p1"><option value="">Select</option></select></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Player 2</label><select class="form-select" id="gd-p2"><option value="">Select</option></select></div></div>
@@ -566,7 +597,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="form-row" style="margin-bottom:10px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label><input type="date" class="form-input" id="sc-date"></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Court</label>
-          <select class="form-select" id="sc-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option></select></div></div>
+          <select class="form-select" id="sc-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option><option value="6">Court 6 — Exhib</option><option value="7">Court 7 — Exhib</option><option value="8">Court 8 — Exhib</option></select></div></div>
       <div class="form-row" style="margin-bottom:10px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Player 1</label><select class="form-select" id="sc-p1"><option value="">Select</option></select></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Player 2</label><select class="form-select" id="sc-p2"><option value="">Select</option></select></div></div>
@@ -597,7 +628,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="form-row" style="margin-bottom:10px;">
         <input type="number" class="form-input" id="new-jersey" placeholder="Jersey #" min="0" max="99" style="max-width:110px;">
         <select class="form-select" id="new-class"><option value="FR">Freshman</option><option value="SO">Sophomore</option><option value="JR">Junior</option><option value="SR">Senior</option></select>
-        <select class="form-select" id="new-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option></select></div>
+        <select class="form-select" id="new-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option><option value="6">Court 6 — Exhib</option><option value="7">Court 7 — Exhib</option><option value="8">Court 8 — Exhib</option></select></div>
       <button class="btn btn-secondary" id="add-player">Add Player</button></div>
     <div class="card"><div class="card-title"><span class="bar"></span> Data Management</div>
       <div class="data-actions">
@@ -606,6 +637,25 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <button class="btn btn-secondary btn-small" id="import-data-btn">Import JSON</button>
         <input type="file" id="import-data" accept=".json" style="display:none;">
         <button class="btn btn-danger btn-small" id="clear-matches">Clear All Matches</button></div></div>
+    <div class="card"><div class="card-title" style="color:var(--blue);"><span class="bar" style="background:var(--blue);"></span> 📸 Upload Court Assignment Sheet</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a handwritten court assignment sheet and AI will extract the court pairings. You can then review, edit, and save as an assignment.</p>
+      <div class="form-row" style="margin-bottom:8px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
+          <input type="date" class="form-input" id="ca-date" style="padding:8px;font-size:13px;"></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
+          <select class="form-select" id="ca-type" style="padding:8px;font-size:13px;">
+            <option value="gameday">Season Game</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
+          </select></div>
+      </div>
+      <div class="form-row" style="margin-bottom:8px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label>
+          <input type="text" class="form-input" id="ca-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
+      </div>
+      <input type="file" id="ca-file" accept="image/*" capture="environment" style="display:none;">
+      <button class="btn btn-blue btn-small" style="width:100%;" onclick="document.getElementById('ca-file').click();">📸 Take Photo or Upload Court Sheet</button>
+      <div id="ca-preview" style="margin-top:10px;"></div>
+      <div id="ca-result" style="margin-top:10px;"></div>
+    </div>
     <div class="card"><div class="card-title"><span class="bar"></span> 📷 Upload Scoresheet</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a handwritten scoresheet and AI will read it and create the match entries.</p>
       <div class="form-row" style="margin-bottom:8px;">
@@ -770,7 +820,8 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 // ============================================================
 const FB_CONFIG={apiKey:"AIzaSyC8Ue06XPvGXo1XTloewPvDRBWtK5tDAj8",authDomain:"leon-beach-volleyball.firebaseapp.com",databaseURL:"https://leon-beach-volleyball-default-rtdb.firebaseio.com",projectId:"leon-beach-volleyball",storageBucket:"leon-beach-volleyball.firebasestorage.app",messagingSenderId:"937804799976",appId:"1:937804799976:web:02121e68655b4febeb8e5d"};
 const DB_ROOT='leon_queens_matches';
-const COURTS=[1,2,3,4,5],CL={1:'Top',2:'Mid',3:'Dev',4:'Court 4',5:'Court 5'};
+const COURTS=[1,2,3,4,5,6,7,8],CL={1:'Top',2:'Mid',3:'Dev',4:'Court 4',5:'Court 5',6:'Exhib',7:'Exhib',8:'Exhib'};
+const EXHIBITION_COURTS=new Set([6,7,8]);
 const CO={SR:0,JR:1,SO:2,FR:3};
 let db=null;
 
@@ -1253,7 +1304,7 @@ function openQueensEdit(id){
     <div class="form-row" style="margin-bottom:14px;">
       <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label><input type="date" class="form-input" id="eq-date" value="${m.date||''}"></div>
       <div class="form-group" style="margin-bottom:0;"><label class="form-label">Court</label>
-        <select class="form-select" id="eq-court">${COURTS.map(c=>`<option value="${c}" ${m.court===c?'selected':''}>Court ${c}</option>`).join('')}</select></div></div>
+        <select class="form-select" id="eq-court">${COURTS.map(c=>`<option value="${c}" ${m.court===c?'selected':''}>${c<=5?'Court '+c:'Court '+c+' — Exhib'}</option>`).join('')}</select></div></div>
     <div class="team-section team-a"><div class="team-label">Team A</div><div class="form-row">
       <select class="form-select" id="eq-a1"></select><select class="form-select" id="eq-a2"></select></div></div>
     <div class="vs-divider">VS</div>
@@ -1441,7 +1492,7 @@ function openExtEdit(id,type){
     <div class="form-row" style="margin-bottom:10px;">
       <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label><input type="date" class="form-input" id="ee-date" value="${m.date||''}"></div>
       <div class="form-group" style="margin-bottom:0;"><label class="form-label">Court</label>
-        <select class="form-select" id="ee-court">${COURTS.map(c=>`<option value="${c}" ${(m.court||1)===c?'selected':''}>Court ${c}</option>`).join('')}</select></div></div>
+        <select class="form-select" id="ee-court">${COURTS.map(c=>`<option value="${c}" ${(m.court||1)===c?'selected':''}>${c<=5?'Court '+c:'Court '+c+' — Exhib'}</option>`).join('')}</select></div></div>
     <div class="form-row" style="margin-bottom:10px;">
       <div class="form-group" style="margin-bottom:0;"><label class="form-label">Player 1</label><select class="form-select" id="ee-p1"></select></div>
       <div class="form-group" style="margin-bottom:0;"><label class="form-label">Player 2</label><select class="form-select" id="ee-p2"></select></div></div>
@@ -1522,7 +1573,21 @@ document.querySelectorAll('#court-filter-players [data-court]').forEach(b=>{b.ad
   document.querySelectorAll('#court-filter-players [data-court]').forEach(x=>x.classList.remove('active'));b.classList.add('active');pCourt=b.dataset.court;renderPlayers();});});
 
 // Queens tab
-document.getElementById('q-court').addEventListener('change',()=>fillSel(['q-a1','q-a2','q-b1','q-b2'],document.getElementById('q-court').value));
+function updateQSplitToggle(){
+  const c=parseInt(document.getElementById('q-court').value);
+  const isExhib=EXHIBITION_COURTS.has(c);
+  document.getElementById('q-split-toggle').style.display=isExhib?'block':'none';
+  if(!isExhib){document.getElementById('q-is-split').checked=false;toggleSplitQ();}
+}
+function toggleSplitQ(){
+  const on=document.getElementById('q-is-split').checked;
+  document.getElementById('q-split-extra').style.display=on?'block':'none';
+  if(on)fillSel(['q-s2a1','q-s2a2','q-s2b1','q-s2b2'],document.getElementById('q-court').value);
+}
+document.getElementById('q-court').addEventListener('change',()=>{
+  fillSel(['q-a1','q-a2','q-b1','q-b2'],document.getElementById('q-court').value);
+  updateQSplitToggle();
+});
 document.getElementById('save-queens').addEventListener('click',()=>{
   const date=document.getElementById('q-date').value,court=parseInt(document.getElementById('q-court').value);
   const a1=document.getElementById('q-a1').value,a2=document.getElementById('q-a2').value,b1=document.getElementById('q-b1').value,b2=document.getElementById('q-b2').value;
@@ -1530,14 +1595,39 @@ document.getElementById('save-queens').addEventListener('click',()=>{
   if(!date){toast('Select a date');return;}if(!a1||!a2||!b1||!b2){toast('Select all 4 players');return;}
   if(new Set([a1,a2,b1,b2]).size<4){toast('Players must be unique');return;}
   if(isNaN(s1)||isNaN(s2)){toast('Enter both scores');return;}if(s1===s2){toast('Scores cannot be tied');return;}
-  const id=gi('m');fbSet('matches/'+id,{id,date,court,team1:[a1,a2],team2:[b1,b2],score1:s1,score2:s2});
-  toast('Queens match saved!');document.getElementById('q-sa').value='';document.getElementById('q-sb').value='';
-  ['q-a1','q-a2','q-b1','q-b2'].forEach(x=>document.getElementById(x).value='');});
+  const isSplit=document.getElementById('q-is-split').checked&&EXHIBITION_COURTS.has(court);
+  const matchData={id:gi('m'),date,court,team1:[a1,a2],team2:[b1,b2],score1:s1,score2:s2};
+  if(isSplit){
+    const s2a1=document.getElementById('q-s2a1').value,s2a2=document.getElementById('q-s2a2').value;
+    const s2b1=document.getElementById('q-s2b1').value,s2b2=document.getElementById('q-s2b2').value;
+    if(s2a1&&s2a2&&s2b1&&s2b2)matchData.splitPairs={set1:[a1,a2,b1,b2],set2:[s2a1,s2a2,s2b1,s2b2]};
+    matchData.isExhibition=true;
+  }
+  fbSet('matches/'+matchData.id,matchData);
+  toast(isSplit?'Split exhibition match saved!':'Queens match saved!');
+  document.getElementById('q-sa').value='';document.getElementById('q-sb').value='';
+  ['q-a1','q-a2','q-b1','q-b2','q-s2a1','q-s2a2','q-s2b1','q-s2b2'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
+  document.getElementById('q-is-split').checked=false;toggleSplitQ();
+});
 document.querySelectorAll('#court-filter-queens [data-qcourt]').forEach(b=>{b.addEventListener('click',()=>{
   document.querySelectorAll('#court-filter-queens [data-qcourt]').forEach(x=>x.classList.remove('active'));b.classList.add('active');qCourtFilter=b.dataset.qcourt;renderQueens();});});
 
 // Game Day tab
-document.getElementById('gd-court').addEventListener('change',()=>fillSel(['gd-p1','gd-p2'],document.getElementById('gd-court').value));
+function updateGDSplitToggle(){
+  const c=parseInt(document.getElementById('gd-court').value);
+  const isExhib=EXHIBITION_COURTS.has(c);
+  document.getElementById('gd-split-toggle').style.display=isExhib?'block':'none';
+  if(!isExhib){document.getElementById('gd-is-split').checked=false;toggleSplitGD();}
+}
+function toggleSplitGD(){
+  const on=document.getElementById('gd-is-split').checked;
+  document.getElementById('gd-split-extra').style.display=on?'block':'none';
+  if(on)fillSel(['gd-s2p1','gd-s2p2'],document.getElementById('gd-court').value);
+}
+document.getElementById('gd-court').addEventListener('change',()=>{
+  fillSel(['gd-p1','gd-p2'],document.getElementById('gd-court').value);
+  updateGDSplitToggle();
+});
 document.getElementById('gd-filter-date').addEventListener('change',()=>renderExtMatches('gameday'));
 document.getElementById('save-gd-match').addEventListener('click',()=>{
   const date=document.getElementById('gd-date').value,court=parseInt(document.getElementById('gd-court').value);
@@ -1545,9 +1635,20 @@ document.getElementById('save-gd-match').addEventListener('click',()=>{
   const opp=document.getElementById('gd-opp').value.trim();
   if(!date){toast('Select a date');return;}if(!p1||!p2){toast('Select both players');return;}
   if(p1===p2){toast('Select two different players');return;}if(!opp){toast('Enter opponent name');return;}
-  const id=gi('gd');fbSet('gamedays/'+id,{id,date,court,pair:[p1,p2],opponent:opp,sets:[]});
-  toast('Game day match created!');document.getElementById('gd-opp').value='';
+  const isSplit=document.getElementById('gd-is-split').checked&&EXHIBITION_COURTS.has(court);
+  const matchData={id:gi('gd'),date,court,pair:[p1,p2],opponent:opp,sets:[]};
+  if(isSplit){
+    const s2p1=document.getElementById('gd-s2p1').value,s2p2=document.getElementById('gd-s2p2').value;
+    if(s2p1&&s2p2)matchData.splitPairs={set1:[p1,p2],set2:[s2p1,s2p2]};
+    matchData.isExhibition=true;
+  }
+  fbSet('gamedays/'+matchData.id,matchData);
+  toast(isSplit?'Split exhibition match created!':'Game day match created!');
+  document.getElementById('gd-opp').value='';
   document.getElementById('gd-p1').value='';document.getElementById('gd-p2').value='';
+  document.getElementById('gd-s2p1')&&(document.getElementById('gd-s2p1').value='');
+  document.getElementById('gd-s2p2')&&(document.getElementById('gd-s2p2').value='');
+  document.getElementById('gd-is-split').checked=false;toggleSplitGD();
   document.getElementById('gd-filter-date').value=date;
 });
 
@@ -2691,6 +2792,123 @@ function exportExcel(){
 }
 
 // ============================================================
+// COURT ASSIGNMENT SCANNER
+// ============================================================
+document.getElementById('ca-date').value=td();
+document.getElementById('ca-file').addEventListener('change',async function(e){
+  const file=e.target.files[0];if(!file)return;
+  const preview=document.getElementById('ca-preview');
+  const result=document.getElementById('ca-result');
+  const reader=new FileReader();
+  reader.onload=async function(ev){
+    const base64=ev.target.result.split(',')[1];
+    const mediaType=file.type||'image/jpeg';
+    preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;border-radius:8px;border:2px solid var(--gray-lighter);">`;
+    result.innerHTML='<div class="ai-loading"><div class="spinner"></div><div style="margin-top:8px;">AI is reading your court assignment sheet...</div></div>';
+    const playerList=D.players.map(p=>p.firstName+' '+p.lastName+' ('+p.id+')').join(', ');
+    try{
+      const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',max_tokens:1500,
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+            {type:'text',text:`You are reading a handwritten beach volleyball court assignment sheet for a high school team.
+Extract the court assignments. Each court has two players (a pair) assigned to it.
+Courts 6, 7, 8 may optionally have a second pair listed (for split/exhibition courts).
+
+PLAYER ROSTER (use these exact IDs — match names to IDs even if spelling varies):
+${playerList}
+
+Return ONLY a JSON array like this:
+[{"court":1,"pair":["p01","p02"]},{"court":2,"pair":["p03","p04"]},{"court":6,"pair":["p05","p06"],"splitPair":["p07","p08"]}]
+
+Rules:
+- court: integer 1-8
+- pair: array of 2 player IDs from the roster
+- splitPair: (courts 6-8 only) optional second pair for split/exhibition match
+- If a name is unclear, use best match from roster
+- Respond with ONLY the JSON array, no other text`}
+          ]}]
+        })
+      });
+      const data=await response.json();
+      const text=data.content?.map(c=>c.text||'').join('')||'';
+      const clean=text.replace(/```json|```/g,'').trim();
+      let parsed;
+      try{parsed=JSON.parse(clean);}catch(pe){
+        result.innerHTML=`<div style="color:var(--loss-red);font-size:13px;">Couldn't parse AI response.</div><pre style="font-size:11px;background:var(--off-white);padding:10px;border-radius:6px;overflow-x:auto;white-space:pre-wrap;">${text}</pre>`;
+        return;
+      }
+      // Show editable preview
+      const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
+      function caPlayerOpts(selId){return '<option value="">Select</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (CT${pl.court})</option>`).join('');}
+      let h=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;margin-bottom:8px;color:var(--green);">✓ Found ${parsed.length} court(s) — edit if needed</div>`;
+      parsed.forEach((m,i)=>{
+        const isExhib=EXHIBITION_COURTS.has(m.court);
+        h+=`<div style="padding:10px;background:var(--off-white);border-radius:6px;margin-bottom:8px;">
+          <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;margin-bottom:6px;color:var(--charcoal);">
+            COURT <input type="number" id="ca-${i}-court" value="${m.court||1}" min="1" max="8" style="width:50px;padding:4px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;font-weight:700;">
+            ${isExhib?'<span style="font-size:10px;color:var(--purple);margin-left:4px;">EXHIBITION</span>':''}
+          </div>
+          <div style="font-size:11px;color:var(--gray);margin-bottom:4px;">Set 1 Pair</div>
+          <div class="form-row" style="margin-bottom:6px;">
+            <select class="form-select" id="ca-${i}-p1" style="padding:6px;font-size:12px;">${caPlayerOpts((m.pair||[])[0])}</select>
+            <select class="form-select" id="ca-${i}-p2" style="padding:6px;font-size:12px;">${caPlayerOpts((m.pair||[])[1])}</select>
+          </div>`;
+        if(isExhib||m.splitPair){
+          h+=`<div style="font-size:11px;color:var(--purple);margin-bottom:4px;">Set 2 Pair (Split — optional)</div>
+          <div class="form-row">
+            <select class="form-select" id="ca-${i}-sp1" style="padding:6px;font-size:12px;">${caPlayerOpts((m.splitPair||[])[0])}</select>
+            <select class="form-select" id="ca-${i}-sp2" style="padding:6px;font-size:12px;">${caPlayerOpts((m.splitPair||[])[1])}</select>
+          </div>`;
+        }
+        h+='</div>';
+      });
+      h+=`<div style="margin-top:10px;display:flex;gap:8px;">
+        <button class="btn btn-primary btn-small" onclick="confirmCAAssignment()">✓ Save as Assignment</button>
+        <button class="btn btn-secondary btn-small" onclick="document.getElementById('ca-result').innerHTML='';document.getElementById('ca-preview').innerHTML='';">✕ Cancel</button></div>`;
+      result.innerHTML=h;
+      window._caData={parsed,count:parsed.length};
+    }catch(err){
+      console.error('CA scan error:',err);
+      result.innerHTML='<div style="color:var(--loss-red);font-size:13px;">Error reading photo. Try a clearer image.</div>';
+    }
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+});
+
+function confirmCAAssignment(){
+  const{count}=window._caData||{};
+  if(!count){toast('No data to save');return;}
+  const date=document.getElementById('ca-date').value||td();
+  const type=document.getElementById('ca-type').value;
+  const opp=document.getElementById('ca-opp').value.trim();
+  const slots=[];
+  for(let i=0;i<count;i++){
+    const court=parseInt(document.getElementById(`ca-${i}-court`)?.value)||1;
+    const p1=document.getElementById(`ca-${i}-p1`)?.value;
+    const p2=document.getElementById(`ca-${i}-p2`)?.value;
+    const sp1=document.getElementById(`ca-${i}-sp1`)?.value;
+    const sp2=document.getElementById(`ca-${i}-sp2`)?.value;
+    if(!p1||!p2)continue;
+    const slot={court,pair:[p1,p2]};
+    if(sp1&&sp2&&EXHIBITION_COURTS.has(court))slot.splitPair=[sp1,sp2];
+    slots.push(slot);
+  }
+  if(!slots.length){toast('No valid courts to save');return;}
+  const id=gi('asgn');
+  const assignData={id,date,type,opponent:opp||null,courts:slots.length,slots,createdAt:new Date().toISOString()};
+  fbSet('assignments/'+id,assignData);
+  toast(`Assignment saved! ${slots.length} court(s) for ${date}`);
+  document.getElementById('ca-result').innerHTML='';
+  document.getElementById('ca-preview').innerHTML='';
+  document.getElementById('ca-opp').value='';
+  renderAssignments();
+}
+
+// ============================================================
 // SCORESHEET SCANNER
 // ============================================================
 document.getElementById('scan-date').value=td();
@@ -2714,11 +2932,12 @@ document.getElementById('scan-file').addEventListener('change',async function(e)
     let typeInstructions='';
     if(matchType==='queens'){
       typeInstructions=`These are Queens matches (Leon vs Leon practice). Each match has:
-- Court number
+- Court number (1-8; courts 6-8 are exhibition and may have split pairs noted)
 - Team A: two Leon players
 - Team B: two Leon players
 - Score for each team
-Return JSON array: [{"court":1,"team1":["p01","p02"],"team2":["p03","p04"],"score1":21,"score2":15}]`;
+- For split/exhibition courts, separate pairs may play Set 1 vs Set 2
+Return JSON array: [{"court":1,"team1":["p01","p02"],"team2":["p03","p04"],"score1":21,"score2":15},{"court":6,"team1":["p05","p06"],"team2":["p07","p08"],"score1":21,"score2":18,"isSplit":true,"splitSet2":{"team1":["p09","p10"],"team2":["p11","p12"]}}]`;
     }else{
       typeInstructions=`These are ${matchType==='gameday'?'Game Day':'Scrimmage'} matches (Leon vs external opponent). Each match has:
 - Court number
@@ -2769,7 +2988,7 @@ IMPORTANT: Respond with ONLY the JSON array, no other text. If you can't read so
           h+=`<div style="padding:10px;background:var(--off-white);border-radius:6px;margin-bottom:8px;">
             <div class="form-row" style="margin-bottom:6px;align-items:center;">
               <span style="font-family:'Bebas Neue';font-size:13px;min-width:38px;">CT</span>
-              <input type="number" id="scan-${i}-court" value="${m.court||1}" min="1" max="7" style="width:50px;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;">
+              <input type="number" id="scan-${i}-court" value="${m.court||1}" min="1" max="8" style="width:50px;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;">
             </div>
             <div class="form-row" style="margin-bottom:6px;">
               <select class="form-select" id="scan-${i}-t1a" style="padding:6px;font-size:12px;"><option value="">P1</option>${playerOpts((m.team1||[])[0])}</select>
@@ -2789,7 +3008,7 @@ IMPORTANT: Respond with ONLY the JSON array, no other text. If you can't read so
           h+=`<div style="padding:10px;background:var(--off-white);border-radius:6px;margin-bottom:8px;">
             <div class="form-row" style="margin-bottom:6px;align-items:center;">
               <span style="font-family:'Bebas Neue';font-size:13px;min-width:38px;">CT</span>
-              <input type="number" id="scan-${i}-court" value="${m.court||1}" min="1" max="7" style="width:50px;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;">
+              <input type="number" id="scan-${i}-court" value="${m.court||1}" min="1" max="8" style="width:50px;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;">
               <input type="text" id="scan-${i}-opp" value="${m.opponent||''}" placeholder="Opponent" style="flex:1;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;">
             </div>
             <div class="form-row" style="margin-bottom:6px;">
