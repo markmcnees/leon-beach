@@ -46,11 +46,19 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .live-court-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
 .live-pair-name{font-weight:700;font-size:14px;color:var(--black);}
 .live-opp-name{font-size:12px;color:var(--gray);margin-top:2px;}
-.live-score-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;margin-bottom:8px;}
+.live-score-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:8px;}
 .live-score-col{text-align:center;}
 .live-score-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gray);margin-bottom:3px;}
 .live-score-input{width:100%;padding:12px 4px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:28px;text-align:center;color:var(--black);background:var(--white);}
 .live-score-input:focus{outline:none;border-color:var(--blue);}
+.ls-counter{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.ls-num{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;min-width:70px;text-align:center;color:var(--black);}
+.ls-btn{width:100%;padding:10px 0;border-radius:10px;border:none;font-family:'Bebas Neue',sans-serif;font-size:28px;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:manipulation;transition:transform 0.08s,background 0.08s;}
+.ls-btn:active{transform:scale(0.92);}
+.ls-btn-plus{background:var(--blue);color:var(--white);}
+.ls-btn-plus:active{background:#1d4ed8;}
+.ls-btn-minus{background:var(--gray-lighter);color:var(--charcoal);}
+.ls-btn-minus:active{background:#d1d5db;}
 .live-set-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:13px;margin:2px;}
 .live-set-chip.win{background:var(--green-bg);color:var(--green);}.live-set-chip.loss{background:#fee2e2;color:var(--loss-red);}
 /* COACH NOTES */
@@ -291,7 +299,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260311165653">
+  <meta name="build-version" content="20260311134118">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -3358,7 +3366,14 @@ function renderLiveScoring(){
     const existingMatch=matchList.find(m=>m.date===date&&arrEq(m.pair||[],[c.p1,c.p2].filter(Boolean)));
     const matchId=existingMatch?existingMatch.id:null;
     const sets=existingMatch?existingMatch.sets||[]:[];
-    let sw=0,sl=0;sets.forEach(s=>(s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++);
+    let sw=0,sl=0,ptDiff=0;
+    sets.forEach(s=>{
+      const us=s.scoreUs||0,them=s.scoreThem||0;
+      (us>them?sw++:sl++);
+      ptDiff+=(us-them);
+    });
+    const diffStr=ptDiff>0?'+'+ptDiff:String(ptDiff);
+    const diffColor=ptDiff>0?'var(--green)':ptDiff<0?'var(--loss-red)':'var(--gray)';
 
     h+=`<div class="live-court-card" id="lc-card-${idx}">
       <div class="live-court-header">
@@ -3368,7 +3383,7 @@ function renderLiveScoring(){
           <div class="live-opp-name">vs ${opp}</div>
         </div>
         <div style="text-align:right;">
-          ${sets.length?`<div style="font-family:'Bebas Neue';font-size:18px;color:${sw>sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</div><div style="font-size:10px;color:var(--gray);">Sets</div>`:'<div style="font-size:12px;color:var(--gray);">No sets yet</div>'}
+          ${sets.length?`<div style="font-family:'Bebas Neue';font-size:18px;color:${sw>sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</div><div style="font-size:10px;color:var(--gray);">Sets</div><div style="font-family:'Bebas Neue';font-size:15px;color:${diffColor};margin-top:2px;">${diffStr}</div><div style="font-size:10px;color:var(--gray);">Pts</div>`:'<div style="font-size:12px;color:var(--gray);">No sets yet</div>'}
         </div>
       </div>`;
 
@@ -3384,19 +3399,27 @@ function renderLiveScoring(){
 
     // Score entry row
     h+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;margin-top:4px;">
-      <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:6px;">SET ${sets.length+1}</div>
+      <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:10px;letter-spacing:1px;">SET ${sets.length+1}</div>
       <div class="live-score-row">
         <div class="live-score-col">
           <div class="live-score-label">LEON</div>
-          <input type="number" class="live-score-input" id="ls-us-${idx}" placeholder="0" min="0">
+          <div class="ls-counter">
+            <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-us-${idx}',1)">+</button>
+            <div class="ls-num" id="ls-us-${idx}">0</div>
+            <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-us-${idx}',-1)">−</button>
+          </div>
         </div>
-        <div style="font-family:'Bebas Neue';font-size:20px;color:var(--gray-light);padding-bottom:8px;">—</div>
+        <div style="font-family:'Bebas Neue';font-size:24px;color:var(--gray-light);">—</div>
         <div class="live-score-col">
           <div class="live-score-label">OPP</div>
-          <input type="number" class="live-score-input" id="ls-them-${idx}" placeholder="0" min="0">
+          <div class="ls-counter">
+            <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-them-${idx}',1)">+</button>
+            <div class="ls-num" id="ls-them-${idx}">0</div>
+            <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-them-${idx}',-1)">−</button>
+          </div>
         </div>
       </div>
-      <button class="btn btn-blue btn-small" style="width:100%;" onclick="saveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${date}',${c.court},'${c.subCourt||''}','${existingMatch?existingMatch.id:''}','${assignment.opponent||''}','${fbNode}')">+ Save Set</button>
+      <button class="btn btn-blue btn-small" style="width:100%;margin-top:6px;" onclick="saveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${date}',${c.court},'${c.subCourt||''}','${existingMatch?existingMatch.id:''}','${assignment.opponent||''}','${fbNode}')">✓ Save Set</button>
     </div>`;
     h+='</div>';
   });
@@ -3404,9 +3427,19 @@ function renderLiveScoring(){
   container.innerHTML=h;
 }
 
+function lsAdj(id,delta){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const cur=parseInt(el.textContent)||0;
+  const next=Math.max(0,cur+delta);
+  el.textContent=next;
+}
+
 function saveLiveSet(idx,p1,p2,date,court,subCourt,existingId,opponent,fbNode){
-  const us=parseInt(document.getElementById('ls-us-'+idx).value);
-  const them=parseInt(document.getElementById('ls-them-'+idx).value);
+  const usEl=document.getElementById('ls-us-'+idx);
+  const themEl=document.getElementById('ls-them-'+idx);
+  const us=parseInt(usEl?.textContent??usEl?.value);
+  const them=parseInt(themEl?.textContent??themEl?.value);
   if(isNaN(us)||isNaN(them)){toast('Enter both scores');return;}
   if(us===them){toast('Scores cannot be tied');return;}
 
@@ -3483,9 +3516,23 @@ function renderLiveScoringQueens(assignment, date, container){
         <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:6px;">VS (select opponent pair)</div>
         <select class="form-select" id="qls-opp-${idx}" style="font-size:13px;padding:8px;margin-bottom:8px;"><option value="">— Pick opponent pair —</option>${oppOptions}</select>
         <div class="live-score-row">
-          <div class="live-score-col"><div class="live-score-label">${p1?p1.firstName:'Team A'}</div><input type="number" class="live-score-input" id="qls-a-${idx}" placeholder="0" min="0"></div>
-          <div style="font-family:'Bebas Neue';font-size:20px;color:var(--gray-light);padding-bottom:8px;">—</div>
-          <div class="live-score-col"><div class="live-score-label">OPP</div><input type="number" class="live-score-input" id="qls-b-${idx}" placeholder="0" min="0"></div>
+          <div class="live-score-col">
+            <div class="live-score-label">${p1?p1.firstName:'Team A'}</div>
+            <div class="ls-counter">
+              <button class="ls-btn ls-btn-plus" onclick="lsAdj('qls-a-${idx}',1)">+</button>
+              <div class="ls-num" id="qls-a-${idx}">0</div>
+              <button class="ls-btn ls-btn-minus" onclick="lsAdj('qls-a-${idx}',-1)">−</button>
+            </div>
+          </div>
+          <div style="font-family:'Bebas Neue';font-size:24px;color:var(--gray-light);">—</div>
+          <div class="live-score-col">
+            <div class="live-score-label">OPP</div>
+            <div class="ls-counter">
+              <button class="ls-btn ls-btn-plus" onclick="lsAdj('qls-b-${idx}',1)">+</button>
+              <div class="ls-num" id="qls-b-${idx}">0</div>
+              <button class="ls-btn ls-btn-minus" onclick="lsAdj('qls-b-${idx}',-1)">−</button>
+            </div>
+          </div>
         </div>
         <button class="btn btn-small" style="width:100%;background:var(--red);color:var(--white);border:none;" onclick="saveQueensLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${date}',${c.court})">Save Queens Result</button>
       </div>`:''}
@@ -3498,8 +3545,10 @@ function saveQueensLiveSet(idx,p1,p2,date,court){
   const oppVal=document.getElementById('qls-opp-'+idx)?.value;
   if(!oppVal){toast('Select an opponent pair');return;}
   const [op1,op2]=oppVal.split('|');
-  const sa=parseInt(document.getElementById('qls-a-'+idx).value);
-  const sb=parseInt(document.getElementById('qls-b-'+idx).value);
+  const saEl=document.getElementById('qls-a-'+idx);
+  const sbEl=document.getElementById('qls-b-'+idx);
+  const sa=parseInt(saEl?.textContent??saEl?.value);
+  const sb=parseInt(sbEl?.textContent??sbEl?.value);
   if(isNaN(sa)||isNaN(sb)){toast('Enter both scores');return;}
   if(sa===sb){toast('Scores cannot be tied');return;}
   const id=gi('qm');
@@ -3917,7 +3966,11 @@ function renderPlayerGameDay(){
     const existingMatch=D.gamedays.find(m=>m.date===nextAssign.date&&arrEq(m.pair||[],pgdCurrentPair));
     pgdCurrentMatchId=existingMatch?existingMatch.id:null;
     const existingSets=existingMatch?existingMatch.sets||[]:[];
-    let sw=0,sl=0;existingSets.forEach(s=>(s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++);
+    let sw=0,sl=0,ptDiff=0;
+    existingSets.forEach(s=>{
+      const us=s.scoreUs||0,them=s.scoreThem||0;
+      us>them?sw++:sl++;ptDiff+=(us-them);
+    });
     const savedNotes=pgdNotes[pid]&&pgdNotes[pid][nextAssign.date]||{};
 
     // Assignment banner
@@ -3934,7 +3987,9 @@ function renderPlayerGameDay(){
     // Existing sets with edit buttons
     h+=pgdSetsHTML(existingSets,pgdCurrentMatchId,pgdCurrentPair,pid,'own');
     if(sw||sl){
-      h+=`<div style="font-family:'Bebas Neue';font-size:15px;margin-bottom:10px;color:${sw>=sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl} sets</div>`;
+      const diffStr=ptDiff>0?'+'+ptDiff:String(ptDiff);
+      const diffColor=ptDiff>0?'var(--green)':ptDiff<0?'var(--loss-red)':'var(--gray)';
+      h+=`<div style="font-family:'Bebas Neue';font-size:15px;margin-bottom:10px;color:${sw>=sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl} sets <span style="font-size:13px;color:${diffColor};margin-left:6px;">(${diffStr} pts)</span></div>`;
     }
 
     // New set entry
@@ -3971,7 +4026,9 @@ function renderPlayerGameDay(){
         const courtLabel2='Court '+c.court+(c.subCourt?c.subCourt.toUpperCase():'');
         const specMatch=D.gamedays.find(m=>m.date===nextAssign.date&&arrEq(m.pair||[],specPair));
         const specSets=specMatch?specMatch.sets||[]:[];
-        let ssw=0,ssl=0;specSets.forEach(s=>(s.scoreUs||0)>(s.scoreThem||0)?ssw++:ssl++);
+        let ssw=0,ssl=0,ssDiff=0;specSets.forEach(s=>{const us=s.scoreUs||0,them=s.scoreThem||0;us>them?ssw++:ssl++;ssDiff+=(us-them);});
+        const ssDiffStr=ssDiff>0?'+'+ssDiff:String(ssDiff);
+        const ssDiffColor=ssDiff>0?'var(--green)':ssDiff<0?'var(--loss-red)':'var(--gray)';
         const prefix2='spec-'+idx;
         h+=`<div class="pgd-court-section spectator" style="margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -3979,7 +4036,7 @@ function renderPlayerGameDay(){
               <span class="court-badge court-${c.court}" style="font-size:11px;">${courtLabel2}</span>
               <div style="font-size:13px;font-weight:700;margin-top:4px;">${specLabel}</div>
             </div>
-            ${specSets.length?`<div style="font-family:'Bebas Neue';font-size:16px;color:${ssw>ssl?'var(--green)':'var(--loss-red)'};">${ssw}-${ssl}</div>`:''}
+            ${specSets.length?`<div style="text-align:right;"><div style="font-family:'Bebas Neue';font-size:16px;color:${ssw>ssl?'var(--green)':'var(--loss-red)'};">${ssw}-${ssl}</div><div style="font-family:'Bebas Neue';font-size:13px;color:${ssDiffColor};">${ssDiffStr} pts</div></div>`:''}
           </div>
           ${pgdSetsHTML(specSets,specMatch?specMatch.id:null,specPair,pid,prefix2)}
           ${pgdNewSetCardHTML(specSets.length+1,specPair,prefix2,true)}
