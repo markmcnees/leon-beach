@@ -1,1 +1,56 @@
+# .github/workflows/cache-bust.yml
+#
+# Runs on every push to main.
+# Injects a build timestamp into each HTML file so GitHub's CDN
+# always treats the file as new and serves the latest version.
+# The [skip ci] tag in the commit message prevents an infinite loop.
+
+name: Cache Bust
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '.github/workflows/**'   # don't re-run on workflow file changes
+
+jobs:
+  cache-bust:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate build timestamp
+        id: version
+        run: echo "v=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+
+      - name: Inject version into HTML files
+        run: |
+          VERSION="${{ steps.version.outputs.v }}"
+
+          for FILE in index.html leon-queens-tracker.html leon-queens-profiles.html; do
+            if [ ! -f "$FILE" ]; then
+              echo "Skipping $FILE (not found)"
+              continue
+            fi
+
+            # If a build-version meta tag already exists, update it
+            if grep -q 'name="build-version"' "$FILE"; then
+              sed -i "s|<meta name=\"build-version\" content=\"[^\"]*\">|<meta name=\"build-version\" content=\"$VERSION\">|" "$FILE"
+            else
+              # Otherwise insert it just before </head>
+              sed -i "s|</head>|  <meta name=\"build-version\" content=\"$VERSION\">\n</head>|" "$FILE"
+            fi
+
+            echo "Updated $FILE → build $VERSION"
+          done
+
+      - name: Commit updated files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: cache bust build ${{ steps.version.outputs.v }} [skip ci]"
+          file_pattern: "*.html"
 
