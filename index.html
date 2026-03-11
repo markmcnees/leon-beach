@@ -291,7 +291,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260311155908">
+  <meta name="build-version" content="20260311134118">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -2899,7 +2899,7 @@ function confirmCAAssignment(){
   }
   if(!slots.length){toast('No valid courts to save');return;}
   const id=gi('asgn');
-  const assignData={id,date,type,opponent:opp||null,courts:slots.length,slots,createdAt:new Date().toISOString()};
+  const assignData={id,date,type,opponent:opp||null,courts:slots,notes:null,createdAt:new Date().toISOString()};
   fbSet('assignments/'+id,assignData);
   toast(`Assignment saved! ${slots.length} court(s) for ${date}`);
   document.getElementById('ca-result').innerHTML='';
