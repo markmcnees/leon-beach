@@ -40,7 +40,80 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .stat-number.green{color:var(--green);}.stat-number.blue{color:var(--blue);}.stat-number.purple{color:var(--purple);}
 .stat-label{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;}
 .court-badge{display:inline-block;font-family:'Bebas Neue',sans-serif;font-size:11px;padding:2px 8px;border-radius:4px;letter-spacing:1px;}
-.court-1{background:#fde2e8;color:var(--red-dark);}.court-2{background:#e0e7ff;color:#3730a3;}.court-3{background:#fef3c7;color:#92400e;}.court-4{background:#d1fae5;color:#065f46;}.court-5{background:#f3e8ff;color:#6b21a8;}
+.court-1{background:#fde2e8;color:var(--red-dark);}.court-2{background:#e0e7ff;color:#3730a3;}.court-3{background:#fef3c7;color:#92400e;}.court-4{background:#d1fae5;color:#065f46;}.court-5{background:#f3e8ff;color:#6b21a8;}.court-6{background:#fce7f3;color:#9d174d;}.court-7{background:#ecfdf5;color:#065f46;}.court-8{background:#fffbeb;color:#92400e;}
+/* LIVE SCORING */
+.live-court-card{background:var(--white);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--blue);}
+.live-court-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.live-pair-name{font-weight:700;font-size:14px;color:var(--black);}
+.live-opp-name{font-size:12px;color:var(--gray);margin-top:2px;}
+.live-score-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;margin-bottom:8px;}
+.live-score-col{text-align:center;}
+.live-score-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gray);margin-bottom:3px;}
+.live-score-input{width:100%;padding:12px 4px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:28px;text-align:center;color:var(--black);background:var(--white);}
+.live-score-input:focus{outline:none;border-color:var(--blue);}
+.live-set-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:13px;margin:2px;}
+.live-set-chip.win{background:var(--green-bg);color:var(--green);}.live-set-chip.loss{background:#fee2e2;color:var(--loss-red);}
+/* COACH NOTES */
+.cnote-tabs{display:flex;gap:4px;margin-bottom:12px;}
+.cnote-tab{flex:1;padding:8px 4px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;border:2px solid var(--gray-lighter);border-radius:6px;background:var(--white);color:var(--gray);cursor:pointer;transition:all 0.15s;}
+.cnote-tab.active{border-color:var(--charcoal);background:var(--charcoal);color:var(--white);}
+.cnote-section{display:none;}.cnote-section.active{display:block;}
+.cnote-player-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04);}
+.cnote-player-row:last-child{border-bottom:none;}
+.cnote-player-label{font-size:12px;font-weight:700;min-width:80px;padding-top:6px;color:var(--charcoal);}
+.cnote-textarea{flex:1;padding:8px 10px;border:1px solid var(--gray-lighter);border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;resize:vertical;min-height:52px;width:100%;}
+.cnote-textarea:focus{outline:none;border-color:var(--charcoal);}
+/* PLAYER PORTAL TABS */
+.pp-tab-bar{display:flex;gap:4px;margin-bottom:14px;background:var(--gray-lighter);border-radius:10px;padding:3px;}
+.pp-tab-btn{flex:1;padding:10px 8px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;border:none;background:transparent;color:var(--gray);cursor:pointer;border-radius:8px;transition:all 0.2s;}
+.pp-tab-btn.active{background:var(--white);color:var(--red);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.pp-panel{display:none;}.pp-panel.active{display:block;}
+/* PLAYER GAME DAY */
+.pgd-assignment{background:linear-gradient(135deg,#1e40af 0%,#3730a3 100%);border-radius:var(--radius);padding:18px;margin-bottom:14px;color:var(--white);}
+.pgd-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;opacity:0.75;margin-bottom:4px;}
+.pgd-title{font-family:'Bebas Neue',sans-serif;font-size:22px;margin-bottom:6px;}
+.pgd-court-badge{display:inline-block;background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;border:1px solid rgba(255,255,255,0.3);}
+.pgd-set-entry{background:var(--off-white);border-radius:10px;padding:16px;margin-bottom:12px;border:2px solid var(--gray-lighter);}
+.pgd-score-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:14px;}
+.pgd-score-block{text-align:center;}
+.pgd-score-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--gray);margin-bottom:8px;}
+.pgd-score-ctrl{display:flex;align-items:center;justify-content:center;gap:6px;}
+.pgd-score-num{font-family:'Bebas Neue',sans-serif;font-size:48px;min-width:64px;text-align:center;line-height:1;}
+.pgd-score-btn{width:44px;height:44px;border-radius:10px;border:2px solid var(--gray-lighter);background:var(--white);font-size:24px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.1s;-webkit-user-select:none;user-select:none;touch-action:manipulation;}
+.pgd-score-btn:active{transform:scale(0.88);background:var(--gray-lighter);}
+.pgd-vs{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gray-light);letter-spacing:2px;text-align:center;}
+.pgd-set-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:14px;margin:3px;}
+.pgd-set-chip.win{background:var(--green-bg);color:var(--green);}.pgd-set-chip.loss{background:#fee2e2;color:var(--loss-red);}
+.pgd-notes-area{width:100%;padding:12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;resize:vertical;min-height:80px;box-sizing:border-box;}
+.pgd-notes-area:focus{outline:none;border-color:var(--blue);}
+/* PLAYER OPTIONAL STATS */
+.pgd-stats-toggle{width:100%;background:none;border:2px dashed var(--gray-lighter);border-radius:8px;padding:10px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gray);cursor:pointer;margin-top:10px;transition:all 0.2s;}
+.pgd-stats-toggle:hover,.pgd-stats-toggle.open{border-color:var(--blue);color:var(--blue);background:#dbeafe;}
+.pgd-stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;}
+.pgd-stat-col{text-align:center;}
+.pgd-stat-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gray);margin-bottom:4px;}
+.pgd-stat-label .stat-desc{display:block;font-size:9px;color:var(--gray-light);font-family:'Barlow',sans-serif;letter-spacing:0;font-weight:600;}
+.pgd-stat-ctrl{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.pgd-stat-num{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;min-width:36px;text-align:center;}
+.pgd-stat-btn{width:36px;height:28px;border-radius:6px;border:1px solid var(--gray-lighter);background:var(--white);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-user-select:none;user-select:none;touch-action:manipulation;}
+.pgd-stat-btn:active{transform:scale(0.88);background:var(--gray-lighter);}
+/* SPECTATOR & EDIT */
+.pgd-player-stats-block{background:var(--off-white);border-radius:8px;padding:10px;margin-top:8px;}
+.pgd-player-stats-label{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;}
+.pgd-court-section{background:var(--white);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--blue);}
+.pgd-court-section.spectator{border-left-color:var(--purple);}
+.pgd-set-edit-form{background:#f0f9ff;border:2px solid var(--blue);border-radius:8px;padding:12px;margin:6px 0;}
+.pgd-edit-score-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px;}
+.pgd-edit-input{width:100%;padding:8px 4px;border:2px solid var(--gray-lighter);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:22px;text-align:center;}
+.pgd-edit-input:focus{outline:none;border-color:var(--blue);}
+.pgd-enteredby{font-size:10px;color:var(--gray);font-style:italic;margin-top:3px;}
+/* NOTIFICATION BANNER */
+.notif-banner{margin:0 0 14px;padding:14px 16px;border-radius:10px;border:2px solid var(--blue);background:#dbeafe;animation:fadeIn 0.3s ease;}
+.notif-banner.scrimmage{border-color:var(--purple);background:var(--purple-bg);}
+.notif-banner-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--blue);margin-bottom:4px;}
+.notif-banner.scrimmage .notif-banner-label{color:var(--purple);}
+.notif-banner-title{font-family:'Bebas Neue',sans-serif;font-size:18px;margin-bottom:4px;}
+.notif-banner-detail{font-size:13px;font-weight:700;}
 .class-badge{display:inline-block;font-size:10px;font-weight:800;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:0.5px;}
 .class-SR{background:var(--black);color:var(--white);}.class-JR{background:var(--red);color:var(--white);}.class-SO{background:var(--gold);color:var(--black);}.class-FR{background:var(--gray-light);color:var(--charcoal);}
 .player-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
@@ -275,9 +348,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   <div class="tabs" id="tabs">
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="players">Players</button>
-    <button class="tab" data-tab="queens">Queens</button>
     <button class="tab" data-tab="gameday">Game Day</button>
-    <button class="tab" data-tab="scrimmage">Scrimmage</button>
     <button class="tab" data-tab="goals">Goals</button>
     <button class="tab" data-tab="settings">Roster</button>
     <button class="tab" onclick="window.location.href='https://markmcnees.github.io/leon-beach/leon-queens-profiles.html'" style="border-left:1px solid rgba(255,255,255,0.15);">Profiles ↗</button>
@@ -390,6 +461,47 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 
   <!-- ====== GAME DAY (Leon vs External — Season) ====== -->
   <div class="tab-content" id="tab-gameday">
+
+    <!-- LIVE SCORE ENTRY -->
+    <div class="card" style="border:2px solid var(--blue);">
+      <div class="card-title blue"><span class="bar"></span> 🏐 Live Score Entry
+        <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Auto-loads today's assignment</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <input type="date" class="form-input" id="live-date" style="max-width:180px;padding:8px 12px;">
+        <button class="btn btn-blue btn-small" onclick="renderLiveScoring()" style="white-space:nowrap;">Load Courts</button>
+      </div>
+      <div id="live-courts-container"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">Select a game date and click Load Courts.</div></div>
+    </div>
+
+    <!-- COACH PRIVATE NOTES -->
+    <div class="card" style="border:2px solid var(--charcoal);">
+      <div class="card-title" style="color:var(--charcoal);"><span class="bar" style="background:var(--charcoal);"></span> 🔒 Coach Notes
+        <span style="font-size:11px;font-weight:400;letter-spacing:0;font-family:'Barlow',sans-serif;color:var(--gray);margin-left:6px;">Private — coaches only</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <input type="date" class="form-input" id="cnote-date" style="max-width:180px;padding:8px 12px;">
+        <button class="btn btn-secondary btn-small" onclick="loadCoachNotes()" style="white-space:nowrap;">Load Notes</button>
+      </div>
+      <div class="cnote-tabs">
+        <button class="cnote-tab active" onclick="switchCnote('game',this)">📋 Game</button>
+        <button class="cnote-tab" onclick="switchCnote('players',this)">👤 Players</button>
+        <button class="cnote-tab" onclick="switchCnote('pairs',this)">🤝 Pairs</button>
+      </div>
+      <div class="cnote-section active" id="cnote-game">
+        <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">Game Summary &amp; General Notes</label>
+        <textarea class="cnote-textarea" id="cnote-game-text" rows="4" placeholder="Overall performance, strategy observations, conditions, key moments..."></textarea>
+        <button class="btn btn-secondary btn-small" style="margin-top:8px;" onclick="saveCoachNote('game')">Save Game Notes</button>
+        <span id="cnote-game-saved" style="font-size:11px;color:var(--green);margin-left:8px;opacity:0;transition:opacity 0.4s;" id="cnote-game-saved">✓ Saved</span>
+      </div>
+      <div class="cnote-section" id="cnote-players">
+        <div id="cnote-players-list"><div style="color:var(--gray);font-size:13px;">Load notes for a date first.</div></div>
+      </div>
+      <div class="cnote-section" id="cnote-pairs">
+        <div id="cnote-pairs-list"><div style="color:var(--gray);font-size:13px;">Load notes for a date first.</div></div>
+      </div>
+    </div>
+
     <div class="card"><div class="card-title blue"><span class="bar"></span> 🤖 AI Pairing Recommendations</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">AI analyzes skills, match history, position compatibility, side preference, and court levels to suggest optimal pairings.</p>
       <div class="form-row" style="margin-bottom:10px;">
@@ -415,7 +527,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label><input type="date" class="form-input" id="assign-date" style="padding:8px;font-size:13px;"></div>
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
             <select class="form-select" id="assign-type" style="padding:8px;font-size:13px;">
-              <option value="gameday">Game Day</option><option value="practice">Practice</option>
+              <option value="gameday">Season Game</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
             </select></div>
         </div>
         <div class="form-row" style="margin-bottom:8px;">
@@ -483,6 +595,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="card"><div class="card-title"><span class="bar"></span> Add Player</div>
       <div class="form-row" style="margin-bottom:10px;"><input type="text" class="form-input" id="new-first" placeholder="First Name"><input type="text" class="form-input" id="new-last" placeholder="Last Name"></div>
       <div class="form-row" style="margin-bottom:10px;">
+        <input type="number" class="form-input" id="new-jersey" placeholder="Jersey #" min="0" max="99" style="max-width:110px;">
         <select class="form-select" id="new-class"><option value="FR">Freshman</option><option value="SO">Sophomore</option><option value="JR">Junior</option><option value="SR">Senior</option></select>
         <select class="form-select" id="new-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option></select></div>
       <button class="btn btn-secondary" id="add-player">Add Player</button></div>
@@ -514,107 +627,126 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 </div>
 <!-- PLAYER PORTAL (shown when logged in as player) -->
 <div class="player-portal" id="player-portal">
+  <!-- Header (always visible) -->
   <div class="card">
     <div class="pp-name" id="pp-name"></div>
     <div class="pp-meta" id="pp-meta"></div>
   </div>
-  <div class="card"><div class="card-title"><span class="bar"></span> My Season Summary</div>
-    <div class="stat-grid" id="pp-summary"></div>
+
+  <!-- Notification banner for upcoming assignment -->
+  <div id="pp-notif-banner"></div>
+
+  <!-- Tab bar -->
+  <div class="pp-tab-bar">
+    <button class="pp-tab-btn active" onclick="switchPPTab('stats',this)">📊 My Stats</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('gameday',this)">🏐 Game Day</button>
   </div>
-  <div class="card"><div class="card-title"><span class="bar"></span> My Team Rankings</div>
-    <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">How you stack up against your teammates</p>
-    <div id="pp-rankings"></div>
-  </div>
-  <div class="card"><div class="card-title"><span class="bar"></span> My Skills</div>
-    <div id="pp-skills"></div>
-  </div>
-  <div class="card"><div class="card-title"><span class="bar"></span> My Star Drill Times</div>
-    <div id="pp-drills"></div>
-  </div>
-  <div class="card"><div class="card-title"><span class="bar"></span> My Verticals</div>
-    <div id="pp-verts"></div>
-  </div>
-  <div class="card"><div class="card-title"><span class="bar"></span> My Queens Matches</div>
-    <div id="pp-queens"></div>
-  </div>
-  <div class="card"><div class="card-title blue"><span class="bar"></span> My Game Day Results</div>
-    <div id="pp-gameday"></div>
-  </div>
-  <div class="card"><div class="card-title purple"><span class="bar"></span> My Scrimmage Results</div>
-    <div id="pp-scrimmage"></div>
-  </div>
-  <div class="card"><div class="card-title"><span class="bar"></span> Season Schedule</div>
-    <div id="pp-assignment" style="margin-bottom:12px;"></div>
-    <div id="pp-schedule"></div>
-  </div>
-  <div class="card"><div class="card-title"><span class="bar"></span> Area Standings</div>
-    <div id="pp-standings"></div>
-  </div>
-  <div class="card"><div class="card-title" style="color:var(--gold);"><span class="bar" style="background:var(--gold);"></span> My Goals & Development Plan</div>
-    <div id="pp-goals-list"></div>
-    <div style="margin-top:14px;border-top:1px solid var(--gray-lighter);padding-top:14px;">
-      <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Add a Goal</div>
-      <select class="form-select" id="pp-goal-select" style="margin-bottom:8px;">
-        <option value="">— Choose a Goal —</option>
-        <optgroup label="🏐 Court Goals">
-          <option value="court1">Move up to Court 1</option>
-          <option value="court2">Move up to Court 2</option>
-          <option value="court3">Earn starting spot on Court 3</option>
-          <option value="hold_court">Hold my current court assignment</option>
-        </optgroup>
-        <optgroup label="🎓 College Goals">
-          <option value="d1">Play D1 college beach volleyball</option>
-          <option value="d2">Play D2 college beach volleyball</option>
-          <option value="naia">Play NAIA/JUCO beach volleyball</option>
-          <option value="college_any">Play college beach volleyball (any level)</option>
-        </optgroup>
-        <optgroup label="📈 Skill Goals">
-          <option value="skill_serving">Improve my serving</option>
-          <option value="skill_passing">Improve my passing</option>
-          <option value="skill_setting">Improve my setting</option>
-          <option value="skill_hitting">Improve my hitting</option>
-          <option value="skill_blocking">Improve my blocking</option>
-          <option value="skill_defense">Improve my defense</option>
-          <option value="skill_court_sense">Improve court sense & IQ</option>
-          <option value="skill_communication">Improve on-court communication</option>
-        </optgroup>
-        <optgroup label="⚡ Performance Goals">
-          <option value="star_drill">Improve star drill time</option>
-          <option value="vertical">Increase my vertical jump</option>
-          <option value="jump_serve">Develop a jump serve</option>
-          <option value="consistency">Become more consistent</option>
-          <option value="both_sides">Learn to play both sides</option>
-          <option value="versatile">Be more versatile (hitter + defender)</option>
-        </optgroup>
-        <optgroup label="👑 Leadership Goals">
-          <option value="captain">Become team captain</option>
-          <option value="leader">Be a vocal leader on court</option>
-          <option value="teammate">Be a better teammate & communicator</option>
-          <option value="mentor">Mentor younger players</option>
-        </optgroup>
-        <optgroup label="🏆 Season Goals">
-          <option value="starter">Earn a starting position</option>
-          <option value="most_improved">Be most improved player</option>
-          <option value="win_pct">Improve my win percentage</option>
-          <option value="positive_diff">Finish season with positive +/-</option>
-        </optgroup>
-      </select>
-      <button class="btn btn-primary btn-small" style="background:var(--gold);width:100%;" onclick="addPlayerGoal()">Set This Goal</button>
+
+  <!-- MY STATS PANEL -->
+  <div class="pp-panel active" id="pp-panel-stats">
+    <div class="card"><div class="card-title"><span class="bar"></span> My Season Summary</div>
+      <div class="stat-grid" id="pp-summary"></div>
     </div>
-  </div>
-  <div class="card"><div class="card-title"><span class="bar"></span> Coach Notes</div>
-    <div id="pp-notes"></div>
-  </div>
-  <div class="card"><div class="card-title"><span class="bar"></span> Change Password</div>
-    <div style="padding:4px;">
-      <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-current" placeholder="Current Password">
-      <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-new" placeholder="New Password">
-      <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-confirm" placeholder="Confirm New Password">
-      <button class="btn btn-primary btn-small" onclick="changePassword()">Update Password</button>
+    <div class="card"><div class="card-title"><span class="bar"></span> My Team Rankings</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">How you stack up against your teammates</p>
+      <div id="pp-rankings"></div>
     </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> My Skills</div>
+      <div id="pp-skills"></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> My Star Drill Times</div>
+      <div id="pp-drills"></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> My Verticals</div>
+      <div id="pp-verts"></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> My Queens Matches</div>
+      <div id="pp-queens"></div>
+    </div>
+    <div class="card"><div class="card-title blue"><span class="bar"></span> My Game Day Results</div>
+      <div id="pp-gameday"></div>
+    </div>
+    <div class="card"><div class="card-title purple"><span class="bar"></span> My Scrimmage Results</div>
+      <div id="pp-scrimmage"></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> Season Schedule</div>
+      <div id="pp-assignment" style="margin-bottom:12px;"></div>
+      <div id="pp-schedule"></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> Area Standings</div>
+      <div id="pp-standings"></div>
+    </div>
+    <div class="card"><div class="card-title" style="color:var(--gold);"><span class="bar" style="background:var(--gold);"></span> My Goals &amp; Development Plan</div>
+      <div id="pp-goals-list"></div>
+      <div style="margin-top:14px;border-top:1px solid var(--gray-lighter);padding-top:14px;">
+        <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Add a Goal</div>
+        <select class="form-select" id="pp-goal-select" style="margin-bottom:8px;">
+          <option value="">— Choose a Goal —</option>
+          <optgroup label="🏐 Court Goals">
+            <option value="court1">Move up to Court 1</option>
+            <option value="court2">Move up to Court 2</option>
+            <option value="court3">Earn starting spot on Court 3</option>
+            <option value="hold_court">Hold my current court assignment</option>
+          </optgroup>
+          <optgroup label="🎓 College Goals">
+            <option value="d1">Play D1 college beach volleyball</option>
+            <option value="d2">Play D2 college beach volleyball</option>
+            <option value="naia">Play NAIA/JUCO beach volleyball</option>
+            <option value="college_any">Play college beach volleyball (any level)</option>
+          </optgroup>
+          <optgroup label="📈 Skill Goals">
+            <option value="skill_serving">Improve my serving</option>
+            <option value="skill_passing">Improve my passing</option>
+            <option value="skill_setting">Improve my setting</option>
+            <option value="skill_hitting">Improve my hitting</option>
+            <option value="skill_blocking">Improve my blocking</option>
+            <option value="skill_defense">Improve my defense</option>
+            <option value="skill_court_sense">Improve court sense &amp; IQ</option>
+            <option value="skill_communication">Improve on-court communication</option>
+          </optgroup>
+          <optgroup label="⚡ Performance Goals">
+            <option value="star_drill">Improve star drill time</option>
+            <option value="vertical">Increase my vertical jump</option>
+            <option value="jump_serve">Develop a jump serve</option>
+            <option value="consistency">Become more consistent</option>
+            <option value="both_sides">Learn to play both sides</option>
+            <option value="versatile">Be more versatile (hitter + defender)</option>
+          </optgroup>
+          <optgroup label="👑 Leadership Goals">
+            <option value="captain">Become team captain</option>
+            <option value="leader">Be a vocal leader on court</option>
+            <option value="teammate">Be a better teammate &amp; communicator</option>
+            <option value="mentor">Mentor younger players</option>
+          </optgroup>
+          <optgroup label="🏆 Season Goals">
+            <option value="starter">Earn a starting position</option>
+            <option value="most_improved">Be most improved player</option>
+            <option value="win_pct">Improve my win percentage</option>
+            <option value="positive_diff">Finish season with positive +/-</option>
+          </optgroup>
+        </select>
+        <button class="btn btn-primary btn-small" style="background:var(--gold);width:100%;" onclick="addPlayerGoal()">Set This Goal</button>
+      </div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> Coach Notes</div>
+      <div id="pp-notes"></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> Change Password</div>
+      <div style="padding:4px;">
+        <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-current" placeholder="Current Password">
+        <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-new" placeholder="New Password">
+        <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-confirm" placeholder="Confirm New Password">
+        <button class="btn btn-primary btn-small" onclick="changePassword()">Update Password</button>
+      </div>
+    </div>
+  </div><!-- end pp-panel-stats -->
+
+  <!-- GAME DAY PANEL -->
+  <div class="pp-panel" id="pp-panel-gameday">
+    <div id="pgd-content"></div>
   </div>
-</div>
-</div><!-- end app-wrapper -->
+
+</div><!-- end player-portal -->
 
 <!-- EDIT MODAL -->
 <div class="modal-overlay" id="edit-modal">
@@ -643,22 +775,22 @@ const CO={SR:0,JR:1,SO:2,FR:3};
 let db=null;
 
 const DEF_P=[
-  {id:'p01',firstName:'Riley',lastName:'Knipple',classYear:'SR',court:1},
-  {id:'p02',firstName:'Destyni',lastName:'Zuema',classYear:'SR',court:1},
-  {id:'p03',firstName:'Aubrey',lastName:'Brown',classYear:'JR',court:3},
-  {id:'p04',firstName:'Madi',lastName:'Bunker',classYear:'JR',court:3},
-  {id:'p05',firstName:'Eden',lastName:'Codd',classYear:'JR',court:2},
-  {id:'p06',firstName:'Kendall',lastName:'Cruse',classYear:'JR',court:2},
-  {id:'p07',firstName:'Aubri',lastName:'Moore',classYear:'JR',court:3},
-  {id:'p08',firstName:'Riley',lastName:'Perezluha',classYear:'JR',court:1},
-  {id:'p09',firstName:'Lizzie',lastName:'Roader',classYear:'JR',court:3},
-  {id:'p10',firstName:'Bentley',lastName:'Barnard',classYear:'SO',court:1},
-  {id:'p11',firstName:'Jazmin',lastName:'Burdick',classYear:'SO',court:2},
-  {id:'p12',firstName:'Madalynn',lastName:'Edenfield',classYear:'SO',court:3},
-  {id:'p13',firstName:'Jordyn',lastName:'Russell',classYear:'SO',court:1},
-  {id:'p14',firstName:'Leilani',lastName:'Winfrey',classYear:'SO',court:3},
-  {id:'p15',firstName:'Salem',lastName:'Ehrhardt',classYear:'FR',court:2},
-  {id:'p16',firstName:'Reagan',lastName:'Giles',classYear:'FR',court:2}
+  {id:'p01',firstName:'Riley',lastName:'Knipple',classYear:'SR',court:1,jersey:9},
+  {id:'p02',firstName:'Destyni',lastName:'Zuema',classYear:'SR',court:1,jersey:5},
+  {id:'p03',firstName:'Aubrey',lastName:'Brown',classYear:'JR',court:3,jersey:10},
+  {id:'p04',firstName:'Madi',lastName:'Bunker',classYear:'JR',court:3,jersey:2},
+  {id:'p05',firstName:'Eden',lastName:'Codd',classYear:'JR',court:2,jersey:7},
+  {id:'p06',firstName:'Kendall',lastName:'Cruse',classYear:'JR',court:2,jersey:8},
+  {id:'p07',firstName:'Aubri',lastName:'Moore',classYear:'JR',court:3,jersey:13},
+  {id:'p08',firstName:'Riley',lastName:'Perezluha',classYear:'JR',court:1,jersey:3},
+  {id:'p09',firstName:'Lizzie',lastName:'Roader',classYear:'JR',court:3,jersey:17},
+  {id:'p10',firstName:'Bentley',lastName:'Barnard',classYear:'SO',court:1,jersey:6},
+  {id:'p11',firstName:'Jazmin',lastName:'Burdick',classYear:'SO',court:2,jersey:4},
+  {id:'p12',firstName:'Madalynn',lastName:'Edenfield',classYear:'SO',court:3,jersey:11},
+  {id:'p13',firstName:'Jordyn',lastName:'Russell',classYear:'SO',court:1,jersey:15},
+  {id:'p14',firstName:'Leilani',lastName:'Winfrey',classYear:'SO',court:3,jersey:18},
+  {id:'p15',firstName:'Salem',lastName:'Ehrhardt',classYear:'FR',court:2,jersey:12},
+  {id:'p16',firstName:'Reagan',lastName:'Giles',classYear:'FR',court:2,jersey:1}
 ];
 const DEF_M=[
   {id:'m01',date:'2026-02-06',court:3,team1:['p07','p04'],team2:['p14','p03'],score1:21,score2:3},
@@ -674,6 +806,7 @@ const DEF_M=[
 
 let D={players:[],matches:[],planned:[],gamedays:[],scrimmages:[],schedule:[],standings:{},goals:{},assignments:{}};
 let profilesData={}; // from leon_queens node for AI context
+let pgdNotes={}; // player self-notes per date: pgdNotes[pid][date]
 let _autoLoginDone=false;
 
 // ============================================================
@@ -709,6 +842,17 @@ function listenData(){if(!db)return;
     if(!_autoLoginDone){_autoLoginDone=true;autoLogin();}
   },err=>{console.error(err);setSS(false);});
   db.ref('leon_queens_passwords').on('value',s=>{passwords=s.val()||{};});
+  db.ref(DB_ROOT+'/player_notes').on('value',s=>{
+    const all=s.val()||{};
+    // Restructure from [date][pid] → pgdNotes[pid][date]
+    pgdNotes={};
+    Object.entries(all).forEach(([date,players])=>{
+      Object.entries(players||{}).forEach(([pid,notes])=>{
+        if(!pgdNotes[pid])pgdNotes[pid]={};
+        pgdNotes[pid][date]=notes;
+      });
+    });
+  });
   db.ref('leon_queens').on('value',s=>{
     profilesData=s.val()||{};
     // Re-render player portal if active (to update rankings with skills/drills/verts)
@@ -921,7 +1065,7 @@ function addScheduleGame(){
   document.getElementById('sched-opp').value='';document.getElementById('sched-us').value='';
   document.getElementById('sched-them').value='';document.getElementById('sched-time').value='';
 }
-function delSchedule(id){if(!confirm('Remove this game?'))return;fbRemove('schedule/'+id);toast('Removed');}
+function delSchedule(id){fbRemove('schedule/'+id);toast('Removed');}
 
 function renderStandings(){
   // Leon's record from schedule
@@ -1099,7 +1243,7 @@ function renderQueens(){
   });
   c.innerHTML=html;
 }
-function delQueens(id){if(!confirm('Delete this Queens match?'))return;fbRemove('matches/'+id);toast('Deleted');}
+function delQueens(id){fbRemove('matches/'+id);toast('Deleted');}
 
 // Queens Edit
 let editQId=null;
@@ -1191,11 +1335,21 @@ function renderExtMatches(type){
             const parts=[];if(ps.k)parts.push(ps.k+'K');if(ps.b)parts.push(ps.b+'B');if(ps.a)parts.push(ps.a+'A');if(ps.d)parts.push(ps.d+'D');if(ps.e)parts.push(ps.e+'E');
             if(parts.length)statsArr.push(pN(pid)+': '+parts.join(', '));
           });
-          html+=`<div class="set-row">
+          const enterer=s.enteredBy?gP(s.enteredBy):null;
+          const editer=s.editedBy?(s.editedBy==='coach'?'coach':gP(s.editedBy)):null;
+          html+=`<div class="set-row" style="flex-wrap:wrap;gap:4px;">
             <span class="set-label">S${i+1}</span>
             <span class="set-score ${win?'win':'loss'}">${su}-${st}</span>
             ${statsArr.length?'<span class="set-stats-mini">'+statsArr.join(' | ')+'</span>':''}
-            <button class="match-action-btn" style="margin-left:auto;font-size:12px;" onclick="delSet('${m.id}','${fbNode}',${i})" title="Delete set">✕</button>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:4px;">
+              ${enterer?`<span style="font-size:9px;color:var(--gray);font-style:italic;">by ${enterer.firstName}</span>`:''}
+              ${editer?`<span style="font-size:9px;color:var(--gray);font-style:italic;">(edited)</span>`:''}
+              <button class="match-action-btn" style="font-size:11px;padding:2px 6px;" onclick="coachToggleEditSet('coach-edit-${m.id}-${i}')" title="Edit set">✎</button>
+              <button class="match-action-btn" style="font-size:12px;" onclick="delSet('${m.id}','${fbNode}',${i})" title="Delete set">✕</button>
+            </div>
+          </div>
+          <div id="coach-edit-${m.id}-${i}" style="display:none;margin-bottom:6px;">
+            ${pgdEditSetFormHTML(m.id,i,s,m.pair||[],'coach','coach-'+m.id)}
           </div>`;
         });
         html+='</div>';
@@ -1212,9 +1366,9 @@ function renderExtMatches(type){
   container.innerHTML=html;
 }
 
-function delExt(id,fbNode){if(!confirm('Delete this match and all its sets?'))return;fbRemove(fbNode+'/'+id);toast('Deleted');}
+function coachToggleEditSet(id){pgdToggleEditSet(id);}
+function delExt(id,fbNode){fbRemove(fbNode+'/'+id);toast('Match deleted');}
 function delSet(matchId,fbNode,setIdx){
-  if(!confirm('Delete this set?'))return;
   const list=fbNode==='gamedays'?D.gamedays:D.scrimmages;
   const m=list.find(x=>x.id===matchId);if(!m)return;
   const sets=(m.sets||[]).filter((_,i)=>i!==setIdx);
@@ -1320,12 +1474,14 @@ function renderRoster(){
       <span class="court-badge court-${p.court}">Court ${p.court} — ${CL[p.court]||''}</span></div>`;last=p.court;}
     html+=`<div class="roster-item"><span class="class-badge class-${p.classYear}">${p.classYear}</span>
       <span class="roster-name">${p.firstName} ${p.lastName}</span>
+      <input type="number" min="0" max="99" placeholder="#" title="Jersey #" value="${p.jersey||''}" style="width:52px;padding:4px 6px;border:1px solid var(--gray-lighter);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:15px;text-align:center;color:var(--charcoal);" onchange="updJersey('${p.id}',this.value)">
       <select class="court-select" onchange="updCt('${p.id}',this.value)">${COURTS.map(c=>`<option value="${c}" ${p.court===c?'selected':''}>CT ${c}</option>`).join('')}</select>
       <button class="btn btn-danger btn-small" onclick="remPlayer('${p.id}')" style="padding:4px 8px;font-size:10px;">✕</button></div>`;});
   document.getElementById('roster-list').innerHTML=html;
 }
 function updCt(id,v){const p=gP(id);if(p){p.court=parseInt(v);fbSet('players/'+id,p);}}
-function remPlayer(id){const p=gP(id);if(!p)return;if(!confirm('Remove '+p.firstName+' '+p.lastName+'?'))return;fbRemove('players/'+id);toast('Removed');}
+function updJersey(id,v){const p=gP(id);if(p){p.jersey=v?parseInt(v):null;fbSet('players/'+id,p);}}
+function remPlayer(id){const p=gP(id);if(!p)return;fbRemove('players/'+id);toast('Player removed');}
 
 // ============================================================
 // REFRESH / NAVIGATION
@@ -1414,8 +1570,9 @@ document.getElementById('save-sc-match').addEventListener('click',()=>{
 document.getElementById('add-player').addEventListener('click',()=>{
   const f=document.getElementById('new-first').value.trim(),l=document.getElementById('new-last').value.trim();
   if(!f||!l){toast('Enter first and last name');return;}
-  const id=gi('p');fbSet('players/'+id,{id,firstName:f,lastName:l,classYear:document.getElementById('new-class').value,court:parseInt(document.getElementById('new-court').value)});
-  document.getElementById('new-first').value='';document.getElementById('new-last').value='';toast('Player added!');});
+  const jersey=document.getElementById('new-jersey').value;
+  const id=gi('p');fbSet('players/'+id,{id,firstName:f,lastName:l,classYear:document.getElementById('new-class').value,court:parseInt(document.getElementById('new-court').value),jersey:jersey?parseInt(jersey):null});
+  document.getElementById('new-first').value='';document.getElementById('new-last').value='';document.getElementById('new-jersey').value='';toast('Player added!');});
 
 // Data management
 document.getElementById('export-data').addEventListener('click',()=>{
@@ -1436,10 +1593,23 @@ document.getElementById('import-data').addEventListener('change',e=>{const file=
       if(imp.assignments)data.assignments=imp.assignments;
       db.ref(DB_ROOT).set(data);toast('Imported & synced!');
     }else toast('Invalid file');}catch(err){toast('Error reading file');}};r.readAsText(file);e.target.value='';});
+let _clearMatchesArmed=false,_clearMatchesTimer=null;
 document.getElementById('clear-matches').addEventListener('click',()=>{
-  if(!confirm('Delete ALL match data (Queens, Game Day, Scrimmage)? Cannot be undone.'))return;if(!confirm('Are you sure?'))return;
-  db.ref(DB_ROOT+'/matches').set({});db.ref(DB_ROOT+'/planned').set({});db.ref(DB_ROOT+'/gamedays').set({});db.ref(DB_ROOT+'/scrimmages').set({});
-  toast('All matches cleared');});
+  const btn=document.getElementById('clear-matches');
+  if(_clearMatchesArmed){
+    clearTimeout(_clearMatchesTimer);_clearMatchesArmed=false;
+    btn.textContent='📊 Export Excel';btn.style.background='';
+    db.ref(DB_ROOT+'/matches').set({});db.ref(DB_ROOT+'/planned').set({});
+    db.ref(DB_ROOT+'/gamedays').set({});db.ref(DB_ROOT+'/scrimmages').set({});
+    toast('All matches cleared');
+  }else{
+    _clearMatchesArmed=true;
+    btn.textContent='⚠️ Tap again to confirm delete';btn.style.background='var(--loss-red)';
+    _clearMatchesTimer=setTimeout(()=>{
+      _clearMatchesArmed=false;btn.textContent='Clear All Matches';btn.style.background='';
+    },4000);
+  }
+});
 
 // Modal clicks
 document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)closeEdit();});
@@ -1578,7 +1748,7 @@ function renderPlayerPortal(){
   const pid=currentPlayerId;
 
   document.getElementById('pp-name').textContent=p.firstName+' '+p.lastName;
-  document.getElementById('pp-meta').innerHTML=`<span class="class-badge class-${p.classYear}">${p.classYear}</span> <span class="court-badge court-${p.court}">Court ${p.court} — ${CL[p.court]||''}</span>`;
+  document.getElementById('pp-meta').innerHTML=`${p.jersey!=null?'<span style="font-family:\'Bebas Neue\',sans-serif;font-size:16px;color:var(--red);margin-right:6px;">#'+p.jersey+'</span>':''}<span class="class-badge class-${p.classYear}">${p.classYear}</span> <span class="court-badge court-${p.court}">Court ${p.court} — ${CL[p.court]||''}</span>`;
 
   // Summary stats
   const qs=queensStats(pid,D.matches);
@@ -1944,7 +2114,6 @@ function addPlayerGoal(){
 }
 
 function removeGoal(pid,gid){
-  if(!confirm('Remove this goal?'))return;
   fbRemove('goals/'+pid+'/'+gid);toast('Goal removed');
 }
 
@@ -2753,7 +2922,26 @@ function saveAssignment(){
   buildAssignSlots();
 }
 
-function deleteAssignment(id){if(!confirm('Delete this assignment?'))return;fbRemove('assignments/'+id);toast('Deleted');}
+function deleteAssignment(id){
+  // No confirm() — blocked in iframes. Use inline confirmation instead.
+  const btn=document.querySelector('[data-del-assign="'+id+'"]');
+  if(!btn)return;
+  if(btn.dataset.confirmed==='1'){
+    fbRemove('assignments/'+id);toast('Assignment deleted');
+  }else{
+    btn.dataset.confirmed='1';
+    btn.textContent='Delete?';
+    btn.style.color='var(--loss-red)';
+    btn.style.fontWeight='700';
+    btn.style.fontSize='11px';
+    setTimeout(()=>{
+      if(btn&&btn.dataset.confirmed==='1'){
+        btn.dataset.confirmed='';btn.textContent='✕';
+        btn.style.color='var(--gray-light)';btn.style.fontWeight='';btn.style.fontSize='14px';
+      }
+    },3000);
+  }
+}
 
 function renderAssignments(){
   const container=document.getElementById('assignments-list');
@@ -2763,14 +2951,17 @@ function renderAssignments(){
   let h='';
   entries.forEach(a=>{
     const isPast=a.date<today;
-    const typeLabel=a.type==='gameday'?'🏐 Game Day':'🏋️ Practice';
-    const typeColor=a.type==='gameday'?'var(--blue)':'var(--green)';
+    const typeLabel=a.type==='gameday'?'🏐 Season Game':a.type==='scrimmage'?'🤝 Scrimmage':'👑 Queens';
+    const typeColor=a.type==='gameday'?'var(--blue)':a.type==='scrimmage'?'var(--purple)':'var(--red)';
     h+=`<div style="border-left:4px solid ${typeColor};background:${isPast?'var(--gray-lighter)':'var(--off-white)'};border-radius:8px;padding:12px;margin-bottom:10px;${isPast?'opacity:0.6;':''}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <div><span style="font-family:'Bebas Neue';font-size:16px;">${fD(a.date)}</span>
           <span style="font-size:12px;margin-left:6px;color:${typeColor};font-weight:700;">${typeLabel}</span>
           ${a.opponent?'<span style="font-size:12px;margin-left:4px;color:var(--gray);">vs '+a.opponent+'</span>':''}</div>
-        <button style="background:none;border:none;color:var(--gray-light);cursor:pointer;font-size:14px;" onclick="deleteAssignment('${a.id}')" title="Delete">✕</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button style="background:none;border:none;color:var(--gray);cursor:pointer;font-size:14px;padding:4px;" onclick="openEditAssignment('${a.id}')" title="Edit">✎</button>
+          <button data-del-assign="${a.id}" style="background:none;border:none;color:var(--gray-light);cursor:pointer;font-size:14px;padding:4px;" onclick="deleteAssignment('${a.id}')" title="Delete — tap once to arm, again to confirm">✕</button>
+        </div>
       </div>`;
     (a.courts||[]).forEach(c=>{
       const p1=gP(c.p1),p2=gP(c.p2);
@@ -2781,6 +2972,8 @@ function renderAssignments(){
         <span style="font-weight:700;">${p2?p2.firstName+' '+p2.lastName.charAt(0)+'.':'TBD'}</span></div>`;
     });
     if(a.notes){h+=`<div style="font-size:12px;color:var(--gray);margin-top:6px;font-style:italic;background:var(--white);padding:8px;border-radius:6px;">📝 ${a.notes}</div>`;}
+    // Generate Matches button
+    h+=`<button class="btn btn-small" style="width:100%;margin-top:10px;background:${typeColor};color:var(--white);border:none;" onclick="generateMatchesFromLineup('${a.id}')">⚡ Generate Matches from Lineup</button>`;
     h+='</div>';
   });
   container.innerHTML=h;
@@ -2805,8 +2998,8 @@ function renderPlayerAssignment(pid){
     container.innerHTML='';return;
   }
   const partner=nextCourt.p1===pid?gP(nextCourt.p2):gP(nextCourt.p1);
-  const typeLabel=nextAssign.type==='gameday'?'🏐 Game Day':'🏋️ Practice';
-  const typeColor=nextAssign.type==='gameday'?'var(--blue)':'var(--green)';
+  const typeLabel=nextAssign.type==='gameday'?'🏐 Season Game':nextAssign.type==='scrimmage'?'🤝 Scrimmage':'👑 Queens';
+  const typeColor=nextAssign.type==='gameday'?'var(--blue)':nextAssign.type==='scrimmage'?'var(--purple)':'var(--red)';
   let h=`<div style="border:2px solid ${typeColor};border-radius:10px;padding:14px;background:var(--white);">
     <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1.5px;color:${typeColor};margin-bottom:4px;">YOUR NEXT ASSIGNMENT</div>
     <div style="font-family:'Bebas Neue';font-size:20px;margin-bottom:4px;">${fD(nextAssign.date)} — ${typeLabel}</div>
@@ -2833,7 +3026,8 @@ function renderPlayerAssignment(pid){
 // Init assignment slots when courts dropdown changes
 document.getElementById('assign-courts').addEventListener('change',buildAssignSlots);
 document.getElementById('assign-type').addEventListener('change',function(){
-  document.getElementById('assign-opp').closest('.form-group').style.display=this.value==='gameday'?'':'none';
+  const showOpp=this.value==='gameday'||this.value==='scrimmage';
+  document.getElementById('assign-opp').closest('.form-group').style.display=showOpp?'':'none';
 });
 
 // ============================================================
@@ -2901,6 +3095,733 @@ function runMigration(){
 }
 
 // ============================================================
+// LIVE SCORE ENTRY (Coach)
+// ============================================================
+function renderLiveScoring(){
+  const date=document.getElementById('live-date').value;
+  if(!date){toast('Select a game date first');return;}
+  const container=document.getElementById('live-courts-container');
+
+  // Find assignment for this date (any type)
+  const assignment=Object.values(D.assignments).find(a=>a.date===date);
+
+  if(!assignment||!(assignment.courts||[]).length){
+    container.innerHTML=`<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">No assignment found for ${fD(date)}.<br><span style="font-size:12px;">Create an assignment in the Upcoming Assignments section first.</span></div>`;
+    return;
+  }
+
+  const aType=assignment.type||'gameday';
+
+  // Queens: show pair-vs-pair score entry
+  if(aType==='queens'){
+    renderLiveScoringQueens(assignment,date,container);
+    return;
+  }
+
+  // Build a card per court entry
+  const matchList=aType==='scrimmage'?D.scrimmages:D.gamedays;
+  const fbNode=aType==='scrimmage'?'scrimmages':'gamedays';
+  let h='';
+  (assignment.courts||[]).forEach((c,idx)=>{
+    const p1=gP(c.p1),p2=gP(c.p2);
+    const pairKey=[c.p1,c.p2].filter(Boolean).sort().join('_');
+    const courtLabel='Court '+c.court+(c.subCourt?c.subCourt.toUpperCase():'');
+    const partnerLabel=[p1,p2].filter(Boolean).map(p=>p.firstName+' '+p.lastName.charAt(0)+'.').join(' & ');
+    const opp=assignment.opponent?assignment.opponent+' CT'+c.court:'Opponent CT'+c.court;
+
+    // Find existing match for this pair/date
+    const existingMatch=matchList.find(m=>m.date===date&&arrEq(m.pair||[],[c.p1,c.p2].filter(Boolean)));
+    const matchId=existingMatch?existingMatch.id:null;
+    const sets=existingMatch?existingMatch.sets||[]:[];
+    let sw=0,sl=0;sets.forEach(s=>(s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++);
+
+    h+=`<div class="live-court-card" id="lc-card-${idx}">
+      <div class="live-court-header">
+        <div>
+          <span class="court-badge court-${c.court}" style="font-size:12px;">${courtLabel}</span>
+          <div class="live-pair-name" style="margin-top:4px;">${partnerLabel||'TBD'}</div>
+          <div class="live-opp-name">vs ${opp}</div>
+        </div>
+        <div style="text-align:right;">
+          ${sets.length?`<div style="font-family:'Bebas Neue';font-size:18px;color:${sw>sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</div><div style="font-size:10px;color:var(--gray);">Sets</div>`:'<div style="font-size:12px;color:var(--gray);">No sets yet</div>'}
+        </div>
+      </div>`;
+
+    // Show existing sets as chips
+    if(sets.length){
+      h+='<div style="margin-bottom:8px;">';
+      sets.forEach((s,si)=>{
+        const win=(s.scoreUs||0)>(s.scoreThem||0);
+        h+=`<span class="live-set-chip ${win?'win':'loss'}">S${si+1}: ${s.scoreUs}-${s.scoreThem} <button style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;padding:0 0 0 4px;" onclick="delLiveSet('${matchId}',${si},'${fbNode}')" title="Delete">✕</button></span>`;
+      });
+      h+='</div>';
+    }
+
+    // Score entry row
+    h+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;margin-top:4px;">
+      <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:6px;">SET ${sets.length+1}</div>
+      <div class="live-score-row">
+        <div class="live-score-col">
+          <div class="live-score-label">LEON</div>
+          <input type="number" class="live-score-input" id="ls-us-${idx}" placeholder="0" min="0">
+        </div>
+        <div style="font-family:'Bebas Neue';font-size:20px;color:var(--gray-light);padding-bottom:8px;">—</div>
+        <div class="live-score-col">
+          <div class="live-score-label">OPP</div>
+          <input type="number" class="live-score-input" id="ls-them-${idx}" placeholder="0" min="0">
+        </div>
+      </div>
+      <button class="btn btn-blue btn-small" style="width:100%;" onclick="saveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${date}',${c.court},'${c.subCourt||''}','${existingMatch?existingMatch.id:''}','${assignment.opponent||''}','${fbNode}')">+ Save Set</button>
+    </div>`;
+    h+='</div>';
+  });
+
+  container.innerHTML=h;
+}
+
+function saveLiveSet(idx,p1,p2,date,court,subCourt,existingId,opponent,fbNode){
+  const us=parseInt(document.getElementById('ls-us-'+idx).value);
+  const them=parseInt(document.getElementById('ls-them-'+idx).value);
+  if(isNaN(us)||isNaN(them)){toast('Enter both scores');return;}
+  if(us===them){toast('Scores cannot be tied');return;}
+
+  const node=fbNode||'gamedays';
+  const matchList=node==='scrimmages'?D.scrimmages:D.gamedays;
+  const idPrefix=node==='scrimmages'?'sc':'gd';
+  const pair=[p1,p2].filter(Boolean);
+  const stats={};pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,d:0,e:0};});
+  const newSet={scoreUs:us,scoreThem:them,stats};
+  const courtLabel=court+(subCourt?subCourt:'');
+  const opp=(opponent||'Opponent')+' CT'+courtLabel;
+
+  if(existingId){
+    const m=matchList.find(x=>x.id===existingId);
+    const sets=m?[...(m.sets||[])]:[];
+    sets.push(newSet);
+    fbSet(node+'/'+existingId+'/sets',sets);
+  }else{
+    const id=gi(idPrefix);
+    fbSet(node+'/'+id,{id,date,court:parseInt(court),pair,opponent:opp,sets:[newSet]});
+  }
+  document.getElementById('ls-us-'+idx).value='';
+  document.getElementById('ls-them-'+idx).value='';
+  toast((us>them?'\u2713 Win':'\u2717 Loss')+' saved — '+us+'-'+them);
+  setTimeout(renderLiveScoring,600);
+}
+
+function delLiveSet(matchId,setIdx,fbNode){
+  if(!matchId)return;
+  const node=fbNode||'gamedays';
+  const matchList=node==='scrimmages'?D.scrimmages:D.gamedays;
+  const m=matchList.find(x=>x.id===matchId);if(!m)return;
+  const sets=(m.sets||[]).filter((_,i)=>i!==setIdx);
+  fbSet(node+'/'+matchId+'/sets',sets.length?sets:null);
+  toast('Set deleted');
+  setTimeout(renderLiveScoring,400);
+}
+
+// ============================================================
+// ============================================================
+// QUEENS LIVE SCORING (Leon vs Leon from assignment)
+// ============================================================
+function renderLiveScoringQueens(assignment, date, container){
+  const pairs=(assignment.courts||[]).map((c,i)=>({idx:i,court:c.court,p1:c.p1,p2:c.p2}));
+  if(!pairs.length){container.innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;">No court assignments found.</div>';return;}
+  let h=`<div style="font-size:12px;color:var(--gray);margin-bottom:10px;padding:8px;background:var(--off-white);border-radius:6px;">👑 Queens mode: each court pair plays an opposing pair. Select Team B for each court and record the final score.</div>`;
+  pairs.forEach((c,idx)=>{
+    const p1=gP(c.p1),p2=gP(c.p2);
+    const teamALabel=[p1,p2].filter(Boolean).map(p=>p.firstName+' '+p.lastName.charAt(0)+'.').join(' & ')||'TBD';
+    // Existing Queens match for this pair on this date
+    const existing=D.matches.find(m=>m.date===date&&(arrEq(m.team1||[],[c.p1,c.p2].filter(Boolean))||arrEq(m.team2||[],[c.p1,c.p2].filter(Boolean))));
+    const hasResult=!!existing;
+    let resultHtml='';
+    if(existing){
+      const onTeam1=arrEq(existing.team1||[],[c.p1,c.p2].filter(Boolean));
+      const myScore=onTeam1?existing.score1:existing.score2;
+      const oppScore=onTeam1?existing.score2:existing.score1;
+      const win=myScore>oppScore;
+      resultHtml=`<div style="margin:6px 0;padding:8px;border-radius:6px;background:${win?'#dcfce7':'#fee2e2'};font-family:'Bebas Neue';font-size:16px;text-align:center;color:${win?'var(--green)':'var(--loss-red)'};">${win?'WIN':'LOSS'} ${myScore}–${oppScore}</div>
+      <button style="background:none;border:none;font-size:12px;color:var(--gray);cursor:pointer;text-decoration:underline;" onclick="delQueens('${existing.id}')">Clear result</button>`;
+    }
+    // Build opponent pair options from other courts
+    const otherPairs=pairs.filter((_,i2)=>i2!==idx);
+    const oppOptions=otherPairs.map(op=>{const a=gP(op.p1),b=gP(op.p2);const lbl=[a,b].filter(Boolean).map(p=>p.firstName+' '+p.lastName.charAt(0)+'.').join(' & ')||'TBD';return`<option value="${op.p1||''}|${op.p2||''}">${lbl} (CT${op.court})</option>`;}).join('');
+    h+=`<div class="live-court-card" style="${hasResult?'opacity:0.8;':''}">
+      <div class="live-court-header">
+        <div><span class="court-badge court-${c.court}" style="font-size:12px;">Court ${c.court}</span>
+          <div class="live-pair-name" style="margin-top:4px;">${teamALabel}</div>
+          <div class="live-opp-name">👑 Queens Match</div>
+        </div>
+      </div>
+      ${resultHtml}
+      ${!hasResult?`<div style="background:var(--off-white);border-radius:8px;padding:10px;margin-top:6px;">
+        <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:6px;">VS (select opponent pair)</div>
+        <select class="form-select" id="qls-opp-${idx}" style="font-size:13px;padding:8px;margin-bottom:8px;"><option value="">— Pick opponent pair —</option>${oppOptions}</select>
+        <div class="live-score-row">
+          <div class="live-score-col"><div class="live-score-label">${p1?p1.firstName:'Team A'}</div><input type="number" class="live-score-input" id="qls-a-${idx}" placeholder="0" min="0"></div>
+          <div style="font-family:'Bebas Neue';font-size:20px;color:var(--gray-light);padding-bottom:8px;">—</div>
+          <div class="live-score-col"><div class="live-score-label">OPP</div><input type="number" class="live-score-input" id="qls-b-${idx}" placeholder="0" min="0"></div>
+        </div>
+        <button class="btn btn-small" style="width:100%;background:var(--red);color:var(--white);border:none;" onclick="saveQueensLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${date}',${c.court})">Save Queens Result</button>
+      </div>`:''}
+    </div>`;
+  });
+  container.innerHTML=h;
+}
+
+function saveQueensLiveSet(idx,p1,p2,date,court){
+  const oppVal=document.getElementById('qls-opp-'+idx)?.value;
+  if(!oppVal){toast('Select an opponent pair');return;}
+  const [op1,op2]=oppVal.split('|');
+  const sa=parseInt(document.getElementById('qls-a-'+idx).value);
+  const sb=parseInt(document.getElementById('qls-b-'+idx).value);
+  if(isNaN(sa)||isNaN(sb)){toast('Enter both scores');return;}
+  if(sa===sb){toast('Scores cannot be tied');return;}
+  const id=gi('qm');
+  fbSet('matches/'+id,{id,date,court:parseInt(court),team1:[p1,p2].filter(Boolean),team2:[op1,op2].filter(Boolean),score1:sa,score2:sb});
+  toast((sa>sb?'✓ Win':'✗ Loss')+' saved — '+sa+'–'+sb);
+  setTimeout(()=>{
+    const assignment=Object.values(D.assignments).find(a=>a.date===date);
+    const container=document.getElementById('live-courts-container');
+    if(assignment&&container)renderLiveScoringQueens(assignment,date,container);
+  },600);
+}
+
+// ============================================================
+// GENERATE MATCHES FROM LINEUP
+// ============================================================
+function generateMatchesFromLineup(assignId){
+  const a=D.assignments[assignId];
+  if(!a){toast('Assignment not found');return;}
+  const aType=a.type||'gameday';
+  const node=aType==='scrimmage'?'scrimmages':'gamedays';
+  const matchList=aType==='scrimmage'?D.scrimmages:D.gamedays;
+  if(aType==='queens'){toast('For Queens, use Live Score Entry to record pair matchups');return;}
+  const courts=a.courts||[];
+  if(!courts.length){toast('No courts assigned');return;}
+  let created=0;
+  courts.forEach(c=>{
+    const pair=[c.p1,c.p2].filter(Boolean);
+    if(pair.length<2)return;
+    const already=matchList.find(m=>m.date===a.date&&arrEq(m.pair||[],pair));
+    if(already)return; // skip if match already exists
+    const courtLabel=c.court+(c.subCourt?c.subCourt:'');
+    const opp=(a.opponent?a.opponent:'Opponent')+' CT'+courtLabel;
+    const id=gi(aType==='scrimmage'?'sc':'gd');
+    fbSet(node+'/'+id,{id,date:a.date,court:parseInt(c.court),pair,opponent:opp,sets:[]});
+    created++;
+  });
+  toast(created>0?'Created '+created+' match record'+(created>1?'s':'')+'! Load them in Live Score Entry.':'All matches already exist for this lineup.');
+}
+
+// COACH PRIVATE NOTES
+// ============================================================
+let coachNotesDate=null;
+let coachNotesData={};
+
+function switchCnote(tab,btn){
+  document.querySelectorAll('.cnote-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.cnote-section').forEach(s=>s.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('cnote-'+tab).classList.add('active');
+}
+
+function loadCoachNotes(){
+  const date=document.getElementById('cnote-date').value;
+  if(!date){toast('Select a date first');return;}
+  coachNotesDate=date;
+  if(!db)return;
+  db.ref(DB_ROOT+'/coach_notes/'+date).once('value',snap=>{
+    coachNotesData=snap.val()||{};
+    // Game notes
+    document.getElementById('cnote-game-text').value=coachNotesData.game||'';
+    // Player notes
+    buildPlayerNotesUI();
+    // Pair notes - based on assignment for that date
+    buildPairNotesUI(date);
+    toast('Notes loaded for '+fD(date));
+  });
+}
+
+function buildPlayerNotesUI(){
+  const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
+  let h='';
+  sorted.forEach(p=>{
+    const val=(coachNotesData.players||{})[p.id]||'';
+    h+=`<div class="cnote-player-row">
+      <div class="cnote-player-label">${p.firstName}<br><span style="font-weight:400;color:var(--gray);font-size:10px;">${p.classYear} · CT${p.court}</span></div>
+      <textarea class="cnote-textarea" id="cnpn-${p.id}" rows="2" placeholder="Notes on ${p.firstName}..." onblur="autoSavePlayerNote('${p.id}')">${val}</textarea>
+    </div>`;
+  });
+  document.getElementById('cnote-players-list').innerHTML=h||'<div style="color:var(--gray);font-size:13px;">No players found.</div>';
+}
+
+function buildPairNotesUI(date){
+  // Find all pairs for this date (from assignment + gamedays)
+  const pairsSet={};
+  const assignment=Object.values(D.assignments).find(a=>a.date===date);
+  if(assignment){
+    (assignment.courts||[]).forEach(c=>{
+      if(c.p1&&c.p2){const key=[c.p1,c.p2].sort().join('_');pairsSet[key]=[c.p1,c.p2];}
+    });
+  }
+  D.gamedays.filter(m=>m.date===date&&m.pair&&m.pair.length===2).forEach(m=>{
+    const key=[...m.pair].sort().join('_');pairsSet[key]=m.pair;
+  });
+  const pairs=Object.entries(pairsSet);
+  if(!pairs.length){
+    document.getElementById('cnote-pairs-list').innerHTML='<div style="color:var(--gray);font-size:13px;">No pairs found for this date. Load a date with assignments or game results.</div>';
+    return;
+  }
+  let h='';
+  pairs.forEach(([key,pair])=>{
+    const p1=gP(pair[0]),p2=gP(pair[1]);
+    const label=[p1,p2].filter(Boolean).map(p=>p.firstName+' '+p.lastName.charAt(0)+'.').join(' & ');
+    const val=(coachNotesData.pairs||{})[key]||'';
+    h+=`<div class="cnote-player-row">
+      <div class="cnote-player-label" style="min-width:90px;">${label}</div>
+      <textarea class="cnote-textarea" id="cnpair-${key}" rows="2" placeholder="Notes on this pair..." onblur="autoSavePairNote('${key}')">${val}</textarea>
+    </div>`;
+  });
+  document.getElementById('cnote-pairs-list').innerHTML=h;
+}
+
+function saveCoachNote(type){
+  if(!coachNotesDate){toast('Load a date first');return;}
+  if(type==='game'){
+    const text=document.getElementById('cnote-game-text').value;
+    db.ref(DB_ROOT+'/coach_notes/'+coachNotesDate+'/game').set(text||null);
+    const saved=document.getElementById('cnote-game-saved');
+    if(saved){saved.style.opacity='1';setTimeout(()=>saved.style.opacity='0',2000);}
+    toast('Game notes saved!');
+  }
+}
+
+function autoSavePlayerNote(pid){
+  if(!coachNotesDate)return;
+  const el=document.getElementById('cnpn-'+pid);if(!el)return;
+  db.ref(DB_ROOT+'/coach_notes/'+coachNotesDate+'/players/'+pid).set(el.value||null);
+}
+
+function autoSavePairNote(key){
+  if(!coachNotesDate)return;
+  const el=document.getElementById('cnpair-'+key);if(!el)return;
+  db.ref(DB_ROOT+'/coach_notes/'+coachNotesDate+'/pairs/'+key).set(el.value||null);
+}
+
+// ============================================================
+// PLAYER PORTAL TAB SWITCHING
+// ============================================================
+function switchPPTab(tab,btn){
+  document.querySelectorAll('.pp-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.pp-panel').forEach(p=>p.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('pp-panel-'+tab).classList.add('active');
+  if(tab==='gameday')renderPlayerGameDay();
+}
+
+// ============================================================
+// PLAYER GAME DAY (Player-side score entry)
+// ============================================================
+let pgdScoreUs=0,pgdScoreThem=0;
+let pgdCurrentMatchId=null;
+let pgdCurrentPair=[];
+let pgdCurrentDate=null;
+let pgdCurrentOpponent='';
+// Stats keyed by player id: pgdStats[pid] = {k,a,b,d,e}
+let pgdStats={};
+
+function pgdResetScores(){pgdScoreUs=0;pgdScoreThem=0;}
+function pgdResetStats(){pgdStats={};}
+
+// Helper: build a stat block for one player
+function pgdStatBlockHTML(pid,label,prefix){
+  const s=pgdStats[pid]||{k:0,a:0,b:0,d:0,e:0};
+  const stats=['k','a','b','d','e'];
+  const names=['Kills','Aces','Blocks','Digs','Errors'];
+  return `<div class="pgd-player-stats-block">
+    <div class="pgd-player-stats-label">${label}</div>
+    <div class="pgd-stats-grid">
+      ${stats.map((st,i)=>`<div class="pgd-stat-col">
+        <div class="pgd-stat-label">${st.toUpperCase()}<span class="stat-desc">${names[i]}</span></div>
+        <div class="pgd-stat-ctrl">
+          <button class="pgd-stat-btn" onclick="pgdStatAdj('${pid}','${st}',1,'${prefix}')">+</button>
+          <div class="pgd-stat-num" id="${prefix}-${pid}-${st}">${s[st]||0}</div>
+          <button class="pgd-stat-btn" onclick="pgdStatAdj('${pid}','${st}',-1,'${prefix}')">−</button>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// Helper: render existing sets for a match with edit buttons
+function pgdSetsHTML(sets,matchId,pair,viewerPid,prefix){
+  if(!sets||!sets.length)return'';
+  let h='<div style="margin-bottom:12px;">';
+  sets.forEach((s,i)=>{
+    const win=(s.scoreUs||0)>(s.scoreThem||0);
+    const enterer=s.enteredBy?gP(s.enteredBy):null;
+    const byLabel=enterer?(enterer.id===viewerPid?'you':enterer.firstName):null;
+    h+=`<div style="margin-bottom:4px;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span class="pgd-set-chip ${win?'win':'loss'}">Set ${i+1}: ${s.scoreUs}-${s.scoreThem}</span>
+        <button style="font-size:11px;background:none;border:1px solid var(--gray-lighter);border-radius:4px;padding:2px 8px;cursor:pointer;color:var(--gray);" onclick="pgdToggleEditSet('${prefix}-edit-${i}')">✎ Edit</button>
+        ${byLabel?`<span class="pgd-enteredby">entered by ${byLabel}</span>`:''}
+      </div>
+      <div id="${prefix}-edit-${i}" style="display:none;">
+        ${pgdEditSetFormHTML(matchId,i,s,pair,viewerPid,prefix)}
+      </div>
+    </div>`;
+  });
+  h+='</div>';
+  return h;
+}
+
+// Helper: inline edit form for an existing set
+function pgdEditSetFormHTML(matchId,setIdx,s,pair,viewerPid,prefix){
+  const p0=gP(pair[0]),p1=pair[1]?gP(pair[1]):null;
+  const ps0=(s.stats||{})[pair[0]]||{};
+  const ps1=p1?(s.stats||{})[pair[1]]||{}:{};
+  const statNames=['k','a','b','d','e'];
+  return `<div class="pgd-set-edit-form">
+    <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;color:var(--blue);margin-bottom:8px;">EDIT SET ${setIdx+1}</div>
+    <div class="pgd-edit-score-row">
+      <div style="text-align:center;">
+        <div style="font-size:10px;font-weight:700;color:var(--gray);margin-bottom:4px;">LEON</div>
+        <input class="pgd-edit-input" type="number" id="${prefix}-eu-${setIdx}" value="${s.scoreUs||0}" min="0">
+      </div>
+      <div style="font-family:'Bebas Neue';font-size:16px;color:var(--gray-light);">—</div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;font-weight:700;color:var(--gray);margin-bottom:4px;">OPP</div>
+        <input class="pgd-edit-input" type="number" id="${prefix}-et-${setIdx}" value="${s.scoreThem||0}" min="0">
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--gray);margin-bottom:6px;">Stats (optional)</div>
+    ${[pair[0],pair[1]].filter(Boolean).map((pid2,pi)=>{
+      const ps=pi===0?ps0:ps1;
+      const pObj=pi===0?p0:p1;
+      return `<div style="margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:700;color:var(--charcoal);margin-bottom:4px;">${pObj?pObj.firstName:'Player'}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${statNames.map(st=>`<div style="text-align:center;min-width:44px;">
+            <div style="font-size:9px;color:var(--gray);font-weight:700;">${st.toUpperCase()}</div>
+            <input type="number" style="width:44px;padding:4px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:14px;text-align:center;" id="${prefix}-e${st}${pi}-${setIdx}" value="${ps[st]||0}" min="0">
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="btn btn-blue btn-small" style="flex:1;" onclick="pgdSaveEditSet('${matchId}',${setIdx},'${pair.join(',')}','${prefix}')">Save</button>
+      <button class="btn btn-secondary btn-small" onclick="pgdToggleEditSet('${prefix}-edit-${setIdx}')">Cancel</button>
+    </div>
+  </div>`;
+}
+
+function pgdToggleEditSet(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function pgdSaveEditSet(matchId,setIdx,pairStr,prefix){
+  const pair=pairStr.split(',').filter(Boolean);
+  const fbNode='gamedays';
+  const m=D.gamedays.find(x=>x.id===matchId);if(!m)return;
+  const us=parseInt(document.getElementById(prefix+'-eu-'+setIdx).value);
+  const them=parseInt(document.getElementById(prefix+'-et-'+setIdx).value);
+  if(isNaN(us)||isNaN(them)){toast('Enter both scores');return;}
+  if(us===them){toast('Scores cannot be tied');return;}
+  const statNames=['k','a','b','d','e'];
+  const stats={};
+  pair.forEach((pid2,pi)=>{
+    const ps={};
+    statNames.forEach(st=>{
+      const el=document.getElementById(prefix+'-e'+st+pi+'-'+setIdx);
+      ps[st]=el?parseInt(el.value)||0:0;
+    });
+    stats[pid2]=ps;
+  });
+  const sets=[...(m.sets||[])];
+  sets[setIdx]={...sets[setIdx],scoreUs:us,scoreThem:them,stats,editedBy:currentPlayerId||'coach',editedAt:td()};
+  fbSet(fbNode+'/'+matchId+'/sets',sets);
+  toast('Set '+( setIdx+1)+' updated!');
+  setTimeout(()=>{if(currentRole==='player')renderPlayerGameDay();else renderExtMatches('gameday');},500);
+}
+
+// Helper: new set entry card (for own court or spectator court)
+function pgdNewSetCardHTML(setNum,pair,prefix,isSpectator){
+  const p0=gP(pair[0]),p1=pair[1]?gP(pair[1]):null;
+  const statNames=['k','a','b','d','e'];
+  const statFullNames=['Kills','Aces','Blocks','Digs','Errors'];
+  return `<div class="pgd-set-entry" id="${prefix}-new-set">
+    <div style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:10px;">Set ${setNum}</div>
+    <div class="pgd-score-grid">
+      <div class="pgd-score-block">
+        <div class="pgd-score-label">LEON</div>
+        <div class="pgd-score-ctrl">
+          <button class="pgd-score-btn" onclick="pgdScoreAdj('${prefix}','us',-1)">−</button>
+          <div class="pgd-score-num" id="${prefix}-us">0</div>
+          <button class="pgd-score-btn" onclick="pgdScoreAdj('${prefix}','us',1)">+</button>
+        </div>
+      </div>
+      <div class="pgd-vs">VS</div>
+      <div class="pgd-score-block">
+        <div class="pgd-score-label">OPP</div>
+        <div class="pgd-score-ctrl">
+          <button class="pgd-score-btn" onclick="pgdScoreAdj('${prefix}','them',-1)">−</button>
+          <div class="pgd-score-num" id="${prefix}-them">0</div>
+          <button class="pgd-score-btn" onclick="pgdScoreAdj('${prefix}','them',1)">+</button>
+        </div>
+      </div>
+    </div>
+    <button class="pgd-stats-toggle" id="${prefix}-stats-toggle" onclick="pgdToggleStatsSection('${prefix}')">＋ Add stats (optional)</button>
+    <div id="${prefix}-stats-section" style="display:none;">
+      <div style="font-size:11px;color:var(--gray);text-align:center;margin:8px 0 4px;">Tap +/− to count as you play</div>
+      ${[pair[0],pair[1]].filter(Boolean).map(pid2=>{
+        const pObj=gP(pid2);
+        return pgdStatBlockHTML(pid2,pObj?pObj.firstName:'Player',prefix);
+      }).join('')}
+    </div>
+    <button class="btn btn-blue" style="width:100%;margin-top:12px;" onclick="pgdSubmitSet('${prefix}','${pair.join(',')}')">Save Set Score</button>
+  </div>`;
+}
+
+// Score adj per-prefix
+const pgdPrefixScores={};
+function pgdScoreAdj(prefix,side,delta){
+  if(!pgdPrefixScores[prefix])pgdPrefixScores[prefix]={us:0,them:0};
+  pgdPrefixScores[prefix][side]=Math.max(0,pgdPrefixScores[prefix][side]+delta);
+  const el=document.getElementById(prefix+'-'+side);
+  if(el)el.textContent=pgdPrefixScores[prefix][side];
+}
+
+function pgdStatAdj(pid,stat,delta,prefix){
+  if(!pgdStats[pid])pgdStats[pid]={k:0,a:0,b:0,d:0,e:0};
+  pgdStats[pid][stat]=Math.max(0,(pgdStats[pid][stat]||0)+delta);
+  const el=document.getElementById(prefix+'-'+pid+'-'+stat);
+  if(el)el.textContent=pgdStats[pid][stat];
+}
+
+function pgdToggleStatsSection(prefix){
+  const section=document.getElementById(prefix+'-stats-section');
+  const btn=document.getElementById(prefix+'-stats-toggle');
+  if(!section||!btn)return;
+  const open=section.style.display==='none';
+  section.style.display=open?'block':'none';
+  btn.textContent=open?'− Hide stats':'＋ Add stats (optional)';
+  btn.classList.toggle('open',open);
+}
+
+function pgdSubmitSet(prefix,pairStr){
+  if(!pgdPrefixScores[prefix])pgdPrefixScores[prefix]={us:0,them:0};
+  const scoreUs=pgdPrefixScores[prefix].us;
+  const scoreThem=pgdPrefixScores[prefix].them;
+  if(scoreUs===scoreThem){toast('Scores cannot be tied');return;}
+  const pair=pairStr.split(',').filter(Boolean);
+  if(pair.length<2){toast('Need two players for this court');return;}
+
+  const statsOpen=document.getElementById(prefix+'-stats-section')?.style.display!=='none';
+  const stats={};
+  pair.forEach(pid2=>{
+    stats[pid2]=statsOpen&&pgdStats[pid2]?{...pgdStats[pid2]}:{k:0,a:0,b:0,d:0,e:0};
+  });
+  const newSet={scoreUs,scoreThem:scoreThem,stats,enteredBy:currentPlayerId||null,enteredAt:td()};
+
+  // Find or create match
+  // prefix format: 'own' for own court, 'spec-{idx}' for spectator courts
+  // We need to look up the match for this pair/date
+  const matchDate=pgdCurrentDate||td();
+  const existingMatch=D.gamedays.find(m=>m.date===matchDate&&arrEq(m.pair||[],pair));
+  if(existingMatch){
+    const sets=[...(existingMatch.sets||[])];
+    sets.push(newSet);
+    fbSet('gamedays/'+existingMatch.id+'/sets',sets);
+    if(prefix==='own')pgdCurrentMatchId=existingMatch.id;
+  }else{
+    // Need opponent info — look up from assignment
+    const assignment=Object.values(D.assignments).find(a=>a.date===matchDate);
+    const courtEntry=(assignment?.courts||[]).find(c=>arrEq([c.p1,c.p2].filter(Boolean),pair));
+    const courtNum=courtEntry?courtEntry.court:(gP(pair[0])?.court||1);
+    const opp=(assignment?.opponent||'Opponent')+' CT'+courtNum;
+    const id=gi('gd');
+    fbSet('gamedays/'+id,{id,date:matchDate,court:courtNum,pair,opponent:opp,sets:[newSet]});
+    if(prefix==='own')pgdCurrentMatchId=id;
+  }
+
+  const win=scoreUs>scoreThem;
+  toast((win?'✓ Win':'✗ Loss')+' saved — '+scoreUs+'-'+scoreThem);
+  pgdPrefixScores[prefix]={us:0,them:0};
+  if(pgdStats[pair[0]])pgdStats[pair[0]]={k:0,a:0,b:0,d:0,e:0};
+  if(pgdStats[pair[1]])pgdStats[pair[1]]={k:0,a:0,b:0,d:0,e:0};
+  setTimeout(renderPlayerGameDay,600);
+}
+
+function renderPlayerGameDay(){
+  if(!currentPlayerId)return;
+  const pid=currentPlayerId;
+  const container=document.getElementById('pgd-content');
+  const today=td();
+
+  // Find today's/next assignment for this player
+  const allAssign=Object.values(D.assignments)
+    .filter(a=>a.date>=today)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+
+  let nextAssign=null,nextCourt=null;
+  for(const a of allAssign){
+    for(const c of(a.courts||[])){
+      if(c.p1===pid||c.p2===pid){nextAssign=a;nextCourt=c;break;}
+    }
+    if(nextAssign)break;
+  }
+
+  pgdCurrentDate=nextAssign?nextAssign.date:today;
+  const myMatches=D.gamedays.filter(m=>(m.pair||[]).includes(pid))
+    .sort((a,b)=>b.date.localeCompare(a.date));
+
+  let h='';
+
+  if(nextAssign&&nextCourt){
+    const partner=nextCourt.p1===pid?gP(nextCourt.p2):gP(nextCourt.p1);
+    const courtLabel='Court '+nextCourt.court+(nextCourt.subCourt?nextCourt.subCourt.toUpperCase():'');
+    const typeLabel=nextAssign.type==='gameday'?'Game Day':'Scrimmage';
+    const isToday=nextAssign.date===today;
+
+    pgdCurrentPair=[nextCourt.p1,nextCourt.p2].filter(Boolean);
+    pgdCurrentOpponent=nextAssign.opponent||'Opponent';
+
+    const existingMatch=D.gamedays.find(m=>m.date===nextAssign.date&&arrEq(m.pair||[],pgdCurrentPair));
+    pgdCurrentMatchId=existingMatch?existingMatch.id:null;
+    const existingSets=existingMatch?existingMatch.sets||[]:[];
+    let sw=0,sl=0;existingSets.forEach(s=>(s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++);
+    const savedNotes=pgdNotes[pid]&&pgdNotes[pid][nextAssign.date]||{};
+
+    // Assignment banner
+    h+=`<div class="pgd-assignment">
+      <div class="pgd-label">${isToday?'TODAY — ':'UPCOMING — '}${typeLabel.toUpperCase()}</div>
+      <div class="pgd-title">${fD(nextAssign.date)}${nextAssign.opponent?' vs '+nextAssign.opponent:''}</div>
+      <div class="pgd-court-badge">${courtLabel} · w/ ${partner?partner.firstName+' '+partner.lastName:'TBD'}</div>
+    </div>`;
+
+    // Score entry card for own court
+    h+=`<div class="pgd-court-section">
+      <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--blue);margin-bottom:8px;">MY COURT SCORES</div>`;
+
+    // Existing sets with edit buttons
+    h+=pgdSetsHTML(existingSets,pgdCurrentMatchId,pgdCurrentPair,pid,'own');
+    if(sw||sl){
+      h+=`<div style="font-family:'Bebas Neue';font-size:15px;margin-bottom:10px;color:${sw>=sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl} sets</div>`;
+    }
+
+    // New set entry
+    h+=pgdNewSetCardHTML(existingSets.length+1,pgdCurrentPair,'own',false);
+    h+=`</div>`;
+
+    // Match notes
+    h+=`<div style="background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);">
+      <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--charcoal);margin-bottom:10px;">📝 MATCH NOTES</div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">How did I play?</label>
+        <textarea class="pgd-notes-area" id="pgd-note-perf" placeholder="Serving, passing, hitting — what worked, what didn't...">${savedNotes.performance||''}</textarea>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">Opponent notes</label>
+        <textarea class="pgd-notes-area" id="pgd-note-opp" placeholder="Their tendencies, weaknesses, what worked against them...">${savedNotes.opponent||''}</textarea>
+      </div>
+      <button class="btn btn-secondary btn-small" style="width:100%;" onclick="pgdSaveNotes()">Save Notes</button>
+      ${savedNotes.savedAt?'<div style="font-size:11px;color:var(--green);text-align:center;margin-top:6px;">Last saved '+fD(savedNotes.savedAt)+'</div>':''}
+    </div>`;
+
+    // Spectator — other courts for same game day
+    const otherCourts=(nextAssign.courts||[]).filter(c=>
+      !arrEq([c.p1,c.p2].filter(Boolean),pgdCurrentPair)&&c.p1&&c.p2
+    );
+    if(otherCourts.length){
+      h+=`<div style="background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);">
+        <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--purple);margin-bottom:4px;">👀 TRACK OTHER COURTS</div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:12px;">Enter scores &amp; stats for other courts. Your name is recorded as the tracker.</div>`;
+      otherCourts.forEach((c,idx)=>{
+        const specPair=[c.p1,c.p2].filter(Boolean);
+        const sp0=gP(c.p1),sp1=gP(c.p2);
+        const specLabel=[sp0,sp1].filter(Boolean).map(p=>p.firstName+' '+p.lastName.charAt(0)+'.').join(' & ');
+        const courtLabel2='Court '+c.court+(c.subCourt?c.subCourt.toUpperCase():'');
+        const specMatch=D.gamedays.find(m=>m.date===nextAssign.date&&arrEq(m.pair||[],specPair));
+        const specSets=specMatch?specMatch.sets||[]:[];
+        let ssw=0,ssl=0;specSets.forEach(s=>(s.scoreUs||0)>(s.scoreThem||0)?ssw++:ssl++);
+        const prefix2='spec-'+idx;
+        h+=`<div class="pgd-court-section spectator" style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div>
+              <span class="court-badge court-${c.court}" style="font-size:11px;">${courtLabel2}</span>
+              <div style="font-size:13px;font-weight:700;margin-top:4px;">${specLabel}</div>
+            </div>
+            ${specSets.length?`<div style="font-family:'Bebas Neue';font-size:16px;color:${ssw>ssl?'var(--green)':'var(--loss-red)'};">${ssw}-${ssl}</div>`:''}
+          </div>
+          ${pgdSetsHTML(specSets,specMatch?specMatch.id:null,specPair,pid,prefix2)}
+          ${pgdNewSetCardHTML(specSets.length+1,specPair,prefix2,true)}
+        </div>`;
+      });
+      h+=`</div>`;
+    }
+
+  }else{
+    h+=`<div style="text-align:center;padding:30px 20px;">
+      <div style="font-size:36px;margin-bottom:12px;">🏐</div>
+      <div style="font-family:'Bebas Neue';font-size:18px;color:var(--gray);margin-bottom:8px;">No Upcoming Assignment</div>
+      <div style="font-size:13px;color:var(--gray);">Check back when coaches post the game day lineup.</div>
+    </div>`;
+  }
+
+  // Past game day history
+  if(myMatches.length){
+    h+=`<div style="background:var(--white);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);">
+      <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--blue);margin-bottom:10px;">MY GAME DAY HISTORY</div>`;
+    myMatches.slice(0,8).forEach(m=>{
+      const partner=(m.pair||[]).find(x=>x!==pid);
+      const sets=m.sets||[];let sw=0,sl=0,pf=0,pa=0,tk=0,ta=0,tb=0,td2=0,te=0,hasStats=false;
+      sets.forEach(s=>{
+        const su=s.scoreUs||0,st=s.scoreThem||0;pf+=su;pa+=st;su>st?sw++:sl++;
+        const ps=s.stats?.[pid]||{};
+        if(ps.k||ps.a||ps.b||ps.d||ps.e){hasStats=true;tk+=ps.k||0;ta+=ps.a||0;tb+=ps.b||0;td2+=ps.d||0;te+=ps.e||0;}
+      });
+      h+=`<div style="padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04);">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:12px;color:var(--gray);">${fD(m.date)} · Court ${m.court||1}</div>
+            <div style="font-size:13px;font-weight:700;">w/ ${pN(partner)} vs ${m.opponent||'?'}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:'Bebas Neue';font-size:16px;color:${sw>sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</div>
+            <div style="font-size:11px;color:var(--gray);">${pmStr(pf-pa)}</div>
+          </div>
+        </div>
+        ${hasStats?`<div style="display:flex;gap:10px;margin-top:5px;padding:5px 8px;background:var(--off-white);border-radius:6px;">
+          <span style="font-size:11px;color:var(--gray);"><b style="color:var(--charcoal);">${tk}</b> K</span>
+          <span style="font-size:11px;color:var(--gray);"><b style="color:var(--charcoal);">${ta}</b> A</span>
+          <span style="font-size:11px;color:var(--gray);"><b style="color:var(--charcoal);">${tb}</b> B</span>
+          <span style="font-size:11px;color:var(--gray);"><b style="color:var(--charcoal);">${td2}</b> D</span>
+          <span style="font-size:11px;color:var(--gray);"><b style="color:var(--charcoal);">${te}</b> E</span>
+        </div>`:''}
+      </div>`;
+    });
+    h+='</div>';
+  }
+
+  container.innerHTML=h;
+}
+
+function pgdSaveNotes(){
+  if(!currentPlayerId||!pgdCurrentDate){toast('No active game day');return;}
+  const perf=document.getElementById('pgd-note-perf')?.value||'';
+  const opp=document.getElementById('pgd-note-opp')?.value||'';
+  db.ref(DB_ROOT+'/player_notes/'+pgdCurrentDate+'/'+currentPlayerId).set({
+    performance:perf||null,opponent:opp||null,savedAt:td()
+  });
+  toast('Notes saved!');
+  if(!pgdNotes[currentPlayerId])pgdNotes[currentPlayerId]={};
+  pgdNotes[currentPlayerId][pgdCurrentDate]={performance:perf,opponent:opp,savedAt:td()};
+}
+
+// ============================================================
 // INIT
 // ============================================================
 document.getElementById('q-date').value=td();
@@ -2909,6 +3830,8 @@ document.getElementById('sc-date').value=td();
 document.getElementById('gd-filter-date').value=td();
 document.getElementById('sc-filter-date').value=td();
 document.getElementById('assign-date').value=td();
+document.getElementById('live-date').value=td();
+document.getElementById('cnote-date').value=td();
 initFB();
 setTimeout(runMigration,2000);
 // Seed MaxPreps schedule data (one-time)
@@ -2955,6 +3878,18 @@ setTimeout(function(){
     db.ref(DB_ROOT+'/_cleaned_standings').set(true);
   });
 },3500);
+// One-time migration: write jersey numbers to existing player records
+setTimeout(function(){
+  if(!db)return;
+  db.ref(DB_ROOT+'/_jerseys_seeded').once('value',snap=>{
+    if(snap.val())return;
+    const jerseys={p01:9,p02:5,p03:10,p04:2,p05:7,p06:8,p07:13,p08:3,p09:17,p10:6,p11:4,p12:11,p13:15,p14:18,p15:12,p16:1};
+    const updates={};
+    Object.entries(jerseys).forEach(([pid,num])=>{updates[DB_ROOT+'/players/'+pid+'/jersey']=num;});
+    updates[DB_ROOT+'/_jerseys_seeded']=true;
+    db.ref().update(updates,err=>{if(!err)console.log('Jersey numbers seeded');});
+  });
+},4000);
 </script>
 </body>
 </html>
