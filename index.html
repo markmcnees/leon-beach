@@ -299,7 +299,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260311171858">
+  <meta name="build-version" content="20260311134118">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -652,7 +652,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <input type="file" id="import-data" accept=".json" style="display:none;">
         <button class="btn btn-danger btn-small" id="clear-matches">Clear All Matches</button></div></div>
     <div class="card"><div class="card-title" style="color:var(--blue);"><span class="bar" style="background:var(--blue);"></span> 📸 Upload Court Assignment Sheet</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a handwritten court assignment sheet and AI will extract the court pairings. You can then review, edit, and save as an assignment.</p>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a court assignment sheet — Leon's or the opponent's — and AI will extract the court pairings.</p>
       <div class="form-row" style="margin-bottom:8px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
           <input type="date" class="form-input" id="ca-date" style="padding:8px;font-size:13px;"></div>
@@ -663,7 +663,12 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
       <div class="form-row" style="margin-bottom:8px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label>
-          <input type="text" class="form-input" id="ca-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
+          <input type="text" class="form-input" id="ca-opp" placeholder="e.g. Lincoln" style="padding:8px;font-size:13px;"></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Whose Sheet?</label>
+          <select class="form-select" id="ca-team" style="padding:8px;font-size:13px;">
+            <option value="leon">Leon's Lineup</option>
+            <option value="opponent">Opponent's Lineup</option>
+          </select></div>
       </div>
       <input type="file" id="ca-file" accept="image/*" capture="environment" style="display:none;">
       <button class="btn btn-blue btn-small" style="width:100%;" onclick="document.getElementById('ca-file').click();">📸 Take Photo or Upload Court Sheet</button>
@@ -2819,6 +2824,192 @@ document.getElementById('ca-file').addEventListener('change',async function(e){
     const mediaType=file.type||'image/jpeg';
     preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;border-radius:8px;border:2px solid var(--gray-lighter);">`;
     result.innerHTML='<div class="ai-loading"><div class="spinner"></div><div style="margin-top:8px;">AI is reading your court assignment sheet...</div></div>';
+    const isOpponent=document.getElementById('ca-team').value==='opponent';
+    const playerList=D.players.map(p=>p.firstName+' '+p.lastName+' ('+p.id+')').join(', ');
+    try{
+      let promptText;
+      if(isOpponent){
+        promptText=`You are reading a handwritten or printed FHSAA Beach Volleyball lineup sheet for the OPPONENT team (not Leon).
+Extract each court's player pairs. This is for recording who the opponent played on each court.
+The form typically shows Position (No.1-5) with pairs of players listed side by side.
+Each court position (No.1 through No.5) is one court.
+
+Return ONLY a JSON array like this:
+[{"court":1,"player1":"First Last","player2":"First Last"},{"court":2,"player1":"First Last","player2":"First Last"}]
+
+Rules:
+- court: integer 1-5 (No.1 = court 1, etc.)
+- player1 and player2: full name strings as written on the sheet (left side player and right side player of each pair)
+- Read all 5 court positions
+- Respond with ONLY the JSON array, no other text`;
+      }else{
+        promptText=`You are reading a handwritten beach volleyball court assignment sheet for a high school team.
+Extract the court assignments. Each court has two players (a pair) assigned to it.
+Courts 6, 7, 8 may optionally have a second pair listed (for split/exhibition courts).
+
+PLAYER ROSTER (use these exact IDs — match names to IDs even if spelling varies):
+${playerList}
+
+Return ONLY a JSON array like this:
+[{"court":1,"pair":["p01","p02"]},{"court":2,"pair":["p03","p04"]},{"court":6,"pair":["p05","p06"],"splitPair":["p07","p08"]}]
+
+Rules:
+- court: integer 1-8
+- pair: array of 2 player IDs from the roster
+- splitPair: (courts 6-8 only) optional second pair for split/exhibition match
+- If a name is unclear, use best match from roster
+- Respond with ONLY the JSON array, no other text`;
+      }
+      const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',max_tokens:1500,
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+            {type:'text',text:promptText}
+          ]}]
+        })
+      });
+      const data=await response.json();
+      const text=data.content?.map(c=>c.text||'').join('')||'';
+      const clean=text.replace(/```json|```/g,'').trim();
+      let parsed;
+      try{parsed=JSON.parse(clean);}catch(pe){
+        result.innerHTML=`<div style="color:var(--loss-red);font-size:13px;">Couldn't parse AI response.</div><pre style="font-size:11px;background:var(--off-white);padding:10px;border-radius:6px;overflow-x:auto;white-space:pre-wrap;">${text}</pre>`;
+        return;
+      }
+      if(isOpponent){
+        // Opponent lineup — show editable name fields, save as oppLineup on the assignment
+        let h=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;margin-bottom:8px;color:var(--green);">✓ Found ${parsed.length} court(s) — edit if needed</div>`;
+        h+=`<div style="font-size:12px;color:var(--gray);margin-bottom:8px;">These will be saved as the opponent's lineup on your assignment for this date.</div>`;
+        parsed.forEach((m,i)=>{
+          h+=`<div style="padding:8px;background:var(--off-white);border-radius:6px;margin-bottom:6px;">
+            <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;margin-bottom:4px;">COURT ${m.court}</div>
+            <div class="form-row">
+              <input type="text" id="ca-opp-${i}-p1" value="${m.player1||''}" placeholder="Player 1" style="flex:1;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;">
+              <input type="text" id="ca-opp-${i}-p2" value="${m.player2||''}" placeholder="Player 2" style="flex:1;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;">
+            </div>
+            <input type="hidden" id="ca-opp-${i}-court" value="${m.court}">
+          </div>`;
+        });
+        h+=`<div style="margin-top:10px;display:flex;gap:8px;">
+          <button class="btn btn-primary btn-small" onclick="confirmOppLineup()">✓ Save Opponent Lineup</button>
+          <button class="btn btn-secondary btn-small" onclick="document.getElementById('ca-result').innerHTML='';document.getElementById('ca-preview').innerHTML='';">✕ Cancel</button></div>`;
+        result.innerHTML=h;
+        window._caData={parsed,count:parsed.length,isOpponent:true};
+      }else{
+        // Leon's lineup
+        const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
+        function caPlayerOpts(selId){return '<option value="">Select</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (CT${pl.court})</option>`).join('');}
+        // Check if assignment already exists for this date
+        const caDate=document.getElementById('ca-date').value||td();
+        const existingAssign=Object.values(D.assignments).find(a=>a.date===caDate);
+        let h=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;margin-bottom:8px;color:var(--green);">✓ Found ${parsed.length} court(s) — edit if needed</div>`;
+        if(existingAssign)h+=`<div style="font-size:12px;color:var(--gold);padding:6px 10px;background:#fffbeb;border-radius:6px;margin-bottom:8px;">⚠ An assignment already exists for ${caDate}. Saving will replace it.</div>`;
+        parsed.forEach((m,i)=>{
+          const isExhib=EXHIBITION_COURTS.has(m.court);
+          h+=`<div style="padding:10px;background:var(--off-white);border-radius:6px;margin-bottom:8px;">
+            <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;margin-bottom:6px;color:var(--charcoal);">
+              COURT <input type="number" id="ca-${i}-court" value="${m.court||1}" min="1" max="8" style="width:50px;padding:4px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;font-weight:700;">
+              ${isExhib?'<span style="font-size:10px;color:var(--purple);margin-left:4px;">EXHIBITION</span>':''}
+            </div>
+            <div style="font-size:11px;color:var(--gray);margin-bottom:4px;">Set 1 Pair</div>
+            <div class="form-row" style="margin-bottom:6px;">
+              <select class="form-select" id="ca-${i}-p1" style="padding:6px;font-size:12px;">${caPlayerOpts((m.pair||[])[0])}</select>
+              <select class="form-select" id="ca-${i}-p2" style="padding:6px;font-size:12px;">${caPlayerOpts((m.pair||[])[1])}</select>
+            </div>`;
+          if(isExhib||m.splitPair){
+            h+=`<div style="font-size:11px;color:var(--purple);margin-bottom:4px;">Set 2 Pair (Split — optional)</div>
+            <div class="form-row">
+              <select class="form-select" id="ca-${i}-sp1" style="padding:6px;font-size:12px;">${caPlayerOpts((m.splitPair||[])[0])}</select>
+              <select class="form-select" id="ca-${i}-sp2" style="padding:6px;font-size:12px;">${caPlayerOpts((m.splitPair||[])[1])}</select>
+            </div>`;
+          }
+          h+='</div>';
+        });
+        h+=`<div style="margin-top:10px;display:flex;gap:8px;">
+          <button class="btn btn-primary btn-small" onclick="confirmCAAssignment()">✓ ${existingAssign?'Update':'Save'} Assignment</button>
+          <button class="btn btn-secondary btn-small" onclick="document.getElementById('ca-result').innerHTML='';document.getElementById('ca-preview').innerHTML='';">✕ Cancel</button></div>`;
+        result.innerHTML=h;
+        window._caData={parsed,count:parsed.length,isOpponent:false,existingAssign};
+      }
+    }catch(err){
+      console.error('CA scan error:',err);
+      result.innerHTML='<div style="color:var(--loss-red);font-size:13px;">Error reading photo. Try a clearer image.</div>';
+    }
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+});
+
+function confirmCAAssignment(){
+  const{count,existingAssign}=window._caData||{};
+  if(!count){toast('No data to save');return;}
+  const date=document.getElementById('ca-date').value||td();
+  const type=document.getElementById('ca-type').value;
+  const opp=document.getElementById('ca-opp').value.trim();
+  const slots=[];
+  for(let i=0;i<count;i++){
+    const court=parseInt(document.getElementById(`ca-${i}-court`)?.value)||1;
+    const p1=document.getElementById(`ca-${i}-p1`)?.value;
+    const p2=document.getElementById(`ca-${i}-p2`)?.value;
+    const sp1=document.getElementById(`ca-${i}-sp1`)?.value;
+    const sp2=document.getElementById(`ca-${i}-sp2`)?.value;
+    if(!p1||!p2)continue;
+    const slot={court,p1,p2};
+    if(sp1&&sp2&&EXHIBITION_COURTS.has(court))slot.splitPair=[sp1,sp2];
+    slots.push(slot);
+  }
+  if(!slots.length){toast('No valid courts to save');return;}
+  // If existing assignment for this date, delete it first then save updated version
+  if(existingAssign){fbRemove('assignments/'+existingAssign.id);}
+  const id=existingAssign?existingAssign.id:gi('asgn');
+  const assignData={id,date,type,opponent:opp||null,courts:slots,notes:null,createdAt:new Date().toISOString()};
+  fbSet('assignments/'+id,assignData);
+  toast(`Assignment ${existingAssign?'updated':'saved'}! ${slots.length} court(s) for ${date}`);
+  document.getElementById('ca-result').innerHTML='';
+  document.getElementById('ca-preview').innerHTML='';
+  document.getElementById('ca-opp').value='';
+  renderAssignments();
+}
+
+function confirmOppLineup(){
+  const{count}=window._caData||{};
+  if(!count){toast('No data to save');return;}
+  const date=document.getElementById('ca-date').value||td();
+  const opp=document.getElementById('ca-opp').value.trim()||'Opponent';
+  const oppCourts=[];
+  for(let i=0;i<count;i++){
+    const court=parseInt(document.getElementById(`ca-opp-${i}-court`)?.value)||i+1;
+    const p1=document.getElementById(`ca-opp-${i}-p1`)?.value.trim();
+    const p2=document.getElementById(`ca-opp-${i}-p2`)?.value.trim();
+    if(p1||p2)oppCourts.push({court,player1:p1||'',player2:p2||''});
+  }
+  if(!oppCourts.length){toast('No courts to save');return;}
+  // Save as opponent lineup under the assignment for this date
+  const existingAssign=Object.values(D.assignments).find(a=>a.date===date);
+  if(existingAssign){
+    fbSet('assignments/'+existingAssign.id+'/oppLineup',oppCourts);
+    toast(`Opponent lineup saved for ${date}!`);
+  }else{
+    // Create a placeholder assignment with just opp lineup
+    const id=gi('asgn');
+    fbSet('assignments/'+id,{id,date,type:'gameday',opponent:opp,courts:[],oppLineup:oppCourts,notes:null,createdAt:new Date().toISOString()});
+    toast(`Opponent lineup saved for ${date}!`);
+  }
+  document.getElementById('ca-result').innerHTML='';
+  document.getElementById('ca-preview').innerHTML='';
+  renderAssignments();
+}
+
+// ============================================================
+
+  const reader=new FileReader();
+  reader.onload=async function(ev){
+    const base64=ev.target.result.split(',')[1];
+    const mediaType=file.type||'image/jpeg';
+    preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;border-radius:8px;border:2px solid var(--gray-lighter);">`;
+    result.innerHTML='<div class="ai-loading"><div class="spinner"></div><div style="margin-top:8px;">AI is reading your court assignment sheet...</div></div>';
     const playerList=D.players.map(p=>p.firstName+' '+p.lastName+' ('+p.id+')').join(', ');
     try{
       const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
@@ -2892,35 +3083,6 @@ Rules:
   reader.readAsDataURL(file);
   e.target.value='';
 });
-
-function confirmCAAssignment(){
-  const{count}=window._caData||{};
-  if(!count){toast('No data to save');return;}
-  const date=document.getElementById('ca-date').value||td();
-  const type=document.getElementById('ca-type').value;
-  const opp=document.getElementById('ca-opp').value.trim();
-  const slots=[];
-  for(let i=0;i<count;i++){
-    const court=parseInt(document.getElementById(`ca-${i}-court`)?.value)||1;
-    const p1=document.getElementById(`ca-${i}-p1`)?.value;
-    const p2=document.getElementById(`ca-${i}-p2`)?.value;
-    const sp1=document.getElementById(`ca-${i}-sp1`)?.value;
-    const sp2=document.getElementById(`ca-${i}-sp2`)?.value;
-    if(!p1||!p2)continue;
-    const slot={court,p1:p1,p2:p2};
-    if(sp1&&sp2&&EXHIBITION_COURTS.has(court))slot.splitPair=[sp1,sp2];
-    slots.push(slot);
-  }
-  if(!slots.length){toast('No valid courts to save');return;}
-  const id=gi('asgn');
-  const assignData={id,date,type,opponent:opp||null,courts:slots,notes:null,createdAt:new Date().toISOString()};
-  fbSet('assignments/'+id,assignData);
-  toast(`Assignment saved! ${slots.length} court(s) for ${date}`);
-  document.getElementById('ca-result').innerHTML='';
-  document.getElementById('ca-preview').innerHTML='';
-  document.getElementById('ca-opp').value='';
-  renderAssignments();
-}
 
 // ============================================================
 // SCORESHEET SCANNER
@@ -3383,7 +3545,7 @@ function renderLiveScoring(){
           <div class="live-opp-name">vs ${opp}</div>
         </div>
         <div style="text-align:right;">
-          ${sets.length?`<div style="font-family:'Bebas Neue';font-size:18px;color:${sw>sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</div><div style="font-size:10px;color:var(--gray);">Sets</div><div style="font-family:'Bebas Neue';font-size:15px;color:${diffColor};margin-top:2px;">${diffStr}</div><div style="font-size:10px;color:var(--gray);">Pts</div>`:'<div style="font-size:12px;color:var(--gray);">No sets yet</div>'}
+          ${sets.length?`<div style="font-family:'Bebas Neue';font-size:18px;color:${sw>sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</div><div style="font-size:10px;color:var(--gray);">Match</div><div style="font-family:'Bebas Neue';font-size:15px;color:${diffColor};margin-top:2px;">${diffStr}</div><div style="font-size:10px;color:var(--gray);">Pts</div>`:'<div style="font-size:12px;color:var(--gray);">No sets yet</div>'}
         </div>
       </div>`;
 
@@ -3406,6 +3568,7 @@ function renderLiveScoring(){
           <div class="ls-counter">
             <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-us-${idx}',1)">+</button>
             <div class="ls-num" id="ls-us-${idx}">0</div>
+            <input type="number" id="ls-us-${idx}-inp" value="0" min="0" oninput="lsInpChange('ls-us-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
             <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-us-${idx}',-1)">−</button>
           </div>
         </div>
@@ -3415,6 +3578,7 @@ function renderLiveScoring(){
           <div class="ls-counter">
             <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-them-${idx}',1)">+</button>
             <div class="ls-num" id="ls-them-${idx}">0</div>
+            <input type="number" id="ls-them-${idx}-inp" value="0" min="0" oninput="lsInpChange('ls-them-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
             <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-them-${idx}',-1)">−</button>
           </div>
         </div>
@@ -3433,6 +3597,16 @@ function lsAdj(id,delta){
   const cur=parseInt(el.textContent)||0;
   const next=Math.max(0,cur+delta);
   el.textContent=next;
+  const inp=document.getElementById(id+'-inp');
+  if(inp)inp.value=next;
+}
+function lsInpChange(id){
+  const inp=document.getElementById(id+'-inp');
+  const el=document.getElementById(id);
+  if(!inp||!el)return;
+  const val=Math.max(0,parseInt(inp.value)||0);
+  inp.value=val;
+  el.textContent=val;
 }
 
 function saveLiveSet(idx,p1,p2,date,court,subCourt,existingId,opponent,fbNode){
@@ -3461,10 +3635,21 @@ function saveLiveSet(idx,p1,p2,date,court,subCourt,existingId,opponent,fbNode){
     const id=gi(idPrefix);
     fbSet(node+'/'+id,{id,date,court:parseInt(court),pair,opponent:opp,sets:[newSet]});
   }
-  document.getElementById('ls-us-'+idx).value='';
-  document.getElementById('ls-them-'+idx).value='';
-  toast((us>them?'\u2713 Win':'\u2717 Loss')+' saved — '+us+'-'+them);
-  setTimeout(renderLiveScoring,600);
+  toast((us>them?'\u2713 Win':'\u2717 Loss')+' — '+us+'-'+them+' saved');
+  // Preserve other courts' counter values before re-render
+  const savedCounters={};
+  document.querySelectorAll('[id^="ls-us-"],[id^="ls-them-"]').forEach(el=>{savedCounters[el.id]=el.textContent||'0';});
+  setTimeout(()=>{
+    renderLiveScoring();
+    // Restore all courts EXCEPT the one just saved (it resets to 0)
+    Object.entries(savedCounters).forEach(([id,val])=>{
+      if(!id.endsWith('-'+idx)){const el=document.getElementById(id);if(el)el.textContent=val;}
+    });
+    // Also sync any keyboard inputs
+    Object.entries(savedCounters).forEach(([id,val])=>{
+      if(!id.endsWith('-'+idx)){const inp=document.getElementById(id+'-inp');if(inp)inp.value=val;}
+    });
+  },600);
 }
 
 function delLiveSet(matchId,setIdx,fbNode){
@@ -3475,7 +3660,13 @@ function delLiveSet(matchId,setIdx,fbNode){
   const sets=(m.sets||[]).filter((_,i)=>i!==setIdx);
   fbSet(node+'/'+matchId+'/sets',sets.length?sets:null);
   toast('Set deleted');
-  setTimeout(renderLiveScoring,400);
+  // Preserve counters across re-render
+  const savedCounters={};
+  document.querySelectorAll('[id^="ls-us-"],[id^="ls-them-"]').forEach(el=>{savedCounters[el.id]=el.textContent||'0';});
+  setTimeout(()=>{
+    renderLiveScoring();
+    Object.entries(savedCounters).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.textContent=val;const inp=document.getElementById(id+'-inp');if(inp)inp.value=val;});
+  },400);
 }
 
 // ============================================================
