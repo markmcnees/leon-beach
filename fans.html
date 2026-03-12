@@ -362,50 +362,39 @@ function render(){
 
 // ── SEASON RECORD ──
 function renderRecord(){
-  let totalW=0,totalL=0,setW=0,setL=0,dualW=0,dualL=0;
+  let setW=0,setL=0,matchW=0,matchL=0,dualW=0,dualL=0;
 
-  // Count set wins/losses from gamedays
+  // Count sets and matches from gamedays
+  // A match = pair that won best of 3 sets (2 sets wins the match)
+  const matchesByPairDate={};
   D.gamedays.forEach(m=>{
-    (m.sets||[]).forEach(s=>{
-      if((s.scoreUs||0)>(s.scoreThem||0))setW++;
-      else setL++;
-    });
-  });
-
-  totalW=setW;totalL=setL;
-
-  // Try to compute dual record from assignments (one dual per unique date+opponent combo)
-  const dualDates={};
-  D.gamedays.forEach(m=>{
-    const key=m.date+'|'+(m.opponent||'').split(' CT')[0];
-    if(!dualDates[key])dualDates[key]={w:0,l:0};
     const sets=m.sets||[];
     const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
     const sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-    if(sw>0)dualDates[key].w+=sw;
-    if(sl>0)dualDates[key].l+=sl;
+    sets.forEach(s=>{ if((s.scoreUs||0)>(s.scoreThem||0))setW++;else setL++; });
+    if(sw>=2)matchW++;
+    else if(sl>=2)matchL++;
   });
 
-  const gdDays=new Set(D.gamedays.map(m=>m.date));
-  const gdDaysArr=[...gdDays].sort();
-
-  // Dual wins: days where Leon won more set-courts than lost
-  gdDaysArr.forEach(date=>{
+  // Dual record: per date, did Leon win more matches than lost?
+  const dualDates=new Set(D.gamedays.map(m=>m.date));
+  dualDates.forEach(date=>{
     const dayMatches=D.gamedays.filter(m=>m.date===date);
     let dw=0,dl=0;
     dayMatches.forEach(m=>{
       const sets=m.sets||[];
       const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
       const sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-      if(sw>sl)dw++;else if(sl>sw)dl++;
+      if(sw>=2)dw++;
+      else if(sl>=2)dl++;
     });
     if(dw>dl)dualW++;else if(dl>dw)dualL++;
   });
 
-  document.getElementById('record-main').textContent=`${setW} — ${setL}`;
+  document.getElementById('record-main').textContent=`${matchW} — ${matchL}`;
   document.getElementById('record-stats').innerHTML=`
-    <div class="record-stat"><div class="record-stat-num">${setW}</div><div class="record-stat-lbl">Set Wins</div></div>
-    <div class="record-stat"><div class="record-stat-num">${setL}</div><div class="record-stat-lbl">Set Losses</div></div>
+    <div class="record-stat"><div class="record-stat-num">${matchW}</div><div class="record-stat-lbl">Match Wins</div></div>
+    <div class="record-stat"><div class="record-stat-num">${matchL}</div><div class="record-stat-lbl">Match Losses</div></div>
     <div class="record-stat"><div class="record-stat-num">${dualW}-${dualL}</div><div class="record-stat-lbl">Duals</div></div>
   `;
 }
@@ -415,23 +404,21 @@ function renderToday(){
   const today=td();
   const container=document.getElementById('today-container');
 
-  // Find today's assignment
   const assignment=Object.values(D.assignments).find(a=>a.date===today&&(a.type==='gameday'||a.type==='scrimmage'));
 
   if(!assignment){
-    // Check if there's a game today in schedule
     const sched=D.schedule.find(s=>s.date===today);
     if(sched){
       container.innerHTML=`<div class="no-game">
         <div class="no-game-icon">🏐</div>
-        <div class="no-game-title">Game Day vs ${sched.opponent||'TBD'}</div>
+        <div class="no-game-title">Match Day vs ${sched.opponent||'TBD'}</div>
         <div class="no-game-sub">Lineup coming soon — check back closer to match time</div>
       </div>`;
     }else{
       container.innerHTML=`<div class="no-game">
         <div class="no-game-icon">🏖️</div>
         <div class="no-game-title">No Match Today</div>
-        <div class="no-game-sub">Check Upcoming Duals below for the next game</div>
+        <div class="no-game-sub">Check Upcoming Duals below for the next match</div>
       </div>`;
     }
     return;
@@ -441,19 +428,20 @@ function renderToday(){
   const courts=assignment.courts||[];
   const matchList=assignment.type==='scrimmage'?D.scrimmages:D.gamedays;
 
-  // Count dual score (courts Leon won vs lost)
-  let leonCourts=0,oppCourts=0;
+  // Count dual score: matches won (2+ sets)
+  let leonMatches=0,oppMatches=0,inProgress=0;
   courts.forEach(c=>{
     const match=matchList.find(m=>m.date===today&&m.pair&&m.pair[0]===c.p1&&m.pair[1]===c.p2);
     if(match&&match.sets&&match.sets.length){
       const sw=match.sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
       const sl=match.sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-      if(sw>sl)leonCourts++;
-      else if(sl>sw)oppCourts++;
+      if(sw>=2)leonMatches++;
+      else if(sl>=2)oppMatches++;
+      else inProgress++;
     }
   });
 
-  const hasScores=courts.some(c=>{
+  const hasAnyScores=courts.some(c=>{
     const m=matchList.find(x=>x.date===today&&x.pair&&x.pair[0]===c.p1&&x.pair[1]===c.p2);
     return m&&(m.sets||[]).length>0;
   });
@@ -465,16 +453,19 @@ function renderToday(){
     const sets=match?match.sets||[]:[];
     const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
     const sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-    const isWin=sw>sl&&sets.length>0;
-    const isLoss=sl>sw&&sets.length>0;
+    const matchWon=sw>=2,matchLost=sl>=2;
 
     let scoreHTML='';
     if(sets.length){
-      scoreHTML=`<div class="court-score ${isWin?'score-win':isLoss?'score-loss':''}">
-        ${sw}-${sl}
-        <div class="set-chips">
-          ${sets.map((s,i)=>{const w=(s.scoreUs||0)>(s.scoreThem||0);return`<span class="set-chip ${w?'w':'l'}">S${i+1}: ${s.scoreUs}-${s.scoreThem}</span>`}).join('')}
-        </div>
+      // Show all recorded sets — includes in-progress
+      const setChips=sets.map((s,i)=>{
+        const w=(s.scoreUs||0)>(s.scoreThem||0);
+        return`<span class="set-chip ${w?'w':'l'}">S${i+1}: ${s.scoreUs}-${s.scoreThem}</span>`;
+      }).join('');
+      scoreHTML=`<div class="court-score ${matchWon?'score-win':matchLost?'score-loss':''}">
+        <div>${sw}-${sl}</div>
+        <div class="set-chips">${setChips}</div>
+        ${(!matchWon&&!matchLost)?'<div style="font-size:9px;letter-spacing:1px;color:var(--gray);margin-top:2px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">IN PLAY</div>':''}
       </div>`;
     }else{
       scoreHTML=`<div class="court-score score-pending">–</div>`;
@@ -482,14 +473,14 @@ function renderToday(){
 
     courtsHTML+=`<div class="court-row">
       <span class="ct-badge ct-${c.court}">CT${c.court}</span>
-      <div class="court-pair">${p1} &amp; ${p2}<div class="court-opp">vs ${opp} CT${c.court}</div></div>
+      <div class="court-pair">${p1} &amp; ${p2}<div class="court-opp">vs ${opp}</div></div>
       ${scoreHTML}
     </div>`;
   });
 
-  const dualScoreHTML=hasScores
-    ?`<div class="dual-result">${leonCourts}–${oppCourts}<div class="dual-result-lbl">COURTS WON</div></div>`
-    :`<div class="dual-result" style="font-size:16px;opacity:0.5;">IN<br>PROGRESS</div>`;
+  const dualScoreHTML=hasAnyScores
+    ?`<div class="dual-result">${leonMatches}–${oppMatches}<div class="dual-result-lbl">${inProgress>0?'MATCHES (LIVE)':'MATCHES WON'}</div></div>`
+    :`<div class="dual-result" style="font-size:14px;opacity:0.6;line-height:1.2;">STARTING<br>SOON</div>`;
 
   container.innerHTML=`<div class="today-card">
     <div class="today-header">
