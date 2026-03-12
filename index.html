@@ -299,7 +299,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260312111217">
+  <meta name="build-version" content="20260311134118">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -3001,88 +3001,6 @@ function confirmOppLineup(){
   document.getElementById('ca-preview').innerHTML='';
   renderAssignments();
 }
-
-// ============================================================
-
-  const reader=new FileReader();
-  reader.onload=async function(ev){
-    const base64=ev.target.result.split(',')[1];
-    const mediaType=file.type||'image/jpeg';
-    preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;border-radius:8px;border:2px solid var(--gray-lighter);">`;
-    result.innerHTML='<div class="ai-loading"><div class="spinner"></div><div style="margin-top:8px;">AI is reading your court assignment sheet...</div></div>';
-    const playerList=D.players.map(p=>p.firstName+' '+p.lastName+' ('+p.id+')').join(', ');
-    try{
-      const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',max_tokens:1500,
-          messages:[{role:'user',content:[
-            {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
-            {type:'text',text:`You are reading a handwritten beach volleyball court assignment sheet for a high school team.
-Extract the court assignments. Each court has two players (a pair) assigned to it.
-Courts 6, 7, 8 may optionally have a second pair listed (for split/exhibition courts).
-
-PLAYER ROSTER (use these exact IDs — match names to IDs even if spelling varies):
-${playerList}
-
-Return ONLY a JSON array like this:
-[{"court":1,"pair":["p01","p02"]},{"court":2,"pair":["p03","p04"]},{"court":6,"pair":["p05","p06"],"splitPair":["p07","p08"]}]
-
-Rules:
-- court: integer 1-8
-- pair: array of 2 player IDs from the roster
-- splitPair: (courts 6-8 only) optional second pair for split/exhibition match
-- If a name is unclear, use best match from roster
-- Respond with ONLY the JSON array, no other text`}
-          ]}]
-        })
-      });
-      const data=await response.json();
-      const text=data.content?.map(c=>c.text||'').join('')||'';
-      const clean=text.replace(/```json|```/g,'').trim();
-      let parsed;
-      try{parsed=JSON.parse(clean);}catch(pe){
-        result.innerHTML=`<div style="color:var(--loss-red);font-size:13px;">Couldn't parse AI response.</div><pre style="font-size:11px;background:var(--off-white);padding:10px;border-radius:6px;overflow-x:auto;white-space:pre-wrap;">${text}</pre>`;
-        return;
-      }
-      // Show editable preview
-      const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
-      function caPlayerOpts(selId){return '<option value="">Select</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (CT${pl.court})</option>`).join('');}
-      let h=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;margin-bottom:8px;color:var(--green);">✓ Found ${parsed.length} court(s) — edit if needed</div>`;
-      parsed.forEach((m,i)=>{
-        const isExhib=EXHIBITION_COURTS.has(m.court);
-        h+=`<div style="padding:10px;background:var(--off-white);border-radius:6px;margin-bottom:8px;">
-          <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;margin-bottom:6px;color:var(--charcoal);">
-            COURT <input type="number" id="ca-${i}-court" value="${m.court||1}" min="1" max="8" style="width:50px;padding:4px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;font-weight:700;">
-            ${isExhib?'<span style="font-size:10px;color:var(--purple);margin-left:4px;">EXHIBITION</span>':''}
-          </div>
-          <div style="font-size:11px;color:var(--gray);margin-bottom:4px;">Set 1 Pair</div>
-          <div class="form-row" style="margin-bottom:6px;">
-            <select class="form-select" id="ca-${i}-p1" style="padding:6px;font-size:12px;">${caPlayerOpts((m.pair||[])[0])}</select>
-            <select class="form-select" id="ca-${i}-p2" style="padding:6px;font-size:12px;">${caPlayerOpts((m.pair||[])[1])}</select>
-          </div>`;
-        if(isExhib||m.splitPair){
-          h+=`<div style="font-size:11px;color:var(--purple);margin-bottom:4px;">Set 2 Pair (Split — optional)</div>
-          <div class="form-row">
-            <select class="form-select" id="ca-${i}-sp1" style="padding:6px;font-size:12px;">${caPlayerOpts((m.splitPair||[])[0])}</select>
-            <select class="form-select" id="ca-${i}-sp2" style="padding:6px;font-size:12px;">${caPlayerOpts((m.splitPair||[])[1])}</select>
-          </div>`;
-        }
-        h+='</div>';
-      });
-      h+=`<div style="margin-top:10px;display:flex;gap:8px;">
-        <button class="btn btn-primary btn-small" onclick="confirmCAAssignment()">✓ Save as Assignment</button>
-        <button class="btn btn-secondary btn-small" onclick="document.getElementById('ca-result').innerHTML='';document.getElementById('ca-preview').innerHTML='';">✕ Cancel</button></div>`;
-      result.innerHTML=h;
-      window._caData={parsed,count:parsed.length};
-    }catch(err){
-      console.error('CA scan error:',err);
-      result.innerHTML='<div style="color:var(--loss-red);font-size:13px;">Error reading photo. Try a clearer image.</div>';
-    }
-  };
-  reader.readAsDataURL(file);
-  e.target.value='';
-});
 
 // ============================================================
 // SCORESHEET SCANNER
