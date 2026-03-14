@@ -887,6 +887,29 @@ const DEMO_BANNER_HTML = `<div style="background:#f59e0b;color:#000;text-align:c
 
 // In-memory DB simulator
 const _demoDB = {};
+// Demo-safe db shim — intercepts all db.ref() calls
+const db = {
+  ref: function(path='') {
+    const normPath = path.replace(/^leon_queens_matches\/?/,'');
+    return {
+      set: function(val) { if(normPath)_dbSet('leon_queens_matches/'+normPath, val); _dbNotify(); },
+      update: function(u) { Object.entries(u||{}).forEach(([k,v])=>_dbSet(k,v)); _dbNotify(); },
+      remove: function() { if(normPath)_dbRemove('leon_queens_matches/'+normPath); _dbNotify(); },
+      on: function(evt, cb) { _dbListeners.push(()=>{ const snap=_getSnap(path); cb({val:()=>snap,exists:()=>snap!=null}); }); },
+      once: function(evt, cb) { const snap=_getSnap(path); cb({val:()=>snap,exists:()=>snap!=null}); return Promise.resolve({val:()=>snap}); },
+      push: function() { const id='demo_'+Math.random().toString(36).slice(2,8); return {key:id,set:function(v){_dbSet('leon_queens_matches/'+normPath+'/'+id,v);_dbNotify();}}; }
+    };
+  }
+};
+function _getSnap(path) {
+  if(!path || path==='.' || path==='.info/connected') return true;
+  const clean = path.replace(/^leon_queens_matches\/?/,'');
+  if(!clean) return _demoDB['leon_queens_matches']||null;
+  const parts = clean.split('/');
+  let node = _demoDB['leon_queens_matches']||{};
+  for(const p of parts){ if(node==null)return null; node=node[p]; }
+  return node==null?null:node;
+}
 function _dbSet(path, val) {
   const parts = path.split('/');
   let node = _demoDB;
@@ -1050,7 +1073,8 @@ const DB_ROOT='leon_queens_matches';
 const COURTS=[1,2,3,4,5,6,7,8],CL={1:'Top',2:'Mid',3:'Dev',4:'Court 4',5:'Court 5',6:'Exhib',7:'Exhib',8:'Exhib'};
 const EXHIBITION_COURTS=new Set([6,7,8]);
 const CO={SR:0,JR:1,SO:2,FR:3};
-let db=null;
+// db declared as shim in demo mode
+
 
 const DEF_P=DEMO_PLAYERS;
 const DEF_M=[
