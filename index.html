@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314154423">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4258,19 +4258,24 @@ function renderDuals(){
   const container=document.getElementById('duals-list');
   if(!container)return;
 
-  // If we have structured dual records, use them; otherwise build from gamedays
-  const hasDuals=(D.duals||[]).length>0;
-  const duals=hasDuals
-    ? [...D.duals].sort((a,b)=>(b.date||'').localeCompare(a.date||''))
-    : buildDualsFromGamedays();
+  // Merge structured duals + gameday-derived duals, deduplicate by date+opponent
+  const gdDuals=buildDualsFromGamedays();
+  const structuredDuals=D.duals||[];
+  // Index structured duals by date+opponent so we can skip gdDuals that are already covered
+  const structuredKeys=new Set(structuredDuals.map(d=>(d.date||'')+'||'+(d.opponent||'').toLowerCase()));
+  const merged=[
+    ...structuredDuals,
+    ...gdDuals.filter(d=>!structuredKeys.has((d.date||'')+'||'+(d.opponent||'').toLowerCase()))
+  ].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
 
+  const duals=merged;
   if(!duals.length){container.innerHTML='<div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.</p></div>';return;}
   let h='';
   duals.forEach(d=>{
     const win=(d.leonCourts||0)>(d.oppCourts||0),loss=(d.oppCourts||0)>(d.leonCourts||0);
     const locLabel=d.location==='away'?'@ ':d.location==='neutral'?'(N) ':'vs ';
-    const scored=(d.courts||[]).filter(c=>!c.isExhibition);
-    const exhib=(d.courts||[]).filter(c=>c.isExhibition);
+    const scored=(d.courts||[]).filter(c=>!c.isExhibition).sort((a,b)=>(a.court||0)-(b.court||0));
+    const exhib=(d.courts||[]).filter(c=>c.isExhibition).sort((a,b)=>(a.court||0)-(b.court||0));
     h+=`<div class="dual-card ${win?'win':loss?'loss':''}">
       <div style="position:absolute;top:8px;right:8px;">
         <button class="match-action-btn" onclick="deleteDual('${d.id}')" title="Delete">&#x2715;</button>
