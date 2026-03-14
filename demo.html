@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="20260314-restructure-v2">
-<title>Sand Sharks — Demo</title>
+<title>Sand Sharks Demo</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- Firebase replaced with in-memory demo DB -->
+<!-- Firebase SDK not loaded in demo mode -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
 :root{--red:#e4002b;--red-dark:#b50022;--red-deeper:#8a001a;--red-light:#ff3354;--red-bg:#fce8ec;--black:#1a1a1a;--charcoal:#2d2d2d;--white:#ffffff;--off-white:#fafafa;--cream:#f7f4f0;--gold:#d4a843;--gold-light:#f0d98a;--gray:#6b7280;--gray-light:#d1d5db;--gray-lighter:#e8eaed;--green:#16a34a;--green-bg:#dcfce7;--loss-red:#991b1b;--blue:#4338ca;--blue-bg:#e0e7ff;--purple:#7c3aed;--purple-bg:#f3e8ff;--radius:10px;--shadow:0 2px 10px rgba(0,0,0,0.06);--shadow-lg:0 8px 30px rgba(0,0,0,0.12);}
@@ -314,7 +314,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
     <div class="login-logo"><span class="crown">🦈</span> Sand Sharks</div>
-    <div class="login-sub">Demo Mode · 2026 Season</div>
+    <div class="login-sub">Demo Mode · Coach PIN: 1234 · Player PW: SharkPride</div>
     <div class="login-toggle">
       <button class="login-toggle-btn active" onclick="switchLogin('coach')">Coach</button>
       <button class="login-toggle-btn" onclick="switchLogin('player')">Player</button>
@@ -878,97 +878,55 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div class="toast" id="toast"></div>
 
 <script>
-// ============================================================
-// DEMO MODE — Sand Sharks Beach Volleyball
-// All data is in-memory only. Nothing writes to Firebase.
-// ============================================================
-const DEMO_MODE = true;
-const DEMO_BANNER_HTML = `<div style="background:#f59e0b;color:#000;text-align:center;padding:8px 16px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;position:sticky;top:0;z-index:9998;">⚡ DEMO MODE — Sand Sharks · Data resets on refresh · No real data affected ⚡</div>`;
+// ╔══════════════════════════════════════════════════════════════╗
+// ║          SAND SHARKS DEMO MODE — reads from memory only     ║
+// ║          Nothing writes to Firebase. Resets on refresh.     ║
+// ╚══════════════════════════════════════════════════════════════╝
+(function(){
 
-// In-memory DB simulator
-const _demoDB = {};
-// Demo-safe db shim — intercepts all db.ref() calls
-const db = {
-  ref: function(path='') {
-    const normPath = path.replace(/^leon_queens_matches\/?/,'');
-    return {
-      set: function(val) { if(normPath)_dbSet('leon_queens_matches/'+normPath, val); _dbNotify(); },
-      update: function(u) { Object.entries(u||{}).forEach(([k,v])=>_dbSet(k,v)); _dbNotify(); },
-      remove: function() { if(normPath)_dbRemove('leon_queens_matches/'+normPath); _dbNotify(); },
-      on: function(evt, cb) { _dbListeners.push(()=>{ const snap=_getSnap(path); cb({val:()=>snap,exists:()=>snap!=null}); }); },
-      once: function(evt, cb) { const snap=_getSnap(path); cb({val:()=>snap,exists:()=>snap!=null}); return Promise.resolve({val:()=>snap}); },
-      push: function() { const id='demo_'+Math.random().toString(36).slice(2,8); return {key:id,set:function(v){_dbSet('leon_queens_matches/'+normPath+'/'+id,v);_dbNotify();}}; }
-    };
-  }
-};
-function _getSnap(path) {
-  if(!path || path==='.' || path==='.info/connected') return true;
-  const clean = path.replace(/^leon_queens_matches\/?/,'');
-  if(!clean) return _demoDB['leon_queens_matches']||null;
-  const parts = clean.split('/');
-  let node = _demoDB['leon_queens_matches']||{};
-  for(const p of parts){ if(node==null)return null; node=node[p]; }
+// ── In-memory store ──
+const _mem = {};
+const _cbs = [];
+function _notify(){ _cbs.forEach(fn=>{ try{fn();}catch(e){} }); }
+
+function _set(path, val){
+  const parts=path.split('/'); let node=_mem;
+  for(let i=0;i<parts.length-1;i++){ if(!node[parts[i]])node[parts[i]]={};node=node[parts[i]]; }
+  node[parts[parts.length-1]]=val; _notify();
+}
+function _del(path){
+  const parts=path.split('/'); let node=_mem;
+  for(let i=0;i<parts.length-1;i++){ if(!node[parts[i]])return;node=node[parts[i]]; }
+  delete node[parts[parts.length-1]]; _notify();
+}
+function _get(path){
+  if(!path||path==='.'||path==='.info/connected')return true;
+  const parts=path.split('/'); let node=_mem;
+  for(const p of parts){ if(node==null||typeof node!=='object')return null; node=node[p]; }
   return node==null?null:node;
 }
-function _dbSet(path, val) {
-  const parts = path.split('/');
-  let node = _demoDB;
-  for(let i=0;i<parts.length-1;i++){
-    if(!node[parts[i]])node[parts[i]]={};
-    node=node[parts[i]];
-  }
-  node[parts[parts.length-1]] = val;
-  _dbNotify();
-}
-function _dbRemove(path) {
-  const parts = path.split('/');
-  let node = _demoDB;
-  for(let i=0;i<parts.length-1;i++){
-    if(!node[parts[i]])return;
-    node=node[parts[i]];
-  }
-  delete node[parts[parts.length-1]];
-  _dbNotify();
-}
-let _dbListeners = [];
-function _dbNotify(){_dbListeners.forEach(fn=>fn());}
 
-// Override Firebase functions with in-memory versions
-function initFB(){
-  setSS(true);
-  // Insert demo banner
-  document.body.insertAdjacentHTML('afterbegin', DEMO_BANNER_HTML);
-  // Seed demo data
-  seedDemoDB();
-  // Start listening
-  _dbListeners.push(()=>{
-    const val = _demoDB['leon_queens_matches']||{};
-    const hasP = val.players && Object.keys(val.players).length>0;
-    if(hasP){
-      D.players=Object.values(val.players);
-      D.matches=val.matches?Object.values(val.matches):[];
-      D.planned=val.planned?Object.values(val.planned):[];
-      D.gamedays=val.gamedays?Object.values(val.gamedays):[];
-      D.scrimmages=val.scrimmages?Object.values(val.scrimmages):[];
-      D.schedule=val.schedule?Object.values(val.schedule):[];
-      D.standings=val.standings||{};
-      D.goals=val.goals||{};
-      D.assignments=val.assignments||{};
-      D.duals=val.duals?Object.values(val.duals):[];
-    }
-    refreshCurrent();
-    if(!_autoLoginDone){_autoLoginDone=true;autoLogin();}
-  });
-  // Initial notify
-  setTimeout(_dbNotify, 100);
-  // Password listener stub
-  setTimeout(()=>{passwords={};},100);
-}
-function fbSet(path,val){_dbSet('leon_queens_matches/'+path, val);}
-function fbRemove(path){_dbRemove('leon_queens_matches/'+path);}
-function setSS(on){const d=document.getElementById('sync-dot');if(d){d.className='sync-dot '+(on?'online':'offline');d.title=on?'Demo Mode':'Offline';}}
+// ── db shim (replaces Firebase) ──
+Object.defineProperty(window,'db',{
+  get:()=>({
+    ref:(path='')=>({
+      set:(v)=>{ _set(path,v); return Promise.resolve(); },
+      update:(u)=>{ Object.entries(u||{}).forEach(([k,v])=>_set(k,v)); _notify(); return Promise.resolve(); },
+      remove:()=>{ _del(path); return Promise.resolve(); },
+      on:(evt,cb)=>{ _cbs.push(()=>{ cb({val:()=>_get(path),exists:()=>_get(path)!=null}); }); },
+      once:(evt,cb)=>{ const v=_get(path);if(cb)cb({val:()=>v,exists:()=>v!=null});return Promise.resolve({val:()=>v}); },
+      push:()=>{ const k='d_'+Date.now().toString(36);return{key:k,set:(v)=>_set(path+'/'+k,v)}; }
+    })
+  }),
+  configurable:true
+});
 
-const DEMO_PLAYERS = [
+// ── Demo credentials ──
+window.__DEMO_COACH_PIN = '1234';
+window.__DEMO_DEFAULT_PW = 'SharkPride';
+
+// ── Demo players ──
+const DP=[
   {id:'d01',firstName:'Zoe',lastName:'Harrington',classYear:'SR',court:1,jersey:1},
   {id:'d02',firstName:'Maya',lastName:'Torres',classYear:'SR',court:1,jersey:2},
   {id:'d03',firstName:'Chloe',lastName:'Bennett',classYear:'JR',court:1,jersey:3},
@@ -987,82 +945,105 @@ const DEMO_PLAYERS = [
   {id:'d16',firstName:'Piper',lastName:'Clark',classYear:'FR',court:4,jersey:16},
 ];
 
-function seedDemoDB(){
-  const u = {'leon_queens_matches':{players:{},matches:{},gamedays:{},scrimmages:{},schedule:{},standings:{},assignments:{},duals:[]}};
-  DEMO_PLAYERS.forEach(p=>{u['leon_queens_matches'].players[p.id]=p;});
+// ── Seed in-memory DB ──
+function seedDemo(){
+  const R='leon_queens_matches';
+  DP.forEach(p=>{ _set(R+'/players/'+p.id,p); });
 
   // Queens matches
   const qm=[
     {id:'qm1',date:'2026-01-15',court:1,team1:['d01','d03'],team2:['d02','d04'],score1:21,score2:15},
     {id:'qm2',date:'2026-01-15',court:2,team1:['d05','d07'],team2:['d06','d08'],score1:18,score2:21},
-    {id:'qm3',date:'2026-01-15',court:3,team1:['d09','d11'],team2:['d10','d12'],score1:21,score2:11},
-    {id:'qm4',date:'2026-01-22',court:1,team1:['d01','d04'],team2:['d02','d03'],score1:21,score2:17},
-    {id:'qm5',date:'2026-01-22',court:2,team1:['d06','d08'],team2:['d05','d07'],score1:21,score2:19},
-    {id:'qm6',date:'2026-02-05',court:1,team1:['d02','d03'],team2:['d01','d05'],score1:16,score2:21},
-    {id:'qm7',date:'2026-02-05',court:2,team1:['d04','d06'],team2:['d07','d08'],score1:21,score2:14},
-    {id:'qm8',date:'2026-02-12',court:3,team1:['d09','d12'],team2:['d10','d11'],score1:21,score2:8},
+    {id:'qm3',date:'2026-01-22',court:1,team1:['d01','d04'],team2:['d02','d03'],score1:21,score2:17},
+    {id:'qm4',date:'2026-02-05',court:2,team1:['d04','d06'],team2:['d07','d08'],score1:21,score2:14},
   ];
-  qm.forEach(m=>{u['leon_queens_matches'].matches[m.id]=m;});
+  qm.forEach(m=>_set(R+'/matches/'+m.id,m));
 
-  // Gameday matches (dual vs opponents)
-  function makeStats(p1,p2,k1,a1,k2,a2){
-    return{[p1]:{k:k1,a:a1,b:0,d:2,e:1},[p2]:{k:k2,a:a2,b:1,d:3,e:0}};
-  }
+  function st(p1,p2){return{[p1]:{k:3,a:1,b:1,d:2,e:0},[p2]:{k:4,a:2,b:0,d:3,e:1}};}
+
+  // Dual gameday results
   const gd=[
-    {id:'gd1',date:'2026-02-10',court:1,pair:['d01','d03'],opponent:'Riverside CT1',sets:[{scoreUs:21,scoreThem:18,stats:makeStats('d01','d03',4,2,3,1)},{scoreUs:21,scoreThem:14,stats:makeStats('d01','d03',5,1,4,2)}]},
-    {id:'gd2',date:'2026-02-10',court:2,pair:['d04','d05'],opponent:'Riverside CT2',sets:[{scoreUs:21,scoreThem:19,stats:makeStats('d04','d05',3,2,5,0)},{scoreUs:18,scoreThem:21,stats:makeStats('d04','d05',2,1,2,1)},{scoreUs:21,scoreThem:15,stats:makeStats('d04','d05',4,1,3,2)}]},
-    {id:'gd3',date:'2026-02-10',court:3,pair:['d06','d07'],opponent:'Riverside CT3',sets:[{scoreUs:19,scoreThem:21,stats:makeStats('d06','d07',2,0,3,1)},{scoreUs:14,scoreThem:21,stats:makeStats('d06','d07',1,0,2,0)}]},
-    {id:'gd4',date:'2026-02-10',court:4,pair:['d08','d09'],opponent:'Riverside CT4',sets:[{scoreUs:21,scoreThem:12,stats:makeStats('d08','d09',6,3,2,1)},{scoreUs:21,scoreThem:10,stats:makeStats('d08','d09',7,2,3,2)}]},
-    {id:'gd5',date:'2026-02-10',court:5,pair:['d10','d11'],opponent:'Riverside CT5',sets:[{scoreUs:21,scoreThem:17,stats:makeStats('d10','d11',3,1,2,1)},{scoreUs:21,scoreThem:19,stats:makeStats('d10','d11',4,2,3,0)}]},
-    {id:'gd6',date:'2026-02-17',court:1,pair:['d01','d02'],opponent:'Oceanside CT1',sets:[{scoreUs:21,scoreThem:16,stats:makeStats('d01','d02',5,2,3,2)},{scoreUs:21,scoreThem:13,stats:makeStats('d01','d02',6,1,4,1)}]},
-    {id:'gd7',date:'2026-02-17',court:2,pair:['d04','d06'],opponent:'Oceanside CT2',sets:[{scoreUs:14,scoreThem:21,stats:makeStats('d04','d06',2,1,3,0)},{scoreUs:21,scoreThem:18,stats:makeStats('d04','d06',3,2,4,1)},{scoreUs:12,scoreThem:21,stats:makeStats('d04','d06',1,0,2,1)}]},
-    {id:'gd8',date:'2026-02-17',court:3,pair:['d05','d07'],opponent:'Oceanside CT3',sets:[{scoreUs:21,scoreThem:11,stats:makeStats('d05','d07',4,3,5,1)},{scoreUs:21,scoreThem:14,stats:makeStats('d05','d07',3,2,4,2)}]},
-    {id:'gd9',date:'2026-02-17',court:4,pair:['d08','d10'],opponent:'Oceanside CT4',sets:[{scoreUs:21,scoreThem:19,stats:makeStats('d08','d10',3,1,4,2)},{scoreUs:19,scoreThem:21,stats:makeStats('d08','d10',2,1,2,0)},{scoreUs:21,scoreThem:17,stats:makeStats('d08','d10',4,2,3,1)}]},
-    {id:'gd10',date:'2026-02-17',court:5,pair:['d11','d12'],opponent:'Oceanside CT5',sets:[{scoreUs:15,scoreThem:21,stats:makeStats('d11','d12',1,0,2,1)},{scoreUs:18,scoreThem:21,stats:makeStats('d11','d12',2,1,1,0)}]},
-    {id:'gd11',date:'2026-03-01',court:1,pair:['d01','d03'],opponent:'Bayside CT1',sets:[{scoreUs:21,scoreThem:10,stats:makeStats('d01','d03',7,3,4,2)},{scoreUs:21,scoreThem:8,stats:makeStats('d01','d03',8,2,5,1)}]},
-    {id:'gd12',date:'2026-03-01',court:2,pair:['d02','d05'],opponent:'Bayside CT2',sets:[{scoreUs:21,scoreThem:15,stats:makeStats('d02','d05',4,2,3,1)},{scoreUs:21,scoreThem:18,stats:makeStats('d02','d05',5,1,4,2)}]},
-    {id:'gd13',date:'2026-03-01',court:3,pair:['d06','d08'],opponent:'Bayside CT3',sets:[{scoreUs:21,scoreThem:17,stats:makeStats('d06','d08',3,1,4,2)},{scoreUs:17,scoreThem:21,stats:makeStats('d06','d08',2,0,3,1)},{scoreUs:21,scoreThem:16,stats:makeStats('d06','d08',4,2,3,0)}]},
-    {id:'gd14',date:'2026-03-01',court:4,pair:['d07','d09'],opponent:'Bayside CT4',sets:[{scoreUs:21,scoreThem:13,stats:makeStats('d07','d09',3,2,5,1)},{scoreUs:21,scoreThem:11,stats:makeStats('d07','d09',4,1,6,2)}]},
-    {id:'gd15',date:'2026-03-01',court:5,pair:['d10','d13'],opponent:'Bayside CT5',sets:[{scoreUs:21,scoreThem:14,stats:makeStats('d10','d13',2,1,3,2)},{scoreUs:21,scoreThem:19,stats:makeStats('d10','d13',3,2,2,1)}]},
+    {id:'gd1',date:'2026-02-10',court:1,pair:['d01','d03'],opponent:'Riverside CT1',sets:[{scoreUs:21,scoreThem:18,stats:st('d01','d03')},{scoreUs:21,scoreThem:14,stats:st('d01','d03')}]},
+    {id:'gd2',date:'2026-02-10',court:2,pair:['d04','d05'],opponent:'Riverside CT2',sets:[{scoreUs:21,scoreThem:19,stats:st('d04','d05')},{scoreUs:18,scoreThem:21,stats:st('d04','d05')},{scoreUs:21,scoreThem:15,stats:st('d04','d05')}]},
+    {id:'gd3',date:'2026-02-10',court:3,pair:['d06','d07'],opponent:'Riverside CT3',sets:[{scoreUs:19,scoreThem:21,stats:st('d06','d07')},{scoreUs:14,scoreThem:21,stats:st('d06','d07')}]},
+    {id:'gd4',date:'2026-02-10',court:4,pair:['d08','d09'],opponent:'Riverside CT4',sets:[{scoreUs:21,scoreThem:12,stats:st('d08','d09')},{scoreUs:21,scoreThem:10,stats:st('d08','d09')}]},
+    {id:'gd5',date:'2026-02-10',court:5,pair:['d10','d11'],opponent:'Riverside CT5',sets:[{scoreUs:21,scoreThem:17,stats:st('d10','d11')},{scoreUs:21,scoreThem:19,stats:st('d10','d11')}]},
+    {id:'gd6',date:'2026-02-17',court:1,pair:['d01','d02'],opponent:'Oceanside CT1',sets:[{scoreUs:21,scoreThem:16,stats:st('d01','d02')},{scoreUs:21,scoreThem:13,stats:st('d01','d02')}]},
+    {id:'gd7',date:'2026-02-17',court:2,pair:['d04','d06'],opponent:'Oceanside CT2',sets:[{scoreUs:14,scoreThem:21,stats:st('d04','d06')},{scoreUs:21,scoreThem:18,stats:st('d04','d06')},{scoreUs:12,scoreThem:21,stats:st('d04','d06')}]},
+    {id:'gd8',date:'2026-02-17',court:3,pair:['d05','d07'],opponent:'Oceanside CT3',sets:[{scoreUs:21,scoreThem:11,stats:st('d05','d07')},{scoreUs:21,scoreThem:14,stats:st('d05','d07')}]},
+    {id:'gd9',date:'2026-02-17',court:4,pair:['d08','d10'],opponent:'Oceanside CT4',sets:[{scoreUs:21,scoreThem:19,stats:st('d08','d10')},{scoreUs:19,scoreThem:21,stats:st('d08','d10')},{scoreUs:21,scoreThem:17,stats:st('d08','d10')}]},
+    {id:'gd10',date:'2026-02-17',court:5,pair:['d11','d12'],opponent:'Oceanside CT5',sets:[{scoreUs:15,scoreThem:21,stats:st('d11','d12')},{scoreUs:18,scoreThem:21,stats:st('d11','d12')}]},
+    {id:'gd11',date:'2026-03-01',court:1,pair:['d01','d03'],opponent:'Bayside CT1',sets:[{scoreUs:21,scoreThem:10,stats:st('d01','d03')},{scoreUs:21,scoreThem:8,stats:st('d01','d03')}]},
+    {id:'gd12',date:'2026-03-01',court:2,pair:['d02','d05'],opponent:'Bayside CT2',sets:[{scoreUs:21,scoreThem:15,stats:st('d02','d05')},{scoreUs:21,scoreThem:18,stats:st('d02','d05')}]},
+    {id:'gd13',date:'2026-03-01',court:3,pair:['d06','d08'],opponent:'Bayside CT3',sets:[{scoreUs:21,scoreThem:17,stats:st('d06','d08')},{scoreUs:17,scoreThem:21,stats:st('d06','d08')},{scoreUs:21,scoreThem:16,stats:st('d06','d08')}]},
+    {id:'gd14',date:'2026-03-01',court:4,pair:['d07','d09'],opponent:'Bayside CT4',sets:[{scoreUs:21,scoreThem:13,stats:st('d07','d09')},{scoreUs:21,scoreThem:11,stats:st('d07','d09')}]},
+    {id:'gd15',date:'2026-03-01',court:5,pair:['d10','d13'],opponent:'Bayside CT5',sets:[{scoreUs:21,scoreThem:14,stats:st('d10','d13')},{scoreUs:21,scoreThem:19,stats:st('d10','d13')}]},
   ];
-  gd.forEach(m=>{u['leon_queens_matches'].gamedays[m.id]=m;});
+  gd.forEach(m=>_set(R+'/gamedays/'+m.id,m));
 
   // Schedule
-  const sched=[
+  [
     {id:'ss1',date:'2026-02-10',opponent:'Riverside',location:'home',scoreUs:4,scoreThem:1},
     {id:'ss2',date:'2026-02-17',opponent:'Oceanside',location:'away',scoreUs:2,scoreThem:3},
     {id:'ss3',date:'2026-03-01',opponent:'Bayside',location:'home',scoreUs:5,scoreThem:0},
     {id:'ss4',date:'2026-03-08',opponent:'Wavecrest',location:'home',scoreUs:null,scoreThem:null},
     {id:'ss5',date:'2026-03-15',opponent:'Surf City',location:'away',scoreUs:null,scoreThem:null},
     {id:'ss6',date:'2026-03-22',opponent:'Pelican Bay',location:'home',scoreUs:null,scoreThem:null},
-  ];
-  sched.forEach(g=>{u['leon_queens_matches'].schedule[g.id]=g;});
+  ].forEach(g=>_set(R+'/schedule/'+g.id,g));
 
   // Standings
-  u['leon_queens_matches'].standings={
-    'Bayside':{w:4,l:1},'Surf City':{w:3,l:2},'Riverside':{w:3,l:2},
-    'Wavecrest':{w:2,l:3},'Oceanside':{w:2,l:3},'Pelican Bay':{w:1,l:4},
-  };
+  const stands={Bayside:{w:4,l:1},'Surf City':{w:3,l:2},Riverside:{w:3,l:2},Wavecrest:{w:2,l:3},Oceanside:{w:2,l:3},'Pelican Bay':{w:1,l:4}};
+  Object.entries(stands).forEach(([k,v])=>_set(R+'/standings/'+k.replace(/ /g,'_'),v));
 
-  // Sample assignment
-  const tomorrow = new Date();tomorrow.setDate(tomorrow.getDate()+1);
-  const tStr=tomorrow.toISOString().slice(0,10);
-  u['leon_queens_matches'].assignments['asgn_demo']={
-    id:'asgn_demo',date:tStr,type:'gameday',opponent:'Wavecrest',
-    courts:[
-      {court:1,p1:'d01',p2:'d03'},{court:2,p1:'d04',p2:'d05'},
-      {court:3,p1:'d06',p2:'d07'},{court:4,p1:'d08',p2:'d09'},
-      {court:5,p1:'d10',p2:'d11'}
-    ],createdAt:'2026-03-05'
-  };
-
-  // Write to in-memory DB
-  Object.assign(_demoDB, u);
-  console.log('Demo DB seeded');
+  // Sample upcoming assignment
+  const d=new Date();d.setDate(d.getDate()+1);
+  const nxt=d.toISOString().slice(0,10);
+  _set(R+'/assignments/asgn_demo',{id:'asgn_demo',date:nxt,type:'gameday',opponent:'Wavecrest',
+    courts:[{court:1,p1:'d01',p2:'d03'},{court:2,p1:'d04',p2:'d05'},{court:3,p1:'d06',p2:'d07'},{court:4,p1:'d08',p2:'d09'},{court:5,p1:'d10',p2:'d11'}],
+    createdAt:'2026-03-05'});
 }
 
-const COACH_PIN = '1234';
-const DEFAULT_PW = 'SharkPride';
+// ── Override initFB ──
+window.__demoInitFB = function(){
+  // Show demo banner
+  const banner=document.createElement('div');
+  banner.style.cssText='background:#f59e0b;color:#000;text-align:center;padding:8px;font-family:Bebas Neue,sans-serif;font-size:13px;letter-spacing:2px;position:sticky;top:0;z-index:9999;';
+  banner.textContent='⚡ DEMO MODE — Sand Sharks · Data resets on refresh · Nothing writes to Firebase ⚡';
+  document.body.prepend(banner);
+  // Mark sync dot online
+  const dot=document.getElementById('sync-dot');
+  if(dot){dot.className='sync-dot online';dot.title='Demo Mode';}
+  // Seed data
+  seedDemo();
+  // Wire up the main data listener
+  _cbs.push(()=>{
+    const R='leon_queens_matches';
+    const val=_get(R)||{};
+    if(val.players&&Object.keys(val.players).length>0){
+      D.players=Object.values(val.players);
+      D.matches=val.matches?Object.values(val.matches):[];
+      D.planned=val.planned?Object.values(val.planned):[];
+      D.gamedays=val.gamedays?Object.values(val.gamedays):[];
+      D.scrimmages=val.scrimmages?Object.values(val.scrimmages):[];
+      D.schedule=val.schedule?Object.values(val.schedule):[];
+      D.standings=val.standings||{};
+      D.goals=val.goals||{};
+      D.assignments=val.assignments||{};
+      D.duals=val.duals?Object.values(val.duals):[];
+    }
+    if(typeof refreshCurrent==='function')refreshCurrent();
+    if(typeof autoLogin==='function'&&!window._demoAutoLogged){window._demoAutoLogged=true;autoLogin();}
+  });
+  // Initial load
+  setTimeout(_notify,100);
+  // passwords stays {} — playerLogin falls back to DEFAULT_PW
+};
+
+// ── Override fbSet/fbRemove ──
+window.__demoFbSet=(path,val)=>{ _set('leon_queens_matches/'+path,val); };
+window.__demoFbRemove=(path)=>{ _del('leon_queens_matches/'+path); };
+
+})();
 
 
 // ============================================================
@@ -1073,10 +1054,26 @@ const DB_ROOT='leon_queens_matches';
 const COURTS=[1,2,3,4,5,6,7,8],CL={1:'Top',2:'Mid',3:'Dev',4:'Court 4',5:'Court 5',6:'Exhib',7:'Exhib',8:'Exhib'};
 const EXHIBITION_COURTS=new Set([6,7,8]);
 const CO={SR:0,JR:1,SO:2,FR:3};
-// db declared as shim in demo mode
+let db=null;
 
-
-const DEF_P=DEMO_PLAYERS;
+const DEF_P=[
+  {id:'p01',firstName:'Riley',lastName:'Knipple',classYear:'SR',court:1,jersey:9},
+  {id:'p02',firstName:'Destyni',lastName:'Zuema',classYear:'SR',court:1,jersey:5},
+  {id:'p03',firstName:'Aubrey',lastName:'Brown',classYear:'JR',court:3,jersey:10},
+  {id:'p04',firstName:'Madi',lastName:'Bunker',classYear:'JR',court:3,jersey:2},
+  {id:'p05',firstName:'Eden',lastName:'Codd',classYear:'JR',court:2,jersey:7},
+  {id:'p06',firstName:'Kendall',lastName:'Cruse',classYear:'JR',court:2,jersey:8},
+  {id:'p07',firstName:'Aubri',lastName:'Moore',classYear:'JR',court:3,jersey:13},
+  {id:'p08',firstName:'Riley',lastName:'Perezluha',classYear:'JR',court:1,jersey:3},
+  {id:'p09',firstName:'Lizzie',lastName:'Roader',classYear:'JR',court:3,jersey:17},
+  {id:'p10',firstName:'Bentley',lastName:'Barnard',classYear:'SO',court:1,jersey:6},
+  {id:'p11',firstName:'Jazmin',lastName:'Burdick',classYear:'SO',court:2,jersey:4},
+  {id:'p12',firstName:'Madalynn',lastName:'Edenfield',classYear:'SO',court:3,jersey:11},
+  {id:'p13',firstName:'Jordyn',lastName:'Russell',classYear:'SO',court:1,jersey:15},
+  {id:'p14',firstName:'Leilani',lastName:'Winfrey',classYear:'SO',court:3,jersey:18},
+  {id:'p15',firstName:'Salem',lastName:'Ehrhardt',classYear:'FR',court:2,jersey:12},
+  {id:'p16',firstName:'Reagan',lastName:'Giles',classYear:'FR',court:2,jersey:1}
+];
 const DEF_M=[
   {id:'m01',date:'2026-02-06',court:3,team1:['p07','p04'],team2:['p14','p03'],score1:21,score2:3},
   {id:'m02',date:'2026-02-06',court:1,team1:['p01','p10'],team2:['p08','p13'],score1:21,score2:16},
@@ -1097,21 +1094,65 @@ let _autoLoginDone=false;
 // ============================================================
 // FIREBASE
 // ============================================================
-// initFB overridden by demo mode above
-
+function initFB(){
+  if(window.__demoInitFB){window.__demoInitFB();return;}
+  try{if(!firebase.apps.length)firebase.initializeApp(FB_CONFIG);
+    db=firebase.database();setSS(true);listenData();
+  }catch(e){console.error(e);setSS(false);}
+}
 function setSS(on){const d=document.getElementById('sync-dot');d.className='sync-dot '+(on?'online':'offline');d.title=on?'Connected':'Offline';}
-function listenData(){/* demo: no-op */}
-
+function listenData(){if(!db)return;
+  db.ref(DB_ROOT).on('value',snap=>{
+    const val=snap.val();
+    const hasP=val&&val.players&&Object.keys(val.players).length>0;
+    if(hasP){
+      D.players=Object.values(val.players);
+      D.matches=val.matches?Object.values(val.matches):[];
+      D.planned=val.planned?Object.values(val.planned):[];
+      D.gamedays=val.gamedays?Object.values(val.gamedays):[];
+      D.scrimmages=val.scrimmages?Object.values(val.scrimmages):[];
+      D.schedule=val.schedule?Object.values(val.schedule):[];
+      D.standings=val.standings||{};
+      D.goals=val.goals||{};
+      D.assignments=val.assignments||{};
+      D.duals=val.duals?Object.values(val.duals):[];
+    }else{
+      D.players=JSON.parse(JSON.stringify(DEF_P));
+      D.matches=JSON.parse(JSON.stringify(DEF_M));
+      D.planned=[];D.gamedays=[];D.scrimmages=[];D.duals=[];
+      seedDB();
+    }
+    refreshCurrent();
+    if(!_autoLoginDone){_autoLoginDone=true;autoLogin();}
+  },err=>{console.error(err);setSS(false);});
+  db.ref('leon_queens_passwords').on('value',s=>{passwords=s.val()||{};});
+  db.ref(DB_ROOT+'/player_notes').on('value',s=>{
+    const all=s.val()||{};
+    // Restructure from [date][pid] → pgdNotes[pid][date]
+    pgdNotes={};
+    Object.entries(all).forEach(([date,players])=>{
+      Object.entries(players||{}).forEach(([pid,notes])=>{
+        if(!pgdNotes[pid])pgdNotes[pid]={};
+        pgdNotes[pid][date]=notes;
+      });
+    });
+  });
+  db.ref('leon_queens').on('value',s=>{
+    profilesData=s.val()||{};
+    // Re-render player portal if active (to update rankings with skills/drills/verts)
+    if(currentRole==='player')renderPlayerPortal();
+    if(currentRole==='coach'){const t=document.querySelector('.tab.active');if(t&&t.dataset.tab==='goals')renderCoachGoals();}
+  });
+  db.ref('.info/connected').on('value',s=>{setSS(s.val()===true);});
+}
 function seedDB(){if(!db)return;
   const u={};
   DEF_P.forEach(p=>{u[DB_ROOT+'/players/'+p.id]=JSON.parse(JSON.stringify(p));});
   DEF_M.forEach(m=>{u[DB_ROOT+'/matches/'+m.id]=JSON.parse(JSON.stringify(m));});
   db.ref().update(u);
 }
-// fbSet overridden by demo mode
-
-// fbRemove overridden by demo mode
-
+function fbSet(path,val){if(window.__demoFbSet){window.__demoFbSet(path,val);return;}if(db)db.ref(DB_ROOT+'/'+path).set(val);}
+function fbRemove(path){if(window.__demoFbRemove){window.__demoFbRemove(path);return;}if(db)db.ref(DB_ROOT+'/'+path).remove();}
 
 // ============================================================
 // UTILS
@@ -1860,10 +1901,8 @@ document.getElementById('set-modal').addEventListener('click',function(e){if(e.t
 // ============================================================
 // LOGIN SYSTEM
 // ============================================================
-// COACH_PIN overridden by demo mode
-
-// DEFAULT_PW overridden by demo mode
-
+const COACH_PIN=window.__DEMO_COACH_PIN||'8675';
+const DEFAULT_PW=window.__DEMO_DEFAULT_PW||'Pride2026';
 let passwords={};
 let currentRole=null; // 'coach' or 'player'
 let currentPlayerId=null;
@@ -5499,7 +5538,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
     <div class="login-logo"><span class="crown">🦈</span> Sand Sharks</div>
-    <div class="login-sub">Demo Mode · 2026 Season</div>
+    <div class="login-sub">Demo Mode · Coach PIN: 1234 · Player PW: SharkPride</div>
     <div class="login-toggle">
       <button class="login-toggle-btn active" onclick="switchLogin('coach')">Coach</button>
       <button class="login-toggle-btn" onclick="switchLogin('player')">Player</button>
