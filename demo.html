@@ -8,11 +8,22 @@
 <!-- Firebase SDK not loaded in demo mode -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
-:root{--red:#e4002b;--red-dark:#b50022;--red-deeper:#8a001a;--red-light:#ff3354;--red-bg:#fce8ec;--black:#1a1a1a;--charcoal:#2d2d2d;--white:#ffffff;--off-white:#fafafa;--cream:#f7f4f0;--gold:#d4a843;--gold-light:#f0d98a;--gray:#6b7280;--gray-light:#d1d5db;--gray-lighter:#e8eaed;--green:#16a34a;--green-bg:#dcfce7;--loss-red:#991b1b;--blue:#4338ca;--blue-bg:#e0e7ff;--purple:#7c3aed;--purple-bg:#f3e8ff;--radius:10px;--shadow:0 2px 10px rgba(0,0,0,0.06);--shadow-lg:0 8px 30px rgba(0,0,0,0.12);}
+:root{
+  --red:#0077b6;--red-dark:#005f92;--red-deeper:#023e8a;--red-light:#48cae4;--red-bg:#caf0f8;
+  --black:#03045e;--charcoal:#023e8a;--white:#ffffff;--off-white:#e8f4f9;--cream:#f0f8ff;
+  --gold:#00b4d8;--gold-light:#90e0ef;
+  --gray:#5a7a8a;--gray-light:#9ab4be;--gray-lighter:#cce8f4;
+  --green:#0096c7;--green-bg:#caf0f8;
+  --loss-red:#e63946;
+  --blue:#0096c7;--blue-bg:#caf0f8;
+  --purple:#4361ee;--purple-bg:#e8ecff;
+  --shadow:0 2px 12px rgba(0,40,80,0.10);--shadow-lg:0 8px 32px rgba(0,40,80,0.15);
+  --radius:12px;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);min-height:100vh;-webkit-font-smoothing:antialiased;}
-.header{background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);padding:14px 20px 10px;position:relative;z-index:100;box-shadow:0 4px 24px rgba(228,0,43,0.3);}
+.header{background:linear-gradient(135deg,#03045e 0%,#0077b6 50%,#00b4d8 100%);padding:14px 20px 10px;position:relative;z-index:100;box-shadow:0 4px 24px rgba(228,0,43,0.3);}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .header h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:26px;color:var(--white);letter-spacing:3px;display:flex;align-items:center;gap:8px;text-shadow:0 2px 8px rgba(0,0,0,0.2);}
 .header h1 .crown{font-size:22px;}
@@ -243,7 +254,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 @media(max-width:480px){.header{padding:10px 14px 8px;}.header h1{font-size:20px;letter-spacing:2px;}.tab{font-size:10px;padding:7px 2px;letter-spacing:0.5px;}.content{padding:12px;}.card{padding:14px;}.stat-grid{gap:6px;}.stat-number{font-size:22px;}.stat-label{font-size:9px;}.player-table{font-size:12px;}.player-table thead th{font-size:10px;padding:6px 4px;}.player-table tbody td{padding:8px 4px;}.match-score{font-size:20px;}.match-team{font-size:12px;}.planned-team{font-size:12px;}.modal{padding:18px;}.score-input{font-size:26px;padding:12px;}.stat-grid{grid-template-columns:repeat(2,1fr);}}
 /* LOGIN SCREEN */
-.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#03045e 0%,#0077b6 50%,#00b4d8 100%);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
 .login-overlay.hidden{display:none;}
 .login-box{background:var(--white);border-radius:16px;padding:36px 28px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);text-align:center;}
 .login-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;color:var(--red);margin-bottom:4px;}
@@ -314,7 +325,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
     <div class="login-logo"><span class="crown">🦈</span> Sand Sharks</div>
-    <div class="login-sub">Demo Mode · Coach PIN: 1234 · Player PW: SharkPride</div>
+    <div class="login-sub">Demo Mode · 🦈 Coach PIN: <strong>1234</strong> · Player PW: <strong>SharkPride</strong></div>
     <div class="login-toggle">
       <button class="login-toggle-btn active" onclick="switchLogin('coach')">Coach</button>
       <button class="login-toggle-btn" onclick="switchLogin('player')">Player</button>
@@ -906,20 +917,17 @@ function _get(path){
   return node==null?null:node;
 }
 
-// ── db shim (replaces Firebase) ──
-Object.defineProperty(window,'db',{
-  get:()=>({
-    ref:(path='')=>({
-      set:(v)=>{ _set(path,v); return Promise.resolve(); },
-      update:(u)=>{ Object.entries(u||{}).forEach(([k,v])=>_set(k,v)); _notify(); return Promise.resolve(); },
-      remove:()=>{ _del(path); return Promise.resolve(); },
-      on:(evt,cb)=>{ _cbs.push(()=>{ cb({val:()=>_get(path),exists:()=>_get(path)!=null}); }); },
-      once:(evt,cb)=>{ const v=_get(path);if(cb)cb({val:()=>v,exists:()=>v!=null});return Promise.resolve({val:()=>v}); },
-      push:()=>{ const k='d_'+Date.now().toString(36);return{key:k,set:(v)=>_set(path+'/'+k,v)}; }
-    })
-  }),
-  configurable:true
-});
+// ── db shim stored on window for script-scope access ──
+window._demoDbShim = {
+  ref:(path='')=>({
+    set:(v)=>{ _set(path,v); return Promise.resolve(); },
+    update:(u)=>{ Object.entries(u||{}).forEach(([k,v])=>_set(k,v)); _notify(); return Promise.resolve(); },
+    remove:()=>{ _del(path); return Promise.resolve(); },
+    on:(evt,cb)=>{ _cbs.push(()=>{ cb({val:()=>_get(path),exists:()=>_get(path)!=null}); }); },
+    once:(evt,cb)=>{ const v=_get(path);if(cb)cb({val:()=>v,exists:()=>v!=null});return Promise.resolve({val:()=>v}); },
+    push:()=>{ const k='d_'+Date.now().toString(36);return{key:k,set:(v)=>_set(path+'/'+k,v)}; }
+  })
+};
 
 // ── Demo credentials ──
 window.__DEMO_COACH_PIN = '1234';
@@ -1044,6 +1052,8 @@ window.__demoFbSet=(path,val)=>{ _set('leon_queens_matches/'+path,val); };
 window.__demoFbRemove=(path)=>{ _del('leon_queens_matches/'+path); };
 
 })();
+// Script-scope db — uses shim in demo, Firebase otherwise
+var db = window._demoDbShim || null;
 
 
 // ============================================================
@@ -1054,7 +1064,7 @@ const DB_ROOT='leon_queens_matches';
 const COURTS=[1,2,3,4,5,6,7,8],CL={1:'Top',2:'Mid',3:'Dev',4:'Court 4',5:'Court 5',6:'Exhib',7:'Exhib',8:'Exhib'};
 const EXHIBITION_COURTS=new Set([6,7,8]);
 const CO={SR:0,JR:1,SO:2,FR:3};
-let db=null;
+// db provided by demo shim
 
 const DEF_P=[
   {id:'p01',firstName:'Riley',lastName:'Knipple',classYear:'SR',court:1,jersey:9},
@@ -5538,7 +5548,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
     <div class="login-logo"><span class="crown">🦈</span> Sand Sharks</div>
-    <div class="login-sub">Demo Mode · Coach PIN: 1234 · Player PW: SharkPride</div>
+    <div class="login-sub">Demo Mode · 🦈 Coach PIN: <strong>1234</strong> · Player PW: <strong>SharkPride</strong></div>
     <div class="login-toggle">
       <button class="login-toggle-btn active" onclick="switchLogin('coach')">Coach</button>
       <button class="login-toggle-btn" onclick="switchLogin('player')">Player</button>
