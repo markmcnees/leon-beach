@@ -132,7 +132,14 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="record-label">Season Record</div>
     <div class="record-main" id="record-main">—</div>
   </div>
-  <div class="record-stats" id="record-stats"></div>
+  <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+    <div id="record-stats"></div>
+    <div id="today-strip" style="display:none;text-align:center;border-left:1px solid rgba(255,255,255,0.25);padding-left:20px;">
+      <div class="record-label" id="today-strip-label">Today vs —</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;" id="today-strip-score">—</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.6);font-weight:700;">COURTS</div>
+    </div>
+  </div>
 </div>
 
 <!-- TODAY'S DUAL -->
@@ -213,6 +220,29 @@ function renderRecord(){
     <div class="record-stat"><div class="record-stat-num">${courtW}-${courtL}</div><div class="record-stat-lbl">Court W-L</div></div>
     <div class="record-stat"><div class="record-stat-num">${setW}-${setL}</div><div class="record-stat-lbl">Set W-L</div></div>
   `;
+  // Today's dual score in strip
+  const today=td();
+  const assignment=Object.values(D.assignments).find(a=>a.date===today);
+  const todayStrip=document.getElementById('today-strip');
+  if(assignment){
+    const opp=assignment.opponent||'Opponent';
+    const matchList=assignment.type==='scrimmage'?D.scrimmages:D.gamedays;
+    const courts=(assignment.courts||[]).filter(c=>(c.court||0)<6);
+    let lc=0,oc=0;
+    courts.forEach(c=>{
+      const m=findMatch(matchList,today,c.p1,c.p2);
+      if(!m||!(m.sets||[]).length)return;
+      const sw=(m.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
+      const sl=(m.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
+      if(sw>=2)lc++;else if(sl>=2)oc++;
+    });
+    const hasScores=courts.some(c=>{const m=findMatch(matchList,today,c.p1,c.p2);return m&&(m.sets||[]).length>0;});
+    document.getElementById('today-strip-label').textContent='Today vs '+opp;
+    document.getElementById('today-strip-score').textContent=hasScores?(lc+'–'+oc):'—';
+    if(todayStrip)todayStrip.style.display='block';
+  }else{
+    if(todayStrip)todayStrip.style.display='none';
+  }
 }
 
 // ── TODAY'S DUAL ──
