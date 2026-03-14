@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314192137">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -2727,6 +2727,25 @@ ANALYSIS: [2-3 sentences explaining overall strategy]`}`}]
       }
     });
     container.innerHTML=h||'<div style="font-size:13px;line-height:1.7;white-space:pre-wrap;">'+text+'</div>';
+    // Store parsed data for editing
+    window._aiPairingData={text,context,numCourts,numRounds:numRounds||1,parsed:[]};
+    // Parse into structured data for editing
+    lines.forEach(line=>{
+      const rMatch=line.match(/^ROUND\s*(\d+):/i);
+      const qMatch=line.match(/^COURT\s*(\d+):\s*(.+?)\s+VS\s+(.+?)\s*\|\s*(.+)/i);
+      const sMatch=!qMatch&&line.match(/^COURT\s*(\d+):\s*(.+?)\s*\|\s*(.+)/i);
+      if(rMatch)window._aiPairingData.parsed.push({type:'round',num:rMatch[1]});
+      else if(qMatch)window._aiPairingData.parsed.push({type:'queens',court:parseInt(qMatch[1]),teamA:qMatch[2].trim(),teamB:qMatch[3].trim(),reason:qMatch[4].trim()});
+      else if(sMatch)window._aiPairingData.parsed.push({type:'pair',court:parseInt(sMatch[1]),players:sMatch[2].trim(),reason:sMatch[3].trim()});
+    });
+    // Show edit/save button if we have court data
+    const hasCourts=window._aiPairingData.parsed.some(p=>p.type==='pair'||p.type==='queens');
+    if(hasCourts){
+      container.innerHTML+=`<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-blue btn-small" onclick="editAIPairings()" style="flex:1;">✎ Edit Pairings</button>
+        <button class="btn btn-success btn-small" onclick="saveAIAssignment()" style="flex:1;">💾 Save as Assignment</button>
+      </div>`;
+    }
   }catch(err){
     console.error('AI pairing error:',err);
     container.innerHTML='<div style="color:var(--loss-red);font-size:13px;">Error generating pairings. Check connection and try again.</div>';
@@ -4803,6 +4822,159 @@ function renderPlayerMatches(){
   }else{
     document.getElementById('pp-queens').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No Queens matches yet</div>';
   }
+}
+
+
+// ============================================================
+// AI PAIRING EDIT & SAVE
+// ============================================================
+function editAIPairings(){
+  const data=window._aiPairingData;
+  if(!data)return;
+  const container=document.getElementById('ai-pairings-result');
+  const sortedPlayers=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
+  function playerOpts(val=''){
+    return'<option value="">Select Player</option>'+sortedPlayers.map(p=>`<option value="${p.firstName} ${p.lastName}" ${(p.firstName+' '+p.lastName)===val?'selected':''}>${p.firstName} ${p.lastName} (CT${p.court})</option>`).join('');
+  }
+  let h=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--blue);margin-bottom:12px;">EDIT PAIRINGS</div>`;
+  // Date + opponent + type fields
+  h+=`<div class="form-row" style="margin-bottom:8px;">
+    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
+      <input type="date" class="form-input" id="aip-date" value="${td()}" style="padding:8px;font-size:13px;"></div>
+    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (if dual)</label>
+      <input type="text" class="form-input" id="aip-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
+  </div>`;
+  // Court rows
+  let courtIdx=0;
+  let currentRound=1;
+  data.parsed.forEach((p,i)=>{
+    if(p.type==='round'){
+      h+=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--red);margin:12px 0 6px;">⚡ Round ${p.num}</div>`;
+      currentRound=parseInt(p.num);
+    }else if(p.type==='queens'){
+      h+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;margin-bottom:8px;" id="aip-court-${courtIdx}">
+        <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;color:var(--charcoal);margin-bottom:6px;">
+          CT <input type="number" id="aip-ct-${courtIdx}" value="${p.court}" min="1" max="8" style="width:44px;padding:3px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;font-weight:700;">
+          ${data.numRounds>1?`<span style="font-size:10px;color:var(--gray);margin-left:6px;">Round ${currentRound}</span>`:''}
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px;">Team A</div>
+        <div class="form-row" style="margin-bottom:6px;">
+          <select class="form-select" id="aip-a1-${courtIdx}" style="padding:6px;font-size:12px;">${playerOpts(p.teamA.split('&')[0]?.trim())}</select>
+          <select class="form-select" id="aip-a2-${courtIdx}" style="padding:6px;font-size:12px;">${playerOpts(p.teamA.split('&')[1]?.trim())}</select>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:4px;">Team B</div>
+        <div class="form-row">
+          <select class="form-select" id="aip-b1-${courtIdx}" style="padding:6px;font-size:12px;">${playerOpts(p.teamB.split('&')[0]?.trim())}</select>
+          <select class="form-select" id="aip-b2-${courtIdx}" style="padding:6px;font-size:12px;">${playerOpts(p.teamB.split('&')[1]?.trim())}</select>
+        </div>
+        <input type="hidden" id="aip-type-${courtIdx}" value="queens">
+        <input type="hidden" id="aip-round-${courtIdx}" value="${currentRound}">
+      </div>`;
+      courtIdx++;
+    }else if(p.type==='pair'){
+      h+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;margin-bottom:8px;">
+        <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;color:var(--charcoal);margin-bottom:6px;">
+          CT <input type="number" id="aip-ct-${courtIdx}" value="${p.court}" min="1" max="8" style="width:44px;padding:3px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;font-weight:700;">
+        </div>
+        <div class="form-row">
+          <select class="form-select" id="aip-p1-${courtIdx}" style="padding:6px;font-size:12px;">${playerOpts(p.players.split('+')[0]?.trim())}</select>
+          <select class="form-select" id="aip-p2-${courtIdx}" style="padding:6px;font-size:12px;">${playerOpts(p.players.split('+')[1]?.trim())}</select>
+        </div>
+        <input type="hidden" id="aip-type-${courtIdx}" value="pair">
+        <input type="hidden" id="aip-round-${courtIdx}" value="1">
+      </div>`;
+      courtIdx++;
+    }
+  });
+  window._aiPairingData.courtCount=courtIdx;
+  h+=`<div style="display:flex;gap:8px;margin-top:12px;">
+    <button class="btn btn-success btn-small" style="flex:1;" onclick="saveAIAssignment()">💾 Save as Assignment</button>
+    <button class="btn btn-secondary btn-small" onclick="generateAIPairings()">↩ Regenerate</button>
+  </div>`;
+  container.innerHTML=h;
+}
+
+function saveAIAssignment(){
+  const data=window._aiPairingData;
+  const date=document.getElementById('aip-date')?.value||td();
+  const opp=document.getElementById('aip-opp')?.value.trim()||null;
+  const context=data?.context||'gameday';
+  const type=context==='queens'?'queens':context==='scrimmage'?'scrimmage':'gameday';
+  const numRounds=data?.numRounds||1;
+  // If edit form is showing, read from form; otherwise use parsed data directly
+  const hasForm=!!document.getElementById('aip-ct-0');
+
+  if(hasForm){
+    const courtCount=data?.courtCount||0;
+    if(numRounds>1){
+      // Multi-round: save one assignment per round
+      const roundCourts={};
+      for(let i=0;i<courtCount;i++){
+        const ct=parseInt(document.getElementById('aip-ct-'+i)?.value)||1;
+        const rnd=parseInt(document.getElementById('aip-round-'+i)?.value)||1;
+        const aipType=document.getElementById('aip-type-'+i)?.value||'pair';
+        if(!roundCourts[rnd])roundCourts[rnd]=[];
+        if(aipType==='queens'){
+          const a1=nameToId(document.getElementById('aip-a1-'+i)?.value);
+          const a2=nameToId(document.getElementById('aip-a2-'+i)?.value);
+          const b1=nameToId(document.getElementById('aip-b1-'+i)?.value);
+          const b2=nameToId(document.getElementById('aip-b2-'+i)?.value);
+          // For Queens, save as 2 pairs on the same court (A side and B side)
+          if(a1&&a2)roundCourts[rnd].push({court:ct,p1:a1,p2:a2});
+        }else{
+          const p1=nameToId(document.getElementById('aip-p1-'+i)?.value);
+          const p2=nameToId(document.getElementById('aip-p2-'+i)?.value);
+          if(p1&&p2)roundCourts[rnd].push({court:ct,p1,p2});
+        }
+      }
+      let saved=0;
+      Object.entries(roundCourts).forEach(([rnd,courts])=>{
+        if(!courts.length)return;
+        const id=gi('asgn');
+        fbSet('assignments/'+id,{id,date,type,opponent:opp,courts,notes:'Round '+rnd+' of '+numRounds,createdAt:td()});
+        saved++;
+      });
+      toast('Saved '+saved+' round assignment'+(saved>1?'s':'')+'!');
+    }else{
+      // Single round
+      const courts=[];
+      for(let i=0;i<courtCount;i++){
+        const ct=parseInt(document.getElementById('aip-ct-'+i)?.value)||1;
+        const aipType=document.getElementById('aip-type-'+i)?.value||'pair';
+        if(aipType==='queens'){
+          const a1=nameToId(document.getElementById('aip-a1-'+i)?.value);
+          const a2=nameToId(document.getElementById('aip-a2-'+i)?.value);
+          if(a1&&a2)courts.push({court:ct,p1:a1,p2:a2});
+        }else{
+          const p1=nameToId(document.getElementById('aip-p1-'+i)?.value);
+          const p2=nameToId(document.getElementById('aip-p2-'+i)?.value);
+          if(p1&&p2)courts.push({court:ct,p1,p2});
+        }
+      }
+      if(!courts.length){toast('No courts to save');return;}
+      const id=gi('asgn');
+      fbSet('assignments/'+id,{id,date,type,opponent:opp,courts,createdAt:td()});
+      toast('Assignment saved — '+courts.length+' courts!');
+    }
+  }else{
+    // No edit form — save directly from parsed AI data
+    editAIPairings();
+    toast('Review and save using the form above');
+    return;
+  }
+  // Navigate to Planner tab to see saved assignment
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  const plannerTab=document.querySelector('.tab[data-tab="gameday"]');
+  if(plannerTab){plannerTab.classList.add('active');document.getElementById('tab-gameday').classList.add('active');renderAssignments();}
+}
+
+// Helper: convert "First Last" name string back to player ID
+function nameToId(fullName){
+  if(!fullName)return null;
+  const n=fullName.trim().toLowerCase();
+  const p=D.players.find(x=>(x.firstName+' '+x.lastName).toLowerCase()===n);
+  return p?p.id:null;
 }
 
 // ============================================================
