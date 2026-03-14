@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leon Queens — Beach Volleyball</title>
+<title>Leon Beach — Fans</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700;900&family=Barlow+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --red:#e4002b;--red-dark:#b0001f;--gold:#d4a843;--gold-light:#f5d78e;
+  --red:#e4002b;--red-dark:#b0001f;--gold:#d4a843;
   --cream:#f7f4f0;--white:#ffffff;--black:#0a0a0a;
-  --charcoal:#1a1a2e;--navy:#0f0f23;
+  --charcoal:#1a1a2e;
   --gray:#888;--gray-light:#bbb;--gray-lighter:#e5e5e5;
   --green:#16a34a;--green-bg:#dcfce7;
   --loss-red:#dc2626;
@@ -18,247 +18,91 @@
   --radius:12px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{
-  font-family:'Barlow',sans-serif;
-  background:var(--cream);
-  color:var(--black);
-  min-height:100vh;
-  overflow-x:hidden;
-}
+body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);min-height:100vh;overflow-x:hidden;}
 
-/* ── HERO HEADER ── */
-.hero{
-  background:var(--charcoal);
-  position:relative;
-  overflow:hidden;
-  padding:0;
-}
-.hero-bg{
-  position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 50%, rgba(228,0,43,0.25) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 80% 30%, rgba(212,168,67,0.15) 0%, transparent 60%),
-    linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f0f1f 100%);
-}
-.hero-pattern{
-  position:absolute;inset:0;
-  background-image:
-    repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px),
-    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px);
-}
-.hero-content{
-  position:relative;z-index:1;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:20px 20px 16px;
-  gap:12px;
-}
+/* HERO */
+.hero{background:var(--charcoal);position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(228,0,43,.25) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 30%,rgba(212,168,67,.15) 0%,transparent 60%),linear-gradient(135deg,#0a0a1a 0%,#1a1a2e 50%,#0f0f1f 100%);}
+.hero-pattern{position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.015) 0,rgba(255,255,255,.015) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(-45deg,rgba(255,255,255,.015) 0,rgba(255,255,255,.015) 1px,transparent 1px,transparent 40px);}
+.hero-content{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:20px 20px 16px;gap:12px;}
 .hero-left{display:flex;align-items:center;gap:14px;}
-.crown-icon{font-size:36px;filter:drop-shadow(0 0 12px rgba(212,168,67,0.6));}
-.hero-text{}
-.hero-title{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:32px;letter-spacing:2px;
-  color:var(--white);line-height:1;
-}
-.hero-sub{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:13px;letter-spacing:3px;font-weight:700;
-  color:var(--gold);text-transform:uppercase;margin-top:2px;
-}
-.hero-right{text-align:right;}
-.live-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  background:rgba(228,0,43,0.2);border:1px solid rgba(228,0,43,0.4);
-  padding:6px 12px;border-radius:20px;
-  font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;
-  color:#ff6b6b;
-}
-.live-dot{width:7px;height:7px;border-radius:50%;background:#ff4444;animation:pulse 1.4s infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.8);}}
-.sync-status{font-size:11px;color:var(--gray);margin-top:4px;font-family:'Barlow',sans-serif;}
+.crown-icon{font-size:36px;filter:drop-shadow(0 0 12px rgba(212,168,67,.6));}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#fff;line-height:1;}
+.hero-sub{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;font-weight:700;color:var(--gold);text-transform:uppercase;margin-top:2px;}
+.live-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(228,0,43,.2);border:1px solid rgba(228,0,43,.4);padding:6px 12px;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;color:#ff6b6b;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#ff4444;animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+.sync-status{font-size:11px;color:var(--gray);margin-top:4px;}
 
-/* ── SEASON RECORD STRIP ── */
-.record-strip{
-  background:var(--red);
-  padding:12px 20px;
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;flex-wrap:wrap;
-}
-.record-main{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:28px;letter-spacing:3px;
-  color:var(--white);
-}
-.record-label{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:11px;letter-spacing:2px;font-weight:700;
-  color:rgba(255,255,255,0.65);text-transform:uppercase;
-}
+/* RECORD STRIP */
+.record-strip{background:var(--red);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.record-main{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:#fff;line-height:1;}
+.record-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:2px;}
 .record-stats{display:flex;gap:20px;}
 .record-stat{text-align:center;}
-.record-stat-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--white);}
-.record-stat-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.6);font-weight:700;}
+.record-stat-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;}
+.record-stat-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,.6);font-weight:700;}
 
-/* ── SECTIONS ── */
+/* SECTIONS */
 .section{padding:16px 16px 0;}
-.section-title{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:18px;letter-spacing:2px;
-  color:var(--charcoal);
-  display:flex;align-items:center;gap:8px;
-  margin-bottom:12px;
-  padding-bottom:8px;
-  border-bottom:2px solid var(--red);
-}
-.section-title span{color:var(--red);}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--charcoal);display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--red);}
 
-/* ── TODAY CARD ── */
-.today-card{
-  background:var(--white);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  margin-bottom:12px;
-}
-.today-header{
-  background:linear-gradient(135deg, var(--charcoal) 0%, #2d2d4e 100%);
-  padding:14px 16px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.today-matchup{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:22px;letter-spacing:2px;color:var(--white);
-}
-.today-date{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:12px;letter-spacing:1.5px;font-weight:700;
-  color:var(--gold);margin-top:2px;
-}
-.dual-result{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:36px;letter-spacing:2px;
-  color:var(--white);
-  text-align:right;
-}
-.dual-result-lbl{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.5);font-family:'Barlow Condensed',sans-serif;font-weight:700;}
+/* TODAY'S DUAL */
+.dual-header{background:linear-gradient(135deg,var(--charcoal) 0%,#2d2d4e 100%);padding:16px;display:flex;align-items:center;justify-content:space-between;border-radius:var(--radius) var(--radius) 0 0;}
+.dual-matchup{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:#fff;}
+.dual-meta-line{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;font-weight:700;color:var(--gold);margin-top:2px;}
+.dual-score-badge{text-align:right;}
+.dual-score-num{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:2px;color:#fff;line-height:1;}
+.dual-score-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.55);font-weight:700;}
 
-/* ── COURT ROWS ── */
-.court-list{padding:8px 0;}
-.court-row{
-  padding:10px 16px;
-  border-bottom:1px solid var(--gray-lighter);
-  display:flex;align-items:center;gap:10px;
-}
-.court-row:last-child{border-bottom:none;}
-.ct-badge{
-  font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;
-  padding:3px 8px;border-radius:4px;min-width:38px;text-align:center;flex-shrink:0;
-}
-.ct-1{background:#fde2e8;color:var(--red-dark);}
-.ct-2{background:#e0e7ff;color:#3730a3;}
-.ct-3{background:#fef3c7;color:#92400e;}
-.ct-4{background:#d1fae5;color:#065f46;}
-.ct-5{background:#f3e8ff;color:#6b21a8;}
-.ct-6{background:#fce7f3;color:#9d174d;}
-.ct-7{background:#ecfdf5;color:#065f46;}
-.ct-8{background:#fffbeb;color:#92400e;}
-.court-pair{
-  flex:1;
-  font-family:'Barlow',sans-serif;font-size:14px;font-weight:700;
-  color:var(--charcoal);
-}
-.court-opp{font-size:12px;color:var(--gray);font-weight:400;}
-.court-score{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:16px;letter-spacing:1px;
-  text-align:right;
-  flex-shrink:0;
-}
-.score-win{color:var(--green);}
-.score-loss{color:var(--loss-red);}
-.score-pending{color:var(--gray-light);font-size:13px;}
-.set-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;}
-.set-chip{
-  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
-  padding:2px 6px;border-radius:3px;
-}
-.set-chip.w{background:var(--green-bg);color:var(--green);}
-.set-chip.l{background:#fee2e2;color:var(--loss-red);}
-.set-chip.pending{background:var(--gray-lighter);color:var(--gray);}
+/* COURT CARDS */
+.courts-grid{padding:12px;display:flex;flex-direction:column;gap:10px;}
+.court-card{background:#fff;border-radius:10px;border:1px solid var(--gray-lighter);box-shadow:0 1px 6px rgba(0,0,0,.05);overflow:hidden;}
+.court-card.live{border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.2);}
+.court-card.won{border-color:var(--green);}
+.court-card.lost{border-color:var(--loss-red);}
+.court-card-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--cream);}
+.ct-badge{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;padding:3px 8px;border-radius:4px;min-width:36px;text-align:center;flex-shrink:0;}
+.ct-1{background:#fde2e8;color:var(--red-dark);}.ct-2{background:#e0e7ff;color:#3730a3;}.ct-3{background:#fef3c7;color:#92400e;}.ct-4{background:#d1fae5;color:#065f46;}.ct-5{background:#f3e8ff;color:#6b21a8;}.ct-6{background:#fce7f3;color:#9d174d;}.ct-7{background:#ecfdf5;color:#065f46;}.ct-8{background:#fffbeb;color:#92400e;}
+.court-pair-name{flex:1;font-weight:700;font-size:14px;color:var(--charcoal);}
+.court-pair-opp{font-size:11px;color:var(--gray);font-weight:400;}
+.court-match-rec{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;}
+.court-match-rec.win{color:var(--green);}
+.court-match-rec.loss{color:var(--loss-red);}
+.court-match-rec.pending{color:var(--gray-light);font-size:14px;}
+.court-sets{padding:6px 14px 10px;display:flex;flex-wrap:wrap;gap:6px;}
+.set-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.5px;}
+.set-pill.w{background:var(--green-bg);color:var(--green);}
+.set-pill.l{background:#fee2e2;color:var(--loss-red);}
+.set-pill.live-set{background:#dbeafe;color:#1d4ed8;animation:setpulse 1.5s infinite;}
+@keyframes setpulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+.exhib-label{font-size:10px;font-weight:800;color:var(--gray);letter-spacing:1.5px;padding:6px 14px 2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;}
 
-/* ── NO GAME TODAY ── */
-.no-game{
-  background:var(--white);border-radius:var(--radius);
-  padding:28px 20px;text-align:center;
-  box-shadow:var(--shadow);margin-bottom:12px;
-}
+/* SCHEDULE */
+.sched-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-lighter);}
+.sched-row:last-child{border-bottom:none;}
+.sched-date{min-width:58px;font-size:12px;color:var(--gray);font-weight:600;}
+.sched-opp{flex:1;font-weight:700;font-size:14px;}
+.sched-loc{font-size:11px;color:var(--gray);font-weight:400;}
+.sched-score{font-family:'Bebas Neue',sans-serif;font-size:18px;text-align:right;}
+.sched-score.w{color:var(--green);}.sched-score.l{color:var(--loss-red);}.sched-score.upcoming{color:var(--gray-light);font-size:12px;font-family:'Barlow',sans-serif;font-style:italic;}
+
+/* UTIL */
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;}
+.no-game{background:#fff;border-radius:var(--radius);padding:28px 20px;text-align:center;box-shadow:var(--shadow);margin-bottom:12px;}
 .no-game-icon{font-size:36px;margin-bottom:8px;}
 .no-game-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px;color:var(--charcoal);}
 .no-game-sub{font-size:13px;color:var(--gray);margin-top:4px;}
-
-/* ── UPCOMING DUALS ── */
-.dual-card{
-  background:var(--white);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:14px 16px;
-  margin-bottom:10px;
-  display:flex;align-items:center;gap:12px;
-}
-.dual-date-block{
-  background:var(--charcoal);
-  border-radius:8px;
-  padding:8px 12px;
-  text-align:center;
-  flex-shrink:0;min-width:52px;
-}
-.dual-month{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;font-weight:700;color:var(--gold);text-transform:uppercase;}
-.dual-day{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--white);line-height:1;}
-.dual-info{flex:1;}
-.dual-opp{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--charcoal);}
-.dual-meta{font-size:12px;color:var(--gray);margin-top:2px;}
-.dual-type-badge{
-  font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;font-weight:700;
-  padding:3px 8px;border-radius:4px;
-}
-.type-gameday{background:#dbeafe;color:#1d4ed8;}
-.type-scrimmage{background:#f3e8ff;color:#6b21a8;}
-
-/* ── FOOTER ── */
-.footer{
-  padding:20px 16px 32px;
-  text-align:center;
-}
+.footer{padding:20px 16px 32px;text-align:center;}
 .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--gray);}
 .footer-sub{font-size:11px;color:var(--gray-light);margin-top:4px;}
-.back-btn{
-  display:inline-flex;align-items:center;gap:6px;
-  margin-top:14px;
-  font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;
-  color:var(--gray);text-decoration:none;
-  padding:8px 16px;border:1px solid var(--gray-lighter);border-radius:8px;
-  transition:all 0.2s;
-}
-.back-btn:hover{color:var(--red);border-color:var(--red);}
-
-/* ── LOADING ── */
-.loading{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:40px 20px;gap:12px;
-}
-.spinner{width:32px;height:32px;border:3px solid var(--gray-lighter);border-top-color:var(--red);border-radius:50%;animation:spin 0.7s linear infinite;}
+.back-btn{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;color:#fff;text-decoration:none;padding:9px 20px;border-radius:8px;background:var(--red);transition:background .2s;}
+.back-btn:hover{background:var(--red-dark);}
+.loading{display:flex;flex-direction:column;align-items:center;padding:30px;gap:10px;}
+.spinner{width:28px;height:28px;border:3px solid var(--gray-lighter);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.loading-text{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1.5px;font-weight:700;color:var(--gray);}
-
-/* ── EMPTY STATE ── */
-.empty{padding:20px;text-align:center;color:var(--gray);font-size:13px;}
-
-/* ── RESPONSIVE ── */
-@media(max-width:400px){
-  .hero-title{font-size:26px;}
-  .record-main{font-size:22px;}
-  .dual-result{font-size:28px;}
-}
+.loading-text{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;color:var(--gray);}
+@media(max-width:400px){.hero-title{font-size:22px;}.record-main{font-size:26px;}.dual-score-num{font-size:32px;}}
 </style>
 </head>
 <body>
@@ -271,7 +115,7 @@ body{
     <div class="hero-left">
       <div class="crown-icon">👑</div>
       <div class="hero-text">
-        <div class="hero-title">Leon Queens</div>
+        <div class="hero-title">Leon Beach Fans Page</div>
         <div class="hero-sub">Beach Volleyball · 2026</div>
       </div>
     </div>
@@ -282,68 +126,60 @@ body{
   </div>
 </div>
 
-<!-- SEASON RECORD STRIP -->
-<div class="record-strip" id="record-strip">
+<!-- RECORD STRIP -->
+<div class="record-strip">
   <div>
     <div class="record-label">Season Record</div>
-    <div class="record-main" id="record-main">— — —</div>
+    <div class="record-main" id="record-main">—</div>
   </div>
   <div class="record-stats" id="record-stats"></div>
 </div>
 
-<!-- TODAY SECTION -->
+<!-- TODAY'S DUAL -->
 <div class="section">
-  <div class="section-title"><span>🏐</span> Today's Match</div>
+  <div class="section-title">🏐 Today's Dual</div>
   <div id="today-container"><div class="loading"><div class="spinner"></div><div class="loading-text">Loading...</div></div></div>
 </div>
 
-<!-- UPCOMING DUALS SECTION -->
-<div class="section" style="padding-top:16px;">
-  <div class="section-title"><span>📅</span> Upcoming Duals</div>
-  <div id="upcoming-container"><div class="loading"><div class="spinner"></div><div class="loading-text">Loading...</div></div></div>
+<!-- SEASON SCHEDULE -->
+<div class="section" style="padding-top:16px;padding-bottom:16px;">
+  <div class="section-title">📋 Season Schedule</div>
+  <div class="card" style="padding:8px 16px;">
+    <div id="schedule-container"><div class="loading"><div class="spinner"></div><div class="loading-text">Loading...</div></div></div>
+  </div>
 </div>
 
+<!-- FOOTER -->
 <div class="footer">
-  <div class="footer-logo">👑 Leon Queens</div>
+  <div class="footer-logo">👑 Leon Beach</div>
   <div class="footer-sub">Leon High School · Tallahassee, FL</div>
-  <a href="index.html" class="back-btn">← Back to Login</a>
+  <a href="index.html" class="back-btn">← Team Login</a>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script>
 const FB_CONFIG={apiKey:"AIzaSyC8Ue06XPvGXo1XTloewPvDRBWtK5tDAj8",authDomain:"leon-beach-volleyball.firebaseapp.com",databaseURL:"https://leon-beach-volleyball-default-rtdb.firebaseio.com",projectId:"leon-beach-volleyball",storageBucket:"leon-beach-volleyball.firebasestorage.app",messagingSenderId:"937804799976",appId:"1:937804799976:web:02121e68655b4febeb8e5d"};
 const DB_ROOT='leon_queens_matches';
-
 firebase.initializeApp(FB_CONFIG);
 const db=firebase.database();
-
-// State
 let D={players:[],gamedays:[],scrimmages:[],assignments:{},schedule:[]};
 
-function td(){return new Date().toISOString().slice(0,10);}
-
-function fmtDate(d){
-  if(!d)return'';
-  const[y,m,day]=d.split('-');
-  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return months[parseInt(m)-1]+' '+parseInt(day);
-}
-
+function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fD(s){if(!s)return'';return new Date(s+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});}
 function pN(id){
   const p=D.players.find(x=>x.id===id);
   if(!p)return'?';
-  const dups=D.players.filter(x=>x.firstName===p.firstName);
-  return dups.length>1?p.firstName+' '+p.lastName.charAt(0)+'.':p.firstName;
+  return D.players.filter(x=>x.firstName===p.firstName).length>1?p.firstName+' '+p.lastName.charAt(0)+'.':p.firstName;
 }
+function pairKey(p1,p2){return[p1,p2].filter(Boolean).sort().join('|');}
+function findMatch(list,date,p1,p2){return list.find(m=>m.date===date&&m.pair&&pairKey(...(m.pair||[]))==pairKey(p1,p2));}
 
-// Firebase connection
+// Live updates every 15s
 db.ref('.info/connected').on('value',s=>{
   document.getElementById('sync-status').textContent=s.val()?'Live updates on':'Offline';
 });
 
-// Main data listener
 db.ref(DB_ROOT).on('value',snap=>{
   const val=snap.val()||{};
   D.players=val.players?Object.values(val.players):[];
@@ -354,193 +190,162 @@ db.ref(DB_ROOT).on('value',snap=>{
   render();
 });
 
-function render(){
-  renderRecord();
-  renderToday();
-  renderUpcoming();
-}
+function render(){renderRecord();renderToday();renderSchedule();}
 
 // ── SEASON RECORD ──
 function renderRecord(){
-  let setW=0,setL=0,matchW=0,matchL=0,dualW=0,dualL=0;
-
-  // Count sets and matches from gamedays
-  // A match = pair that won best of 3 sets (2 sets wins the match)
-  const matchesByPairDate={};
+  let dualW=0,dualL=0,courtW=0,courtL=0,setW=0,setL=0;
+  D.schedule.forEach(g=>{
+    if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){
+      parseInt(g.scoreUs)>parseInt(g.scoreThem)?dualW++:dualL++;
+    }
+  });
   D.gamedays.forEach(m=>{
+    if((m.court||0)>=6||m.isExhibition)return;
     const sets=m.sets||[];
     const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
     const sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-    sets.forEach(s=>{ if((s.scoreUs||0)>(s.scoreThem||0))setW++;else setL++; });
-    if(sw>=2)matchW++;
-    else if(sl>=2)matchL++;
+    sets.forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?setW++:setL++;});
+    if(sw>sl)courtW++;else if(sl>sw)courtL++;
   });
-
-  // Dual record: per date, did Leon win more matches than lost?
-  const dualDates=new Set(D.gamedays.map(m=>m.date));
-  dualDates.forEach(date=>{
-    const dayMatches=D.gamedays.filter(m=>m.date===date);
-    let dw=0,dl=0;
-    dayMatches.forEach(m=>{
-      const sets=m.sets||[];
-      const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
-      const sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-      if(sw>=2)dw++;
-      else if(sl>=2)dl++;
-    });
-    if(dw>dl)dualW++;else if(dl>dw)dualL++;
-  });
-
-  document.getElementById('record-main').textContent=`${matchW} — ${matchL}`;
+  document.getElementById('record-main').textContent=dualW+'-'+dualL;
   document.getElementById('record-stats').innerHTML=`
-    <div class="record-stat"><div class="record-stat-num">${matchW}</div><div class="record-stat-lbl">Match Wins</div></div>
-    <div class="record-stat"><div class="record-stat-num">${matchL}</div><div class="record-stat-lbl">Match Losses</div></div>
-    <div class="record-stat"><div class="record-stat-num">${dualW}-${dualL}</div><div class="record-stat-lbl">Duals</div></div>
+    <div class="record-stat"><div class="record-stat-num">${courtW}-${courtL}</div><div class="record-stat-lbl">Court W-L</div></div>
+    <div class="record-stat"><div class="record-stat-num">${setW}-${setL}</div><div class="record-stat-lbl">Set W-L</div></div>
   `;
 }
 
-// ── TODAY'S MATCH ──
+// ── TODAY'S DUAL ──
 function renderToday(){
   const today=td();
   const container=document.getElementById('today-container');
-
-  const assignment=Object.values(D.assignments).find(a=>a.date===today&&(a.type==='gameday'||a.type==='scrimmage'));
+  const assignment=Object.values(D.assignments).find(a=>a.date===today);
 
   if(!assignment){
     const sched=D.schedule.find(s=>s.date===today);
-    if(sched){
-      container.innerHTML=`<div class="no-game">
-        <div class="no-game-icon">🏐</div>
-        <div class="no-game-title">Match Day vs ${sched.opponent||'TBD'}</div>
-        <div class="no-game-sub">Lineup coming soon — check back closer to match time</div>
-      </div>`;
-    }else{
-      container.innerHTML=`<div class="no-game">
-        <div class="no-game-icon">🏖️</div>
-        <div class="no-game-title">No Match Today</div>
-        <div class="no-game-sub">Check Upcoming Duals below for the next match</div>
-      </div>`;
-    }
+    container.innerHTML=sched
+      ?`<div class="no-game"><div class="no-game-icon">🏐</div><div class="no-game-title">Dual Day vs ${sched.opponent}</div><div class="no-game-sub">Lineup posting soon — check back!</div></div>`
+      :`<div class="no-game"><div class="no-game-icon">🏖️</div><div class="no-game-title">No Dual Today</div><div class="no-game-sub">See the Season Schedule below for upcoming duals.</div></div>`;
     return;
   }
 
   const opp=assignment.opponent||'Opponent';
-  const courts=assignment.courts||[];
-  const matchList=assignment.type==='scrimmage'?D.scrimmages:D.gamedays;
+  const isScrimmage=assignment.type==='scrimmage';
+  const matchList=isScrimmage?D.scrimmages:D.gamedays;
+  const courts=(assignment.courts||[]).sort((a,b)=>(a.court||0)-(b.court||0));
 
-  // Count dual score: matches won (2+ sets)
-  let leonMatches=0,oppMatches=0,inProgress=0;
+  // Tally scored courts (non-exhibition, courts 1-5)
+  let leonCourts=0,oppCourts=0;
   courts.forEach(c=>{
-    const match=matchList.find(m=>m.date===today&&m.pair&&m.pair[0]===c.p1&&m.pair[1]===c.p2);
-    if(match&&match.sets&&match.sets.length){
-      const sw=match.sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
-      const sl=match.sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-      if(sw>=2)leonMatches++;
-      else if(sl>=2)oppMatches++;
-      else inProgress++;
-    }
+    if((c.court||0)>=6)return;
+    const m=findMatch(matchList,today,c.p1,c.p2);
+    if(!m||!(m.sets||[]).length)return;
+    const sw=(m.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
+    const sl=(m.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
+    if(sw>=2)leonCourts++;
+    else if(sl>=2)oppCourts++;
   });
 
   const hasAnyScores=courts.some(c=>{
-    const m=matchList.find(x=>x.date===today&&x.pair&&x.pair[0]===c.p1&&x.pair[1]===c.p2);
+    const m=findMatch(matchList,today,c.p1,c.p2);
     return m&&(m.sets||[]).length>0;
   });
 
-  let courtsHTML='';
-  courts.forEach(c=>{
-    const p1=pN(c.p1),p2=pN(c.p2);
-    const match=matchList.find(m=>m.date===today&&m.pair&&m.pair[0]===c.p1&&m.pair[1]===c.p2);
-    const sets=match?match.sets||[]:[];
+  // Build court cards
+  const scoredCourts=courts.filter(c=>(c.court||0)<6);
+  const exhibCourts=courts.filter(c=>(c.court||0)>=6);
+
+  function buildCourtCard(c){
+    const m=findMatch(matchList,today,c.p1,c.p2);
+    const sets=m?m.sets||[]:[];
     const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
     const sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-    const matchWon=sw>=2,matchLost=sl>=2;
+    const matchDone=sw>=2||sl>=2;
+    const isLive=sets.length>0&&!matchDone;
+    const cardClass=sw>=2?'won':sl>=2?'lost':isLive?'live':'';
 
-    let scoreHTML='';
-    if(sets.length){
-      // Show all recorded sets — includes in-progress
-      const setChips=sets.map((s,i)=>{
-        const w=(s.scoreUs||0)>(s.scoreThem||0);
-        return`<span class="set-chip ${w?'w':'l'}">S${i+1}: ${s.scoreUs}-${s.scoreThem}</span>`;
-      }).join('');
-      scoreHTML=`<div class="court-score ${matchWon?'score-win':matchLost?'score-loss':''}">
-        <div>${sw}-${sl}</div>
-        <div class="set-chips">${setChips}</div>
-        ${(!matchWon&&!matchLost)?'<div style="font-size:9px;letter-spacing:1px;color:var(--gray);margin-top:2px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">IN PLAY</div>':''}
-      </div>`;
-    }else{
-      scoreHTML=`<div class="court-score score-pending">–</div>`;
-    }
+    // Set pills — all recorded sets shown, in-progress set gets live style
+    const setPills=sets.map((s,i)=>{
+      const w=(s.scoreUs||0)>(s.scoreThem||0);
+      const l=(s.scoreThem||0)>(s.scoreUs||0);
+      // Last set that's not conclusive = live
+      const liveSet=!w&&!l;
+      return`<span class="set-pill ${liveSet?'live-set':w?'w':'l'}">S${i+1} ${s.scoreUs}–${s.scoreThem}</span>`;
+    }).join('');
 
-    courtsHTML+=`<div class="court-row">
-      <span class="ct-badge ct-${c.court}">CT${c.court}</span>
-      <div class="court-pair">${p1} &amp; ${p2}<div class="court-opp">vs ${opp}</div></div>
-      ${scoreHTML}
-    </div>`;
-  });
+    const recStr=sets.length?`${sw}–${sl}`:'–';
+    const recClass=sw>sl?'win':sl>sw?'loss':'pending';
 
-  const dualScoreHTML=hasAnyScores
-    ?`<div class="dual-result">${leonMatches}–${oppMatches}<div class="dual-result-lbl">${inProgress>0?'MATCHES (LIVE)':'MATCHES WON'}</div></div>`
-    :`<div class="dual-result" style="font-size:14px;opacity:0.6;line-height:1.2;">STARTING<br>SOON</div>`;
-
-  container.innerHTML=`<div class="today-card">
-    <div class="today-header">
-      <div>
-        <div class="today-matchup">LEON vs ${opp.toUpperCase()}</div>
-        <div class="today-date">${fmtDate(today)} · ${assignment.type==='scrimmage'?'SCRIMMAGE':'DUAL'}</div>
+    return`<div class="court-card ${cardClass}">
+      <div class="court-card-header">
+        <span class="ct-badge ct-${c.court}">CT${c.court}</span>
+        <div class="court-pair-name">${pN(c.p1)} &amp; ${pN(c.p2)}<div class="court-pair-opp">vs ${opp}</div></div>
+        <div class="court-match-rec ${recClass}">${recStr}</div>
       </div>
-      ${dualScoreHTML}
+      ${sets.length?`<div class="court-sets">${setPills}</div>`:''}
+    </div>`;
+  }
+
+  const scoredHTML=scoredCourts.map(buildCourtCard).join('');
+  const exhibHTML=exhibCourts.length
+    ?`<div class="exhib-label">Exhibition</div>${exhibCourts.map(buildCourtCard).join('')}`
+    :'';
+
+  // Header score: show dash until first score, then tally
+  const headerScore=hasAnyScores
+    ?`<div class="dual-score-badge">
+        <div class="dual-score-num">${leonCourts}–${oppCourts}</div>
+        <div class="dual-score-lbl">COURTS WON</div>
+      </div>`
+    :`<div class="dual-score-badge">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;color:rgba(255,255,255,.6);line-height:1.3;">STARTING<br>SOON</div>
+      </div>`;
+
+  container.innerHTML=`<div class="card" style="overflow:hidden;">
+    <div class="dual-header">
+      <div>
+        <div class="dual-matchup">LEON vs ${opp.toUpperCase()}</div>
+        <div class="dual-meta-line">${fD(today)} · ${isScrimmage?'SCRIMMAGE':'DUAL'}</div>
+      </div>
+      ${headerScore}
     </div>
-    <div class="court-list">${courtsHTML||'<div class="empty">Lineup loading...</div>'}</div>
+    <div class="courts-grid">
+      ${scoredHTML}${exhibHTML}
+      ${!courts.length?'<div style="text-align:center;padding:16px;color:var(--gray);font-size:13px;">Lineup loading...</div>':''}
+    </div>
   </div>`;
 }
 
-// ── UPCOMING DUALS ──
-function renderUpcoming(){
+// ── SEASON SCHEDULE (mirrors coach dashboard) ──
+function renderSchedule(){
+  const container=document.getElementById('schedule-container');
+  const games=[...D.schedule].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  if(!games.length){container.innerHTML='<div style="padding:16px;text-align:center;color:var(--gray);font-size:13px;">Schedule coming soon.</div>';return;}
   const today=td();
-  const container=document.getElementById('upcoming-container');
-
-  // From schedule node + future assignments
-  const upcoming=[];
-
-  // Future schedule entries
-  D.schedule.filter(s=>s.date>today).forEach(s=>{
-    upcoming.push({date:s.date,opponent:s.opponent||'TBD',type:'gameday',source:'schedule'});
-  });
-
-  // Future assignments not already in schedule
-  Object.values(D.assignments).filter(a=>a.date>today&&(a.type==='gameday'||a.type==='scrimmage')).forEach(a=>{
-    if(!upcoming.find(u=>u.date===a.date&&u.opponent===a.opponent)){
-      upcoming.push({date:a.date,opponent:a.opponent||'TBD',type:a.type,source:'assignment'});
+  let wins=0,losses=0;
+  games.forEach(g=>{if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){parseInt(g.scoreUs)>parseInt(g.scoreThem)?wins++:losses++;}});
+  let h=`<div style="display:flex;gap:12px;margin-bottom:14px;padding-top:6px;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--green);">${wins}-${losses}</div>
+    <div style="font-size:12px;color:var(--gray);align-self:center;">Season Record</div>
+  </div>`;
+  games.forEach(g=>{
+    const played=g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!=='';
+    const win=played&&parseInt(g.scoreUs)>parseInt(g.scoreThem);
+    const upcoming=!played&&g.date>=today;
+    const loc=g.location==='away'?'@':'vs';
+    h+=`<div class="sched-row">
+      <span class="sched-date">${fD(g.date)}</span>
+      <div class="sched-opp"><span class="sched-loc">${loc} </span>${g.opponent||'TBD'}</div>
+      <div>`;
+    if(played){
+      h+=`<div class="sched-score ${win?'w':'l'}">${g.scoreUs}–${g.scoreThem}</div>
+          <div style="font-size:10px;font-weight:700;color:${win?'var(--green)':'var(--loss-red)'};text-align:right;">${win?'W':'L'}</div>`;
+    }else{
+      h+=`<div class="sched-score upcoming">${upcoming?'Upcoming':'—'}</div>`;
     }
+    h+=`</div></div>`;
   });
-
-  upcoming.sort((a,b)=>a.date.localeCompare(b.date));
-
-  if(!upcoming.length){
-    container.innerHTML=`<div class="no-game">
-      <div class="no-game-icon">📅</div>
-      <div class="no-game-title">No Upcoming Duals</div>
-      <div class="no-game-sub">Check back soon for the schedule</div>
-    </div>`;
-    return;
-  }
-
-  container.innerHTML=upcoming.slice(0,6).map(u=>{
-    const[y,m,d]=u.date.split('-');
-    const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-    const typeLabel=u.type==='scrimmage'?'Scrimmage':'Season Dual';
-    const typeClass=u.type==='scrimmage'?'type-scrimmage':'type-gameday';
-    return`<div class="dual-card">
-      <div class="dual-date-block">
-        <div class="dual-month">${months[parseInt(m)-1]}</div>
-        <div class="dual-day">${parseInt(d)}</div>
-      </div>
-      <div class="dual-info">
-        <div class="dual-opp">vs ${u.opponent.toUpperCase()}</div>
-        <div class="dual-meta"><span class="dual-type-badge ${typeClass}">${typeLabel}</span></div>
-      </div>
-    </div>`;
-  }).join('');
+  container.innerHTML=h;
 }
 </script>
 </body>
