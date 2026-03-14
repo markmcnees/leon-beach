@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314144021">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -900,6 +900,10 @@ function listenData(){if(!db)return;
       D.scrimmages=val.scrimmages?Object.values(val.scrimmages):[];
       D.schedule=val.schedule?Object.values(val.schedule):[];
       D.standings=val.standings||{};
+      // Auto-seed schedule if empty
+      if(D.schedule.length===0){seedSchedule();}
+      // Auto-seed standings if empty
+      if(Object.keys(D.standings).length<5){seedStandings();}
       D.goals=val.goals||{};
       D.assignments=val.assignments||{};
       D.duals=val.duals?Object.values(val.duals):[];
@@ -931,6 +935,33 @@ function listenData(){if(!db)return;
     if(currentRole==='coach'){const t=document.querySelector('.tab.active');if(t&&t.dataset.tab==='goals')renderCoachGoals();}
   });
   db.ref('.info/connected').on('value',s=>{setSS(s.val()===true);});
+}
+function seedSchedule(){
+  if(!db)return;
+  const sched={
+    sch01:{id:'sch01',date:'2026-02-24',opponent:'Community Christian',location:'home',scoreUs:4,scoreThem:1},
+    sch02:{id:'sch02',date:'2026-02-26',opponent:'Wakulla',location:'home',scoreUs:4,scoreThem:1},
+    sch03:{id:'sch03',date:'2026-02-26',opponent:'Sneads',location:'home',scoreUs:5,scoreThem:0},
+    sch04:{id:'sch04',date:'2026-03-03',opponent:'Florida State University HS',location:'home',scoreUs:2,scoreThem:3},
+    sch05:{id:'sch05',date:'2026-03-05',opponent:'Mosley',location:'home',scoreUs:3,scoreThem:2},
+    sch06:{id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',scoreUs:0,scoreThem:5},
+    sch07:{id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',scoreUs:5,scoreThem:0},
+    sch08:{id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
+    sch09:{id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
+  };
+  const u={};Object.values(sched).forEach(g=>{u[DB_ROOT+'/schedule/'+g.id]=g;});
+  db.ref().update(u,function(){console.log('Schedule seeded');});
+}
+function seedStandings(){
+  if(!db)return;
+  const teams={
+    'Chiles':{w:7,l:0},'Lincoln':{w:4,l:3},'Florida State University HS':{w:4,l:2},
+    'Wakulla':{w:3,l:3},'Mosley':{w:3,l:3},'Community Christian':{w:1,l:5},
+    'Sneads':{w:1,l:4},'South Walton':{w:4,l:2},'Gulf Breeze':{w:4,l:1},
+    'Destin':{w:2,l:3},'Maclay':{w:2,l:2},'Godby':{w:0,l:3}
+  };
+  const u={};Object.entries(teams).forEach(([t,r])=>{u[DB_ROOT+'/standings/'+t]=r;});
+  db.ref().update(u,function(){console.log('Standings seeded');});
 }
 function seedDB(){if(!db)return;
   const data={players:{},matches:{},planned:{},gamedays:{},scrimmages:{},schedule:{}};
@@ -1018,11 +1049,59 @@ function renderDash(){
   const _dr=getDualRecord();
   const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dr.w+'-'+_dr.l;
   const _crEl=document.getElementById('dash-courts-rec');if(_crEl)_crEl.textContent=_dr.cw+'-'+_dr.cl;
-  let gdSW=0,gdSL=0;
-  D.gamedays.forEach(m=>{(m.sets||[]).forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?gdSW++:gdSL++;});});
-  const gdEl=document.getElementById('dash-gd-rec');if(gdEl)gdEl.textContent=gdSW+'-'+gdSL;
+  const totalQM=D.matches.length;
+
+  // Game Day sets
+  let gdSW=0,gdSL=0,gdPF=0,gdPA=0,gdDays=new Set(),gdMatches=0;
+  D.gamedays.forEach(m=>{gdDays.add(m.date);gdMatches++;
+    (m.sets||[]).forEach(s=>{const su=s.scoreUs||0,st=s.scoreThem||0;gdPF+=su;gdPA+=st;su>st?gdSW++:gdSL++;});
+  });
+  document.getElementById('dash-gd-rec').textContent=gdSW+'-'+gdSL;
+
+  // Scrimmage sets
+  let scSW=0,scSL=0;
+  D.scrimmages.forEach(m=>{(m.sets||[]).forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?scSW++:scSL++;});});
+
+  // Total match days
+  const allDates=new Set();
+  D.matches.forEach(m=>allDates.add(m.date));
+  D.gamedays.forEach(m=>allDates.add(m.date));
+  D.scrimmages.forEach(m=>allDates.add(m.date));
+
+  // Game Day overview boxes
+  const gdTotalSets=gdSW+gdSL;
+  document.getElementById('dash-gd-overview').innerHTML=`
+    <div class="stat-box"><div class="stat-number green">${gdDays.size}</div><div class="stat-label">Dual Days</div></div>
+    <div class="stat-box"><div class="stat-number green">${gdSW}-${gdSL}</div><div class="stat-label">Court Record</div></div>
+    <div class="stat-box"><div class="stat-number ${(gdPF-gdPA)>=0?'green':''}" style="${(gdPF-gdPA)<0?'color:var(--loss-red)':''}">${(gdPF-gdPA)>=0?'+':''}${gdPF-gdPA}</div><div class="stat-label">Point +/-</div></div>
+    <div class="stat-box"><div class="stat-number green">${gdSW+gdSL}</div><div class="stat-label">Total Sets</div></div>`;
+
+  // Game Day player stats table
+  const gdStats={};
+  D.players.forEach(p=>{const s=extStats(p.id,D.gamedays);if(s.sets>0)gdStats[p.id]=s;});
+  const gdSorted=Object.entries(gdStats).sort((a,b)=>b[1].diff-a[1].diff);
+  document.querySelector('#dash-gd-table tbody').innerHTML=gdSorted.map(([id,s])=>{
+    const p=gP(id);if(!p)return'';
+    return`<tr>
+      <td><span class="player-name">${pN(id)}</span> <span class="court-badge court-${p.court}">Court ${p.court}</span></td>
+      <td>${s.sets}</td>
+      <td class="plus-minus ${pmClass(s.diff)}" style="font-weight:700;">${pmStr(s.diff)}</td>
+      <td>${s.k}</td><td>${s.b}</td><td>${s.a}</td><td>${s.d}</td><td>${s.e}</td></tr>`;
+  }).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:20px;">No dual data yet</td></tr>';
+
+  // Queens leaders
+  const qStats=D.players.map(p=>({...p,s:queensStats(p.id,D.matches)})).filter(p=>p.s.gp>0).sort((a,b)=>b.s.diff-a.s.diff).slice(0,8);
+  document.querySelector('#top-performers tbody').innerHTML=qStats.map(p=>`<tr>
+    <td><span class="player-name">${p.firstName} ${p.lastName}</span> <span class="class-badge class-${p.classYear}">${p.classYear}</span></td>
+    <td><span class="court-badge court-${p.court}">CT${p.court}</span></td>
+    <td class="wl-record">${p.s.wins}-${p.s.losses}</td>
+    <td class="plus-minus ${pmClass(p.s.diff)}">${pmStr(p.s.diff)}</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--gray);padding:20px;">No Queens data yet</td></tr>';
+
+  // Season Schedule
   renderSchedule();
+  // Standings
   renderStandings();
+  // Show add form only for coaches
   const addEl=document.getElementById('dash-schedule-add');
   if(addEl)addEl.style.display=currentRole==='coach'?'block':'none';
 }
@@ -1584,7 +1663,7 @@ document.querySelectorAll('#court-filter-queens [data-qcourt]').forEach(b=>{b.ad
 
 // Game Day tab
 function updateGDSplitToggle(){
-  const c=parseInt((document.getElementById('gd-court')||{}).value);
+  const c=parseInt(document.getElementById('gd-court').value);
   const isExhib=EXHIBITION_COURTS.has(c);
   document.getElementById('gd-split-toggle').style.display=isExhib?'block':'none';
   if(!isExhib){document.getElementById('gd-is-split').checked=false;toggleSplitGD();}
@@ -1592,15 +1671,15 @@ function updateGDSplitToggle(){
 function toggleSplitGD(){
   const on=document.getElementById('gd-is-split').checked;
   document.getElementById('gd-split-extra').style.display=on?'block':'none';
-  if(on)fillSel(['gd-s2p1','gd-s2p2'],(document.getElementById('gd-court')||{}).value);
+  if(on)fillSel(['gd-s2p1','gd-s2p2'],document.getElementById('gd-court').value);
 }
 (document.getElementById('gd-court')||{addEventListener:()=>{}}).addEventListener('change',()=>{
-  fillSel(['gd-p1','gd-p2'],(document.getElementById('gd-court')||{}).value);
+  fillSel(['gd-p1','gd-p2'],document.getElementById('gd-court').value);
   updateGDSplitToggle();
 });
 (document.getElementById('gd-filter-date')||{addEventListener:()=>{}}).addEventListener('change',()=>renderExtMatches('gameday'));
 (document.getElementById('save-gd-match')||{addEventListener:()=>{}}).addEventListener('click',()=>{
-  const date=document.getElementById('gd-date').value,court=parseInt((document.getElementById('gd-court')||{}).value);
+  const date=document.getElementById('gd-date').value,court=parseInt(document.getElementById('gd-court').value);
   const p1=document.getElementById('gd-p1').value,p2=document.getElementById('gd-p2').value;
   const opp=document.getElementById('gd-opp').value.trim();
   if(!date){toast('Select a date');return;}if(!p1||!p2){toast('Select both players');return;}
@@ -1619,7 +1698,7 @@ function toggleSplitGD(){
   document.getElementById('gd-s2p1')&&(document.getElementById('gd-s2p1').value='');
   document.getElementById('gd-s2p2')&&(document.getElementById('gd-s2p2').value='');
   document.getElementById('gd-is-split').checked=false;toggleSplitGD();
-  (document.getElementById('gd-filter-date')||{}).value=date;
+  document.getElementById('gd-filter-date').value=date;
 });
 
 // Scrimmage tab
@@ -3186,6 +3265,27 @@ function saveAssignment(){
   buildAssignSlots();
 }
 
+function openEditAssignment(id){
+  const a=D.assignments[id];if(!a)return;
+  // Simple: just rebuild the planner with this date/type pre-filled
+  document.getElementById('assign-date').value=a.date||td();
+  document.getElementById('assign-type').value=a.type||'gameday';
+  document.getElementById('assign-opp').value=a.opponent||'';
+  const n=(a.courts||[]).length;
+  document.getElementById('assign-courts').value=n||3;
+  buildAssignSlots();
+  // Pre-fill courts
+  setTimeout(function(){
+    (a.courts||[]).forEach(function(c,i){
+      const p1El=document.getElementById('assign-c'+(i+1)+'-p1');
+      const p2El=document.getElementById('assign-c'+(i+1)+'-p2');
+      if(p1El)p1El.value=c.p1||'';
+      if(p2El)p2El.value=c.p2||'';
+    });
+  },100);
+  fbRemove('assignments/'+id);
+  toast('Assignment loaded for editing — update and save');
+}
 function deleteAssignment(id){
   // No confirm() — blocked in iframes. Use inline confirmation instead.
   const btn=document.querySelector('[data-del-assign="'+id+'"]');
@@ -4431,7 +4531,7 @@ initDualScanner();
 document.getElementById('q-date').value=td();
 document.getElementById('gd-date').value=td();
 document.getElementById('sc-date').value=td();
-(document.getElementById('gd-filter-date')||{}).value=td();
+document.getElementById('gd-filter-date').value=td();
 document.getElementById('sc-filter-date').value=td();
 document.getElementById('assign-date').value=td();
 document.getElementById('live-date').value=td();
@@ -4498,48 +4598,6 @@ setTimeout(function(){
     db.ref().update(updates,err=>{if(!err)console.log('Jersey numbers seeded');});
   });
 },4000);
-
-// ============================================================
-// V3: ensure schedule + standings always populated
-// ============================================================
-setTimeout(function(){
-  if(!db)return;
-  db.ref(DB_ROOT+'/schedule').once('value',function(snap){
-    const ex=snap.val()||{};
-    const sched={
-      sch01:{id:'sch01',date:'2026-02-24',opponent:'Community Christian',location:'home',scoreUs:4,scoreThem:1},
-      sch02:{id:'sch02',date:'2026-02-26',opponent:'Wakulla',location:'home',scoreUs:4,scoreThem:1},
-      sch03:{id:'sch03',date:'2026-02-26',opponent:'Sneads',location:'home',scoreUs:5,scoreThem:0},
-      sch04:{id:'sch04',date:'2026-03-03',opponent:'Florida State University HS',location:'home',scoreUs:2,scoreThem:3},
-      sch05:{id:'sch05',date:'2026-03-05',opponent:'Mosley',location:'home',scoreUs:3,scoreThem:2},
-      sch06:{id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',scoreUs:0,scoreThem:5},
-      sch07:{id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',scoreUs:5,scoreThem:0},
-      sch08:{id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
-      sch09:{id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
-    };
-    const u={};
-    Object.entries(sched).forEach(([id,g])=>{
-      if(!ex[id]||ex[id].scoreUs==null){u[DB_ROOT+'/schedule/'+id]=g;}
-    });
-    if(Object.keys(u).length){
-      db.ref().update(u,function(){console.log('V3: schedule updated');});
-    }
-  });
-  db.ref(DB_ROOT+'/standings').once('value',function(snap){
-    const ex=snap.val()||{};
-    if(Object.keys(ex).length>=5)return;
-    const teams={
-      'Chiles':{w:7,l:0},'Lincoln':{w:4,l:3},'Florida State University HS':{w:4,l:2},
-      'Wakulla':{w:3,l:3},'Mosley':{w:3,l:3},'Community Christian':{w:1,l:5},
-      'Sneads':{w:1,l:4},'South Walton':{w:4,l:2},'Gulf Breeze':{w:4,l:1},
-      'Destin':{w:2,l:3},'Maclay':{w:2,l:2},'Godby':{w:0,l:3}
-    };
-    const u={};
-    Object.entries(teams).forEach(([t,r])=>{u[DB_ROOT+'/standings/'+t]=r;});
-    db.ref().update(u,function(){console.log('V3: standings seeded');});
-  });
-},2000);
-
 </script>
 </body>
 </html>
