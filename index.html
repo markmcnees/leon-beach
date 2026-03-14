@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="20260314-dashboard-v2">
+<meta name="viewport" content="20260314-restructure-v2">
 <title>Leon Beach Volleyball Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314113045">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -371,7 +371,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   <div class="tabs" id="tabs">
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="players">Players</button>
-    <button class="tab" data-tab="gameday">Dual Matches</button>
+    <button class="tab" data-tab="gameday">Planner</button>
     <button class="tab" data-tab="duals">Duals</button>
     <button class="tab" data-tab="goals">Goals</button>
     <button class="tab" data-tab="settings">Roster</button>
@@ -381,15 +381,15 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div class="content" id="coach-content">
 
   <!-- ====== DASHBOARD ====== -->
-  <div class="tab-content active" id="tab-dashboard">
-    <div class="card"><div class="card-title"><span class="bar"></span> Season Overview</div>
+    <div class="tab-content active" id="tab-dashboard">
+<div class="card"><div class="card-title"><span class="bar"></span> Season Overview</div>
       <div class="stat-grid cols-3">
         <div class="stat-box"><div class="stat-number gold" id="dash-dual-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
         <div class="stat-box"><div class="stat-number green" id="dash-gd-rec">0-0</div><div class="stat-label">Dual Sets</div></div>
         <div class="stat-box"><div class="stat-number" id="dash-courts-rec">0-0</div><div class="stat-label">Court W-L</div></div>
       </div>
     </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> Season Schedule <span style="font-size:11px;color:var(--gray);font-family:'Barlow';font-weight:600;letter-spacing:0;margin-left:8px;">via MaxPreps</span></div>
+<div class="card"><div class="card-title"><span class="bar"></span> Season Schedule <span style="font-size:11px;color:var(--gray);font-family:'Barlow';font-weight:600;letter-spacing:0;margin-left:8px;">via MaxPreps</span></div>
       <div id="dash-schedule"></div>
       <div id="dash-schedule-add" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-lighter);">
         <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Add Game</div>
@@ -409,7 +409,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <button class="btn btn-primary btn-small" onclick="addScheduleGame()">Add Game</button>
       </div>
     </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> Area Standings</div>
+<div class="card"><div class="card-title"><span class="bar"></span> Area Standings</div>
       <div id="dash-standings"></div>
       <div id="dash-standings-add" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-lighter);">
         <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Update Team Record</div>
@@ -424,19 +424,11 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         </div>
       </div>
     </div>
+
+
   </div>
 
-    <div class="card"><div class="card-title"><span class="bar"></span> Season Dual Stats</div>
-      <div class="stat-grid" id="dash-gd-overview" style="margin-bottom:14px;"></div>
-      <div class="table-wrap"><table class="player-table" id="dash-gd-table"><thead><tr>
-        <th>Player</th><th>Sets</th><th>+/-</th><th>K</th><th>B</th><th>A</th><th>D</th><th>E</th>
-      </tr></thead><tbody></tbody></table></div>
-    </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> Queens Leaders — Point Diff</div>
-      <div class="table-wrap"><table class="player-table" id="top-performers"><thead><tr><th>Player</th><th>CT</th><th>W-L</th><th>+/-</th></tr></thead><tbody></tbody></table></div>
-    </div>
-  </div>
-  <!-- ====== PLAYERS ====== -->
+<!-- ====== PLAYERS ====== -->
   <div class="tab-content" id="tab-players">
     <div class="filter-row" id="type-filter-players">
       <button class="filter-btn active" data-ptype="all">All</button>
@@ -502,10 +494,111 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   </div>
 
   <!-- ====== GAME DAY (Leon vs External — Season) ====== -->
-  <div class="tab-content" id="tab-gameday">
+    <div class="tab-content" id="tab-gameday">
+<div class="card"><div class="card-title blue"><span class="bar"></span> 🤖 AI Pairing Recommendations</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">AI analyzes skills, match history, position compatibility, side preference, and court levels to suggest optimal pairings.</p>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Courts to fill</label>
+          <select class="form-select" id="ai-pair-courts" style="padding:8px;font-size:13px;">
+            <option value="3">3 courts</option><option value="4">4 courts</option><option value="5">5 courts</option><option value="6">6 courts</option><option value="7">7 courts</option><option value="8">8 courts</option><option value="2">2 courts</option><option value="1">1 court</option>
+          </select></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Context</label>
+          <select class="form-select" id="ai-pair-context" style="padding:8px;font-size:13px;">
+            <option value="gameday">Dual (strongest pairings)</option>
+            <option value="scrimmage">Scrimmage (mix it up)</option>
+            <option value="queens">Queens Practice (competitive balance)</option>
+          </select></div>
+      </div>
+      <button class="btn btn-blue btn-small" onclick="generateAIPairings()" id="ai-pair-btn" style="width:100%;">🤖 Generate Pairings</button>
+      <div id="ai-pairings-result" style="margin-top:12px;"></div>
+    </div>
+<div class="card"><div class="card-title blue"><span class="bar"></span> 📋 Planner</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Set lineups for duals and practice. Players see their assignment in their portal.</p>
+      <div style="background:var(--off-white);border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Create Assignment</div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label><input type="date" class="form-input" id="assign-date" style="padding:8px;font-size:13px;"></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
+            <select class="form-select" id="assign-type" style="padding:8px;font-size:13px;">
+              <option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
+            </select></div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label><input type="text" class="form-input" id="assign-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Courts</label>
+            <select class="form-select" id="assign-courts" style="padding:8px;font-size:13px;">
+              <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="2">2</option><option value="1">1</option>
+            </select></div>
+        </div>
+        <div id="assign-court-slots"></div>
+        <div id="assign-notes-section" style="margin-top:8px;"></div>
+        <button class="btn btn-blue btn-small" style="width:100%;margin-top:10px;" onclick="saveAssignment()">Save Assignment</button>
+      </div>
+      <div id="assignments-list"></div>
+    </div>
+<div class="card"><div class="card-title"><span class="bar"></span> Data Management</div>
+      <div class="data-actions">
+        <button class="btn btn-primary btn-small" id="export-excel">📊 Export Excel</button>
+        <button class="btn btn-secondary btn-small" id="export-data">Export JSON</button>
+        <button class="btn btn-secondary btn-small" id="import-data-btn">Import JSON</button>
+        <input type="file" id="import-data" accept=".json" style="display:none;">
+        <button class="btn btn-danger btn-small" id="clear-matches">Clear All Matches</button>
+        <button class="btn btn-small" id="migrate-to-duals" style="background:var(--gold);color:var(--black);">&#128190; Migrate Game Days &#8594; Duals</button></div></div>
+<div class="card"><div class="card-title" style="color:var(--blue);"><span class="bar" style="background:var(--blue);"></span> 📸 Upload Court Assignment Sheet</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a court assignment sheet — Leon's or the opponent's — and AI will extract the court pairings.</p>
+      <div class="form-row" style="margin-bottom:8px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
+          <input type="date" class="form-input" id="ca-date" style="padding:8px;font-size:13px;"></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
+          <select class="form-select" id="ca-type" style="padding:8px;font-size:13px;">
+            <option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
+          </select></div>
+      </div>
+      <div class="form-row" style="margin-bottom:8px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label>
+          <input type="text" class="form-input" id="ca-opp" placeholder="e.g. Lincoln" style="padding:8px;font-size:13px;"></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Whose Sheet?</label>
+          <select class="form-select" id="ca-team" style="padding:8px;font-size:13px;">
+            <option value="leon">Leon's Lineup</option>
+            <option value="opponent">Opponent's Lineup</option>
+          </select></div>
+      </div>
+      <input type="file" id="ca-file" accept="image/*" capture="environment" style="display:none;">
+      <button class="btn btn-blue btn-small" style="width:100%;" onclick="document.getElementById('ca-file').click();">📸 Take Photo or Upload Court Sheet</button>
+      <div id="ca-preview" style="margin-top:10px;"></div>
+      <div id="ca-result" style="margin-top:10px;"></div>
+    </div>
+<div class="card"><div class="card-title"><span class="bar"></span> 📷 Upload Scoresheet</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a handwritten scoresheet and AI will read it and create the match entries.</p>
+      <div class="form-row" style="margin-bottom:8px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Match Type</label>
+          <select class="form-select" id="scan-type" style="padding:8px;font-size:13px;">
+            <option value="queens">Queens (Leon vs Leon)</option>
+            <option value="gameday">Dual</option>
+            <option value="scrimmage">Scrimmage</option>
+          </select></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
+          <input type="date" class="form-input" id="scan-date" style="padding:8px;font-size:13px;"></div>
+      </div>
+      <input type="file" id="scan-file" accept="image/*" capture="environment" style="display:none;">
+      <button class="btn btn-secondary btn-small" style="width:100%;" onclick="document.getElementById('scan-file').click();">📷 Take Photo or Upload Image</button>
+      <div id="scan-preview" style="margin-top:10px;"></div>
+      <div id="scan-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
 
-    <!-- LIVE SCORE ENTRY -->
-    <div class="card" style="border:2px solid var(--blue);">
+<!-- ====== DUALS ====== -->
+    <!-- ====== DUALS ====== -->
+  <div class="tab-content" id="tab-duals">
+<div class="card">
+      <div class="card-title gold"><span class="bar" style="background:var(--gold);"></span> Dual Match Record</div>
+      <div class="stat-grid cols-3">
+        <div class="stat-box"><div class="stat-number gold" id="dual-season-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
+        <div class="stat-box"><div class="stat-number" id="dual-season-total">0</div><div class="stat-label">Total Duals</div></div>
+        <div class="stat-box"><div class="stat-number green" id="dual-courts-rec">0-0</div><div class="stat-label">Court W-L</div></div>
+      </div>
+    </div>
+<div class="card" style="border:2px solid var(--blue);">
       <div class="card-title blue"><span class="bar"></span> 🏐 Live Dual Score Entry
         <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Auto-loads today's assignment</span>
       </div>
@@ -515,9 +608,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
       <div id="live-courts-container"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">Select a game date and click Load Courts.</div></div>
     </div>
-
-    <!-- COACH PRIVATE NOTES -->
-    <div class="card" style="border:2px solid var(--charcoal);">
+<div class="card" style="border:2px solid var(--charcoal);">
       <div class="card-title" style="color:var(--charcoal);"><span class="bar" style="background:var(--charcoal);"></span> 🔒 Coach Notes
         <span style="font-size:11px;font-weight:400;letter-spacing:0;font-family:'Barlow',sans-serif;color:var(--gray);margin-left:6px;">Private — coaches only</span>
       </div>
@@ -543,90 +634,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <div id="cnote-pairs-list"><div style="color:var(--gray);font-size:13px;">Load notes for a date first.</div></div>
       </div>
     </div>
-
-    <div class="card"><div class="card-title blue"><span class="bar"></span> 🤖 AI Pairing Recommendations</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">AI analyzes skills, match history, position compatibility, side preference, and court levels to suggest optimal pairings.</p>
-      <div class="form-row" style="margin-bottom:10px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Courts to fill</label>
-          <select class="form-select" id="ai-pair-courts" style="padding:8px;font-size:13px;">
-            <option value="3">3 courts</option><option value="4">4 courts</option><option value="5">5 courts</option><option value="6">6 courts</option><option value="7">7 courts</option><option value="8">8 courts</option><option value="2">2 courts</option><option value="1">1 court</option>
-          </select></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Context</label>
-          <select class="form-select" id="ai-pair-context" style="padding:8px;font-size:13px;">
-            <option value="gameday">Dual (strongest pairings)</option>
-            <option value="scrimmage">Scrimmage (mix it up)</option>
-            <option value="queens">Queens Practice (competitive balance)</option>
-          </select></div>
-      </div>
-      <button class="btn btn-blue btn-small" onclick="generateAIPairings()" id="ai-pair-btn" style="width:100%;">🤖 Generate Pairings</button>
-      <div id="ai-pairings-result" style="margin-top:12px;"></div>
-    </div>
-    <div class="card"><div class="card-title blue"><span class="bar"></span> 📋 Upcoming Assignments</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Set lineups for duals and practice. Players see their assignment in their portal.</p>
-      <div style="background:var(--off-white);border-radius:8px;padding:14px;margin-bottom:14px;">
-        <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Create Assignment</div>
-        <div class="form-row" style="margin-bottom:8px;">
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label><input type="date" class="form-input" id="assign-date" style="padding:8px;font-size:13px;"></div>
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
-            <select class="form-select" id="assign-type" style="padding:8px;font-size:13px;">
-              <option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
-            </select></div>
-        </div>
-        <div class="form-row" style="margin-bottom:8px;">
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label><input type="text" class="form-input" id="assign-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Courts</label>
-            <select class="form-select" id="assign-courts" style="padding:8px;font-size:13px;">
-              <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="2">2</option><option value="1">1</option>
-            </select></div>
-        </div>
-        <div id="assign-court-slots"></div>
-        <div id="assign-notes-section" style="margin-top:8px;"></div>
-        <button class="btn btn-blue btn-small" style="width:100%;margin-top:10px;" onclick="saveAssignment()">Save Assignment</button>
-      </div>
-      <div id="assignments-list"></div>
-    </div>
-    <div class="card"><div class="card-title blue"><span class="bar"></span> New Dual Match</div>
-      <div class="form-row" style="margin-bottom:10px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label><input type="date" class="form-input" id="gd-date"></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Court</label>
-          <select class="form-select" id="gd-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option><option value="6">Court 6 — Exhib</option><option value="7">Court 7 — Exhib</option><option value="8">Court 8 — Exhib</option></select></div></div>
-      <div id="gd-split-toggle" style="display:none;margin-top:8px;">
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--purple);cursor:pointer;">
-          <input type="checkbox" id="gd-is-split" style="width:16px;height:16px;accent-color:var(--purple);" onchange="toggleSplitGD()">
-          🔀 Split Match — different pair for Set 2
-        </label>
-      </div>
-      <div id="gd-split-extra" style="display:none;margin-top:8px;padding:10px;background:#f5f3ff;border-radius:8px;border:1px solid #c4b5fd;">
-        <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;color:var(--purple);margin-bottom:8px;">SET 2 — DIFFERENT PAIR</div>
-        <div class="form-row">
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label">Set 2 Player 1</label><select class="form-select" id="gd-s2p1"><option value="">Select</option></select></div>
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label">Set 2 Player 2</label><select class="form-select" id="gd-s2p2"><option value="">Select</option></select></div>
-        </div>
-      </div>
-      <div class="form-row" style="margin-bottom:10px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Player 1</label><select class="form-select" id="gd-p1"><option value="">Select</option></select></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Player 2</label><select class="form-select" id="gd-p2"><option value="">Select</option></select></div></div>
-      <div class="form-group" style="margin-bottom:10px;"><label class="form-label">Opponent</label><input type="text" class="form-input" id="gd-opp" placeholder="e.g. Wakulla CT5"></div>
-      <button class="btn btn-blue" id="save-gd-match">Create Match</button>
-    </div>
-    <div class="card"><div class="card-title blue"><span class="bar"></span> Dual Match Log</div>
-      <div class="date-filter"><label style="font-size:13px;font-weight:700;">Date:</label><input type="date" id="gd-filter-date" class="form-input" style="max-width:180px;padding:8px 12px;"></div>
-      <div id="gd-matches-list"></div>
-    </div>
-  </div>
-
-
-  <!-- ====== DUALS ====== -->
-  <div class="tab-content" id="tab-duals">
-    <div class="card">
-      <div class="card-title gold"><span class="bar" style="background:var(--gold);"></span> Dual Match Record</div>
-      <div class="stat-grid cols-3">
-        <div class="stat-box"><div class="stat-number gold" id="dual-season-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
-        <div class="stat-box"><div class="stat-number" id="dual-season-total">0</div><div class="stat-label">Total Duals</div></div>
-        <div class="stat-box"><div class="stat-number green" id="dual-courts-rec">0-0</div><div class="stat-label">Court W-L</div></div>
-      </div>
-    </div>
-    <div class="card" style="border:2px solid var(--gold);">
+<div class="card" style="border:2px solid var(--gold);">
       <div class="card-title gold"><span class="bar" style="background:var(--gold);"></span> Upload Dual Scoresheet</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Photograph the handwritten scoresheet after a dual. AI reads the opponent, pairings, and all set scores — then automatically creates the dual record and individual match entries for player stats.</p>
       <div class="form-group">
@@ -638,13 +646,13 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div id="dual-scan-preview" style="margin-top:10px;"></div>
       <div id="dual-scan-result" style="margin-top:10px;"></div>
     </div>
-    <div class="card">
+<div class="card">
       <div class="card-title"><span class="bar"></span> Dual History</div>
       <div id="duals-list"><div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.<br>Upload a scoresheet above to get started!</p></div></div>
     </div>
   </div>
 
-  <!-- ====== SCRIMMAGE (Leon vs External — Non-Season) ====== -->
+<!-- ====== SCRIMMAGE (Leon vs External — Non-Season) ====== -->
   <div class="tab-content" id="tab-scrimmage">
     <div class="card"><div class="card-title purple"><span class="bar"></span> New Scrimmage Match</div>
       <div class="form-row" style="margin-bottom:10px;">
@@ -673,66 +681,18 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   </div>
 
   <!-- ====== ROSTER ====== -->
-  <div class="tab-content" id="tab-settings">
-    <div class="card"><div class="card-title"><span class="bar"></span> Player Roster</div>
+    <div class="tab-content" id="tab-settings">
+<div class="card"><div class="card-title"><span class="bar"></span> Player Roster</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Assign court levels. Changes sync in real time.</p><div id="roster-list"></div></div>
-    <div class="card"><div class="card-title"><span class="bar"></span> Add Player</div>
+<div class="card"><div class="card-title"><span class="bar"></span> Add Player</div>
       <div class="form-row" style="margin-bottom:10px;"><input type="text" class="form-input" id="new-first" placeholder="First Name"><input type="text" class="form-input" id="new-last" placeholder="Last Name"></div>
       <div class="form-row" style="margin-bottom:10px;">
         <input type="number" class="form-input" id="new-jersey" placeholder="Jersey #" min="0" max="99" style="max-width:110px;">
         <select class="form-select" id="new-class"><option value="FR">Freshman</option><option value="SO">Sophomore</option><option value="JR">Junior</option><option value="SR">Senior</option></select>
         <select class="form-select" id="new-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option><option value="6">Court 6 — Exhib</option><option value="7">Court 7 — Exhib</option><option value="8">Court 8 — Exhib</option></select></div>
       <button class="btn btn-secondary" id="add-player">Add Player</button></div>
-    <div class="card"><div class="card-title"><span class="bar"></span> Data Management</div>
-      <div class="data-actions">
-        <button class="btn btn-primary btn-small" id="export-excel">📊 Export Excel</button>
-        <button class="btn btn-secondary btn-small" id="export-data">Export JSON</button>
-        <button class="btn btn-secondary btn-small" id="import-data-btn">Import JSON</button>
-        <input type="file" id="import-data" accept=".json" style="display:none;">
-        <button class="btn btn-danger btn-small" id="clear-matches">Clear All Matches</button>
-        <button class="btn btn-small" id="migrate-to-duals" style="background:var(--gold);color:var(--black);">&#128190; Migrate Game Days &#8594; Duals</button></div></div>
-    <div class="card"><div class="card-title" style="color:var(--blue);"><span class="bar" style="background:var(--blue);"></span> 📸 Upload Court Assignment Sheet</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a court assignment sheet — Leon's or the opponent's — and AI will extract the court pairings.</p>
-      <div class="form-row" style="margin-bottom:8px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
-          <input type="date" class="form-input" id="ca-date" style="padding:8px;font-size:13px;"></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
-          <select class="form-select" id="ca-type" style="padding:8px;font-size:13px;">
-            <option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
-          </select></div>
-      </div>
-      <div class="form-row" style="margin-bottom:8px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label>
-          <input type="text" class="form-input" id="ca-opp" placeholder="e.g. Lincoln" style="padding:8px;font-size:13px;"></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Whose Sheet?</label>
-          <select class="form-select" id="ca-team" style="padding:8px;font-size:13px;">
-            <option value="leon">Leon's Lineup</option>
-            <option value="opponent">Opponent's Lineup</option>
-          </select></div>
-      </div>
-      <input type="file" id="ca-file" accept="image/*" capture="environment" style="display:none;">
-      <button class="btn btn-blue btn-small" style="width:100%;" onclick="document.getElementById('ca-file').click();">📸 Take Photo or Upload Court Sheet</button>
-      <div id="ca-preview" style="margin-top:10px;"></div>
-      <div id="ca-result" style="margin-top:10px;"></div>
-    </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> 📷 Upload Scoresheet</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a handwritten scoresheet and AI will read it and create the match entries.</p>
-      <div class="form-row" style="margin-bottom:8px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Match Type</label>
-          <select class="form-select" id="scan-type" style="padding:8px;font-size:13px;">
-            <option value="queens">Queens (Leon vs Leon)</option>
-            <option value="gameday">Dual</option>
-            <option value="scrimmage">Scrimmage</option>
-          </select></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
-          <input type="date" class="form-input" id="scan-date" style="padding:8px;font-size:13px;"></div>
-      </div>
-      <input type="file" id="scan-file" accept="image/*" capture="environment" style="display:none;">
-      <button class="btn btn-secondary btn-small" style="width:100%;" onclick="document.getElementById('scan-file').click();">📷 Take Photo or Upload Image</button>
-      <div id="scan-preview" style="margin-top:10px;"></div>
-      <div id="scan-result" style="margin-top:10px;"></div>
-    </div>
   </div>
+
 </div>
 <!-- PLAYER PORTAL (shown when logged in as player) -->
 <div class="player-portal" id="player-portal">
@@ -943,11 +903,10 @@ function listenData(){if(!db)return;
       D.goals=val.goals||{};
       D.assignments=val.assignments||{};
       D.duals=val.duals?Object.values(val.duals):[];
-      D.duals=val.duals?Object.values(val.duals):[];
     }else{
       D.players=JSON.parse(JSON.stringify(DEF_P));
       D.matches=JSON.parse(JSON.stringify(DEF_M));
-      D.planned=[];D.gamedays=[];D.scrimmages=[];D.duals=[];D.duals=[];
+      D.planned=[];D.gamedays=[];D.scrimmages=[];D.duals=[];
       seedDB();
     }
     refreshCurrent();
@@ -1056,11 +1015,14 @@ function fillSel(ids,courtHint){
 // DASHBOARD
 // ============================================================
 function renderDash(){
-  // Dual W-L from schedule
-  const _dr=getDualRecord();
-  const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dr.w+'-'+_dr.l;
-  const _crEl=document.getElementById('dash-courts-rec');if(_crEl)_crEl.textContent=_dr.cw+'-'+_dr.cl;
+  // Queens record
+  let qW=0,qL=0;
+  D.matches.forEach(m=>{qW++;qL++;}); // each match has a winner and loser
   const totalQM=D.matches.length;
+  // Actually count unique wins across all players
+  let totalQWins=D.matches.length; // each match = 1 win, 1 loss
+  const _dualRec=getDualRecord();const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dualRec.w+'-'+_dualRec.l;
+    document.getElementById('dash-queens-rec').textContent=totalQM+' matches';
 
   // Game Day sets
   let gdSW=0,gdSL=0,gdPF=0,gdPA=0,gdDays=new Set(),gdMatches=0;
@@ -4258,31 +4220,11 @@ function pgdSaveNotes(){
 // DUALS
 // ============================================================
 function getDualRecord(){
-  // W-L from schedule (most complete/authoritative)
   let w=0,l=0;
-  (D.schedule||[]).forEach(g=>{
-    if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){
-      parseInt(g.scoreUs)>parseInt(g.scoreThem)?w++:l++;
-    }
-  });
-  // Court W-L from duals node, fallback to gamedays
+  (D.schedule||[]).forEach(g=>{if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){parseInt(g.scoreUs)>parseInt(g.scoreThem)?w++:l++;}});
   let cw=0,cl=0;
-  (D.duals||[]).forEach(d=>{
-    (d.courts||[]).filter(c=>!c.isExhibition).forEach(c=>{
-      const sw=(c.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
-      const sl=(c.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-      if(sw>sl)cw++;else if(sl>sw)cl++;
-    });
-  });
-  if(cw===0&&cl===0){
-    (D.gamedays||[]).forEach(m=>{
-      if(m.isExhibition||(m.court||0)>=6)return;
-      const sets=m.sets||[];
-      const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
-      const sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-      if(sw>sl)cw++;else if(sl>sw)cl++;
-    });
-  }
+  (D.duals||[]).forEach(d=>{(d.courts||[]).filter(c=>!c.isExhibition).forEach(c=>{const sw=(c.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length,sl=(c.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;if(sw>sl)cw++;else if(sl>sw)cl++;});});
+  if(cw===0&&cl===0){(D.gamedays||[]).forEach(m=>{if(m.isExhibition||(m.court||0)>=6)return;const sets=m.sets||[];const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length,sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;if(sw>sl)cw++;else if(sl>sw)cl++;});}
   return{w,l,cw,cl,total:w+l};
 }
 
@@ -4293,6 +4235,7 @@ function renderDuals(){
   setEl('dual-season-total',rec.total);
   setEl('dual-courts-rec',rec.cw+'-'+rec.cl);
   setEl('dash-dual-rec',rec.w+'-'+rec.l);
+  setEl('dash-courts-rec',rec.cw+'-'+rec.cl);
   const duals=[...(D.duals||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const container=document.getElementById('duals-list');
   if(!container)return;
@@ -4569,42 +4512,23 @@ setTimeout(function(){
     // Also seed area team standings
     const standUpdates={
       'Chiles':{w:7,l:0},
-      'Lincoln':{w:4,l:3},
-      'Florida State University HS':{w:4,l:2},
-      'Wakulla':{w:3,l:3},
-      'Mosley':{w:3,l:3},
-      'Maclay':{w:2,l:2},
-      'Community Christian':{w:1,l:5},
-      'Sneads':{w:1,l:4},
-      'Godby':{w:0,l:3},
-      'South Walton':{w:4,l:2},
-      'Gulf Breeze':{w:4,l:1},
-      'Destin':{w:2,l:3}
+      'Lincoln':{w:3,l:2},
+      'FSUS':{w:3,l:1},
+      'Wakulla':{w:2,l:3},
+      'Maclay':{w:1,l:2},
+      'Community Christian':{w:1,l:3},
+      'Mosley':{w:2,l:2},
+      'Sneads':{w:0,l:3},
+      'Godby':{w:0,l:2},
+      'South Walton':{w:2,l:1},
+      'Gulf Breeze':{w:3,l:1}
     };
     Object.entries(standUpdates).forEach(([team,rec])=>{updates[DB_ROOT+'/standings/'+team]=rec;});
     db.ref().update(updates,err=>{if(!err)toast('Schedule imported from MaxPreps!');});
   });
 },3000);
 
-// Schedule V2: patch existing Firebase schedule with correct scores
-setTimeout(function(){
-  if(!db)return;
-  db.ref(DB_ROOT+'/_schedule_v2').once('value',snap=>{
-    if(snap.val())return;
-    const updates={};
-    updates[DB_ROOT+'/schedule/sch06/scoreUs']=0;
-    updates[DB_ROOT+'/schedule/sch06/scoreThem']=5;
-    updates[DB_ROOT+'/schedule/sch06/time']=null;
-    updates[DB_ROOT+'/schedule/sch07/scoreUs']=5;
-    updates[DB_ROOT+'/schedule/sch07/scoreThem']=0;
-    updates[DB_ROOT+'/schedule/sch07/time']=null;
-    db.ref(DB_ROOT+'/schedule/sch08').once('value',s=>{if(!s.val())db.ref(DB_ROOT+'/schedule/sch08').set({id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0});});
-    db.ref(DB_ROOT+'/schedule/sch09').once('value',s=>{if(!s.val())db.ref(DB_ROOT+'/schedule/sch09').set({id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4});});
-    updates[DB_ROOT+'/_schedule_v2']=true;
-    db.ref().update(updates);
-  });
-},4500);
-
+setTimeout(function(){if(!db)return;db.ref(DB_ROOT+'/_schedule_v2').once('value',snap=>{if(snap.val())return;const u={};u[DB_ROOT+'/schedule/sch06/scoreUs']=0;u[DB_ROOT+'/schedule/sch06/scoreThem']=5;u[DB_ROOT+'/schedule/sch06/time']=null;u[DB_ROOT+'/schedule/sch07/scoreUs']=5;u[DB_ROOT+'/schedule/sch07/scoreThem']=0;u[DB_ROOT+'/schedule/sch07/time']=null;u[DB_ROOT+'/_schedule_v2']=true;db.ref().update(u);db.ref(DB_ROOT+'/schedule/sch08').once('value',s=>{if(!s.val())db.ref(DB_ROOT+'/schedule/sch08').set({id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0});});db.ref(DB_ROOT+'/schedule/sch09').once('value',s=>{if(!s.val())db.ref(DB_ROOT+'/schedule/sch09').set({id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4});});});},4500);
 // Clean up any fake standings data — start fresh, coaches add manually
 setTimeout(function(){
   if(!db)return;
