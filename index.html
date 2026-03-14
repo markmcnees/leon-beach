@@ -32,6 +32,15 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .card-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;color:var(--red);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .card-title .bar{width:4px;height:18px;border-radius:2px;background:var(--red);display:inline-block;}
 .card-title.blue{color:var(--blue);}.card-title.blue .bar{background:var(--blue);}
+.card-title.gold{color:var(--gold);}.card-title.gold .bar{background:var(--gold);}
+.dual-card{background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border-left:4px solid var(--gold);position:relative;}
+.dual-card.win{border-left-color:var(--green);}.dual-card.loss{border-left-color:var(--loss-red);}
+.dual-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.dual-result-badge{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;line-height:1;}
+.dual-result-badge.win{color:var(--green);}.dual-result-badge.loss{color:var(--loss-red);}
+.dual-court-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:13px;}
+.dual-court-row:last-child{border-bottom:none;}
+.dual-review-block{background:var(--off-white);border-radius:10px;padding:14px;margin-bottom:14px;}
 .card-title.purple{color:var(--purple);}.card-title.purple .bar{background:var(--purple);}
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .stat-grid.cols-3{grid-template-columns:repeat(3,1fr);}
@@ -299,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260312150826">
+  <meta name="build-version" content="20260313-duals">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -363,6 +372,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="players">Players</button>
     <button class="tab" data-tab="gameday">Game Day</button>
+    <button class="tab" data-tab="duals">Duals</button>
     <button class="tab" data-tab="goals">Goals</button>
     <button class="tab" data-tab="settings">Roster</button>
     <button class="tab" onclick="window.location.href='https://markmcnees.github.io/leon-beach/leon-queens-profiles.html'" style="border-left:1px solid rgba(255,255,255,0.15);">Profiles ↗</button>
@@ -374,7 +384,8 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   <div class="tab-content active" id="tab-dashboard">
     <div class="card"><div class="card-title"><span class="bar"></span> Season Overview</div>
       <div class="stat-grid">
-        <div class="stat-box"><div class="stat-number" id="dash-queens-rec">0-0</div><div class="stat-label">Queens W-L</div></div>
+        <div class="stat-box"><div class="stat-number gold" id="dash-dual-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
+                <div class="stat-box"><div class="stat-number" id="dash-queens-rec">0-0</div><div class="stat-label">Queens W-L</div></div>
         <div class="stat-box"><div class="stat-number green" id="dash-gd-rec">0-0</div><div class="stat-label">Game Day Sets</div></div>
         <div class="stat-box"><div class="stat-number purple" id="dash-scrim-rec">0-0</div><div class="stat-label">Scrimmage Sets</div></div>
         <div class="stat-box"><div class="stat-number" id="dash-days">0</div><div class="stat-label">Match Days</div></div>
@@ -602,6 +613,35 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="card"><div class="card-title blue"><span class="bar"></span> Game Day Matches</div>
       <div class="date-filter"><label style="font-size:13px;font-weight:700;">Date:</label><input type="date" id="gd-filter-date" class="form-input" style="max-width:180px;padding:8px 12px;"></div>
       <div id="gd-matches-list"></div>
+    </div>
+  </div>
+
+
+  <!-- ====== DUALS ====== -->
+  <div class="tab-content" id="tab-duals">
+    <div class="card">
+      <div class="card-title gold"><span class="bar" style="background:var(--gold);"></span> Dual Match Record</div>
+      <div class="stat-grid cols-3">
+        <div class="stat-box"><div class="stat-number gold" id="dual-season-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
+        <div class="stat-box"><div class="stat-number" id="dual-season-total">0</div><div class="stat-label">Total Duals</div></div>
+        <div class="stat-box"><div class="stat-number green" id="dual-courts-rec">0-0</div><div class="stat-label">Court W-L</div></div>
+      </div>
+    </div>
+    <div class="card" style="border:2px solid var(--gold);">
+      <div class="card-title gold"><span class="bar" style="background:var(--gold);"></span> Upload Dual Scoresheet</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Photograph the handwritten scoresheet after a dual. AI reads the opponent, pairings, and all set scores — then automatically creates the dual record and individual match entries for player stats.</p>
+      <div class="form-group">
+        <label class="form-label" style="font-size:11px;">Match Date</label>
+        <input type="date" class="form-input" id="dual-scan-date" style="padding:8px;font-size:13px;">
+      </div>
+      <input type="file" id="dual-scan-file" accept="image/*" capture="environment" style="display:none;">
+      <button class="btn btn-small" style="width:100%;background:var(--gold);color:var(--black);border:none;font-size:15px;padding:12px;" onclick="document.getElementById('dual-scan-file').click();">&#128248; Take Photo or Upload Scoresheet</button>
+      <div id="dual-scan-preview" style="margin-top:10px;"></div>
+      <div id="dual-scan-result" style="margin-top:10px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="bar"></span> Dual History</div>
+      <div id="duals-list"><div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.<br>Upload a scoresheet above to get started!</p></div></div>
     </div>
   </div>
 
@@ -874,7 +914,7 @@ const DEF_M=[
   {id:'m09',date:'2026-02-06',court:2,team1:['p15','p04'],team2:['p05','p06'],score1:21,score2:15}
 ];
 
-let D={players:[],matches:[],planned:[],gamedays:[],scrimmages:[],schedule:[],standings:{},goals:{},assignments:{}};
+let D={players:[],matches:[],planned:[],gamedays:[],scrimmages:[],schedule:[],standings:{},goals:{},assignments:{},duals:[]};
 let profilesData={}; // from leon_queens node for AI context
 let pgdNotes={}; // player self-notes per date: pgdNotes[pid][date]
 let _autoLoginDone=false;
@@ -902,10 +942,11 @@ function listenData(){if(!db)return;
       D.standings=val.standings||{};
       D.goals=val.goals||{};
       D.assignments=val.assignments||{};
+      D.duals=val.duals?Object.values(val.duals):[];
     }else{
       D.players=JSON.parse(JSON.stringify(DEF_P));
       D.matches=JSON.parse(JSON.stringify(DEF_M));
-      D.planned=[];D.gamedays=[];D.scrimmages=[];
+      D.planned=[];D.gamedays=[];D.scrimmages=[];D.duals=[];
       seedDB();
     }
     refreshCurrent();
@@ -1020,7 +1061,8 @@ function renderDash(){
   const totalQM=D.matches.length;
   // Actually count unique wins across all players
   let totalQWins=D.matches.length; // each match = 1 win, 1 loss
-  document.getElementById('dash-queens-rec').textContent=totalQM+' matches';
+  const _dualRec=getDualRecord();const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dualRec.w+'-'+_dualRec.l;
+    document.getElementById('dash-queens-rec').textContent=totalQM+' matches';
 
   // Game Day sets
   let gdSW=0,gdSL=0,gdPF=0,gdPA=0,gdDays=new Set(),gdMatches=0;
@@ -1568,6 +1610,7 @@ function refreshTab(id){
     case'players':renderPlayers();break;
     case'queens':renderQueens();break;
     case'gameday':renderExtMatches('gameday');buildAssignSlots();renderAssignments();break;
+    case'duals':renderDuals();break;
     case'scrimmage':renderExtMatches('scrimmage');break;
     case'goals':renderCoachGoals();break;
     case'settings':renderRoster();break;
@@ -4212,9 +4255,275 @@ function pgdSaveNotes(){
   pgdNotes[currentPlayerId][pgdCurrentDate]={performance:perf,opponent:opp,savedAt:td()};
 }
 
+
+// ============================================================
+// DUALS
+// ============================================================
+function getDualRecord(){
+  let w=0,l=0,cw=0,cl=0;
+  (D.duals||[]).forEach(d=>{
+    const lc=d.leonCourts||0,oc=d.oppCourts||0;
+    if(lc>oc)w++;else if(oc>lc)l++;
+    (d.courts||[]).filter(c=>!c.isExhibition).forEach(c=>{
+      const sw=(c.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
+      const sl=(c.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
+      if(sw>sl)cw++;else if(sl>sw)cl++;
+    });
+  });
+  return{w,l,cw,cl,total:(D.duals||[]).length};
+}
+
+function renderDuals(){
+  const rec=getDualRecord();
+  const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  setEl('dual-season-rec',rec.w+'-'+rec.l);
+  setEl('dual-season-total',rec.total);
+  setEl('dual-courts-rec',rec.cw+'-'+rec.cl);
+  setEl('dash-dual-rec',rec.w+'-'+rec.l);
+  const duals=[...(D.duals||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const container=document.getElementById('duals-list');
+  if(!container)return;
+  if(!duals.length){container.innerHTML='<div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.<br>Upload a scoresheet above to get started!</p></div>';return;}
+  let h='';
+  duals.forEach(d=>{
+    const win=(d.leonCourts||0)>(d.oppCourts||0),loss=(d.oppCourts||0)>(d.leonCourts||0);
+    const locLabel=d.location==='away'?'@ ':d.location==='neutral'?'(N) ':'vs ';
+    const scored=(d.courts||[]).filter(c=>!c.isExhibition);
+    const exhib=(d.courts||[]).filter(c=>c.isExhibition);
+    h+=`<div class="dual-card ${win?'win':loss?'loss':''}">
+      <div style="position:absolute;top:8px;right:8px;">
+        <button class="match-action-btn" onclick="deleteDual('${d.id}')" title="Delete">&#x2715;</button>
+      </div>
+      <div class="dual-header">
+        <div>
+          <div style="font-size:12px;color:var(--gray);font-weight:600;">${fD(d.date)}</div>
+          <div style="font-weight:700;font-size:17px;margin-top:2px;">${locLabel}${d.opponent||'TBD'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="dual-result-badge ${win?'win':loss?'loss':''}">${win?'W':loss?'L':'&#8212;'} ${d.leonCourts||0}-${d.oppCourts||0}</div>
+          <div style="font-size:10px;color:var(--gray);margin-top:2px;">${win?'Dual Win':loss?'Dual Loss':'Tied'}</div>
+        </div>
+      </div>`;
+    if(scored.length){
+      h+='<div style="margin-top:8px;">';
+      scored.forEach(c=>{
+        const pair=(c.pair||[]).map(id=>pN(id)).join(' & ')||'TBD';
+        const sets=c.sets||[];let sw=0,sl=0;sets.forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++;});
+        const cWin=sw>sl;
+        const setsStr=sets.map(s=>s.scoreUs+'-'+s.scoreThem).join(', ')||'—';
+        h+=`<div class="dual-court-row">
+          <span class="court-badge court-${c.court}" style="min-width:28px;text-align:center;">${c.court}</span>
+          <span style="flex:1;font-weight:600;font-size:12px;">${pair}</span>
+          <span style="font-family:'Bebas Neue';font-size:14px;color:${cWin?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</span>
+          <span style="font-size:11px;color:var(--gray);min-width:80px;text-align:right;">${setsStr}</span>
+        </div>`;
+      });
+      h+='</div>';
+    }
+    if(exhib.length){
+      h+='<div style="font-size:10px;font-weight:800;color:var(--gray);letter-spacing:1px;margin:6px 0 2px;padding-top:4px;border-top:1px dashed var(--gray-lighter);">EXHIBITION</div>';
+      exhib.forEach(c=>{
+        const pair=(c.pair||[]).map(id=>pN(id)).join(' & ')||'TBD';
+        const sets=c.sets||[];const setsStr=sets.length?sets.map(s=>s.scoreUs+'-'+s.scoreThem).join(', '):'—';
+        h+=`<div class="dual-court-row" style="opacity:0.65;">
+          <span class="court-badge court-${c.court}" style="min-width:28px;text-align:center;">${c.court}</span>
+          <span style="flex:1;font-size:12px;">${pair}</span>
+          <span style="font-size:10px;color:var(--purple);font-weight:700;">Exhib</span>
+          <span style="font-size:11px;color:var(--gray);min-width:80px;text-align:right;">${setsStr}</span>
+        </div>`;
+      });
+    }
+    h+='</div>';
+  });
+  container.innerHTML=h;
+}
+
+let _delDualArmed={};
+function deleteDual(id){
+  if(_delDualArmed[id]){clearTimeout(_delDualArmed[id]);delete _delDualArmed[id];fbRemove('duals/'+id);toast('Dual deleted');}
+  else{_delDualArmed[id]=setTimeout(()=>{delete _delDualArmed[id];},3000);toast('Tap again to confirm delete');}
+}
+
+// ── DUAL SCORESHEET UPLOAD ──────────────────────────────────
+function initDualScanner(){
+  const dateEl=document.getElementById('dual-scan-date');
+  if(dateEl)dateEl.value=td();
+  const fileEl=document.getElementById('dual-scan-file');
+  if(!fileEl)return;
+  fileEl.addEventListener('change',async function(e){
+    const file=e.target.files[0];if(!file)return;
+    const preview=document.getElementById('dual-scan-preview');
+    const result=document.getElementById('dual-scan-result');
+    const reader=new FileReader();
+    reader.onload=async function(ev){
+      const base64=ev.target.result.split(',')[1];
+      const mediaType=file.type||'image/jpeg';
+      preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;border-radius:8px;border:2px solid var(--gray-lighter);">`;
+      result.innerHTML='<div class="ai-loading"><div class="spinner"></div><div style="margin-top:8px;">AI is reading your dual scoresheet...</div></div>';
+      const date=document.getElementById('dual-scan-date').value||td();
+      const playerList=D.players.map(p=>p.firstName+' '+p.lastName+' ('+p.id+')').join(', ');
+      try{
+        const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            model:'claude-sonnet-4-20250514',max_tokens:2000,
+            messages:[{role:'user',content:[
+              {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+              {type:'text',text:`You are reading a handwritten high school beach volleyball DUAL MATCH scoresheet for Leon Queens.
+
+A dual has courts 1-5 counting toward the result. Courts 6+ are exhibition.
+There may be ONE or MULTIPLE duals on this sheet (each has a different opponent header e.g. "VS Destin W5-0").
+
+PLAYER ROSTER - match abbreviated names to these IDs:
+${playerList}
+
+COMMON ABBREVIATIONS:
+Reag/RP = Reagan Giles (p16) + Riley Perezluha (p08)
+Jord/Kend = Jordyn Russell (p13) + Kendall Cruse (p06)
+Dez/Am = Destyni Zuema (p02) + Aubri Moore (p07)
+Ri/Bent or R/Bent = Riley Knipple (p01) + Bentley Barnard (p10)
+Liz/Madi = Lizzie Roader (p09) + Madalynn Edenfield (p12)
+Salem/Jaz = Salem Ehrhardt (p15) + Jazmin Burdick (p11)
+Eden/Madalynn = Eden Codd (p05) + Madalynn Edenfield (p12)
+
+SCORE FORMAT: W21-18 W21-11 means Leon won set1 21-18, won set2 21-11
+L19-21 means Leon lost a set 19-21
+
+Return ONLY a JSON array, one element per dual:
+[{"opponent":"Destin","leonCourts":5,"oppCourts":0,"courts":[{"court":2,"pair":["p16","p08"],"sets":[{"scoreUs":21,"scoreThem":18},{"scoreUs":21,"scoreThem":11}],"isExhibition":false}]}]
+
+RULES: court 1-5 isExhibition:false, court 6+ isExhibition:true. Include ALL courts. Respond with ONLY the JSON array, no other text.`}
+            ]}]
+          })
+        });
+        const data=await response.json();
+        const text=data.content?.map(c=>c.text||'').join('')||'';
+        const clean=text.replace(/\`\`\`json|\`\`\`/g,'').trim();
+        let parsed;
+        try{parsed=JSON.parse(clean);}catch(pe){
+          result.innerHTML=`<div style="color:var(--loss-red);font-size:13px;">Could not parse AI response. Raw output:</div><pre style="font-size:11px;background:var(--off-white);padding:10px;border-radius:6px;overflow-x:auto;white-space:pre-wrap;">${text}</pre>`;return;
+        }
+        if(!Array.isArray(parsed))parsed=[parsed];
+        showDualReviewUI(parsed,date,result);
+      }catch(err){
+        console.error('Dual scan error:',err);
+        result.innerHTML='<div style="color:var(--loss-red);font-size:13px;">Error reading scoresheet. Try a clearer photo.</div>';
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value='';
+  });
+}
+
+function showDualReviewUI(duals,date,container){
+  const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
+  function playerOpts(selId){return'<option value="">Select Player</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (CT${pl.court})</option>`).join('');}
+  let h=`<div style="font-family:'Bebas Neue';font-size:15px;letter-spacing:1px;margin-bottom:10px;color:var(--green);">Found ${duals.length} dual(s) — review and save</div>`;
+  h+=`<div style="font-size:12px;color:var(--gray);margin-bottom:14px;padding:8px 12px;background:#fffbeb;border-radius:6px;border-left:3px solid var(--gold);">Saving creates the dual record AND individual Game Day match entries so player stats update automatically.</div>`;
+  duals.forEach((d,di)=>{
+    const win=(d.leonCourts||0)>(d.oppCourts||0),loss=(d.oppCourts||0)>(d.leonCourts||0);
+    h+=`<div class="dual-review-block" style="border-left:4px solid ${win?'var(--green)':loss?'var(--loss-red)':'var(--gray-lighter)'};">
+      <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;margin-bottom:10px;color:${win?'var(--green)':loss?'var(--loss-red)':'var(--charcoal)'};">DUAL ${di+1} ${win?'— WIN':loss?'— LOSS':''}</div>
+      <div class="form-row" style="margin-bottom:8px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent</label>
+          <input type="text" class="form-input" id="dr-${di}-opp" value="${d.opponent||''}" placeholder="Opponent name" style="padding:8px;font-size:13px;"></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Location</label>
+          <select class="form-select" id="dr-${di}-loc" style="padding:8px;font-size:13px;"><option value="home">Home</option><option value="away">Away</option><option value="neutral">Neutral</option></select></div>
+      </div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Leon Courts Won</label>
+          <input type="number" class="form-input" id="dr-${di}-leon" value="${d.leonCourts||0}" min="0" max="7" style="padding:8px;font-size:13px;"></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opp Courts Won</label>
+          <input type="number" class="form-input" id="dr-${di}-oppc" value="${d.oppCourts||0}" min="0" max="7" style="padding:8px;font-size:13px;"></div>
+      </div>
+      <div style="font-family:'Bebas Neue';font-size:11px;letter-spacing:1px;color:var(--gray);margin-bottom:6px;">COURT RESULTS</div>`;
+    (d.courts||[]).forEach((c,ci)=>{
+      const isExhib=(c.isExhibition)||(c.court>=6);
+      h+=`<div style="background:${isExhib?'#f5f3ff':'var(--white)'};border-radius:8px;padding:10px;margin-bottom:8px;border:1px solid ${isExhib?'#c4b5fd':'var(--gray-lighter)'};">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-family:'Bebas Neue';font-size:11px;color:var(--gray);">CT</span>
+          <input type="number" id="dr-${di}-${ci}-court" value="${c.court||ci+1}" min="1" max="8" style="width:48px;padding:4px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;font-weight:700;">
+          <span style="font-size:10px;font-weight:800;padding:2px 6px;border-radius:4px;${isExhib?'color:var(--purple);background:#ede9fe;':'color:var(--green);background:#dcfce7;'}">${isExhib?'EXHIB':'SCORED'}</span>
+        </div>
+        <div class="form-row" style="margin-bottom:6px;">
+          <select class="form-select" id="dr-${di}-${ci}-p1" style="padding:6px;font-size:12px;">${playerOpts((c.pair||[])[0])}</select>
+          <select class="form-select" id="dr-${di}-${ci}-p2" style="padding:6px;font-size:12px;">${playerOpts((c.pair||[])[1])}</select>
+        </div>`;
+      (c.sets||[]).forEach((s,si)=>{
+        const setWin=(s.scoreUs||0)>(s.scoreThem||0);
+        h+=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <span style="font-size:11px;color:var(--gray);min-width:36px;font-weight:700;">Set ${si+1}</span>
+          <input type="number" id="dr-${di}-${ci}-s${si}-us" value="${s.scoreUs||0}" min="0" style="width:54px;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:14px;text-align:center;">
+          <span style="color:var(--gray);">&#8212;</span>
+          <input type="number" id="dr-${di}-${ci}-s${si}-them" value="${s.scoreThem||0}" min="0" style="width:54px;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:14px;text-align:center;">
+          <span style="font-size:11px;font-weight:700;color:${setWin?'var(--green)':'var(--loss-red)'};">${setWin?'W':'L'}</span>
+        </div>`;
+      });
+      h+='</div>';
+    });
+    h+='</div>';
+  });
+  h+=`<div style="display:flex;gap:8px;margin-top:12px;">
+    <button class="btn btn-success btn-small" style="flex:1;padding:12px;" onclick="confirmDualSave()">Save All Duals + Create Match Records</button>
+    <button class="btn btn-secondary btn-small" onclick="document.getElementById('dual-scan-result').innerHTML='';document.getElementById('dual-scan-preview').innerHTML='';">Cancel</button>
+  </div>`;
+  container.innerHTML=h;
+  window._dualReviewData={duals,date};
+}
+
+function confirmDualSave(){
+  const{duals,date}=window._dualReviewData||{};
+  if(!duals||!duals.length){toast('No data to save');return;}
+  let dualsSaved=0,matchesCreated=0;
+  duals.forEach((d,di)=>{
+    const opponent=(document.getElementById('dr-'+di+'-opp')?.value||'').trim()||d.opponent||'Unknown';
+    const location=document.getElementById('dr-'+di+'-loc')?.value||'home';
+    const leonCourts=parseInt(document.getElementById('dr-'+di+'-leon')?.value)||0;
+    const oppCourts=parseInt(document.getElementById('dr-'+di+'-oppc')?.value)||0;
+    const courts=[];
+    (d.courts||[]).forEach((c,ci)=>{
+      const court=parseInt(document.getElementById('dr-'+di+'-'+ci+'-court')?.value)||c.court||ci+1;
+      const p1=document.getElementById('dr-'+di+'-'+ci+'-p1')?.value;
+      const p2=document.getElementById('dr-'+di+'-'+ci+'-p2')?.value;
+      const isExhibition=court>=6;
+      const sets=[];
+      for(let si=0;si<10;si++){
+        const usEl=document.getElementById('dr-'+di+'-'+ci+'-s'+si+'-us');
+        const themEl=document.getElementById('dr-'+di+'-'+ci+'-s'+si+'-them');
+        if(!usEl)break;
+        sets.push({scoreUs:parseInt(usEl.value)||0,scoreThem:parseInt(themEl.value)||0});
+      }
+      const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
+      const sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
+      courts.push({court,pair:[p1,p2].filter(Boolean),sets,isExhibition,courtResult:sw>sl?'W':'L'});
+      if(p1&&p2&&sets.length){
+        const pair=[p1,p2];
+        const already=D.gamedays.find(m=>m.date===date&&arrEq(m.pair||[],pair));
+        if(!already){
+          const mid=gi('gd');
+          const matchSets=sets.map(s=>{const stats={};pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,d:0,e:0};});return{...s,stats};});
+          fbSet('gamedays/'+mid,{id:mid,date,court,pair,opponent:opponent+' CT'+court,sets:matchSets,isExhibition});
+          matchesCreated++;
+        }
+      }
+    });
+    const dualId=gi('dual');
+    fbSet('duals/'+dualId,{id:dualId,date,opponent,location,leonCourts,oppCourts,dualWin:leonCourts>oppCourts,courts,createdAt:td()});
+    dualsSaved++;
+    // Auto-update schedule result if date+opponent match
+    const schedMatch=D.schedule.find(g=>g.date===date&&(g.opponent||'').toLowerCase().includes(opponent.toLowerCase().split(' ')[0]));
+    if(schedMatch&&schedMatch.scoreUs==null){fbSet('schedule/'+schedMatch.id+'/scoreUs',leonCourts);fbSet('schedule/'+schedMatch.id+'/scoreThem',oppCourts);}
+  });
+  toast(dualsSaved+' dual(s) + '+matchesCreated+' match records saved!');
+  document.getElementById('dual-scan-result').innerHTML='<div style="color:var(--green);font-size:14px;font-weight:700;padding:12px;background:var(--green-bg);border-radius:8px;">Saved! Check Dual History below and Game Day tab for match entries.</div>';
+  document.getElementById('dual-scan-preview').innerHTML='';
+  window._dualReviewData=null;
+}
+
 // ============================================================
 // INIT
 // ============================================================
+initDualScanner();
 document.getElementById('q-date').value=td();
 document.getElementById('gd-date').value=td();
 document.getElementById('sc-date').value=td();
