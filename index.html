@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314154856">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -543,7 +543,11 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <button class="btn btn-secondary btn-small" id="import-data-btn">Import JSON</button>
         <input type="file" id="import-data" accept=".json" style="display:none;">
         <button class="btn btn-danger btn-small" id="clear-matches">Clear All Matches</button>
-        <button class="btn btn-small" id="migrate-to-duals" style="background:var(--gold);color:var(--black);">&#128190; Migrate Game Days &#8594; Duals</button></div></div>
+        <button class="btn btn-small" id="migrate-to-duals" style="background:var(--gold);color:var(--black);">&#128190; Migrate Game Days &#8594; Duals</button>
+        <button class="btn btn-small" onclick="seedMissingDuals()" style="background:#7c3aed;color:var(--white);">📋 Seed CCS / FSU / Mosley Scores</button>
+      </div>
+      <div id="seed-missing-status" style="margin-top:8px;font-size:12px;color:var(--gray);"></div>
+    </div>
 <div class="card"><div class="card-title" style="color:var(--blue);"><span class="bar" style="background:var(--blue);"></span> 📸 Upload Court Assignment Sheet</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a court assignment sheet — Leon's or the opponent's — and AI will extract the court pairings.</p>
       <div class="form-row" style="margin-bottom:8px;">
@@ -4504,6 +4508,64 @@ function confirmDualSave(){
   document.getElementById('dual-scan-result').innerHTML='<div style="color:var(--green);font-size:14px;font-weight:700;padding:12px;background:var(--green-bg);border-radius:8px;">Saved! Check Dual History below and Game Day tab for match entries.</div>';
   document.getElementById('dual-scan-preview').innerHTML='';
   window._dualReviewData=null;
+}
+
+// ============================================================
+// SEED MISSING DUAL DATA (CCS, FSU HS, Mosley)
+// ============================================================
+function seedMissingDuals(){
+  if(!db){toast('Not connected');return;}
+  const MISSING=[
+    // Community Christian 2/24 — W 4-1
+    {date:'2026-02-24',court:1,pair:['p01','p10'],opponent:'Community Christian CT1',sets:[{scoreUs:21,scoreThem:19},{scoreUs:16,scoreThem:21},{scoreUs:15,scoreThem:7}]},
+    {date:'2026-02-24',court:2,pair:['p16','p08'],opponent:'Community Christian CT2',sets:[{scoreUs:21,scoreThem:15},{scoreUs:21,scoreThem:19}]},
+    {date:'2026-02-24',court:3,pair:['p13','p06'],opponent:'Community Christian CT3',sets:[{scoreUs:21,scoreThem:9},{scoreUs:21,scoreThem:7}]},
+    {date:'2026-02-24',court:4,pair:['p02','p09'],opponent:'Community Christian CT4',sets:[{scoreUs:16,scoreThem:21},{scoreUs:22,scoreThem:20},{scoreUs:13,scoreThem:15}]},
+    {date:'2026-02-24',court:5,pair:['p11','p15'],opponent:'Community Christian CT5',sets:[{scoreUs:21,scoreThem:0},{scoreUs:21,scoreThem:7}]},
+    {date:'2026-02-24',court:6,pair:['p05','p03'],opponent:'Community Christian Exhibition',sets:[{scoreUs:21,scoreThem:10},{scoreUs:21,scoreThem:9}],isExhibition:true},
+    // Florida State University HS 3/3 — L 2-3
+    {date:'2026-03-03',court:1,pair:['p01','p10'],opponent:'Florida State University HS CT1',sets:[{scoreUs:16,scoreThem:21},{scoreUs:23,scoreThem:21},{scoreUs:17,scoreThem:19}]},
+    {date:'2026-03-03',court:2,pair:['p16','p08'],opponent:'Florida State University HS CT2',sets:[{scoreUs:17,scoreThem:21},{scoreUs:18,scoreThem:21}]},
+    {date:'2026-03-03',court:3,pair:['p13','p06'],opponent:'Florida State University HS CT3',sets:[{scoreUs:21,scoreThem:10},{scoreUs:18,scoreThem:21},{scoreUs:15,scoreThem:11}]},
+    {date:'2026-03-03',court:4,pair:['p02','p03'],opponent:'Florida State University HS CT4',sets:[{scoreUs:8,scoreThem:21},{scoreUs:21,scoreThem:14},{scoreUs:11,scoreThem:15}]},
+    {date:'2026-03-03',court:5,pair:['p11','p15'],opponent:'Florida State University HS CT5',sets:[{scoreUs:21,scoreThem:16},{scoreUs:21,scoreThem:15}]},
+    {date:'2026-03-03',court:6,pair:['p05','p09'],opponent:'Florida State University HS Exhibition',sets:[{scoreUs:23,scoreThem:21},{scoreUs:16,scoreThem:21},{scoreUs:15,scoreThem:7}],isExhibition:true},
+    {date:'2026-03-03',court:7,pair:['p07','p12'],opponent:'Florida State University HS Exhibition',sets:[{scoreUs:11,scoreThem:21}],isExhibition:true},
+    {date:'2026-03-03',court:8,pair:['p12','p14'],opponent:'Florida State University HS Exhibition',sets:[{scoreUs:16,scoreThem:21}],isExhibition:true},
+    // Mosley 3/5 — W 3-2
+    {date:'2026-03-05',court:1,pair:['p01','p16'],opponent:'Mosley CT1',sets:[{scoreUs:21,scoreThem:14},{scoreUs:21,scoreThem:15}]},
+    {date:'2026-03-05',court:2,pair:['p10','p08'],opponent:'Mosley CT2',sets:[{scoreUs:21,scoreThem:18},{scoreUs:21,scoreThem:17}]},
+    {date:'2026-03-05',court:3,pair:['p13','p06'],opponent:'Mosley CT3',sets:[{scoreUs:21,scoreThem:6},{scoreUs:21,scoreThem:11}]},
+    {date:'2026-03-05',court:4,pair:['p11','p15'],opponent:'Mosley CT4',sets:[{scoreUs:20,scoreThem:22},{scoreUs:14,scoreThem:21}]},// ⚠️ Set 2 score unclear on sheet — verify & correct if needed
+    {date:'2026-03-05',court:5,pair:['p02','p03'],opponent:'Mosley CT5',sets:[{scoreUs:16,scoreThem:21},{scoreUs:22,scoreThem:20},{scoreUs:9,scoreThem:15}]},
+    {date:'2026-03-05',court:6,pair:['p05','p07'],opponent:'Mosley Exhibition',sets:[{scoreUs:21,scoreThem:12},{scoreUs:16,scoreThem:21},{scoreUs:15,scoreThem:6}],isExhibition:true},
+    {date:'2026-03-05',court:7,pair:['p09','p04'],opponent:'Mosley Exhibition',sets:[{scoreUs:21,scoreThem:8},{scoreUs:17,scoreThem:15}],isExhibition:true},
+    {date:'2026-03-05',court:8,pair:['p12','p14'],opponent:'Mosley Exhibition',sets:[{scoreUs:12,scoreThem:21}],isExhibition:true},
+  ];
+  const u={};let skipped=0;
+  MISSING.forEach(function(m){
+    // Skip if a match for this pair+date already exists
+    const already=D.gamedays.find(function(g){
+      return g.date===m.date&&g.pair&&g.pair.length===2&&
+        g.pair.slice().sort().join()==m.pair.slice().sort().join();
+    });
+    if(already){skipped++;return;}
+    const id=gi('gd');
+    const stats={};m.pair.forEach(function(pid){stats[pid]={k:0,b:0,a:0,d:0,e:0};});
+    const sets=m.sets.map(function(s){return{scoreUs:s.scoreUs,scoreThem:s.scoreThem,stats:JSON.parse(JSON.stringify(stats))};});
+    u[DB_ROOT+'/gamedays/'+id]={id:id,date:m.date,court:m.court,pair:m.pair,opponent:m.opponent,sets:sets,isExhibition:m.isExhibition||false};
+  });
+  const statusEl=document.getElementById('seed-missing-status');
+  if(!Object.keys(u).length){
+    if(statusEl)statusEl.textContent='✓ All data already in Firebase ('+skipped+' courts skipped)';
+    toast('All data already present');return;
+  }
+  db.ref().update(u,function(err){
+    if(err){toast('Error: '+err.message);return;}
+    const msg='✓ Added '+Object.keys(u).length+' court records'+(skipped?' ('+skipped+' already existed)':'')+'! ⚠️ Check Mosley CT4 Set 2 score.';
+    if(statusEl)statusEl.textContent=msg;
+    toast('Done! '+Object.keys(u).length+' courts added');
+  });
 }
 
 // ============================================================
