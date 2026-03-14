@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="20260314-schedule-fix">
 <title>Leon Beach Volleyball Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -371,7 +371,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   <div class="tabs" id="tabs">
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="players">Players</button>
-    <button class="tab" data-tab="gameday">Game Day</button>
+    <button class="tab" data-tab="gameday">Dual Matches</button>
     <button class="tab" data-tab="duals">Duals</button>
     <button class="tab" data-tab="goals">Goals</button>
     <button class="tab" data-tab="settings">Roster</button>
@@ -386,12 +386,12 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="stat-grid">
         <div class="stat-box"><div class="stat-number gold" id="dash-dual-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
                 <div class="stat-box"><div class="stat-number" id="dash-queens-rec">0-0</div><div class="stat-label">Queens W-L</div></div>
-        <div class="stat-box"><div class="stat-number green" id="dash-gd-rec">0-0</div><div class="stat-label">Game Day Sets</div></div>
+        <div class="stat-box"><div class="stat-number green" id="dash-gd-rec">0-0</div><div class="stat-label">Dual Sets</div></div>
         <div class="stat-box"><div class="stat-number purple" id="dash-scrim-rec">0-0</div><div class="stat-label">Scrimmage Sets</div></div>
         <div class="stat-box"><div class="stat-number" id="dash-days">0</div><div class="stat-label">Match Days</div></div>
       </div>
     </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> Season Game Day Stats</div>
+    <div class="card"><div class="card-title"><span class="bar"></span> Season Dual Stats</div>
       <div class="stat-grid" id="dash-gd-overview" style="margin-bottom:14px;"></div>
       <div class="table-wrap"><table class="player-table" id="dash-gd-table"><thead><tr>
         <th>Player</th><th>Sets</th><th>+/-</th><th>K</th><th>B</th><th>A</th><th>D</th><th>E</th>
@@ -442,7 +442,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="filter-row" id="type-filter-players">
       <button class="filter-btn active" data-ptype="all">All</button>
       <button class="filter-btn" data-ptype="queens">Queens</button>
-      <button class="filter-btn blue" data-ptype="gameday">Game Day</button>
+      <button class="filter-btn blue" data-ptype="gameday">Dual</button>
       <button class="filter-btn purple" data-ptype="scrimmage">Scrimmage</button>
     </div>
     <div class="filter-row" id="court-filter-players">
@@ -507,7 +507,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 
     <!-- LIVE SCORE ENTRY -->
     <div class="card" style="border:2px solid var(--blue);">
-      <div class="card-title blue"><span class="bar"></span> 🏐 Live Score Entry
+      <div class="card-title blue"><span class="bar"></span> 🏐 Live Dual Score Entry
         <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Auto-loads today's assignment</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
@@ -554,7 +554,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
           </select></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Context</label>
           <select class="form-select" id="ai-pair-context" style="padding:8px;font-size:13px;">
-            <option value="gameday">Game Day (strongest pairings)</option>
+            <option value="gameday">Dual (strongest pairings)</option>
             <option value="scrimmage">Scrimmage (mix it up)</option>
             <option value="queens">Queens Practice (competitive balance)</option>
           </select></div>
@@ -563,14 +563,14 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div id="ai-pairings-result" style="margin-top:12px;"></div>
     </div>
     <div class="card"><div class="card-title blue"><span class="bar"></span> 📋 Upcoming Assignments</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Set lineups for game days and practice. Players see their assignment in their portal.</p>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Set lineups for duals and practice. Players see their assignment in their portal.</p>
       <div style="background:var(--off-white);border-radius:8px;padding:14px;margin-bottom:14px;">
         <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Create Assignment</div>
         <div class="form-row" style="margin-bottom:8px;">
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label><input type="date" class="form-input" id="assign-date" style="padding:8px;font-size:13px;"></div>
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
             <select class="form-select" id="assign-type" style="padding:8px;font-size:13px;">
-              <option value="gameday">Season Game</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
+              <option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
             </select></div>
         </div>
         <div class="form-row" style="margin-bottom:8px;">
@@ -586,7 +586,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
       <div id="assignments-list"></div>
     </div>
-    <div class="card"><div class="card-title blue"><span class="bar"></span> New Game Day Match</div>
+    <div class="card"><div class="card-title blue"><span class="bar"></span> New Dual Match</div>
       <div class="form-row" style="margin-bottom:10px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label><input type="date" class="form-input" id="gd-date"></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Court</label>
@@ -610,7 +610,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="form-group" style="margin-bottom:10px;"><label class="form-label">Opponent</label><input type="text" class="form-input" id="gd-opp" placeholder="e.g. Wakulla CT5"></div>
       <button class="btn btn-blue" id="save-gd-match">Create Match</button>
     </div>
-    <div class="card"><div class="card-title blue"><span class="bar"></span> Game Day Matches</div>
+    <div class="card"><div class="card-title blue"><span class="bar"></span> Dual Match Log</div>
       <div class="date-filter"><label style="font-size:13px;font-weight:700;">Date:</label><input type="date" id="gd-filter-date" class="form-input" style="max-width:180px;padding:8px 12px;"></div>
       <div id="gd-matches-list"></div>
     </div>
@@ -690,7 +690,8 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <button class="btn btn-secondary btn-small" id="export-data">Export JSON</button>
         <button class="btn btn-secondary btn-small" id="import-data-btn">Import JSON</button>
         <input type="file" id="import-data" accept=".json" style="display:none;">
-        <button class="btn btn-danger btn-small" id="clear-matches">Clear All Matches</button></div></div>
+        <button class="btn btn-danger btn-small" id="clear-matches">Clear All Matches</button>
+        <button class="btn btn-small" id="migrate-to-duals" style="background:var(--gold);color:var(--black);">&#128190; Migrate Game Days &#8594; Duals</button></div></div>
     <div class="card"><div class="card-title" style="color:var(--blue);"><span class="bar" style="background:var(--blue);"></span> 📸 Upload Court Assignment Sheet</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a court assignment sheet — Leon's or the opponent's — and AI will extract the court pairings.</p>
       <div class="form-row" style="margin-bottom:8px;">
@@ -698,7 +699,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
           <input type="date" class="form-input" id="ca-date" style="padding:8px;font-size:13px;"></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
           <select class="form-select" id="ca-type" style="padding:8px;font-size:13px;">
-            <option value="gameday">Season Game</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
+            <option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
           </select></div>
       </div>
       <div class="form-row" style="margin-bottom:8px;">
@@ -721,7 +722,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Match Type</label>
           <select class="form-select" id="scan-type" style="padding:8px;font-size:13px;">
             <option value="queens">Queens (Leon vs Leon)</option>
-            <option value="gameday">Game Day</option>
+            <option value="gameday">Dual</option>
             <option value="scrimmage">Scrimmage</option>
           </select></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
@@ -748,7 +749,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   <!-- Tab bar -->
   <div class="pp-tab-bar">
     <button class="pp-tab-btn active" onclick="switchPPTab('stats',this)">📊 My Stats</button>
-    <button class="pp-tab-btn" onclick="switchPPTab('gameday',this)">🏐 Game Day</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('gameday',this)">🏐 My Duals</button>
   </div>
 
   <!-- MY STATS PANEL -->
@@ -772,7 +773,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="card"><div class="card-title"><span class="bar"></span> My Queens Matches</div>
       <div id="pp-queens"></div>
     </div>
-    <div class="card"><div class="card-title blue"><span class="bar"></span> My Game Day Results</div>
+    <div class="card"><div class="card-title blue"><span class="bar"></span> My Dual Results</div>
       <div id="pp-gameday"></div>
     </div>
     <div class="card"><div class="card-title purple"><span class="bar"></span> My Scrimmage Results</div>
@@ -1086,7 +1087,7 @@ function renderDash(){
   // Game Day overview boxes
   const gdTotalSets=gdSW+gdSL;
   document.getElementById('dash-gd-overview').innerHTML=`
-    <div class="stat-box"><div class="stat-number green">${gdDays.size}</div><div class="stat-label">Game Days</div></div>
+    <div class="stat-box"><div class="stat-number green">${gdDays.size}</div><div class="stat-label">Dual Days</div></div>
     <div class="stat-box"><div class="stat-number green">${gdSW}-${gdSL}</div><div class="stat-label">Court Record</div></div>
     <div class="stat-box"><div class="stat-number ${(gdPF-gdPA)>=0?'green':''}" style="${(gdPF-gdPA)<0?'color:var(--loss-red)':''}">${(gdPF-gdPA)>=0?'+':''}${gdPF-gdPA}</div><div class="stat-label">Point +/-</div></div>
     <div class="stat-box"><div class="stat-number green">${gdSW+gdSL}</div><div class="stat-label">Total Sets</div></div>`;
@@ -1102,7 +1103,7 @@ function renderDash(){
       <td>${s.sets}</td>
       <td class="plus-minus ${pmClass(s.diff)}" style="font-weight:700;">${pmStr(s.diff)}</td>
       <td>${s.k}</td><td>${s.b}</td><td>${s.a}</td><td>${s.d}</td><td>${s.e}</td></tr>`;
-  }).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:20px;">No game day data yet</td></tr>';
+  }).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:20px;">No dual data yet</td></tr>';
 
   // Queens leaders
   const qStats=D.players.map(p=>({...p,s:queensStats(p.id,D.matches)})).filter(p=>p.s.gp>0).sort((a,b)=>b.s.diff-a.s.diff).slice(0,8);
@@ -1338,6 +1339,7 @@ function renderQueens(){
   const c=document.getElementById('queens-log');
   if(!matches.length){c.innerHTML='<div class="empty-state"><div class="emoji">👑</div><p>No Queens matches yet.</p></div>';return;}
   const grouped={};matches.forEach(m=>{if(!grouped[m.date])grouped[m.date]=[];grouped[m.date].push(m);});
+  Object.keys(grouped).forEach(d=>grouped[d].sort((a,b)=>(a.court||0)-(b.court||0)));
   let html='';
   Object.keys(grouped).sort().reverse().forEach(date=>{
     html+=`<div class="section-divider">${fD(date)}</div>`;
@@ -1414,11 +1416,12 @@ function renderExtMatches(type){
   matches.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
 
   if(!matches.length){
-    container.innerHTML=`<div class="empty-state"><div class="emoji">${isGD?'🏐':'⚡'}</div><p>No ${isGD?'game day':'scrimmage'} matches${filterDate?' on '+fD(filterDate):''}.</p></div>`;
+    container.innerHTML=`<div class="empty-state"><div class="emoji">${isGD?'🏐':'⚡'}</div><p>No ${isGD?'dual':'scrimmage'} matches${filterDate?' on '+fD(filterDate):''}.</p></div>`;
     return;
   }
 
   const grouped={};matches.forEach(m=>{if(!grouped[m.date])grouped[m.date]=[];grouped[m.date].push(m);});
+  Object.keys(grouped).forEach(d=>grouped[d].sort((a,b)=>(a.court||0)-(b.court||0)));
   let html='';
   Object.keys(grouped).sort().reverse().forEach(date=>{
     html+=`<div class="section-divider">${fD(date)}</div>`;
@@ -1547,7 +1550,7 @@ function openExtEdit(id,type){
   const m=list.find(x=>x.id===id);if(!m)return;
   const isGD=type==='gameday';
   editQId=null; // clear queens edit
-  document.querySelector('#edit-modal .modal-title').innerHTML=`Edit ${isGD?'Game Day':'Scrimmage'} Match <button class="modal-close" onclick="closeEdit()">✕</button>`;
+  document.querySelector('#edit-modal .modal-title').innerHTML=`Edit ${isGD?'Dual':'Scrimmage'} Match <button class="modal-close" onclick="closeEdit()">✕</button>`;
   document.querySelector('#edit-modal .modal-title').style.color=isGD?'var(--blue)':'var(--purple)';
   document.getElementById('edit-modal-body').innerHTML=`
     <div class="form-row" style="margin-bottom:10px;">
@@ -3307,7 +3310,7 @@ function renderAssignments(){
   let h='';
   entries.forEach(a=>{
     const isPast=a.date<today;
-    const typeLabel=a.type==='gameday'?'🏐 Season Game':a.type==='scrimmage'?'🤝 Scrimmage':'👑 Queens';
+    const typeLabel=a.type==='gameday'?'🏐 Dual':a.type==='scrimmage'?'🤝 Scrimmage':'👑 Queens';
     const typeColor=a.type==='gameday'?'var(--blue)':a.type==='scrimmage'?'var(--purple)':'var(--red)';
     h+=`<div style="border-left:4px solid ${typeColor};background:${isPast?'var(--gray-lighter)':'var(--off-white)'};border-radius:8px;padding:12px;margin-bottom:10px;${isPast?'opacity:0.6;':''}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -3319,7 +3322,7 @@ function renderAssignments(){
           <button data-del-assign="${a.id}" style="background:none;border:none;color:var(--gray-light);cursor:pointer;font-size:14px;padding:4px;" onclick="deleteAssignment('${a.id}')" title="Delete — tap once to arm, again to confirm">✕</button>
         </div>
       </div>`;
-    (a.courts||[]).forEach(c=>{
+    (a.courts||[]).sort((a,b)=>(a.court||0)-(b.court||0)).forEach(c=>{
       const p1=gP(c.p1),p2=gP(c.p2);
       h+=`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;">
         <span class="court-badge court-${c.court}" style="font-size:11px;min-width:40px;text-align:center;">CT ${c.court}</span>
@@ -3354,7 +3357,7 @@ function renderPlayerAssignment(pid){
     container.innerHTML='';return;
   }
   const partner=nextCourt.p1===pid?gP(nextCourt.p2):gP(nextCourt.p1);
-  const typeLabel=nextAssign.type==='gameday'?'🏐 Season Game':nextAssign.type==='scrimmage'?'🤝 Scrimmage':'👑 Queens';
+  const typeLabel=nextAssign.type==='gameday'?'🏐 Dual':nextAssign.type==='scrimmage'?'🤝 Scrimmage':'👑 Queens';
   const typeColor=nextAssign.type==='gameday'?'var(--blue)':nextAssign.type==='scrimmage'?'var(--purple)':'var(--red)';
   let h=`<div style="border:2px solid ${typeColor};border-radius:10px;padding:14px;background:var(--white);">
     <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1.5px;color:${typeColor};margin-bottom:4px;">YOUR NEXT ASSIGNMENT</div>
@@ -3478,7 +3481,7 @@ function renderLiveScoring(){
   const matchList=aType==='scrimmage'?D.scrimmages:D.gamedays;
   const fbNode=aType==='scrimmage'?'scrimmages':'gamedays';
   let h='';
-  (assignment.courts||[]).forEach((c,idx)=>{
+  (assignment.courts||[]).sort((a,b)=>(a.court||0)-(b.court||0)).forEach((c,idx)=>{
     const p1=gP(c.p1),p2=gP(c.p2);
     const pairKey=[c.p1,c.p2].filter(Boolean).sort().join('_');
     const courtLabel='Court '+c.court+(c.subCourt?c.subCourt.toUpperCase():'');
@@ -4109,7 +4112,7 @@ function renderPlayerGameDay(){
   if(nextAssign&&nextCourt){
     const partner=nextCourt.p1===pid?gP(nextCourt.p2):gP(nextCourt.p1);
     const courtLabel='Court '+nextCourt.court+(nextCourt.subCourt?nextCourt.subCourt.toUpperCase():'');
-    const typeLabel=nextAssign.type==='gameday'?'Game Day':'Scrimmage';
+    const typeLabel=nextAssign.type==='gameday'?'Dual':'Scrimmage';
     const isToday=nextAssign.date===today;
 
     pgdCurrentPair=[nextCourt.p1,nextCourt.p2].filter(Boolean);
@@ -4134,7 +4137,7 @@ function renderPlayerGameDay(){
 
     // Score entry card for own court
     h+=`<div class="pgd-court-section">
-      <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--blue);margin-bottom:8px;">MY COURT SCORES</div>`;
+      <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--blue);margin-bottom:8px;">MY DUAL SCORES</div>`;
 
     // Existing sets with edit buttons
     h+=pgdSetsHTML(existingSets,pgdCurrentMatchId,pgdCurrentPair,pid,'own');
@@ -4208,7 +4211,7 @@ function renderPlayerGameDay(){
   // Past game day history
   if(myMatches.length){
     h+=`<div style="background:var(--white);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);">
-      <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--blue);margin-bottom:10px;">MY GAME DAY HISTORY</div>`;
+      <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--blue);margin-bottom:10px;">MY DUAL HISTORY</div>`;
     myMatches.slice(0,8).forEach(m=>{
       const partner=(m.pair||[]).find(x=>x!==pid);
       const sets=m.sets||[];let sw=0,sl=0,pf=0,pa=0,tk=0,ta=0,tb=0,td2=0,te=0,hasStats=false;
@@ -4286,6 +4289,7 @@ function renderDuals(){
   if(!duals.length){container.innerHTML='<div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.<br>Upload a scoresheet above to get started!</p></div>';return;}
   let h='';
   duals.forEach(d=>{
+    d.courts=(d.courts||[]).sort((a,b)=>(a.court||0)-(b.court||0));
     const win=(d.leonCourts||0)>(d.oppCourts||0),loss=(d.oppCourts||0)>(d.leonCourts||0);
     const locLabel=d.location==='away'?'@ ':d.location==='neutral'?'(N) ':'vs ';
     const scored=(d.courts||[]).filter(c=>!c.isExhibition);
@@ -4545,8 +4549,10 @@ setTimeout(function(){
       {id:'sch03',date:'2026-02-26',opponent:'Sneads',location:'home',scoreUs:5,scoreThem:0},
       {id:'sch04',date:'2026-03-03',opponent:'Florida State University HS',location:'home',scoreUs:2,scoreThem:3},
       {id:'sch05',date:'2026-03-05',opponent:'Mosley',location:'home',scoreUs:3,scoreThem:2},
-      {id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',time:'3:00pm'},
-      {id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',time:'3:00pm'}
+      {id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',scoreUs:0,scoreThem:5},
+      {id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',scoreUs:5,scoreThem:0},
+      {id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
+      {id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
     ];
     const updates={};
     sched.forEach(g=>{updates[DB_ROOT+'/schedule/'+g.id]=g;});
@@ -4569,6 +4575,40 @@ setTimeout(function(){
     db.ref().update(updates,err=>{if(!err)toast('Schedule imported from MaxPreps!');});
   });
 },3000);
+
+// ── SCHEDULE V2: patch existing Firebase data with correct scores ─────
+setTimeout(function(){
+  if(!db)return;
+  db.ref(DB_ROOT+'/_schedule_v2').once('value',snap=>{
+    if(snap.val())return;
+    const updates={};
+    // Correct scores for games that may already be in Firebase without scores
+    const corrections=[
+      {id:'sch06',scoreUs:0,scoreThem:5},   // Chiles L 0-5
+      {id:'sch07',scoreUs:5,scoreThem:0},   // Lincoln W 5-0
+      // Add Destin and South Walton if not yet present
+      {id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
+      {id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
+    ];
+    corrections.forEach(c=>{
+      if(c.date){
+        // Full record — only write if not already there
+        db.ref(DB_ROOT+'/schedule/'+c.id).once('value',s=>{
+          if(!s.val())fbSet('schedule/'+c.id,{id:c.id,date:c.date,opponent:c.opponent,location:c.location,scoreUs:c.scoreUs,scoreThem:c.scoreThem});
+        });
+      }else{
+        // Just update score fields on existing record
+        updates[DB_ROOT+'/schedule/'+c.id+'/scoreUs']=c.scoreUs;
+        updates[DB_ROOT+'/schedule/'+c.id+'/scoreThem']=c.scoreThem;
+        // Remove time field now that we have real results
+        updates[DB_ROOT+'/schedule/'+c.id+'/time']=null;
+      }
+    });
+    updates[DB_ROOT+'/_schedule_v2']=true;
+    db.ref().update(updates);
+  });
+},4500);
+
 // Clean up any fake standings data — start fresh, coaches add manually
 setTimeout(function(){
   if(!db)return;
