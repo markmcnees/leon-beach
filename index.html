@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314153025">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4188,24 +4188,56 @@ function getDualRecord(){
 
 // Build synthetic dual records from gamedays, grouped by date + opponent
 function buildDualsFromGamedays(){
+  // Schedule lookup: date → game
+  const schedByDate={};
+  D.schedule.forEach(g=>{if(g.date)schedByDate[g.date]=g;});
+
+  // First pass: strip court suffixes from opponent names
+  function cleanOpp(raw){
+    if(!raw)return'';
+    return raw
+      .replace(/\s*(CT\s*\d+|Court\s*\d+|Exhibition|\s+\d+).*$/i,'')
+      .trim();
+  }
+  function isGenericName(n){return!n||/^(opponent|unknown|tbd)$/i.test(n);}
+
+  // Group gamedays by date + cleaned opponent
   const groups={};
   D.gamedays.forEach(m=>{
-    // Derive opponent base name (strip " CT1" etc)
-    const oppBase=(m.opponent||'Unknown').replace(/\s*CT\d+.*$/i,'').trim();
+    let oppBase=cleanOpp(m.opponent);
+    const sched=schedByDate[m.date];
+    if(isGenericName(oppBase)&&sched){oppBase=sched.opponent||'Unknown';}
+    if(!oppBase)oppBase='Unknown';
     const key=m.date+'||'+oppBase;
-    if(!groups[key])groups[key]={date:m.date,opponent:oppBase,courts:[],location:'home'};
+    if(!groups[key]){
+      groups[key]={date:m.date,opponent:oppBase,courts:[],location:sched?sched.location||'home':'home'};
+    }
     const isExhib=(m.isExhibition===true)||(m.court||0)>=6;
     groups[key].courts.push({court:m.court||1,pair:m.pair||[],sets:m.sets||[],isExhibition:isExhib,id:m.id});
   });
-  // Also check schedule for location
-  D.schedule.forEach(g=>{
-    Object.values(groups).forEach(d=>{
-      if(d.date===g.date&&(g.opponent||'').toLowerCase().includes(d.opponent.toLowerCase().split(' ')[0])){
-        d.location=g.location||'home';
-      }
-    });
+
+  // Second pass: if a date has a schedule entry, consolidate ALL groups for that date
+  // into one if there's only one non-exhibition schedule game (handles edge case mismatches)
+  const byDate={};
+  Object.values(groups).forEach(g=>{
+    if(!byDate[g.date])byDate[g.date]=[];
+    byDate[g.date].push(g);
   });
-  return Object.values(groups)
+  const finalGroups=[];
+  Object.entries(byDate).forEach(([date,dayGroups])=>{
+    const sched=schedByDate[date];
+    if(dayGroups.length===1){
+      // Single group for this date — use schedule opponent/location if available
+      const g=dayGroups[0];
+      if(sched&&isGenericName(g.opponent)){g.opponent=sched.opponent||g.opponent;g.location=sched.location||g.location;}
+      finalGroups.push(g);
+    }else{
+      // Multiple groups (e.g. Mar 12 had Destin + South Walton) — keep separate
+      dayGroups.forEach(g=>finalGroups.push(g));
+    }
+  });
+
+  return finalGroups
     .map(d=>{
       const scored=d.courts.filter(c=>!c.isExhibition);
       const leonCourts=scored.filter(c=>{const sw=(c.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length,sl=(c.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;return sw>sl;}).length;
