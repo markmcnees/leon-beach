@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="20260314-schedule-fix">
+<meta name="viewport" content="20260314-dashboard-v2">
 <title>Leon Beach Volleyball Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314104429">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -383,22 +383,11 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   <!-- ====== DASHBOARD ====== -->
   <div class="tab-content active" id="tab-dashboard">
     <div class="card"><div class="card-title"><span class="bar"></span> Season Overview</div>
-      <div class="stat-grid">
+      <div class="stat-grid cols-3">
         <div class="stat-box"><div class="stat-number gold" id="dash-dual-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
-                <div class="stat-box"><div class="stat-number" id="dash-queens-rec">0-0</div><div class="stat-label">Queens W-L</div></div>
         <div class="stat-box"><div class="stat-number green" id="dash-gd-rec">0-0</div><div class="stat-label">Dual Sets</div></div>
-        <div class="stat-box"><div class="stat-number purple" id="dash-scrim-rec">0-0</div><div class="stat-label">Scrimmage Sets</div></div>
-        <div class="stat-box"><div class="stat-number" id="dash-days">0</div><div class="stat-label">Match Days</div></div>
+        <div class="stat-box"><div class="stat-number" id="dash-courts-rec">0-0</div><div class="stat-label">Court W-L</div></div>
       </div>
-    </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> Season Dual Stats</div>
-      <div class="stat-grid" id="dash-gd-overview" style="margin-bottom:14px;"></div>
-      <div class="table-wrap"><table class="player-table" id="dash-gd-table"><thead><tr>
-        <th>Player</th><th>Sets</th><th>+/-</th><th>K</th><th>B</th><th>A</th><th>D</th><th>E</th>
-      </tr></thead><tbody></tbody></table></div>
-    </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> Queens Leaders — Point Diff</div>
-      <div class="table-wrap"><table class="player-table" id="top-performers"><thead><tr><th>Player</th><th>CT</th><th>W-L</th><th>+/-</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="card"><div class="card-title"><span class="bar"></span> Season Schedule <span style="font-size:11px;color:var(--gray);font-family:'Barlow';font-weight:600;letter-spacing:0;margin-left:8px;">via MaxPreps</span></div>
       <div id="dash-schedule"></div>
@@ -437,6 +426,16 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
   </div>
 
+    <div class="card"><div class="card-title"><span class="bar"></span> Season Dual Stats</div>
+      <div class="stat-grid" id="dash-gd-overview" style="margin-bottom:14px;"></div>
+      <div class="table-wrap"><table class="player-table" id="dash-gd-table"><thead><tr>
+        <th>Player</th><th>Sets</th><th>+/-</th><th>K</th><th>B</th><th>A</th><th>D</th><th>E</th>
+      </tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> Queens Leaders — Point Diff</div>
+      <div class="table-wrap"><table class="player-table" id="top-performers"><thead><tr><th>Player</th><th>CT</th><th>W-L</th><th>+/-</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
   <!-- ====== PLAYERS ====== -->
   <div class="tab-content" id="tab-players">
     <div class="filter-row" id="type-filter-players">
@@ -944,10 +943,11 @@ function listenData(){if(!db)return;
       D.goals=val.goals||{};
       D.assignments=val.assignments||{};
       D.duals=val.duals?Object.values(val.duals):[];
+      D.duals=val.duals?Object.values(val.duals):[];
     }else{
       D.players=JSON.parse(JSON.stringify(DEF_P));
       D.matches=JSON.parse(JSON.stringify(DEF_M));
-      D.planned=[];D.gamedays=[];D.scrimmages=[];D.duals=[];
+      D.planned=[];D.gamedays=[];D.scrimmages=[];D.duals=[];D.duals=[];
       seedDB();
     }
     refreshCurrent();
@@ -1056,14 +1056,13 @@ function fillSel(ids,courtHint){
 // DASHBOARD
 // ============================================================
 function renderDash(){
-  // Queens record
-  let qW=0,qL=0;
-  D.matches.forEach(m=>{qW++;qL++;}); // each match has a winner and loser
+  // Dual W-L from schedule
+  const _dr=getDualRecord();
+  const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dr.w+'-'+_dr.l;
+  const _crEl=document.getElementById('dash-courts-rec');if(_crEl)_crEl.textContent=_dr.cw+'-'+_dr.cl;
   const totalQM=D.matches.length;
-  // Actually count unique wins across all players
-  let totalQWins=D.matches.length; // each match = 1 win, 1 loss
   const _dualRec=getDualRecord();const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dualRec.w+'-'+_dualRec.l;
-    document.getElementById('dash-queens-rec').textContent=totalQM+' matches';
+    // queens stat removed from overview
 
   // Game Day sets
   let gdSW=0,gdSL=0,gdPF=0,gdPA=0,gdDays=new Set(),gdMatches=0;
@@ -1075,14 +1074,12 @@ function renderDash(){
   // Scrimmage sets
   let scSW=0,scSL=0;
   D.scrimmages.forEach(m=>{(m.sets||[]).forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?scSW++:scSL++;});});
-  document.getElementById('dash-scrim-rec').textContent=scSW+'-'+scSL;
 
   // Total match days
   const allDates=new Set();
   D.matches.forEach(m=>allDates.add(m.date));
   D.gamedays.forEach(m=>allDates.add(m.date));
   D.scrimmages.forEach(m=>allDates.add(m.date));
-  document.getElementById('dash-days').textContent=allDates.size;
 
   // Game Day overview boxes
   const gdTotalSets=gdSW+gdSL;
@@ -4263,17 +4260,32 @@ function pgdSaveNotes(){
 // DUALS
 // ============================================================
 function getDualRecord(){
-  let w=0,l=0,cw=0,cl=0;
+  // W-L from schedule (most complete/authoritative)
+  let w=0,l=0;
+  (D.schedule||[]).forEach(g=>{
+    if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){
+      parseInt(g.scoreUs)>parseInt(g.scoreThem)?w++:l++;
+    }
+  });
+  // Court W-L from duals node, fallback to gamedays
+  let cw=0,cl=0;
   (D.duals||[]).forEach(d=>{
-    const lc=d.leonCourts||0,oc=d.oppCourts||0;
-    if(lc>oc)w++;else if(oc>lc)l++;
     (d.courts||[]).filter(c=>!c.isExhibition).forEach(c=>{
       const sw=(c.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
       const sl=(c.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
       if(sw>sl)cw++;else if(sl>sw)cl++;
     });
   });
-  return{w,l,cw,cl,total:(D.duals||[]).length};
+  if(cw===0&&cl===0){
+    (D.gamedays||[]).forEach(m=>{
+      if(m.isExhibition||(m.court||0)>=6)return;
+      const sets=m.sets||[];
+      const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
+      const sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
+      if(sw>sl)cw++;else if(sl>sw)cl++;
+    });
+  }
+  return{w,l,cw,cl,total:w+l};
 }
 
 function renderDuals(){
@@ -4289,7 +4301,6 @@ function renderDuals(){
   if(!duals.length){container.innerHTML='<div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.<br>Upload a scoresheet above to get started!</p></div>';return;}
   let h='';
   duals.forEach(d=>{
-    d.courts=(d.courts||[]).sort((a,b)=>(a.court||0)-(b.court||0));
     const win=(d.leonCourts||0)>(d.oppCourts||0),loss=(d.oppCourts||0)>(d.leonCourts||0);
     const locLabel=d.location==='away'?'@ ':d.location==='neutral'?'(N) ':'vs ';
     const scored=(d.courts||[]).filter(c=>!c.isExhibition);
@@ -4559,51 +4570,38 @@ setTimeout(function(){
     updates[DB_ROOT+'/_seeded_schedule']=true;
     // Also seed area team standings
     const standUpdates={
-      'Chiles':{w:5,l:0},
-      'Lincoln':{w:3,l:2},
-      'FSUS':{w:3,l:1},
-      'Wakulla':{w:2,l:3},
-      'Maclay':{w:1,l:2},
-      'Community Christian':{w:1,l:3},
-      'Mosley':{w:2,l:2},
-      'Sneads':{w:0,l:3},
-      'Godby':{w:0,l:2},
-      'South Walton':{w:2,l:1},
-      'Gulf Breeze':{w:3,l:1}
+      'Chiles':{w:7,l:0},
+      'Lincoln':{w:4,l:3},
+      'Florida State University HS':{w:4,l:2},
+      'Wakulla':{w:3,l:3},
+      'Mosley':{w:3,l:3},
+      'Maclay':{w:2,l:2},
+      'Community Christian':{w:1,l:5},
+      'Sneads':{w:1,l:4},
+      'Godby':{w:0,l:3},
+      'South Walton':{w:4,l:2},
+      'Gulf Breeze':{w:4,l:1},
+      'Destin':{w:2,l:3}
     };
     Object.entries(standUpdates).forEach(([team,rec])=>{updates[DB_ROOT+'/standings/'+team]=rec;});
     db.ref().update(updates,err=>{if(!err)toast('Schedule imported from MaxPreps!');});
   });
 },3000);
 
-// ── SCHEDULE V2: patch existing Firebase data with correct scores ─────
+// Schedule V2: patch existing Firebase schedule with correct scores
 setTimeout(function(){
   if(!db)return;
   db.ref(DB_ROOT+'/_schedule_v2').once('value',snap=>{
     if(snap.val())return;
     const updates={};
-    // Correct scores for games that may already be in Firebase without scores
-    const corrections=[
-      {id:'sch06',scoreUs:0,scoreThem:5},   // Chiles L 0-5
-      {id:'sch07',scoreUs:5,scoreThem:0},   // Lincoln W 5-0
-      // Add Destin and South Walton if not yet present
-      {id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
-      {id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
-    ];
-    corrections.forEach(c=>{
-      if(c.date){
-        // Full record — only write if not already there
-        db.ref(DB_ROOT+'/schedule/'+c.id).once('value',s=>{
-          if(!s.val())fbSet('schedule/'+c.id,{id:c.id,date:c.date,opponent:c.opponent,location:c.location,scoreUs:c.scoreUs,scoreThem:c.scoreThem});
-        });
-      }else{
-        // Just update score fields on existing record
-        updates[DB_ROOT+'/schedule/'+c.id+'/scoreUs']=c.scoreUs;
-        updates[DB_ROOT+'/schedule/'+c.id+'/scoreThem']=c.scoreThem;
-        // Remove time field now that we have real results
-        updates[DB_ROOT+'/schedule/'+c.id+'/time']=null;
-      }
-    });
+    updates[DB_ROOT+'/schedule/sch06/scoreUs']=0;
+    updates[DB_ROOT+'/schedule/sch06/scoreThem']=5;
+    updates[DB_ROOT+'/schedule/sch06/time']=null;
+    updates[DB_ROOT+'/schedule/sch07/scoreUs']=5;
+    updates[DB_ROOT+'/schedule/sch07/scoreThem']=0;
+    updates[DB_ROOT+'/schedule/sch07/time']=null;
+    db.ref(DB_ROOT+'/schedule/sch08').once('value',s=>{if(!s.val())db.ref(DB_ROOT+'/schedule/sch08').set({id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0});});
+    db.ref(DB_ROOT+'/schedule/sch09').once('value',s=>{if(!s.val())db.ref(DB_ROOT+'/schedule/sch09').set({id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4});});
     updates[DB_ROOT+'/_schedule_v2']=true;
     db.ref().update(updates);
   });
