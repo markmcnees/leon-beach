@@ -904,8 +904,12 @@ const _DEMO=(function(){
   [{id:'gd1',date:'2026-02-10',court:1,pair:['d01','d03'],opponent:'Riverside CT1',sets:[{scoreUs:21,scoreThem:18,stats:st('d01','d03')},{scoreUs:21,scoreThem:14,stats:st('d01','d03')}]},{id:'gd2',date:'2026-02-10',court:2,pair:['d04','d05'],opponent:'Riverside CT2',sets:[{scoreUs:21,scoreThem:19,stats:st('d04','d05')},{scoreUs:18,scoreThem:21,stats:st('d04','d05')},{scoreUs:21,scoreThem:15,stats:st('d04','d05')}]},{id:'gd3',date:'2026-02-10',court:3,pair:['d06','d07'],opponent:'Riverside CT3',sets:[{scoreUs:19,scoreThem:21,stats:st('d06','d07')},{scoreUs:14,scoreThem:21,stats:st('d06','d07')}]},{id:'gd4',date:'2026-02-10',court:4,pair:['d08','d09'],opponent:'Riverside CT4',sets:[{scoreUs:21,scoreThem:12,stats:st('d08','d09')},{scoreUs:21,scoreThem:10,stats:st('d08','d09')}]},{id:'gd5',date:'2026-02-10',court:5,pair:['d10','d11'],opponent:'Riverside CT5',sets:[{scoreUs:21,scoreThem:17,stats:st('d10','d11')},{scoreUs:21,scoreThem:19,stats:st('d10','d11')}]},{id:'gd6',date:'2026-02-17',court:1,pair:['d01','d02'],opponent:'Oceanside CT1',sets:[{scoreUs:21,scoreThem:16,stats:st('d01','d02')},{scoreUs:21,scoreThem:13,stats:st('d01','d02')}]},{id:'gd7',date:'2026-02-17',court:2,pair:['d04','d06'],opponent:'Oceanside CT2',sets:[{scoreUs:14,scoreThem:21,stats:st('d04','d06')},{scoreUs:21,scoreThem:18,stats:st('d04','d06')},{scoreUs:12,scoreThem:21,stats:st('d04','d06')}]},{id:'gd8',date:'2026-02-17',court:3,pair:['d05','d07'],opponent:'Oceanside CT3',sets:[{scoreUs:21,scoreThem:11,stats:st('d05','d07')},{scoreUs:21,scoreThem:14,stats:st('d05','d07')}]},{id:'gd9',date:'2026-02-17',court:4,pair:['d08','d10'],opponent:'Oceanside CT4',sets:[{scoreUs:21,scoreThem:19,stats:st('d08','d10')},{scoreUs:19,scoreThem:21,stats:st('d08','d10')},{scoreUs:21,scoreThem:17,stats:st('d08','d10')}]},{id:'gd10',date:'2026-02-17',court:5,pair:['d11','d12'],opponent:'Oceanside CT5',sets:[{scoreUs:15,scoreThem:21,stats:st('d11','d12')},{scoreUs:18,scoreThem:21,stats:st('d11','d12')}]},{id:'gd11',date:'2026-03-01',court:1,pair:['d01','d03'],opponent:'Bayside CT1',sets:[{scoreUs:21,scoreThem:10,stats:st('d01','d03')},{scoreUs:21,scoreThem:8,stats:st('d01','d03')}]},{id:'gd12',date:'2026-03-01',court:2,pair:['d02','d05'],opponent:'Bayside CT2',sets:[{scoreUs:21,scoreThem:15,stats:st('d02','d05')},{scoreUs:21,scoreThem:18,stats:st('d02','d05')}]},{id:'gd13',date:'2026-03-01',court:3,pair:['d06','d08'],opponent:'Bayside CT3',sets:[{scoreUs:21,scoreThem:17,stats:st('d06','d08')},{scoreUs:17,scoreThem:21,stats:st('d06','d08')},{scoreUs:21,scoreThem:16,stats:st('d06','d08')}]},{id:'gd14',date:'2026-03-01',court:4,pair:['d07','d09'],opponent:'Bayside CT4',sets:[{scoreUs:21,scoreThem:13,stats:st('d07','d09')},{scoreUs:21,scoreThem:11,stats:st('d07','d09')}]},{id:'gd15',date:'2026-03-01',court:5,pair:['d10','d13'],opponent:'Bayside CT5',sets:[{scoreUs:21,scoreThem:14,stats:st('d10','d13')},{scoreUs:21,scoreThem:19,stats:st('d10','d13')}]}].forEach(m=>mset(R+'/gamedays/'+m.id,m));
   [{id:'ss1',date:'2026-02-10',opponent:'Riverside',location:'home',scoreUs:4,scoreThem:1},{id:'ss2',date:'2026-02-17',opponent:'Oceanside',location:'away',scoreUs:2,scoreThem:3},{id:'ss3',date:'2026-03-01',opponent:'Bayside',location:'home',scoreUs:5,scoreThem:0},{id:'ss4',date:'2026-03-08',opponent:'Wavecrest',location:'home'},{id:'ss5',date:'2026-03-15',opponent:'Surf City',location:'away'},{id:'ss6',date:'2026-03-22',opponent:'Pelican Bay',location:'home'}].forEach(g=>mset(R+'/schedule/'+g.id,g));
   [['Bayside',4,1],['Surf City',3,2],['Riverside',3,2],['Wavecrest',2,3],['Oceanside',2,3],['Pelican Bay',1,4]].forEach(([k,w,l])=>mset(R+'/standings/'+k.replace(/ /g,'_'),{w,l}));
-  const nxt=new Date();nxt.setDate(nxt.getDate()+1);
-  mset(R+'/assignments/asgn_demo',{id:'asgn_demo',date:nxt.toISOString().slice(0,10),type:'gameday',opponent:'Wavecrest',courts:[{court:1,p1:'d01',p2:'d03'},{court:2,p1:'d04',p2:'d05'},{court:3,p1:'d06',p2:'d07'},{court:4,p1:'d08',p2:'d09'},{court:5,p1:'d10',p2:'d11'}],createdAt:'2026-03-05'});
+  const today=new Date().toISOString().slice(0,10);
+  const nxt=new Date();nxt.setDate(nxt.getDate()+1);const tmrw=nxt.toISOString().slice(0,10);
+  // Today: live dual vs Wavecrest so coaches can demo live scoring
+  mset(R+'/assignments/asgn_demo',{id:'asgn_demo',date:today,type:'gameday',opponent:'Wavecrest',courts:[{court:1,p1:'d01',p2:'d03'},{court:2,p1:'d04',p2:'d05'},{court:3,p1:'d06',p2:'d07'},{court:4,p1:'d08',p2:'d09'},{court:5,p1:'d10',p2:'d11'}],createdAt:today});
+  // Tomorrow: upcoming dual on schedule
+  mset(R+'/assignments/asgn_demo2',{id:'asgn_demo2',date:tmrw,type:'gameday',opponent:'Surf City',courts:[{court:1,p1:'d01',p2:'d02'},{court:2,p1:'d04',p2:'d06'},{court:3,p1:'d05',p2:'d07'},{court:4,p1:'d08',p2:'d10'},{court:5,p1:'d11',p2:'d12'}],createdAt:today});
   function getAll(){return mget(R)||{};}
   function loadInto(D){const v=getAll();D.players=Object.values(v.players||{});D.matches=v.matches?Object.values(v.matches):[];D.planned=[];D.gamedays=v.gamedays?Object.values(v.gamedays):[];D.scrimmages=[];D.schedule=v.schedule?Object.values(v.schedule):[];D.standings=v.standings||{};D.goals=v.goals||{};D.assignments=v.assignments||{};D.duals=[];}
   return{
@@ -971,8 +975,21 @@ function initFB(){
     b.style.cssText='background:#f59e0b;color:#000;text-align:center;padding:7px 12px;font-family:Bebas Neue,sans-serif;font-size:13px;letter-spacing:2px;position:sticky;top:0;z-index:9999;';
     b.textContent='⚡ DEMO MODE — Sand Sharks — Nothing saves — Resets on refresh ⚡';
     document.body.prepend(b);
+    // Demo date controls bar
+    const dc=document.createElement('div');
+    dc.style.cssText='background:#023e8a;color:#fff;text-align:center;padding:8px 16px;display:flex;align-items:center;justify-content:center;gap:12px;font-family:Barlow,sans-serif;font-size:13px;flex-wrap:wrap;';
+    const tod=new Date().toISOString().slice(0,10);
+    dc.innerHTML='<strong style="font-family:Bebas Neue,sans-serif;letter-spacing:1px;">Demo Dual Date:</strong><input type="date" id="demo-date-picker" value="'+tod+'" style="padding:4px 8px;border:1px solid #90e0ef;border-radius:6px;font-size:13px;background:#0077b6;color:#fff;cursor:pointer;"><button onclick="applyDemoDate()" style="padding:5px 14px;background:#00b4d8;color:#000;border:none;border-radius:6px;font-family:Bebas Neue,sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;">Apply</button><span style="font-size:11px;opacity:0.7;">Set which date has today\'s dual</span>';
+    document.body.insertBefore(dc,b.nextSibling);
     _DEMO.loadInto(D);
-    _DEMO.onUpdate(function(){_DEMO.loadInto(D);refreshCurrent();});
+    _DEMO.onUpdate(function(){
+      _DEMO.loadInto(D);
+      refreshCurrent();
+      // Also rebuild assignment slots if planner tab is active
+      if(typeof buildAssignSlots==='function')try{buildAssignSlots();}catch(e){}
+      if(typeof renderAssignments==='function')try{renderAssignments();}catch(e){}
+      if(typeof populatePlayerLogin==='function')try{populatePlayerLogin();}catch(e){}
+    });
     setSS(true);
     populatePlayerLogin();
     refreshCurrent();
@@ -5084,6 +5101,19 @@ function seedMissingDuals(){
     if(statusEl)statusEl.textContent=msg;
     toast('Done! '+Object.keys(u).length+' courts added');
   });
+}
+
+function applyDemoDate(){
+  const picker=document.getElementById('demo-date-picker');
+  if(!picker||!picker.value){toast('Pick a date first');return;}
+  const d=picker.value;
+  if(typeof _DEMO!=='undefined'&&_DEMO.setDualDate){
+    _DEMO.setDualDate(d);
+    const liveDate=document.getElementById('live-date');
+    if(liveDate)liveDate.value=d;
+    toast('Demo dual date: '+d);
+    refreshCurrent();
+  }
 }
 
 // ============================================================
