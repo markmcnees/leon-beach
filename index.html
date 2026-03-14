@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314151741">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4186,6 +4186,35 @@ function getDualRecord(){
   return{w,l,cw,cl,total:w+l};
 }
 
+// Build synthetic dual records from gamedays, grouped by date + opponent
+function buildDualsFromGamedays(){
+  const groups={};
+  D.gamedays.forEach(m=>{
+    // Derive opponent base name (strip " CT1" etc)
+    const oppBase=(m.opponent||'Unknown').replace(/\s*CT\d+.*$/i,'').trim();
+    const key=m.date+'||'+oppBase;
+    if(!groups[key])groups[key]={date:m.date,opponent:oppBase,courts:[],location:'home'};
+    const isExhib=(m.isExhibition===true)||(m.court||0)>=6;
+    groups[key].courts.push({court:m.court||1,pair:m.pair||[],sets:m.sets||[],isExhibition:isExhib,id:m.id});
+  });
+  // Also check schedule for location
+  D.schedule.forEach(g=>{
+    Object.values(groups).forEach(d=>{
+      if(d.date===g.date&&(g.opponent||'').toLowerCase().includes(d.opponent.toLowerCase().split(' ')[0])){
+        d.location=g.location||'home';
+      }
+    });
+  });
+  return Object.values(groups)
+    .map(d=>{
+      const scored=d.courts.filter(c=>!c.isExhibition);
+      const leonCourts=scored.filter(c=>{const sw=(c.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length,sl=(c.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;return sw>sl;}).length;
+      const oppCourts=scored.filter(c=>{const sw=(c.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length,sl=(c.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;return sl>sw;}).length;
+      return{...d,leonCourts,oppCourts,fromGamedays:true};
+    })
+    .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+}
+
 function renderDuals(){
   const rec=getDualRecord();
   const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
@@ -4194,10 +4223,16 @@ function renderDuals(){
   setEl('dual-courts-rec',rec.cw+'-'+rec.cl);
   setEl('dash-dual-rec',rec.w+'-'+rec.l);
   setEl('dash-courts-rec',rec.cw+'-'+rec.cl);
-  const duals=[...(D.duals||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const container=document.getElementById('duals-list');
   if(!container)return;
-  if(!duals.length){container.innerHTML='<div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.<br>Upload a scoresheet above to get started!</p></div>';return;}
+
+  // If we have structured dual records, use them; otherwise build from gamedays
+  const hasDuals=(D.duals||[]).length>0;
+  const duals=hasDuals
+    ? [...D.duals].sort((a,b)=>(b.date||'').localeCompare(a.date||''))
+    : buildDualsFromGamedays();
+
+  if(!duals.length){container.innerHTML='<div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.</p></div>';return;}
   let h='';
   duals.forEach(d=>{
     const win=(d.leonCourts||0)>(d.oppCourts||0),loss=(d.oppCourts||0)>(d.leonCourts||0);
