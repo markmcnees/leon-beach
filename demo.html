@@ -1055,6 +1055,69 @@ window.__demoFbRemove=(path)=>{ _del('leon_queens_matches/'+path); };
 // Script-scope db — uses shim in demo, Firebase otherwise
 var db = window._demoDbShim || null;
 
+// ── Demo login overrides (run after DOM ready) ──
+document.addEventListener('DOMContentLoaded', function() {
+  // Override pinPress to use demo PIN directly
+  window._demoPinEntry = '';
+  window.pinPress = function(n) {
+    window._demoPinEntry += n;
+    // Update dots
+    const dots = document.querySelectorAll('.login-pin-dot');
+    dots.forEach((d,i) => d.classList.toggle('filled', i < window._demoPinEntry.length));
+    if (window._demoPinEntry.length === 4) {
+      if (window._demoPinEntry === '1234') {
+        window._demoPinEntry = '';
+        dots.forEach(d => d.classList.remove('filled'));
+        if (typeof loginAsCoach === 'function') loginAsCoach();
+      } else {
+        const err = document.getElementById('pin-error');
+        if (err) err.textContent = 'Incorrect PIN (demo: 1234)';
+        setTimeout(() => {
+          window._demoPinEntry = '';
+          dots.forEach(d => d.classList.remove('filled'));
+          if (err) err.textContent = '';
+        }, 800);
+      }
+    }
+  };
+  window.pinBack = function() {
+    window._demoPinEntry = window._demoPinEntry.slice(0,-1);
+    document.querySelectorAll('.login-pin-dot').forEach((d,i) => d.classList.toggle('filled', i < window._demoPinEntry.length));
+    const err = document.getElementById('pin-error');
+    if (err) err.textContent = '';
+  };
+  // Override playerLogin to use demo password
+  window.playerLogin = function() {
+    const pid = document.getElementById('login-player-select').value;
+    const pw = document.getElementById('login-pw').value;
+    const err = document.getElementById('pw-error');
+    if (!pid) { if(err) err.textContent='Select your name'; return; }
+    if (!pw) { if(err) err.textContent='Enter your password'; return; }
+    if (pw !== 'SharkPride') { if(err) err.textContent='Incorrect (demo: SharkPride)'; return; }
+    if (err) err.textContent = '';
+    if (typeof loginAsCoach === 'function') {
+      // reuse loginAsCoach flow but for player
+      currentRole='player'; currentPlayerId=pid;
+      try { sessionStorage.setItem('leonAuth', JSON.stringify({role:'player',pid})); } catch(e){}
+      const overlay = document.getElementById('login-overlay');
+      const app = document.getElementById('app-wrapper');
+      const coach = document.getElementById('coach-content');
+      const portal = document.getElementById('player-portal');
+      const tabs = document.querySelector('.tabs');
+      if (overlay) overlay.classList.add('hidden');
+      if (app) app.style.display = 'block';
+      if (coach) coach.style.display = 'none';
+      if (portal) { portal.style.display = 'block'; portal.classList.add('active'); }
+      if (tabs) tabs.style.display = 'none';
+      const p = typeof gP === 'function' ? gP(pid) : null;
+      const uname = document.getElementById('header-username');
+      if (uname) uname.textContent = p ? p.firstName+' '+p.lastName : 'Player';
+      if (typeof renderPlayerPortal === 'function') renderPlayerPortal();
+    }
+  };
+});
+
+
 
 // ============================================================
 // FIREBASE CONFIG
@@ -1153,7 +1216,7 @@ function listenData(){if(!db)return;
     if(currentRole==='player')renderPlayerPortal();
     if(currentRole==='coach'){const t=document.querySelector('.tab.active');if(t&&t.dataset.tab==='goals')renderCoachGoals();}
   });
-  db.ref('.info/connected').on('value',s=>{setSS(s.val()===true);});
+  if(db&&db.ref)db.ref('.info/connected').on('value',s=>{setSS(s.val()===true);});
 }
 function seedDB(){if(!db)return;
   const u={};
