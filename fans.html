@@ -216,10 +216,7 @@ function renderRecord(){
     if(sw>sl)courtW++;else if(sl>sw)courtL++;
   });
   document.getElementById('record-main').textContent=dualW+'-'+dualL;
-  document.getElementById('record-stats').innerHTML=`
-    <div class="record-stat"><div class="record-stat-num">${courtW}-${courtL}</div><div class="record-stat-lbl">Court W-L</div></div>
-    <div class="record-stat"><div class="record-stat-num">${setW}-${setL}</div><div class="record-stat-lbl">Set W-L</div></div>
-  `;
+  document.getElementById('record-stats').innerHTML='';
   // Today's dual score in strip
   const today=td();
   const assignment=Object.values(D.assignments).find(a=>a.date===today);
