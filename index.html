@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314163515">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4300,12 +4300,27 @@ function renderDuals(){
         const pair=(c.pair||[]).map(id=>pN(id)).join(' & ')||'TBD';
         const sets=c.sets||[];let sw=0,sl=0;sets.forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++;});
         const cWin=sw>sl;
-        const setsStr=sets.map(s=>s.scoreUs+'-'+s.scoreThem).join(', ')||'—';
-        h+=`<div class="dual-court-row">
-          <span class="court-badge court-${c.court}" style="min-width:28px;text-align:center;">${c.court}</span>
-          <span style="flex:1;font-weight:600;font-size:12px;">${pair}</span>
+        const mid=c.id||'';
+        const setsHtml=sets.map((s,si)=>{
+          const win=(s.scoreUs||0)>(s.scoreThem||0);
+          return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">
+            <span style="font-family:'Bebas Neue';font-size:13px;color:${win?'var(--green)':'var(--loss-red)'};">S${si+1}: ${s.scoreUs}-${s.scoreThem}</span>
+            ${mid?`<button onclick="dhEditSet('${mid}',${si})" style="font-size:10px;padding:1px 5px;border:1px solid var(--gray-lighter);border-radius:3px;background:var(--white);color:var(--gray);cursor:pointer;">✎</button>
+            <button onclick="dhDeleteSet('${mid}',${si})" style="font-size:10px;padding:1px 5px;border:1px solid var(--gray-lighter);border-radius:3px;background:var(--white);color:var(--gray);cursor:pointer;">✕</button>
+            <span id="dh-edit-${mid}-${si}" style="display:none;align-items:center;gap:3px;">
+              <input type="number" id="dh-us-${mid}-${si}" value="${s.scoreUs}" min="0" style="width:42px;padding:2px;border:1px solid var(--gray-lighter);border-radius:3px;font-family:'Bebas Neue';font-size:13px;text-align:center;">
+              <span>-</span>
+              <input type="number" id="dh-them-${mid}-${si}" value="${s.scoreThem}" min="0" style="width:42px;padding:2px;border:1px solid var(--gray-lighter);border-radius:3px;font-family:'Bebas Neue';font-size:13px;text-align:center;">
+              <button onclick="dhSaveSet('${mid}',${si})" style="font-size:10px;padding:1px 7px;border:none;border-radius:3px;background:var(--green);color:var(--white);cursor:pointer;">✓</button>
+              <button onclick="dhCancelEdit('${mid}',${si})" style="font-size:10px;padding:1px 5px;border:1px solid var(--gray-lighter);border-radius:3px;background:var(--white);color:var(--gray);cursor:pointer;">✗</button>
+            </span>`:''}
+          </div>`;
+        }).join('');
+        h+=`<div class="dual-court-row" style="flex-wrap:wrap;align-items:flex-start;">
+          <span class="court-badge court-${c.court}" style="min-width:28px;text-align:center;margin-top:3px;">${c.court}</span>
+          <span style="flex:1;font-weight:600;font-size:12px;padding-top:3px;">${pair}</span>
           <span style="font-family:'Bebas Neue';font-size:14px;color:${cWin?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</span>
-          <span style="font-size:11px;color:var(--gray);min-width:80px;text-align:right;">${setsStr}</span>
+          <div style="width:100%;padding-left:36px;margin-top:4px;">${setsHtml}${mid?`<button onclick="dhAddSet('${mid}')" style="font-size:10px;padding:1px 7px;border:1px dashed var(--gray-lighter);border-radius:3px;background:none;color:var(--gray);cursor:pointer;margin-top:2px;">+ Add Set</button>`:''}</div>
         </div>`;
       });
       h+='</div>';
@@ -4508,6 +4523,41 @@ function confirmDualSave(){
   document.getElementById('dual-scan-result').innerHTML='<div style="color:var(--green);font-size:14px;font-weight:700;padding:12px;background:var(--green-bg);border-radius:8px;">Saved! Check Dual History below and Game Day tab for match entries.</div>';
   document.getElementById('dual-scan-preview').innerHTML='';
   window._dualReviewData=null;
+}
+
+
+// ============================================================
+// DUAL HISTORY INLINE EDIT HELPERS
+// ============================================================
+function dhEditSet(matchId,si){
+  const el=document.getElementById('dh-edit-'+matchId+'-'+si);
+  if(el){el.style.display='inline-flex';}
+}
+function dhCancelEdit(matchId,si){
+  const el=document.getElementById('dh-edit-'+matchId+'-'+si);
+  if(el){el.style.display='none';}
+}
+function dhSaveSet(matchId,si){
+  const m=D.gamedays.find(x=>x.id===matchId);if(!m)return;
+  const us=parseInt(document.getElementById('dh-us-'+matchId+'-'+si)?.value);
+  const them=parseInt(document.getElementById('dh-them-'+matchId+'-'+si)?.value);
+  if(isNaN(us)||isNaN(them)){toast('Enter both scores');return;}
+  if(us===them){toast('Scores cannot be tied');return;}
+  const sets=[...(m.sets||[])];
+  sets[si]={...sets[si],scoreUs:us,scoreThem:them,editedBy:'coach',editedAt:td()};
+  fbSet('gamedays/'+matchId+'/sets',sets);
+  toast('Set updated!');
+}
+function dhDeleteSet(matchId,si){
+  const m=D.gamedays.find(x=>x.id===matchId);if(!m)return;
+  const sets=(m.sets||[]).filter((_,i)=>i!==si);
+  fbSet('gamedays/'+matchId+'/sets',sets.length?sets:null);
+  toast('Set deleted');
+}
+function dhAddSet(matchId){
+  const m=D.gamedays.find(x=>x.id===matchId);if(!m)return;
+  // Open the existing Add Set modal
+  openAddSet(matchId,'gameday');
 }
 
 // ============================================================
