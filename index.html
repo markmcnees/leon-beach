@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314145542">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -900,10 +900,6 @@ function listenData(){if(!db)return;
       D.scrimmages=val.scrimmages?Object.values(val.scrimmages):[];
       D.schedule=val.schedule?Object.values(val.schedule):[];
       D.standings=val.standings||{};
-      // Auto-seed schedule if empty
-      if(D.schedule.length===0){seedSchedule();}
-      // Auto-seed standings if empty
-      if(Object.keys(D.standings).length<5){seedStandings();}
       D.goals=val.goals||{};
       D.assignments=val.assignments||{};
       D.duals=val.duals?Object.values(val.duals):[];
@@ -936,38 +932,11 @@ function listenData(){if(!db)return;
   });
   db.ref('.info/connected').on('value',s=>{setSS(s.val()===true);});
 }
-function seedSchedule(){
-  if(!db)return;
-  const sched={
-    sch01:{id:'sch01',date:'2026-02-24',opponent:'Community Christian',location:'home',scoreUs:4,scoreThem:1},
-    sch02:{id:'sch02',date:'2026-02-26',opponent:'Wakulla',location:'home',scoreUs:4,scoreThem:1},
-    sch03:{id:'sch03',date:'2026-02-26',opponent:'Sneads',location:'home',scoreUs:5,scoreThem:0},
-    sch04:{id:'sch04',date:'2026-03-03',opponent:'Florida State University HS',location:'home',scoreUs:2,scoreThem:3},
-    sch05:{id:'sch05',date:'2026-03-05',opponent:'Mosley',location:'home',scoreUs:3,scoreThem:2},
-    sch06:{id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',scoreUs:0,scoreThem:5},
-    sch07:{id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',scoreUs:5,scoreThem:0},
-    sch08:{id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
-    sch09:{id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
-  };
-  const u={};Object.values(sched).forEach(g=>{u[DB_ROOT+'/schedule/'+g.id]=g;});
-  db.ref().update(u,function(){console.log('Schedule seeded');});
-}
-function seedStandings(){
-  if(!db)return;
-  const teams={
-    'Chiles':{w:7,l:0},'Lincoln':{w:4,l:3},'Florida State University HS':{w:4,l:2},
-    'Wakulla':{w:3,l:3},'Mosley':{w:3,l:3},'Community Christian':{w:1,l:5},
-    'Sneads':{w:1,l:4},'South Walton':{w:4,l:2},'Gulf Breeze':{w:4,l:1},
-    'Destin':{w:2,l:3},'Maclay':{w:2,l:2},'Godby':{w:0,l:3}
-  };
-  const u={};Object.entries(teams).forEach(([t,r])=>{u[DB_ROOT+'/standings/'+t]=r;});
-  db.ref().update(u,function(){console.log('Standings seeded');});
-}
 function seedDB(){if(!db)return;
-  const data={players:{},matches:{},planned:{},gamedays:{},scrimmages:{},schedule:{}};
-  DEF_P.forEach(p=>{data.players[p.id]=JSON.parse(JSON.stringify(p));});
-  DEF_M.forEach(m=>{data.matches[m.id]=JSON.parse(JSON.stringify(m));});
-  db.ref(DB_ROOT).set(data);
+  const u={};
+  DEF_P.forEach(p=>{u[DB_ROOT+'/players/'+p.id]=JSON.parse(JSON.stringify(p));});
+  DEF_M.forEach(m=>{u[DB_ROOT+'/matches/'+m.id]=JSON.parse(JSON.stringify(m));});
+  db.ref().update(u,err=>{if(!err)console.log('Players+matches seeded');});
 }
 function fbSet(path,val){if(db)db.ref(DB_ROOT+'/'+path).set(val);}
 function fbRemove(path){if(db)db.ref(DB_ROOT+'/'+path).remove();}
@@ -1107,8 +1076,22 @@ function renderDash(){
 }
 
 function renderSchedule(){
-  const games=[...D.schedule].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-  if(!games.length){document.getElementById('dash-schedule').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No schedule data yet.</div>';return;}
+  let games=[...D.schedule].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  if(!games.length){
+    // Fallback: use hardcoded schedule and write to Firebase
+    games=[
+    {id:'sch01',date:'2026-02-24',opponent:'Community Christian',location:'home',scoreUs:4,scoreThem:1},
+    {id:'sch02',date:'2026-02-26',opponent:'Wakulla',location:'home',scoreUs:4,scoreThem:1},
+    {id:'sch03',date:'2026-02-26',opponent:'Sneads',location:'home',scoreUs:5,scoreThem:0},
+    {id:'sch04',date:'2026-03-03',opponent:'Florida State University HS',location:'home',scoreUs:2,scoreThem:3},
+    {id:'sch05',date:'2026-03-05',opponent:'Mosley',location:'home',scoreUs:3,scoreThem:2},
+    {id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',scoreUs:0,scoreThem:5},
+    {id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',scoreUs:5,scoreThem:0},
+    {id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
+    {id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
+  ].sort((a,b)=>a.date.localeCompare(b.date));
+    if(db){const u={};games.forEach(g=>{u[DB_ROOT+'/schedule/'+g.id]=g;});db.ref().update(u);}
+  }
   const today=td();
   let wins=0,losses=0;
   games.forEach(g=>{if(g.scoreUs!=null&&g.scoreThem!=null){g.scoreUs>g.scoreThem?wins++:losses++;}});
@@ -1165,6 +1148,12 @@ function addScheduleGame(){
 function delSchedule(id){fbRemove('schedule/'+id);toast('Removed');}
 
 function renderStandings(){
+  // Fallback: if no standings in Firebase, seed them
+  if(Object.keys(D.standings).length<5){
+    const def={'Chiles':{w:7,l:0},'Lincoln':{w:4,l:3},'Florida State University HS':{w:4,l:2},'Wakulla':{w:3,l:3},'Mosley':{w:3,l:3},'Community Christian':{w:1,l:5},'Sneads':{w:1,l:4},'South Walton':{w:4,l:2},'Gulf Breeze':{w:4,l:1},'Destin':{w:2,l:3},'Maclay':{w:2,l:2},'Godby':{w:0,l:3}};
+    if(db){const u={};Object.entries(def).forEach(([t,r])=>{u[DB_ROOT+'/standings/'+t]=r;});db.ref().update(u);}
+    Object.assign(D.standings,def);
+  }
   // Leon's record from schedule
   const games=[...D.schedule];
   let leonW=0,leonL=0;
@@ -3267,24 +3256,15 @@ function saveAssignment(){
 
 function openEditAssignment(id){
   const a=D.assignments[id];if(!a)return;
-  // Simple: just rebuild the planner with this date/type pre-filled
   document.getElementById('assign-date').value=a.date||td();
   document.getElementById('assign-type').value=a.type||'gameday';
   document.getElementById('assign-opp').value=a.opponent||'';
-  const n=(a.courts||[]).length;
-  document.getElementById('assign-courts').value=n||3;
+  const n=Math.max(3,(a.courts||[]).length);
+  document.getElementById('assign-courts').value=n;
   buildAssignSlots();
-  // Pre-fill courts
-  setTimeout(function(){
-    (a.courts||[]).forEach(function(c,i){
-      const p1El=document.getElementById('assign-c'+(i+1)+'-p1');
-      const p2El=document.getElementById('assign-c'+(i+1)+'-p2');
-      if(p1El)p1El.value=c.p1||'';
-      if(p2El)p2El.value=c.p2||'';
-    });
-  },100);
+  setTimeout(()=>{(a.courts||[]).forEach((c,i)=>{const el1=document.getElementById('assign-c'+(i+1)+'-p1'),el2=document.getElementById('assign-c'+(i+1)+'-p2');if(el1)el1.value=c.p1||'';if(el2)el2.value=c.p2||'';});},150);
   fbRemove('assignments/'+id);
-  toast('Assignment loaded for editing — update and save');
+  toast('Loaded for editing — update and re-save');
 }
 function deleteAssignment(id){
   // No confirm() — blocked in iframes. Use inline confirmation instead.
@@ -4531,45 +4511,56 @@ initDualScanner();
 document.getElementById('q-date').value=td();
 document.getElementById('gd-date').value=td();
 document.getElementById('sc-date').value=td();
-(document.getElementById('gd-filter-date')||{}).value=td();
+document.getElementById('gd-filter-date').value=td();
 document.getElementById('sc-filter-date').value=td();
 document.getElementById('assign-date').value=td();
 document.getElementById('live-date').value=td();
 document.getElementById('cnote-date').value=td();
 initFB();
 setTimeout(runMigration,2000);
-// ── SINGLE CLEAN SEED (idempotent — runs every load, safe to repeat) ──
+// Idempotent seeder — always writes schedule+standings+jerseys on every load
 setTimeout(function(){
   if(!db)return;
-  var u={};
-  var SCHED={
-    sch01:{id:'sch01',date:'2026-02-24',opponent:'Community Christian',location:'home',scoreUs:4,scoreThem:1},
-    sch02:{id:'sch02',date:'2026-02-26',opponent:'Wakulla',location:'home',scoreUs:4,scoreThem:1},
-    sch03:{id:'sch03',date:'2026-02-26',opponent:'Sneads',location:'home',scoreUs:5,scoreThem:0},
-    sch04:{id:'sch04',date:'2026-03-03',opponent:'Florida State University HS',location:'home',scoreUs:2,scoreThem:3},
-    sch05:{id:'sch05',date:'2026-03-05',opponent:'Mosley',location:'home',scoreUs:3,scoreThem:2},
-    sch06:{id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',scoreUs:0,scoreThem:5},
-    sch07:{id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',scoreUs:5,scoreThem:0},
-    sch08:{id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
-    sch09:{id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
-  };
-  Object.values(SCHED).forEach(function(g){u[DB_ROOT+'/schedule/'+g.id]=g;});
-  var STAND={'Chiles':{w:7,l:0},'Lincoln':{w:4,l:3},'Florida State University HS':{w:4,l:2},'Wakulla':{w:3,l:3},'Mosley':{w:3,l:3},'Community Christian':{w:1,l:5},'Sneads':{w:1,l:4},'South Walton':{w:4,l:2},'Gulf Breeze':{w:4,l:1},'Destin':{w:2,l:3},'Maclay':{w:2,l:2},'Godby':{w:0,l:3}};
-  Object.entries(STAND).forEach(function(kv){u[DB_ROOT+'/standings/'+kv[0]]=kv[1];});
-  db.ref().update(u,function(err){if(!err){console.log('Schedule+standings seeded OK');}}); 
-},3000);
-// One-time jersey seed
-setTimeout(function(){
-  if(!db)return;
-  db.ref(DB_ROOT+'/_jerseys_seeded').once('value',snap=>{
-    if(snap.val())return;
-    const jerseys={p01:9,p02:5,p03:10,p04:2,p05:7,p06:8,p07:13,p08:3,p09:17,p10:6,p11:4,p12:11,p13:15,p14:18,p15:12,p16:1};
-    const updates={};
-    Object.entries(jerseys).forEach(([pid,num])=>{updates[DB_ROOT+'/players/'+pid+'/jersey']=num;});
-    updates[DB_ROOT+'/_jerseys_seeded']=true;
-    db.ref().update(updates);
+  // Only seed schedule entries that are genuinely missing from Firebase
+  db.ref('leon_queens_matches/schedule').once('value',function(snap){
+    var existing=snap.val()||{};
+    var u={};
+    [{id:'sch01',date:'2026-02-24',opponent:'Community Christian',location:'home',scoreUs:4,scoreThem:1},
+     {id:'sch02',date:'2026-02-26',opponent:'Wakulla',location:'home',scoreUs:4,scoreThem:1},
+     {id:'sch03',date:'2026-02-26',opponent:'Sneads',location:'home',scoreUs:5,scoreThem:0},
+     {id:'sch04',date:'2026-03-03',opponent:'Florida State University HS',location:'home',scoreUs:2,scoreThem:3},
+     {id:'sch05',date:'2026-03-05',opponent:'Mosley',location:'home',scoreUs:3,scoreThem:2},
+     {id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',scoreUs:0,scoreThem:5},
+     {id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',scoreUs:5,scoreThem:0},
+     {id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
+     {id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
+    ].forEach(function(g){
+      // Only write if this entry doesn't exist at all in Firebase
+      if(!existing[g.id]){u['leon_queens_matches/schedule/'+g.id]=g;}
+    });
+    // Only seed standings if fewer than 5 teams exist
+    db.ref('leon_queens_matches/standings').once('value',function(snap2){
+      var existingSt=snap2.val()||{};
+      if(Object.keys(existingSt).length<5){
+        var st={'Chiles':{w:7,l:0},'Lincoln':{w:4,l:3},'Florida State University HS':{w:4,l:2},'Wakulla':{w:3,l:3},'Mosley':{w:3,l:3},'Community Christian':{w:1,l:5},'Sneads':{w:1,l:4},'South Walton':{w:4,l:2},'Gulf Breeze':{w:4,l:1},'Destin':{w:2,l:3},'Maclay':{w:2,l:2},'Godby':{w:0,l:3}};
+        Object.keys(st).forEach(function(t){u['leon_queens_matches/standings/'+t]=st[t];});
+      }
+      // Jersey numbers — only write once (check flag)
+      db.ref('leon_queens_matches/_jerseys_seeded').once('value',function(snap3){
+        if(!snap3.val()){
+          var jerseys={p01:9,p02:5,p03:10,p04:2,p05:7,p06:8,p07:13,p08:3,p09:17,p10:6,p11:4,p12:11,p13:15,p14:18,p15:12,p16:1};
+          Object.keys(jerseys).forEach(function(pid){u['leon_queens_matches/players/'+pid+'/jersey']=jerseys[pid];});
+          u['leon_queens_matches/_jerseys_seeded']=true;
+        }
+        if(Object.keys(u).length){
+          db.ref().update(u,function(err){console.log(err?'Seed error:'+err:'Seed OK — wrote '+Object.keys(u).length+' entries');});
+        }else{
+          console.log('Seed: nothing to write, Firebase already has all data');
+        }
+      });
+    });
   });
-},4000);
+},2500);
 </script>
 </body>
 </html>
