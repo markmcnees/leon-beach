@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314135006">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -1015,65 +1015,24 @@ function fillSel(ids,courtHint){
 // DASHBOARD
 // ============================================================
 function renderDash(){
+  // Dual W-L from schedule
   const _dr=getDualRecord();
   const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dr.w+'-'+_dr.l;
   const _crEl=document.getElementById('dash-courts-rec');if(_crEl)_crEl.textContent=_dr.cw+'-'+_dr.cl;
-  const totalQM=D.matches.length;
 
-  // Game Day sets
-  let gdSW=0,gdSL=0,gdPF=0,gdPA=0,gdDays=new Set(),gdMatches=0;
-  D.gamedays.forEach(m=>{gdDays.add(m.date);gdMatches++;
-    (m.sets||[]).forEach(s=>{const su=s.scoreUs||0,st=s.scoreThem||0;gdPF+=su;gdPA+=st;su>st?gdSW++:gdSL++;});
-  });
-  document.getElementById('dash-gd-rec').textContent=gdSW+'-'+gdSL;
-
-  // Scrimmage sets
-  let scSW=0,scSL=0;
-  D.scrimmages.forEach(m=>{(m.sets||[]).forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?scSW++:scSL++;});});
-
-  // Total match days
-  const allDates=new Set();
-  D.matches.forEach(m=>allDates.add(m.date));
-  D.gamedays.forEach(m=>allDates.add(m.date));
-  D.scrimmages.forEach(m=>allDates.add(m.date));
-
-  // Game Day overview boxes
-  const gdTotalSets=gdSW+gdSL;
-  document.getElementById('dash-gd-overview').innerHTML=`
-    <div class="stat-box"><div class="stat-number green">${gdDays.size}</div><div class="stat-label">Dual Days</div></div>
-    <div class="stat-box"><div class="stat-number green">${gdSW}-${gdSL}</div><div class="stat-label">Court Record</div></div>
-    <div class="stat-box"><div class="stat-number ${(gdPF-gdPA)>=0?'green':''}" style="${(gdPF-gdPA)<0?'color:var(--loss-red)':''}">${(gdPF-gdPA)>=0?'+':''}${gdPF-gdPA}</div><div class="stat-label">Point +/-</div></div>
-    <div class="stat-box"><div class="stat-number green">${gdSW+gdSL}</div><div class="stat-label">Total Sets</div></div>`;
-
-  // Game Day player stats table
-  const gdStats={};
-  D.players.forEach(p=>{const s=extStats(p.id,D.gamedays);if(s.sets>0)gdStats[p.id]=s;});
-  const gdSorted=Object.entries(gdStats).sort((a,b)=>b[1].diff-a[1].diff);
-  document.querySelector('#dash-gd-table tbody').innerHTML=gdSorted.map(([id,s])=>{
-    const p=gP(id);if(!p)return'';
-    return`<tr>
-      <td><span class="player-name">${pN(id)}</span> <span class="court-badge court-${p.court}">Court ${p.court}</span></td>
-      <td>${s.sets}</td>
-      <td class="plus-minus ${pmClass(s.diff)}" style="font-weight:700;">${pmStr(s.diff)}</td>
-      <td>${s.k}</td><td>${s.b}</td><td>${s.a}</td><td>${s.d}</td><td>${s.e}</td></tr>`;
-  }).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:20px;">No dual data yet</td></tr>';
-
-  // Queens leaders
-  const qStats=D.players.map(p=>({...p,s:queensStats(p.id,D.matches)})).filter(p=>p.s.gp>0).sort((a,b)=>b.s.diff-a.s.diff).slice(0,8);
-  document.querySelector('#top-performers tbody').innerHTML=qStats.map(p=>`<tr>
-    <td><span class="player-name">${p.firstName} ${p.lastName}</span> <span class="class-badge class-${p.classYear}">${p.classYear}</span></td>
-    <td><span class="court-badge court-${p.court}">CT${p.court}</span></td>
-    <td class="wl-record">${p.s.wins}-${p.s.losses}</td>
-    <td class="plus-minus ${pmClass(p.s.diff)}">${pmStr(p.s.diff)}</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--gray);padding:20px;">No Queens data yet</td></tr>';
+  // Dual Sets (from gamedays)
+  let gdSW=0,gdSL=0;
+  D.gamedays.forEach(m=>{(m.sets||[]).forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?gdSW++:gdSL++;});});
+  const gdEl=document.getElementById('dash-gd-rec');if(gdEl)gdEl.textContent=gdSW+'-'+gdSL;
 
   // Season Schedule
   renderSchedule();
-  // Standings
+  // Area Standings
   renderStandings();
-  // Show add form only for coaches
   const addEl=document.getElementById('dash-schedule-add');
   if(addEl)addEl.style.display=currentRole==='coach'?'block':'none';
 }
+
 
 function renderSchedule(){
   const games=[...D.schedule].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
