@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314224021">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -2003,7 +2003,7 @@ function renderPlayerPortal(){
   const vertBests={};
   Object.values(vertData2).forEach(v=>{
     const vid=v.playerId||v.player;if(!vid)return;
-    const approach=v.approachJump||v.approach||'';
+    const approach=v.approachJump||v.approach||v.approachJumpTouch||'';
     if(approach){
       // Convert to inches for comparison: parse "8'6" format
       const inches=parseHeight(approach);
@@ -2029,7 +2029,7 @@ function renderPlayerPortal(){
   const blockBests={};
   Object.values(vertData2).forEach(v=>{
     const vid=v.playerId||v.player;if(!vid)return;
-    const block=v.blockJump||v.block||'';
+    const block=v.blockJump||v.block||v.blockJumpTouch||'';
     if(block){const inches=parseHeight(block);if(inches&&(!blockBests[vid]||inches>blockBests[vid].inches)){blockBests[vid]={inches,display:block};}}
   });
   const blockRanks=Object.entries(blockBests).map(([id,v])=>({id,val:v.inches,display:v.display})).sort((a,b)=>b.val-a.val);
@@ -2311,7 +2311,7 @@ function getPlayerDataSummary(pid){
   const verts=Object.values(profilesData?.jumpTests||profilesData?.verticals||{}).filter(v=>(v.playerId===pid||v.player===pid)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   if(verts.length){
     const v=verts[0];
-    const reach=v.standingReach||v.reach||'';const block=v.blockJump||v.block||'';const approach=v.approachJump||v.approach||'';
+    const reach=v.standingReach||v.reach||'';const block=v.blockJump||v.block||v.blockJumpTouch||'';const approach=v.approachJump||v.approach||v.approachJumpTouch||'';
     if(reach)summary+=`Standing reach: ${reach}\n`;
     if(block)summary+=`Block jump touch: ${block}\n`;
     if(approach)summary+=`Approach jump touch: ${approach}\n`;
@@ -2449,7 +2449,7 @@ function renderPlayerProfileData(pid){
   const myVerts=allVerts.filter(v=>(v.playerId===pid||v.player===pid)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   if(myVerts.length){
     const v=myVerts[0];
-    const sr=v.standingReach||v.reach||'';const bj=v.blockJump||v.block||'';const aj=v.approachJump||v.approach||'';
+    const sr=v.standingReach||v.reach||'';const bj=v.blockJump||v.block||v.blockJumpTouch||'';const aj=v.approachJump||v.approach||v.approachJumpTouch||'';
     let h='';
     if(sr)h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:13px;"><span style="color:var(--gray);font-weight:600;">Standing Reach</span><span style="font-weight:700;">${sr}</span></div>`;
     if(bj)h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:13px;"><span style="color:var(--gray);font-weight:600;">Block Jump</span><span style="font-weight:700;">${bj}</span></div>`;
@@ -2606,7 +2606,7 @@ function buildTeamDataForPairings(){
     const myVerts=allVertsAI.filter(v=>(v.playerId===p.id||v.player===p.id)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
     if(myVerts.length){
       const v=myVerts[0];
-      const reach=v.standingReach||v.reach||'';const block=v.blockJump||v.block||'';const approach=v.approachJump||v.approach||'';
+      const reach=v.standingReach||v.reach||'';const block=v.blockJump||v.block||v.blockJumpTouch||'';const approach=v.approachJump||v.approach||v.approachJumpTouch||'';
       if(reach)data+=`, Reach: ${reach}`;
       if(block)data+=`, Block Jump: ${block}`;
       if(approach)data+=`, Approach Jump: ${approach}`;
