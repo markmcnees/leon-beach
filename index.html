@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314144902">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4531,62 +4531,34 @@ initDualScanner();
 document.getElementById('q-date').value=td();
 document.getElementById('gd-date').value=td();
 document.getElementById('sc-date').value=td();
-document.getElementById('gd-filter-date').value=td();
+(document.getElementById('gd-filter-date')||{}).value=td();
 document.getElementById('sc-filter-date').value=td();
 document.getElementById('assign-date').value=td();
 document.getElementById('live-date').value=td();
 document.getElementById('cnote-date').value=td();
 initFB();
 setTimeout(runMigration,2000);
-// Seed MaxPreps schedule data (one-time)
+// ── SINGLE CLEAN SEED (idempotent — runs every load, safe to repeat) ──
 setTimeout(function(){
   if(!db)return;
-  db.ref(DB_ROOT+'/_seeded_schedule').once('value',snap=>{
-    if(snap.val())return;
-    const sched=[
-      {id:'sch01',date:'2026-02-24',opponent:'Community Christian',location:'home',scoreUs:4,scoreThem:1},
-      {id:'sch02',date:'2026-02-26',opponent:'Wakulla',location:'home',scoreUs:4,scoreThem:1},
-      {id:'sch03',date:'2026-02-26',opponent:'Sneads',location:'home',scoreUs:5,scoreThem:0},
-      {id:'sch04',date:'2026-03-03',opponent:'Florida State University HS',location:'home',scoreUs:2,scoreThem:3},
-      {id:'sch05',date:'2026-03-05',opponent:'Mosley',location:'home',scoreUs:3,scoreThem:2},
-      {id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',scoreUs:0,scoreThem:5},
-      {id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',scoreUs:5,scoreThem:0},
-      {id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
-      {id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
-    ];
-    const updates={};
-    sched.forEach(g=>{updates[DB_ROOT+'/schedule/'+g.id]=g;});
-    updates[DB_ROOT+'/_seeded_schedule']=true;
-    // Also seed area team standings
-    const standUpdates={
-      'Chiles':{w:7,l:0},
-      'Lincoln':{w:3,l:2},
-      'FSUS':{w:3,l:1},
-      'Wakulla':{w:2,l:3},
-      'Maclay':{w:1,l:2},
-      'Community Christian':{w:1,l:3},
-      'Mosley':{w:2,l:2},
-      'Sneads':{w:0,l:3},
-      'Godby':{w:0,l:2},
-      'South Walton':{w:2,l:1},
-      'Gulf Breeze':{w:3,l:1}
-    };
-    Object.entries(standUpdates).forEach(([team,rec])=>{updates[DB_ROOT+'/standings/'+team]=rec;});
-    db.ref().update(updates,err=>{if(!err)toast('Schedule imported from MaxPreps!');});
-  });
+  var u={};
+  var SCHED={
+    sch01:{id:'sch01',date:'2026-02-24',opponent:'Community Christian',location:'home',scoreUs:4,scoreThem:1},
+    sch02:{id:'sch02',date:'2026-02-26',opponent:'Wakulla',location:'home',scoreUs:4,scoreThem:1},
+    sch03:{id:'sch03',date:'2026-02-26',opponent:'Sneads',location:'home',scoreUs:5,scoreThem:0},
+    sch04:{id:'sch04',date:'2026-03-03',opponent:'Florida State University HS',location:'home',scoreUs:2,scoreThem:3},
+    sch05:{id:'sch05',date:'2026-03-05',opponent:'Mosley',location:'home',scoreUs:3,scoreThem:2},
+    sch06:{id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',scoreUs:0,scoreThem:5},
+    sch07:{id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',scoreUs:5,scoreThem:0},
+    sch08:{id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},
+    sch09:{id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}
+  };
+  Object.values(SCHED).forEach(function(g){u[DB_ROOT+'/schedule/'+g.id]=g;});
+  var STAND={'Chiles':{w:7,l:0},'Lincoln':{w:4,l:3},'Florida State University HS':{w:4,l:2},'Wakulla':{w:3,l:3},'Mosley':{w:3,l:3},'Community Christian':{w:1,l:5},'Sneads':{w:1,l:4},'South Walton':{w:4,l:2},'Gulf Breeze':{w:4,l:1},'Destin':{w:2,l:3},'Maclay':{w:2,l:2},'Godby':{w:0,l:3}};
+  Object.entries(STAND).forEach(function(kv){u[DB_ROOT+'/standings/'+kv[0]]=kv[1];});
+  db.ref().update(u,function(err){if(!err){console.log('Schedule+standings seeded OK');}}); 
 },3000);
-
-setTimeout(function(){if(!db)return;db.ref(DB_ROOT+'/_schedule_v2').once('value',snap=>{if(snap.val())return;const u={};u[DB_ROOT+'/schedule/sch06/scoreUs']=0;u[DB_ROOT+'/schedule/sch06/scoreThem']=5;u[DB_ROOT+'/schedule/sch06/time']=null;u[DB_ROOT+'/schedule/sch07/scoreUs']=5;u[DB_ROOT+'/schedule/sch07/scoreThem']=0;u[DB_ROOT+'/schedule/sch07/time']=null;u[DB_ROOT+'/_schedule_v2']=true;db.ref().update(u);db.ref(DB_ROOT+'/schedule/sch08').once('value',s=>{if(!s.val())db.ref(DB_ROOT+'/schedule/sch08').set({id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0});});db.ref(DB_ROOT+'/schedule/sch09').once('value',s=>{if(!s.val())db.ref(DB_ROOT+'/schedule/sch09').set({id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4});});});},4500);
-// Clean up any fake standings data — start fresh, coaches add manually
-setTimeout(function(){
-  if(!db)return;
-  db.ref(DB_ROOT+'/_cleaned_standings').once('value',snap=>{
-    if(snap.val())return;
-    db.ref(DB_ROOT+'/standings').remove();
-    db.ref(DB_ROOT+'/_cleaned_standings').set(true);
-  });
-},3500);
-// One-time migration: write jersey numbers to existing player records
+// One-time jersey seed
 setTimeout(function(){
   if(!db)return;
   db.ref(DB_ROOT+'/_jerseys_seeded').once('value',snap=>{
@@ -4595,7 +4567,7 @@ setTimeout(function(){
     const updates={};
     Object.entries(jerseys).forEach(([pid,num])=>{updates[DB_ROOT+'/players/'+pid+'/jersey']=num;});
     updates[DB_ROOT+'/_jerseys_seeded']=true;
-    db.ref().update(updates,err=>{if(!err)console.log('Jersey numbers seeded');});
+    db.ref().update(updates);
   });
 },4000);
 </script>
