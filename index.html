@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314183145">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -503,11 +503,23 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
             <option value="3">3 courts</option><option value="4">4 courts</option><option value="5">5 courts</option><option value="6">6 courts</option><option value="7">7 courts</option><option value="8">8 courts</option><option value="2">2 courts</option><option value="1">1 court</option>
           </select></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Context</label>
-          <select class="form-select" id="ai-pair-context" style="padding:8px;font-size:13px;">
+          <select class="form-select" id="ai-pair-context" style="padding:8px;font-size:13px;" onchange="document.getElementById('ai-pair-rounds-row').style.display=this.value==='queens'?'block':'none'">
             <option value="gameday">Dual (strongest pairings)</option>
             <option value="scrimmage">Scrimmage (mix it up)</option>
             <option value="queens">Queens Practice (competitive balance)</option>
           </select></div>
+      </div>
+      <div id="ai-pair-rounds-row" style="display:none;margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Rounds / Games</label>
+          <select class="form-select" id="ai-pair-rounds" style="padding:8px;font-size:13px;">
+            <option value="1">1 round</option>
+            <option value="2">2 rounds — different partners each</option>
+            <option value="3">3 rounds — full rotation</option>
+            <option value="4">4 rounds</option>
+          </select>
+          <div style="font-size:11px;color:var(--gray);margin-top:4px;">Each round re-mixes all partners so players get new matchups</div>
+        </div>
       </div>
       <button class="btn btn-blue btn-small" onclick="generateAIPairings()" id="ai-pair-btn" style="width:100%;">🤖 Generate Pairings</button>
       <div id="ai-pairings-result" style="margin-top:12px;"></div>
@@ -2609,15 +2621,17 @@ function buildTeamDataForPairings(){
 async function generateAIPairings(){
   const numCourts=parseInt(document.getElementById('ai-pair-courts').value)||3;
   const context=document.getElementById('ai-pair-context').value;
+  const numRounds=context==='queens'?parseInt(document.getElementById('ai-pair-rounds')?.value||1):1;
   const container=document.getElementById('ai-pairings-result');
   const btn=document.getElementById('ai-pair-btn');
 
   const contextDesc={
     gameday:'This is for a GAME DAY match against an external opponent. Prioritize the strongest possible pairings on each court. Court 1 gets the best pair, Court 2 next best, etc.',
     scrimmage:'This is for a SCRIMMAGE (non-season match). Mix up the pairings a bit to develop players and try new combinations, while still being competitive.',
-    queens:'This is for QUEENS PRACTICE (internal Leon vs Leon). Create pairs that make the matches as competitive and balanced as possible so everyone improves. Try to avoid lopsided matchups.'
+    queens:`This is QUEENS PRACTICE — internal Leon vs Leon. Generate ${numRounds} round${numRounds>1?'s':''} of matchups. ALL 16 players must be assigned every round, 4 per court (2 vs 2). In each round every player appears exactly once. ${numRounds>1?'Across rounds, vary the pairings so players get new partners and opponents each round — avoid repeating the same pair twice if possible.':''} Make each matchup competitive and balanced.`
   };
 
+  const isQueens=context==='queens';
   container.innerHTML='<div class="ai-loading"><div class="spinner"></div><div style="margin-top:8px;">AI is analyzing team data and generating pairings...</div></div>';
   btn.disabled=true;
 
@@ -2636,15 +2650,24 @@ ${contextDesc[context]}
 
 ${teamData}
 
-PAIRING RULES:
+${isQueens?`QUEENS RULES:
+- Assign ALL 16 players — 4 per court (2 vs 2), no subs
+- Balance each matchup: mix strong with developing players on each side
+- Each player appears exactly once
+- Consider Queens match history to avoid repeated lopsided matchups`:`PAIRING RULES:
 - Each pair needs a hitter and a defender (or at least one versatile player)
 - Left side + right side preference is ideal
 - Consider their actual skills, match history together, and court level
 - For game day, put the strongest pair on Court 1
 - Each player can only be in ONE pair
-- You have 16 players total, assign the top ${numCourts*2} players to courts
+- You have 16 players total, assign the top ${numCourts*2} players to courts`}
 
-Respond with EXACTLY this format (no extra text before or after):
+${isQueens?`Respond with EXACTLY this format. ${numRounds>1?`Generate all ${numRounds} rounds, each labeled ROUND 1, ROUND 2 etc. Use all 16 players each round with new partners.`:''}
+${numRounds>1?Array.from({length:numRounds},(_,ri)=>`ROUND ${ri+1}:\nCOURT 1: [P1] & [P2] VS [P3] & [P4] | [reason]\nCOURT 2: [P1] & [P2] VS [P3] & [P4] | [reason]\n${numCourts>=3?'COURT 3: [P1] & [P2] VS [P3] & [P4] | [reason]':''}\n${numCourts>=4?'COURT 4: [P1] & [P2] VS [P3] & [P4] | [reason]':''}`).join('\n'):`COURT 1: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [Brief reason - 8 words max]
+COURT 2: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [Brief reason - 8 words max]
+${numCourts>=3?'COURT 3: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [Brief reason - 8 words max]':''}
+${numCourts>=4?'COURT 4: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [Brief reason - 8 words max]':''}`}
+ANALYSIS: [2-3 sentences about balance strategy]`:`Respond with EXACTLY this format (no extra text before or after):
 COURT 1: [Player1 Full Name] + [Player2 Full Name] | [Brief reason - 10 words max]
 COURT 2: [Player1 Full Name] + [Player2 Full Name] | [Brief reason - 10 words max]
 ${numCourts>=3?'COURT 3: [Player1 Full Name] + [Player2 Full Name] | [Brief reason - 10 words max]':''}
@@ -2653,7 +2676,7 @@ ${numCourts>=5?'COURT 5: [Player1 Full Name] + [Player2 Full Name] | [Brief reas
 ${numCourts>=6?'COURT 6: [Player1 Full Name] + [Player2 Full Name] | [Brief reason - 10 words max]':''}
 ${numCourts>=7?'COURT 7: [Player1 Full Name] + [Player2 Full Name] | [Brief reason - 10 words max]':''}
 SUBS: [Remaining players not assigned]
-ANALYSIS: [2-3 sentences explaining overall strategy]`}]
+ANALYSIS: [2-3 sentences explaining overall strategy]`}`}]
       })
     });
     const data=await response.json();
@@ -2663,10 +2686,31 @@ ANALYSIS: [2-3 sentences explaining overall strategy]`}]
     let h='';
     const lines=text.split('\n').filter(l=>l.trim());
     lines.forEach(line=>{
-      const courtMatch=line.match(/^COURT\s*(\d+):\s*(.+?)\s*\|\s*(.+)/i);
+      // Round header: ROUND 1:
+      const roundMatch=line.match(/^ROUND\s*(\d+):/i);
+      // Queens format: COURT 1: A & B VS C & D | reason
+      const queensMatch=!roundMatch&&line.match(/^COURT\s*(\d+):\s*(.+?)\s+VS\s+(.+?)\s*\|\s*(.+)/i);
+      // Standard format: COURT 1: A + B | reason
+      const courtMatch=!queensMatch&&line.match(/^COURT\s*(\d+):\s*(.+?)\s*\|\s*(.+)/i);
       const subsMatch=line.match(/^SUBS?:\s*(.+)/i);
       const analysisMatch=line.match(/^ANALYSIS:\s*(.+)/i);
-      if(courtMatch){
+      if(roundMatch){
+        const rn=roundMatch[1];
+        h+=`<div style="font-family:'Bebas Neue';font-size:15px;letter-spacing:2px;color:var(--red);margin:14px 0 6px;padding-top:10px;${rn!=='1'?'border-top:2px solid var(--gray-lighter);':''}">⚡ Round ${rn}</div>`;
+      }else if(queensMatch){
+        const ct=queensMatch[1],teamA=queensMatch[2].trim(),teamB=queensMatch[3].trim(),reason=queensMatch[4].trim();
+        h+=`<div style="padding:12px;margin-bottom:6px;background:var(--off-white);border-radius:8px;border-left:4px solid var(--red);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span class="court-badge court-${ct}" style="font-size:13px;min-width:50px;text-align:center;">CT ${ct}</span>
+            <div style="font-size:11px;color:var(--gray);">${reason}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
+            <div style="font-weight:700;font-size:13px;color:var(--red);">${teamA}</div>
+            <div style="font-family:'Bebas Neue';font-size:16px;color:var(--gray-light);">VS</div>
+            <div style="font-weight:700;font-size:13px;color:var(--blue);text-align:right;">${teamB}</div>
+          </div>
+        </div>`;
+      }else if(courtMatch){
         const ct=courtMatch[1],players=courtMatch[2].trim(),reason=courtMatch[3].trim();
         h+=`<div style="display:flex;align-items:center;gap:10px;padding:12px;margin-bottom:6px;background:var(--off-white);border-radius:8px;border-left:4px solid var(--blue);">
           <span class="court-badge court-${ct}" style="font-size:13px;min-width:50px;text-align:center;">CT ${ct}</span>
@@ -2679,7 +2723,6 @@ ANALYSIS: [2-3 sentences explaining overall strategy]`}]
         h+=`<div style="padding:10px 12px;margin-top:8px;background:#e0e7ff;border-radius:8px;font-size:13px;color:var(--blue);line-height:1.6;">
           💡 ${analysisMatch[1]}</div>`;
       }else if(line.trim()){
-        // Fallback for lines that don't match pattern
         h+=`<div style="font-size:13px;line-height:1.6;padding:4px 0;">${line}</div>`;
       }
     });
