@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314132534">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -1015,14 +1015,10 @@ function fillSel(ids,courtHint){
 // DASHBOARD
 // ============================================================
 function renderDash(){
-  // Queens record
-  let qW=0,qL=0;
-  D.matches.forEach(m=>{qW++;qL++;}); // each match has a winner and loser
+  const _dr=getDualRecord();
+  const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dr.w+'-'+_dr.l;
+  const _crEl=document.getElementById('dash-courts-rec');if(_crEl)_crEl.textContent=_dr.cw+'-'+_dr.cl;
   const totalQM=D.matches.length;
-  // Actually count unique wins across all players
-  let totalQWins=D.matches.length; // each match = 1 win, 1 loss
-  const _dualRec=getDualRecord();const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dualRec.w+'-'+_dualRec.l;
-    document.getElementById('dash-queens-rec').textContent=totalQM+' matches';
 
   // Game Day sets
   let gdSW=0,gdSL=0,gdPF=0,gdPA=0,gdDays=new Set(),gdMatches=0;
