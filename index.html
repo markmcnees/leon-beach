@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314180235">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -697,55 +697,31 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 </div>
 <!-- PLAYER PORTAL (shown when logged in as player) -->
 <div class="player-portal" id="player-portal">
-  <!-- Header (always visible) -->
+  <!-- Header -->
   <div class="card">
     <div class="pp-name" id="pp-name"></div>
     <div class="pp-meta" id="pp-meta"></div>
   </div>
 
-  <!-- Notification banner for upcoming assignment -->
+  <!-- Notification banner -->
   <div id="pp-notif-banner"></div>
 
-  <!-- Tab bar -->
+  <!-- Tab bar: My Stats | Live Dual Score Entry | My Matches -->
   <div class="pp-tab-bar">
     <button class="pp-tab-btn active" onclick="switchPPTab('stats',this)">📊 My Stats</button>
-    <button class="pp-tab-btn" onclick="switchPPTab('gameday',this)">🏐 My Duals</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('live',this)">🏐 Live Dual Score Entry</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('matches',this)">📋 My Matches</button>
   </div>
 
-  <!-- MY STATS PANEL -->
+  <!-- ══ MY STATS PANEL ══ -->
   <div class="pp-panel active" id="pp-panel-stats">
+
+    <!-- Season Summary -->
     <div class="card"><div class="card-title"><span class="bar"></span> My Season Summary</div>
-      <div class="stat-grid" id="pp-summary"></div>
+      <div id="pp-summary"></div>
     </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> My Team Rankings</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">How you stack up against your teammates</p>
-      <div id="pp-rankings"></div>
-    </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> My Skills</div>
-      <div id="pp-skills"></div>
-    </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> My Star Drill Times</div>
-      <div id="pp-drills"></div>
-    </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> My Verticals</div>
-      <div id="pp-verts"></div>
-    </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> My Queens Matches</div>
-      <div id="pp-queens"></div>
-    </div>
-    <div class="card"><div class="card-title blue"><span class="bar"></span> My Dual Results</div>
-      <div id="pp-gameday"></div>
-    </div>
-    <div class="card"><div class="card-title purple"><span class="bar"></span> My Scrimmage Results</div>
-      <div id="pp-scrimmage"></div>
-    </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> Season Schedule</div>
-      <div id="pp-assignment" style="margin-bottom:12px;"></div>
-      <div id="pp-schedule"></div>
-    </div>
-    <div class="card"><div class="card-title"><span class="bar"></span> Area Standings</div>
-      <div id="pp-standings"></div>
-    </div>
+
+    <!-- Goals (moved here) -->
     <div class="card"><div class="card-title" style="color:var(--gold);"><span class="bar" style="background:var(--gold);"></span> My Goals &amp; Development Plan</div>
       <div id="pp-goals-list"></div>
       <div style="margin-top:14px;border-top:1px solid var(--gray-lighter);padding-top:14px;">
@@ -798,9 +774,45 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <button class="btn btn-primary btn-small" style="background:var(--gold);width:100%;" onclick="addPlayerGoal()">Set This Goal</button>
       </div>
     </div>
+
+    <!-- Coach Notes (moved here) -->
     <div class="card"><div class="card-title"><span class="bar"></span> Coach Notes</div>
       <div id="pp-notes"></div>
     </div>
+
+    <!-- Rankings -->
+    <div class="card"><div class="card-title"><span class="bar"></span> My Team Rankings</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">How you stack up against your teammates</p>
+      <div id="pp-rankings"></div>
+    </div>
+
+    <!-- Skills -->
+    <div class="card"><div class="card-title"><span class="bar"></span> My Skills</div>
+      <div id="pp-skills"></div>
+    </div>
+
+    <!-- Star Drill -->
+    <div class="card"><div class="card-title"><span class="bar"></span> My Star Drill Times</div>
+      <div id="pp-drills"></div>
+    </div>
+
+    <!-- Verticals -->
+    <div class="card"><div class="card-title"><span class="bar"></span> My Verticals</div>
+      <div id="pp-verts"></div>
+    </div>
+
+    <!-- Season Schedule -->
+    <div class="card"><div class="card-title"><span class="bar"></span> Season Schedule</div>
+      <div id="pp-assignment" style="margin-bottom:12px;"></div>
+      <div id="pp-schedule"></div>
+    </div>
+
+    <!-- Area Standings -->
+    <div class="card"><div class="card-title"><span class="bar"></span> Area Standings</div>
+      <div id="pp-standings"></div>
+    </div>
+
+    <!-- Change Password -->
     <div class="card"><div class="card-title"><span class="bar"></span> Change Password</div>
       <div style="padding:4px;">
         <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-current" placeholder="Current Password">
@@ -809,11 +821,31 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <button class="btn btn-primary btn-small" onclick="changePassword()">Update Password</button>
       </div>
     </div>
+
   </div><!-- end pp-panel-stats -->
 
-  <!-- GAME DAY PANEL -->
-  <div class="pp-panel" id="pp-panel-gameday">
-    <div id="pgd-content"></div>
+  <!-- ══ LIVE DUAL SCORE ENTRY PANEL ══ -->
+  <div class="pp-panel" id="pp-panel-live">
+    <div class="card" style="border:2px solid var(--blue);">
+      <div class="card-title blue"><span class="bar"></span> 🏐 Live Dual Score Entry
+        <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Today's courts</span>
+      </div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Use +/− to keep score live, or type a number to correct. Each court saves independently.</p>
+      <div id="pp-live-courts"><div style="text-align:center;color:var(--gray);font-size:13px;padding:20px;">Loading today's assignment...</div></div>
+    </div>
+  </div>
+
+  <!-- ══ MY MATCHES PANEL ══ -->
+  <div class="pp-panel" id="pp-panel-matches">
+    <div class="card"><div class="card-title blue"><span class="bar"></span> My Match Results</div>
+      <div id="pp-gameday"></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> My Queens Matches</div>
+      <div id="pp-queens"></div>
+    </div>
+    <div class="card"><div class="card-title purple"><span class="bar"></span> My Scrimmage Results</div>
+      <div id="pp-scrimmage"></div>
+    </div>
   </div>
 
 </div><!-- end player-portal -->
@@ -1826,15 +1858,30 @@ function renderPlayerPortal(){
   const gs=extStats(pid,D.gamedays);
   const ss=extStats(pid,D.scrimmages);
   const totalDiff=qs.diff+gs.diff+ss.diff;
+  // Combined stats
+  const allMatchW=qs.wins+gs.setsWon+ss.setsWon;
+  const allMatchL=qs.losses+gs.setsLost+ss.setsLost;
+  const allSetW=gs.setsWon+ss.setsWon;
+  const allSetL=gs.setsLost+ss.setsLost;
+  const allDiff=qs.diff+gs.diff+ss.diff;
+  const allK=gs.k+ss.k;
+  const allA=gs.a+ss.a;
+  const allB=gs.b+ss.b;
+  const allD=gs.d+ss.d;
+  const allE=gs.e+ss.e;
   document.getElementById('pp-summary').innerHTML=`
-    <div class="stat-box"><div class="stat-number">${qs.wins}-${qs.losses}</div><div class="stat-label">Queens W-L</div></div>
-    <div class="stat-box"><div class="stat-number ${pmClass(qs.diff)}">${qs.gp>0?pmStr(qs.diff):'—'}</div><div class="stat-label">Queens +/-</div></div>
-    <div class="stat-box"><div class="stat-number green">${gs.setsWon}-${gs.setsLost}</div><div class="stat-label">GD Sets</div></div>
-    <div class="stat-box"><div class="stat-number ${pmClass(gs.diff)}" style="${gs.diff<0?'color:var(--loss-red)':''}">${gs.sets>0?pmStr(gs.diff):'—'}</div><div class="stat-label">GD +/-</div></div>
-    <div class="stat-box"><div class="stat-number purple">${ss.setsWon}-${ss.setsLost}</div><div class="stat-label">Scrim Sets</div></div>
-    <div class="stat-box"><div class="stat-number ${pmClass(ss.diff)}" style="${ss.diff<0?'color:var(--loss-red)':''}">${ss.sets>0?pmStr(ss.diff):'—'}</div><div class="stat-label">Scrim +/-</div></div>
-    <div class="stat-box"><div class="stat-number">${gs.k+ss.k}</div><div class="stat-label">Kills</div></div>
-    <div class="stat-box"><div class="stat-number">${gs.a+ss.a}</div><div class="stat-label">Aces</div></div>`;
+    <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px;">
+      <div class="stat-box"><div class="stat-number green">${qs.wins+gs.setsWon+ss.setsWon}-${qs.losses+gs.setsLost+ss.setsLost}</div><div class="stat-label">Match W-L</div></div>
+      <div class="stat-box"><div class="stat-number green">${gs.setsWon+ss.setsWon}-${gs.setsLost+ss.setsLost}</div><div class="stat-label">Set W-L</div></div>
+      <div class="stat-box"><div class="stat-number ${pmClass(allDiff)}">${(qs.gp+gs.sets+ss.sets)>0?pmStr(allDiff):'—'}</div><div class="stat-label">Pts +/-</div></div>
+    </div>
+    <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${allK}</div><div class="stat-label">Kills</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${allA}</div><div class="stat-label">Aces</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${allB}</div><div class="stat-label">Blocks</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${allD}</div><div class="stat-label">Digs</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${allE}</div><div class="stat-label">Errors</div></div>
+    </div>`;
 
   // ===== TEAM RANKINGS =====
   // Build stats for all players
@@ -2051,16 +2098,16 @@ function renderPlayerPortal(){
     document.getElementById('pp-queens').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No Queens matches yet</div>';
   }
 
-  // Game Day / Scrimmage matches
-  renderPlayerExtMatches(pid,D.gamedays,'pp-gameday');
-  renderPlayerExtMatches(pid,D.scrimmages,'pp-scrimmage');
-
   // Schedule, standings, goals, assignment for player
   renderPlayerSchedule();
   renderPlayerGoals();
   renderPlayerAssignment(pid);
   // Profile data (skills, drills, verticals, notes)
   renderPlayerProfileData(pid);
+  // If matches tab is active, render it too
+  const activeTab=document.querySelector('.pp-tab-btn.active');
+  if(activeTab&&activeTab.textContent.includes('My Matches'))renderPlayerMatches();
+  if(activeTab&&activeTab.textContent.includes('Live Dual'))renderPlayerLiveScoring();
 }
 
 function renderPlayerSchedule(){
@@ -3762,7 +3809,8 @@ function switchPPTab(tab,btn){
   document.querySelectorAll('.pp-panel').forEach(p=>p.classList.remove('active'));
   if(btn)btn.classList.add('active');
   document.getElementById('pp-panel-'+tab).classList.add('active');
-  if(tab==='gameday')renderPlayerGameDay();
+  if(tab==='live')renderPlayerLiveScoring();
+  if(tab==='matches')renderPlayerMatches();
 }
 
 // ============================================================
@@ -4555,6 +4603,163 @@ function dhAddSet(matchId){
   const m=D.gamedays.find(x=>x.id===matchId);if(!m)return;
   // Open the existing Add Set modal
   openAddSet(matchId,'gameday');
+}
+
+
+// ============================================================
+// PLAYER LIVE DUAL SCORE ENTRY
+// ============================================================
+function renderPlayerLiveScoring(){
+  const container=document.getElementById('pp-live-courts');
+  if(!container)return;
+  const today=td();
+  const assignment=Object.values(D.assignments).find(a=>a.date===today);
+  if(!assignment||!(assignment.courts||[]).length){
+    container.innerHTML=`<div style="text-align:center;padding:24px;color:var(--gray);"><div style="font-size:32px;margin-bottom:8px;">📅</div><div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;">No Assignment Today</div><div style="font-size:13px;margin-top:4px;">Check back on dual day.</div></div>`;
+    return;
+  }
+  const aType=assignment.type||'gameday';
+  const fbNode=aType==='scrimmage'?'scrimmages':'gamedays';
+  const matchList=aType==='scrimmage'?D.scrimmages:D.gamedays;
+  let h='';
+  (assignment.courts||[]).sort((a,b)=>(a.court||0)-(b.court||0)).forEach((c,idx)=>{
+    const p1=gP(c.p1),p2=gP(c.p2);
+    const courtLabel='Court '+c.court;
+    const partnerLabel=[p1,p2].filter(Boolean).map(p=>p.firstName+' '+p.lastName.charAt(0)+'.').join(' & ');
+    const opp=assignment.opponent?assignment.opponent+' CT'+c.court:'Opponent CT'+c.court;
+    const existingMatch=matchList.find(m=>m.date===today&&arrEq(m.pair||[],[c.p1,c.p2].filter(Boolean)));
+    const matchId=existingMatch?existingMatch.id:null;
+    const sets=existingMatch?existingMatch.sets||[]:[];
+    let sw=0,sl=0,ptDiff=0;
+    sets.forEach(s=>{const us=s.scoreUs||0,them=s.scoreThem||0;us>them?sw++:sl++;ptDiff+=(us-them);});
+    const diffStr=ptDiff>0?'+'+ptDiff:String(ptDiff);
+    const diffColor=ptDiff>0?'var(--green)':ptDiff<0?'var(--loss-red)':'var(--gray)';
+
+    h+=`<div class="live-court-card" id="pp-lc-${idx}">
+      <div class="live-court-header">
+        <div>
+          <span class="court-badge court-${c.court}" style="font-size:12px;">${courtLabel}</span>
+          <div class="live-pair-name" style="margin-top:4px;">${partnerLabel||'TBD'}</div>
+          <div class="live-opp-name">vs ${opp}</div>
+        </div>
+        <div style="text-align:right;">
+          ${sets.length?`<div style="font-family:'Bebas Neue';font-size:18px;color:${sw>sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</div><div style="font-family:'Bebas Neue';font-size:15px;color:${diffColor};">${diffStr} pts</div>`:'<div style="font-size:12px;color:var(--gray);">No sets yet</div>'}
+        </div>
+      </div>`;
+    // Existing sets as chips with delete
+    if(sets.length){
+      h+='<div style="margin-bottom:8px;padding:0 4px;">';
+      sets.forEach((s,si)=>{
+        const win=(s.scoreUs||0)>(s.scoreThem||0);
+        h+=`<span class="live-set-chip ${win?'win':'loss'}">S${si+1}: ${s.scoreUs}-${s.scoreThem} <button style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;padding:0 0 0 4px;" onclick="ppDelLiveSet('${matchId}','${fbNode}',${si})" title="Delete">✕</button></span>`;
+      });
+      h+='</div>';
+    }
+    // New set entry
+    h+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:10px;letter-spacing:1px;">SET ${sets.length+1}</div>
+      <div class="live-score-row">
+        <div class="live-score-col">
+          <div class="live-score-label">LEON</div>
+          <div class="ls-counter">
+            <button class="ls-btn ls-btn-plus" onclick="lsAdj('pp-us-${idx}',1)">+</button>
+            <div class="ls-num" id="pp-us-${idx}">0</div>
+            <input type="number" id="pp-us-${idx}-inp" value="0" min="0" oninput="lsInpChange('pp-us-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
+            <button class="ls-btn ls-btn-minus" onclick="lsAdj('pp-us-${idx}',-1)">−</button>
+          </div>
+        </div>
+        <div style="font-family:'Bebas Neue';font-size:24px;color:var(--gray-light);">—</div>
+        <div class="live-score-col">
+          <div class="live-score-label">OPP</div>
+          <div class="ls-counter">
+            <button class="ls-btn ls-btn-plus" onclick="lsAdj('pp-them-${idx}',1)">+</button>
+            <div class="ls-num" id="pp-them-${idx}">0</div>
+            <input type="number" id="pp-them-${idx}-inp" value="0" min="0" oninput="lsInpChange('pp-them-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
+            <button class="ls-btn ls-btn-minus" onclick="lsAdj('pp-them-${idx}',-1)">−</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-blue btn-small" style="width:100%;margin-top:8px;" onclick="ppSaveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${today}',${c.court},'${matchId||''}','${assignment.opponent||''}','${fbNode}')">✓ Save Set — Court ${c.court}</button>
+    </div></div>`;
+  });
+  container.innerHTML=h;
+}
+
+function ppSaveLiveSet(idx,p1,p2,date,court,existingId,opponent,fbNode){
+  const usEl=document.getElementById('pp-us-'+idx);
+  const themEl=document.getElementById('pp-them-'+idx);
+  const us=parseInt(usEl?.textContent||0);
+  const them=parseInt(themEl?.textContent||0);
+  if(isNaN(us)||isNaN(them)){toast('Enter both scores');return;}
+  if(us===them){toast('Scores cannot be tied');return;}
+  const node=fbNode||'gamedays';
+  const matchList=node==='scrimmages'?D.scrimmages:D.gamedays;
+  const pair=[p1,p2].filter(Boolean);
+  const stats={};pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,d:0,e:0};});
+  const newSet={scoreUs:us,scoreThem:them,stats,enteredBy:currentPlayerId||null};
+  const opp=(opponent||'Opponent')+' CT'+court;
+  if(existingId){
+    const m=matchList.find(x=>x.id===existingId);
+    const sets=m?[...(m.sets||[])]:[];
+    sets.push(newSet);
+    fbSet(node+'/'+existingId+'/sets',sets);
+  }else{
+    const id=gi('gd');
+    fbSet(node+'/'+id,{id,date,court:parseInt(court),pair,opponent:opp,sets:[newSet]});
+  }
+  toast((us>them?'✓ Win':'✗ Loss')+' — '+us+'-'+them+' saved · Court '+court);
+  // Reset just this court's counters
+  if(usEl)usEl.textContent='0';
+  if(themEl)themEl.textContent='0';
+  const usInp=document.getElementById('pp-us-'+idx+'-inp');
+  const themInp=document.getElementById('pp-them-'+idx+'-inp');
+  if(usInp)usInp.value='0';
+  if(themInp)themInp.value='0';
+  setTimeout(renderPlayerLiveScoring,500);
+}
+
+function ppDelLiveSet(matchId,fbNode,setIdx){
+  if(!matchId)return;
+  const node=fbNode||'gamedays';
+  const matchList=node==='scrimmages'?D.scrimmages:D.gamedays;
+  const m=matchList.find(x=>x.id===matchId);if(!m)return;
+  const sets=(m.sets||[]).filter((_,i)=>i!==setIdx);
+  fbSet(node+'/'+matchId+'/sets',sets.length?sets:null);
+  toast('Set deleted');
+  setTimeout(renderPlayerLiveScoring,400);
+}
+
+// ============================================================
+// PLAYER MY MATCHES TAB
+// ============================================================
+function renderPlayerMatches(){
+  if(!currentPlayerId)return;
+  const pid=currentPlayerId;
+  renderPlayerExtMatches(pid,D.gamedays,'pp-gameday');
+  renderPlayerExtMatches(pid,D.scrimmages,'pp-scrimmage');
+  // Queens matches
+  const myQ=D.matches.filter(m=>(m.team1||[]).includes(pid)||(m.team2||[]).includes(pid)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(myQ.length){
+    let h='';
+    myQ.forEach(m=>{
+      const onT1=(m.team1||[]).includes(pid);
+      const partner=onT1?(m.team1||[]).find(x=>x!==pid):(m.team2||[]).find(x=>x!==pid);
+      const opps=onT1?(m.team2||[]):(m.team1||[]);
+      const myScore=onT1?(m.score1||0):(m.score2||0);
+      const theirScore=onT1?(m.score2||0):(m.score1||0);
+      const win=myScore>theirScore;
+      const diff=myScore-theirScore;
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.05);">
+        <div><div style="font-size:12px;color:var(--gray);">${fD(m.date)} · Court ${m.court}</div>
+          <div style="font-size:13px;font-weight:700;">w/ ${pN(partner)} vs ${opps.map(id=>pN(id)).join(' & ')}</div></div>
+        <div style="text-align:right;">
+          <div class="set-score ${win?'win':'loss'}" style="font-size:20px;">${myScore}-${theirScore}</div>
+          <div class="plus-minus ${pmClass(diff)}" style="font-size:13px;">${pmStr(diff)}</div></div></div>`;
+    });
+    document.getElementById('pp-queens').innerHTML=h;
+  }else{
+    document.getElementById('pp-queens').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No Queens matches yet</div>';
+  }
 }
 
 // ============================================================
