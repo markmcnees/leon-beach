@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260315205535">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -3737,14 +3737,20 @@ function renderScouts(){
     const starters=players.filter(p=>!p.isAlternate);
     const alts=players.filter(p=>p.isAlternate);
     const noteCount=Object.values(sc.notes||{}).length;
-    return `<div onclick="openScoutSchool('${key}')" style="cursor:pointer;padding:14px;background:var(--white);border-radius:10px;border:1px solid var(--gray-lighter);margin-bottom:8px;transition:all 0.15s;" onmouseover="this.style.borderColor='#0369a1'" onmouseout="this.style.borderColor='var(--gray-lighter)'">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;">${info.displayName||key}</div>
-          <div style="font-size:12px;color:var(--gray);margin-top:2px;">${starters.length} players · ${alts.length} alternates · ${noteCount} notes</div>
-          ${info.lastDual?`<div style="font-size:11px;color:var(--gray);margin-top:2px;">Last dual: ${info.lastDual}</div>`:''}
+    return `<div style="background:var(--white);border-radius:10px;border:1px solid var(--gray-lighter);margin-bottom:8px;overflow:hidden;">
+      <div onclick="openScoutSchool('${key}')" style="cursor:pointer;padding:14px;transition:background 0.15s;" onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background=''">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;">${info.displayName||key}</div>
+            <div style="font-size:12px;color:var(--gray);margin-top:2px;">${starters.length} players · ${alts.length} alternates · ${noteCount} notes</div>
+            ${info.lastDual?`<div style="font-size:11px;color:var(--gray);margin-top:2px;">Last dual: ${info.lastDual}</div>`:''}
+          </div>
+          <div style="font-family:'Bebas Neue';font-size:24px;color:#0369a1;">›</div>
         </div>
-        <div style="font-family:'Bebas Neue';font-size:24px;color:#0369a1;">›</div>
+      </div>
+      <div style="display:flex;border-top:1px solid var(--gray-lighter);">
+        <button onclick="openScoutEditModal('${key}')" style="flex:1;padding:8px;background:none;border:none;border-right:1px solid var(--gray-lighter);cursor:pointer;font-size:12px;font-weight:700;color:var(--blue);display:flex;align-items:center;justify-content:center;gap:5px;" onmouseover="this.style.background='var(--blue-bg)'" onmouseout="this.style.background='none'">&#x270E; Rename</button>
+        <button onclick="deleteScoutSchool('${key}','${info.displayName||key}')" style="flex:1;padding:8px;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--loss-red);display:flex;align-items:center;justify-content:center;gap:5px;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">&#x1F5D1; Delete</button>
       </div>
     </div>`;
   }).join('');
@@ -3836,6 +3842,38 @@ function renderScoutNotes(notesArr){
       ${n.tags&&n.tags.length?`<div style="margin-top:4px;">${n.tags.map(t=>`<span style="background:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-right:3px;">${t}</span>`).join('')}</div>`:''}
       <div style="font-size:10px;color:var(--gray);margin-top:4px;">${n.authorName||'Coach'} · ${n.date||''}</div>
     </div>`).join('')+'</div>';
+}
+
+function deleteScoutSchool(key, displayName){
+  if(!confirm('Delete all scouting data for "'+displayName+'"?\n\nThis removes all players, pairs, and notes. This cannot be undone.'))return;
+  fbRemove('opponents/'+key);
+  toast('Deleted '+displayName+' from Scouts.');
+  document.getElementById('scouts-detail-panel').style.display='none';
+  document.getElementById('scouts-school-list').style.display='block';
+}
+
+function openScoutEditModal(key){
+  const sc=D.opponents[key];if(!sc)return;
+  const info=sc.info||{};
+  const current=info.displayName||key;
+  // Reuse edit modal
+  document.getElementById('edit-modal-body').innerHTML=`
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">SCHOOL DISPLAY NAME</label>
+      <input type="text" id="scout-rename-inp" class="form-input" value="${current}" style="font-size:15px;" placeholder="e.g. FSUS">
+    </div>
+    <div style="font-size:12px;color:var(--gray);">This only changes the display name — it does not merge with another school's data.</div>`;
+  document.querySelector('#edit-modal .modal-title').innerHTML='Rename School <button class="modal-close" onclick="closeEdit()">&#x2715;</button>';
+  document.querySelector('#edit-modal .modal-title').style.color='var(--blue)';
+  document.getElementById('edit-save').textContent='Save Name';
+  document.getElementById('edit-save').onclick=function(){
+    const newName=document.getElementById('scout-rename-inp')?.value.trim();
+    if(!newName){toast('Enter a name');return;}
+    fbSet('opponents/'+key+'/info',{...(D.opponents[key]?.info||{}),displayName:newName});
+    toast('Renamed to '+newName);
+    closeEdit();
+  };
+  document.getElementById('edit-modal').classList.add('active');
 }
 
 function closeScoutSchool(){
