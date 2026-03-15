@@ -242,7 +242,30 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .ext-summary-item{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.5px;}
 .section-divider{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;color:var(--gray);margin:14px 0 8px;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-@media(max-width:480px){.header{padding:10px 14px 8px;}.header h1{font-size:20px;letter-spacing:2px;}.tab{font-size:10px;padding:7px 2px;letter-spacing:0.5px;}.content{padding:12px;}.card{padding:14px;}.stat-grid{gap:6px;}.stat-number{font-size:22px;}.stat-label{font-size:9px;}.player-table{font-size:12px;}.player-table thead th{font-size:10px;padding:6px 4px;}.player-table tbody td{padding:8px 4px;}.match-score{font-size:20px;}.match-team{font-size:12px;}.planned-team{font-size:12px;}.modal{padding:18px;}.score-input{font-size:26px;padding:12px;}.stat-grid{grid-template-columns:repeat(2,1fr);}}
+/* Phone: coach portal + live scoring tweaks */
+@media(max-width:480px){
+  .header{padding:10px 14px 8px;}
+  .header h1{font-size:20px;letter-spacing:2px;}
+  .tab{font-size:10px;padding:7px 2px;letter-spacing:0.5px;}
+  .content{padding:10px;}
+  .card{padding:12px;}
+  .stat-grid{gap:6px;grid-template-columns:repeat(2,1fr);}
+  .stat-number{font-size:22px;}
+  .stat-label{font-size:9px;}
+  .player-table{font-size:12px;}
+  .player-table thead th{font-size:10px;padding:6px 4px;}
+  .player-table tbody td{padding:8px 4px;}
+  .match-score{font-size:20px;}
+  .match-team{font-size:12px;}
+  .planned-team{font-size:12px;}
+  .modal{padding:16px;}
+  .score-input{font-size:26px;padding:12px;}
+  /* Live Score Entry: bigger tap targets */
+  .ls-num{font-size:64px;}
+  .ls-btn{padding:16px 0;font-size:34px;border-radius:14px;}
+  .live-court-card{padding:16px;}
+  .live-score-row{gap:12px;}
+}
 /* LOGIN SCREEN */
 .login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
 .login-overlay.hidden{display:none;}
@@ -305,10 +328,31 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .ai-loading{text-align:center;padding:20px;color:var(--gray);}
 .ai-loading .spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--gray-lighter);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-@media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
-@media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
+/* Phone: login screen */
+@media(max-width:480px){
+  .login-box{padding:24px 16px;max-width:100%;border-radius:12px;}
+  .login-logo{font-size:32px;}
+  .login-numpad{max-width:100%;gap:10px;}
+  .login-numpad-btn{padding:18px;font-size:26px;border-radius:12px;}
+  .login-pin-dot{width:20px;height:20px;}
+  .login-pin-dots{gap:18px;margin:24px 0;}
+  .login-toggle-btn{padding:12px 6px;font-size:14px;}
+  .login-btn{padding:16px;font-size:20px;}
+  .header-username{font-size:12px;}
+  /* Player portal: sticky bottom tab bar */
+  .pp-tab-bar{position:sticky;bottom:0;z-index:50;border-radius:0;
+    padding:4px;background:var(--white);
+    box-shadow:0 -2px 14px rgba(0,0,0,0.12);margin-bottom:0;}
+  .pp-tab-btn{padding:12px 4px;font-size:12px;letter-spacing:1px;}
+  .player-portal{padding:10px 10px 80px;}
+}
+@media(max-width:360px){
+  .header h1{font-size:17px;}
+  .tab{font-size:9px;}
+  .login-numpad-btn{padding:16px;font-size:22px;}
+}
 </style>
-  <meta name="build-version" content="20260315120931">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -622,7 +666,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
     </div>
 <div class="card" style="border:2px solid var(--blue);">
-      <div class="card-title blue"><span class="bar"></span> 🏐 Live Dual Score Entry
+      <div class="card-title blue"><span class="bar"></span> 🏐 Live Score Entry
         <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Auto-loads today's assignment</span>
       </div>
       <div id="live-assignment-list" style="margin-bottom:12px;"></div>
@@ -725,10 +769,10 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   <!-- Notification banner -->
   <div id="pp-notif-banner"></div>
 
-  <!-- Tab bar: My Stats | Live Dual Score Entry | My Matches -->
+  <!-- Tab bar: My Stats | Live Score Entry | My Matches -->
   <div class="pp-tab-bar">
     <button class="pp-tab-btn active" onclick="switchPPTab('stats',this)">📊 My Stats</button>
-    <button class="pp-tab-btn" onclick="switchPPTab('live',this)">🏐 Live Dual Score Entry</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('live',this)">🏐 Live Score Entry</button>
     <button class="pp-tab-btn" onclick="switchPPTab('matches',this)">📋 My Matches</button>
   </div>
 
@@ -843,10 +887,10 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 
   </div><!-- end pp-panel-stats -->
 
-  <!-- ══ LIVE DUAL SCORE ENTRY PANEL ══ -->
+  <!-- ══ LIVE SCORE ENTRY PANEL ══ -->
   <div class="pp-panel" id="pp-panel-live">
     <div class="card" style="border:2px solid var(--blue);">
-      <div class="card-title blue"><span class="bar"></span> 🏐 Live Dual Score Entry
+      <div class="card-title blue"><span class="bar"></span> 🏐 Live Score Entry
         <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Today's courts</span>
       </div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Use +/− to keep score live, or type a number to correct. Each court saves independently.</p>
@@ -870,6 +914,17 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 </div><!-- end player-portal -->
 
 <!-- EDIT MODAL -->
+<!-- ASSIGNMENT EDIT MODAL -->
+<div class="modal-overlay" id="assign-edit-modal">
+  <div class="modal" style="max-width:480px;width:100%;max-height:90vh;overflow-y:auto;">
+    <div class="modal-title" id="assign-edit-title">Edit Assignment <button class="modal-close" onclick="closeAssignEditModal()">&#x2715;</button></div>
+    <div id="assign-edit-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeAssignEditModal()">Cancel</button>
+      <button class="btn btn-blue" onclick="saveAssignEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="edit-modal">
   <div class="modal"><div class="modal-title">Edit Match <button class="modal-close" onclick="closeEdit()">✕</button></div>
     <div id="edit-modal-body"></div>
@@ -3374,6 +3429,99 @@ function deleteAssignment(id){
   }
 }
 
+function openAssignEditModal(id){
+  const a=D.assignments[id];if(!a)return;
+  window._editAssignId=id;
+  const tL={gameday:'Dual',scrimmage:'Scrimmage',queens:'Queens'};
+  const tC={gameday:'var(--blue)',scrimmage:'var(--purple)',queens:'var(--red)'};
+  const titleEl=document.getElementById('assign-edit-title');
+  titleEl.innerHTML=`Edit ${tL[a.type||'gameday']||'Assignment'} \u2014 ${fD(a.date)} <button class="modal-close" onclick="closeAssignEditModal()">&#x2715;</button>`;
+  titleEl.style.color=tC[a.type||'gameday']||'var(--red)';
+  const sortedP=[...D.players].sort((x,y)=>x.court-y.court||x.lastName.localeCompare(y.lastName));
+  function pOpts(val){
+    return'<option value="">\u2014</option>'+sortedP.map(p=>`<option value="${p.id}" ${p.id===val?'selected':''}>${p.firstName} ${p.lastName.charAt(0)}. (CT${p.court})</option>`).join('');
+  }
+  let h=`<div class="form-row" style="margin-bottom:10px;">
+    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
+      <input type="date" class="form-input" id="ae-date" value="${a.date||td()}" style="padding:8px;font-size:13px;"></div>
+    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
+      <select class="form-select" id="ae-type" style="padding:8px;font-size:13px;">
+        <option value="gameday" ${(a.type||'gameday')==='gameday'?'selected':''}>Dual</option>
+        <option value="scrimmage" ${a.type==='scrimmage'?'selected':''}>Scrimmage</option>
+        <option value="queens" ${a.type==='queens'?'selected':''}>Queens</option>
+      </select></div>
+  </div>
+  <div class="form-row" style="margin-bottom:10px;">
+    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent</label>
+      <input type="text" class="form-input" id="ae-opp" value="${a.opponent||''}" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
+    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Location</label>
+      <select class="form-select" id="ae-loc" style="padding:8px;font-size:13px;">
+        <option ${(a.location==='Tom Brown'||!a.location)?'selected':''}>Tom Brown</option>
+        <option ${a.location==='Northside'?'selected':''}>Northside</option>
+        <option ${a.location==='4 Oaks'?'selected':''}>4 Oaks</option>
+        <option ${a.location==='Away'?'selected':''}>Away</option>
+      </select></div>
+    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Time</label>
+      <input type="time" class="form-input" id="ae-time" value="${a.time||''}" style="padding:8px;font-size:13px;"></div>
+  </div>`;
+  const courts=a.courts||[];
+  courts.sort((x,y)=>(x.court||0)-(y.court||0)).forEach((c,i)=>{
+    h+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;margin-bottom:8px;">
+      <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;margin-bottom:6px;">
+        COURT <input type="number" id="ae-ct-${i}" value="${c.court}" min="1" max="8"
+          style="width:44px;padding:3px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;font-weight:700;">
+      </div>
+      <div class="form-row">
+        <select class="form-select" id="ae-p1-${i}" style="padding:6px;font-size:12px;">${pOpts(c.p1)}</select>
+        <select class="form-select" id="ae-p2-${i}" style="padding:6px;font-size:12px;">${pOpts(c.p2)}</select>
+      </div></div>`;
+  });
+  window._editAssignCourtCount=courts.length;
+  document.getElementById('assign-edit-body').innerHTML=h;
+  document.getElementById('assign-edit-modal').classList.add('active');
+}
+function closeAssignEditModal(){document.getElementById('assign-edit-modal').classList.remove('active');}
+function saveAssignEdit(){
+  const id=window._editAssignId;if(!id)return;
+  const a=D.assignments[id];if(!a)return;
+  const date=document.getElementById('ae-date')?.value;
+  if(!date){toast('Select a date');return;}
+  const type=document.getElementById('ae-type')?.value||'gameday';
+  const opp=document.getElementById('ae-opp')?.value.trim()||null;
+  const loc=document.getElementById('ae-loc')?.value||'Tom Brown';
+  const atime=document.getElementById('ae-time')?.value||'';
+  const n=window._editAssignCourtCount||0;
+  const courts=[];
+  for(let i=0;i<n;i++){
+    const ct=parseInt(document.getElementById('ae-ct-'+i)?.value)||1;
+    const p1=document.getElementById('ae-p1-'+i)?.value||'';
+    const p2=document.getElementById('ae-p2-'+i)?.value||'';
+    if(p1||p2)courts.push({court:ct,p1,p2});
+  }
+  if(!courts.length){toast('At least one court required');return;}
+  fbSet('assignments/'+id,{...a,date,type,opponent:opp,location:loc,time:atime,courts});
+  closeAssignEditModal();
+  toast('Assignment updated!');
+  renderLiveAssignmentList();
+  renderAssignments();
+}
+function deleteLiveAssignment(id,btn){
+  if(btn.dataset.confirmed==='1'){
+    fbRemove('assignments/'+id);
+    toast('Assignment deleted');
+  }else{
+    btn.dataset.confirmed='1';
+    const orig=btn.innerHTML;
+    btn.innerHTML='Sure?';
+    btn.style.fontWeight='800';
+    setTimeout(()=>{
+      if(btn&&btn.dataset.confirmed==='1'){
+        btn.dataset.confirmed='';btn.innerHTML=orig;btn.style.fontWeight='';
+      }
+    },3000);
+  }
+}
+
 function renderAssignments(){
   const container=document.getElementById('assignments-list');
   const entries=Object.values(D.assignments).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
@@ -3544,7 +3692,11 @@ function renderLiveAssignmentList(){
         <div style="font-weight:700;font-size:13px;">${fD(a.date)} — ${a.opponent||'Practice'}${locStr}${timeStr}</div>
         <div style="font-size:11px;color:var(--gray);margin-top:2px;"><span style="font-weight:700;color:${tC[a.type||'gameday']}">${tL[a.type||'gameday']||'Dual'}</span> · ${(a.courts||[]).length} courts${isToday?' <strong style="color:var(--blue)">TODAY</strong>':''}</div>
       </div>
-      <button class="btn btn-blue btn-small" onclick="loadLiveCourts('${a.id}')" style="white-space:nowrap;padding:6px 14px;">Load Courts</button>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="btn btn-blue btn-small" onclick="loadLiveCourts('${a.id}')" style="white-space:nowrap;padding:6px 12px;">Load</button>
+        <button class="btn btn-secondary btn-small" onclick="openAssignEditModal('${a.id}')" style="padding:6px 10px;" title="Edit">&#9998;</button>
+        <button class="btn btn-danger btn-small" data-del-live="${a.id}" onclick="deleteLiveAssignment('${a.id}',this)" style="padding:6px 10px;" title="Delete">&#x2715;</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -4738,7 +4890,7 @@ function dhAddSet(matchId){
 
 
 // ============================================================
-// PLAYER LIVE DUAL SCORE ENTRY
+// PLAYER LIVE SCORE ENTRY
 // ============================================================
 function renderPlayerLiveScoring(){
   const container=document.getElementById('pp-live-courts');
@@ -4976,9 +5128,20 @@ function editAIPairings(){
   // Date + opponent + type fields
   h+=`<div class="form-row" style="margin-bottom:8px;">
     <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
-      <input type="date" class="form-input" id="aip-date" value="${td()}" style="padding:8px;font-size:13px;"></div>
+      <input type="date" class="form-input" id="aip-date" value="${data.aiDate||td()}" style="padding:8px;font-size:13px;"></div>
     <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (if dual)</label>
       <input type="text" class="form-input" id="aip-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
+  </div>
+  <div class="form-row" style="margin-bottom:8px;">
+    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Location</label>
+      <select class="form-input" id="aip-location" style="padding:8px;font-size:13px;">
+        <option${(data.aiLocation==='Tom Brown'||!data.aiLocation)?' selected':''}>Tom Brown</option>
+        <option${data.aiLocation==='Northside'?' selected':''}>Northside</option>
+        <option${data.aiLocation==='4 Oaks'?' selected':''}>4 Oaks</option>
+        <option${data.aiLocation==='Away'?' selected':''}>Away</option>
+      </select></div>
+    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Time</label>
+      <input type="time" class="form-input" id="aip-time" value="${data.aiTime||''}" style="padding:8px;font-size:13px;"></div>
   </div>`;
   // Court rows
   let courtIdx=0;
@@ -5100,11 +5263,11 @@ function saveAIAssignment(){
     toast('Review and save using the form above');
     return;
   }
-  // Navigate to Planner tab to see saved assignment
+  // Navigate to Duals tab (Live Score Entry) after saving
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  const plannerTab=document.querySelector('.tab[data-tab="gameday"]');
-  if(plannerTab){plannerTab.classList.add('active');document.getElementById('tab-gameday').classList.add('active');renderAssignments();}
+  const dualsTab=document.querySelector('.tab[data-tab="duals"]');
+  if(dualsTab){dualsTab.classList.add('active');document.getElementById('tab-duals').classList.add('active');renderDuals();if(typeof renderLiveAssignmentList==='function')renderLiveAssignmentList();}
 }
 
 // Helper: convert "First Last" name string back to player ID
