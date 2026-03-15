@@ -352,7 +352,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260315132755">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -2840,14 +2840,9 @@ ANALYSIS: [2-3 sentences explaining overall strategy]`}`}]
       else if(qMatch)window._aiPairingData.parsed.push({type:'queens',court:parseInt(qMatch[1]),teamA:qMatch[2].trim(),teamB:qMatch[3].trim(),reason:qMatch[4].trim()});
       else if(sMatch)window._aiPairingData.parsed.push({type:'pair',court:parseInt(sMatch[1]),players:sMatch[2].trim(),reason:sMatch[3].trim()});
     });
-    // Show edit/save button if we have court data
+    // Auto-open edit form so coach goes straight to review + single save
     const hasCourts=window._aiPairingData.parsed.some(p=>p.type==='pair'||p.type==='queens');
-    if(hasCourts){
-      container.innerHTML+=`<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-blue btn-small" onclick="editAIPairings()" style="flex:1;">✎ Edit Pairings</button>
-        <button class="btn btn-success btn-small" onclick="saveAIAssignment()" style="flex:1;">💾 Save as Assignment</button>
-      </div>`;
-    }
+    if(hasCourts){editAIPairings();}
   }catch(err){
     console.error('AI pairing error:',err);
     container.innerHTML='<div style="color:var(--loss-red);font-size:13px;">Error generating pairings. Check connection and try again.</div>';
@@ -3690,7 +3685,7 @@ function renderLiveAssignmentList(){
     return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:6px;border-radius:8px;border:1px solid ${isToday?'var(--blue)':'var(--gray-lighter)'};background:${isToday?'var(--blue-bg)':'var(--white)'};">
       <div style="flex:1;">
         <div style="font-weight:700;font-size:13px;">${fD(a.date)} — ${a.opponent||'Practice'}${locStr}${timeStr}</div>
-        <div style="font-size:11px;color:var(--gray);margin-top:2px;"><span style="font-weight:700;color:${tC[a.type||'gameday']}">${tL[a.type||'gameday']||'Dual'}</span> · ${(a.courts||[]).length} courts${isToday?' <strong style="color:var(--blue)">TODAY</strong>':''}</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px;"><span style="font-weight:700;color:${tC[a.type||'gameday']}">${tL[a.type||'gameday']||'Dual'}</span> · ${(a.courts||[]).length} courts${a.totalRounds>1?' <span style="background:var(--red-bg);color:var(--red);font-weight:700;padding:1px 5px;border-radius:4px;font-size:10px;">RD ${a.round||1}/${a.totalRounds}</span>':''} ${isToday?'<strong style="color:var(--blue)">TODAY</strong>':''}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;">
         <button class="btn btn-blue btn-small" onclick="loadLiveCourts('${a.id}')" style="white-space:nowrap;padding:6px 12px;">Load</button>
@@ -5187,28 +5182,39 @@ function editAIPairings(){
   });
   window._aiPairingData.courtCount=courtIdx;
   h+=`<div style="display:flex;gap:8px;margin-top:12px;">
-    <button class="btn btn-success btn-small" style="flex:1;" onclick="saveAIAssignment()">💾 Save as Assignment</button>
+    <button class="btn btn-success btn-small" id="aip-save-btn" style="flex:1;" onclick="saveAIAssignment(this)">💾 Save to Live Score Entry</button>
     <button class="btn btn-secondary btn-small" onclick="generateAIPairings()">↩ Regenerate</button>
   </div>`;
   container.innerHTML=h;
 }
 
-function saveAIAssignment(){
+function saveAIAssignment(btnEl){
   const data=window._aiPairingData;
-  const date=document.getElementById('aip-date')?.value||td();
-  const opp=document.getElementById('aip-opp')?.value.trim()||null;
-  const loc=document.getElementById('aip-location')?.value||document.getElementById('ai-pair-location')?.value||'Tom Brown';
-  const atime=document.getElementById('aip-time')?.value||document.getElementById('ai-pair-time')?.value||'';
-  const context=data?.context||'gameday';
+  if(!data){toast('No pairings to save');return;}
+  // Prevent double-save
+  const saveBtn=btnEl||document.getElementById('aip-save-btn');
+  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='Saving...';}
+
+  const context=data.context||'gameday';
   const type=context==='queens'?'queens':context==='scrimmage'?'scrimmage':'gameday';
-  const numRounds=data?.numRounds||1;
-  // If edit form is showing, read from form; otherwise use parsed data directly
+  const numRounds=data.numRounds||1;
   const hasForm=!!document.getElementById('aip-ct-0');
 
+  // Read date/opp/loc/time from edit form if showing, else from generator fields
+  const date=(hasForm?document.getElementById('aip-date')?.value:null)||data.aiDate||td();
+  const opp=(hasForm?document.getElementById('aip-opp')?.value.trim():null)||null;
+  const loc=(hasForm?document.getElementById('aip-location')?.value:null)||data.aiLocation||'Tom Brown';
+  const atime=(hasForm?document.getElementById('aip-time')?.value:null)||data.aiTime||'';
+
+  // Helper: deterministic ID prevents duplicates if saved twice
+  function assignId(rnd){return 'asgn_'+date+'_'+type+'_r'+rnd;}
+
+  let totalSaved=0;
+
   if(hasForm){
-    const courtCount=data?.courtCount||0;
+    // ── Save from edit form ──────────────────────────────────────
+    const courtCount=data.courtCount||0;
     if(numRounds>1){
-      // Multi-round: save one assignment per round
       const roundCourts={};
       for(let i=0;i<courtCount;i++){
         const ct=parseInt(document.getElementById('aip-ct-'+i)?.value)||1;
@@ -5218,9 +5224,6 @@ function saveAIAssignment(){
         if(aipType==='queens'){
           const a1=nameToId(document.getElementById('aip-a1-'+i)?.value);
           const a2=nameToId(document.getElementById('aip-a2-'+i)?.value);
-          const b1=nameToId(document.getElementById('aip-b1-'+i)?.value);
-          const b2=nameToId(document.getElementById('aip-b2-'+i)?.value);
-          // For Queens, save as 2 pairs on the same court (A side and B side)
           if(a1&&a2)roundCourts[rnd].push({court:ct,p1:a1,p2:a2});
         }else{
           const p1=nameToId(document.getElementById('aip-p1-'+i)?.value);
@@ -5228,16 +5231,14 @@ function saveAIAssignment(){
           if(p1&&p2)roundCourts[rnd].push({court:ct,p1,p2});
         }
       }
-      let saved=0;
       Object.entries(roundCourts).forEach(([rnd,courts])=>{
         if(!courts.length)return;
-        const id=gi('asgn');
-        fbSet('assignments/'+id,{id,date,type,opponent:opp,courts,notes:'Round '+rnd+' of '+numRounds,createdAt:td()});
-        saved++;
+        const id=assignId(rnd);
+        fbSet('assignments/'+id,{id,date,type,location:loc,time:atime,opponent:opp,courts,
+          notes:'Round '+rnd+' of '+numRounds,round:parseInt(rnd),totalRounds:numRounds,createdAt:td()});
+        totalSaved++;
       });
-      toast('Saved '+saved+' round assignment'+(saved>1?'s':'')+'!');
     }else{
-      // Single round
       const courts=[];
       for(let i=0;i<courtCount;i++){
         const ct=parseInt(document.getElementById('aip-ct-'+i)?.value)||1;
@@ -5252,22 +5253,84 @@ function saveAIAssignment(){
           if(p1&&p2)courts.push({court:ct,p1,p2});
         }
       }
-      if(!courts.length){toast('No courts to save');return;}
-      const id=gi('asgn');
-      fbSet('assignments/'+id,{id,date,type,opponent:opp,location:loc,time:atime,courts,createdAt:td()});
-      toast('Assignment saved — '+courts.length+' courts!');
+      if(!courts.length){
+        toast('No courts to save');
+        if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='💾 Save to Live Score Entry';}
+        return;
+      }
+      const id=assignId(1);
+      fbSet('assignments/'+id,{id,date,type,location:loc,time:atime,opponent:opp,courts,createdAt:td()});
+      totalSaved=1;
     }
   }else{
-    // No edit form — save directly from parsed AI data
-    editAIPairings();
-    toast('Review and save using the form above');
-    return;
+    // ── Save directly from parsed AI data (no edit form open) ───
+    if(numRounds>1){
+      const roundCourts={};let currentRound=1;
+      data.parsed.forEach(p=>{
+        if(p.type==='round'){currentRound=parseInt(p.num);return;}
+        if(!roundCourts[currentRound])roundCourts[currentRound]=[];
+        if(p.type==='queens'){
+          const a1=nameToId(p.teamA.split('&')[0]?.trim());
+          const a2=nameToId(p.teamA.split('&')[1]?.trim());
+          if(a1&&a2)roundCourts[currentRound].push({court:p.court,p1:a1,p2:a2});
+        }else if(p.type==='pair'){
+          const p1=nameToId(p.players.split('+')[0]?.trim());
+          const p2=nameToId(p.players.split('+')[1]?.trim());
+          if(p1&&p2)roundCourts[currentRound].push({court:p.court,p1,p2});
+        }
+      });
+      Object.entries(roundCourts).forEach(([rnd,courts])=>{
+        if(!courts.length)return;
+        const id=assignId(rnd);
+        fbSet('assignments/'+id,{id,date,type,location:loc,time:atime,opponent:opp,courts,
+          notes:'Round '+rnd+' of '+numRounds,round:parseInt(rnd),totalRounds:numRounds,createdAt:td()});
+        totalSaved++;
+      });
+    }else{
+      const courts=[];
+      data.parsed.forEach(p=>{
+        if(p.type==='queens'){
+          const a1=nameToId(p.teamA.split('&')[0]?.trim());
+          const a2=nameToId(p.teamA.split('&')[1]?.trim());
+          if(a1&&a2)courts.push({court:p.court,p1:a1,p2:a2});
+        }else if(p.type==='pair'){
+          const p1=nameToId(p.players.split('+')[0]?.trim());
+          const p2=nameToId(p.players.split('+')[1]?.trim());
+          if(p1&&p2)courts.push({court:p.court,p1,p2});
+        }
+      });
+      if(!courts.length){
+        toast('No courts to save');
+        if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='💾 Save to Live Score Entry';}
+        return;
+      }
+      const id=assignId(1);
+      fbSet('assignments/'+id,{id,date,type,location:loc,time:atime,opponent:opp,courts,createdAt:td()});
+      totalSaved=1;
+    }
   }
-  // Navigate to Duals tab (Live Score Entry) after saving
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  const dualsTab=document.querySelector('.tab[data-tab="duals"]');
-  if(dualsTab){dualsTab.classList.add('active');document.getElementById('tab-duals').classList.add('active');renderDuals();if(typeof renderLiveAssignmentList==='function')renderLiveAssignmentList();}
+
+  if(!totalSaved){toast('Nothing to save — check player selections');if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='💾 Save to Live Score Entry';}return;}
+
+  // Show confirmation in the result container
+  const container=document.getElementById('ai-pairings-result');
+  if(container){
+    const tLabel={gameday:'Dual',scrimmage:'Scrimmage',queens:'Queens'}[type]||type;
+    const rndNote=numRounds>1?` (${totalSaved} rounds)`:'';
+    container.innerHTML=`<div style="background:var(--green-bg);border:1px solid var(--green);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-family:'Bebas Neue';font-size:18px;letter-spacing:1.5px;color:var(--green);margin-bottom:6px;">✓ ${tLabel} Saved${rndNote}</div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:12px;">${fD(date)}${opp?' vs '+opp:''} · ${loc}</div>
+      <button class="btn btn-blue btn-small" onclick="
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+        const dt=document.querySelector('.tab[data-tab=\\'duals\\']');
+        if(dt){dt.classList.add('active');document.getElementById('tab-duals').classList.add('active');renderDuals();renderLiveAssignmentList();}
+      ">🏐 Open Live Score Entry →</button>
+      <button class="btn btn-secondary btn-small" style="margin-left:8px;" onclick="generateAIPairings()">↩ Generate New</button>
+    </div>`;
+  }
+  window._aiPairingData=null;
+  renderAssignments();
 }
 
 // Helper: convert "First Last" name string back to player ID
