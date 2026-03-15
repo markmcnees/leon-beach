@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260314231828">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -500,7 +500,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="form-row" style="margin-bottom:10px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Courts to fill</label>
           <select class="form-select" id="ai-pair-courts" style="padding:8px;font-size:13px;">
-            <option value="3">3 courts</option><option value="4">4 courts</option><option value="5">5 courts</option><option value="6">6 courts</option><option value="7">7 courts</option><option value="8">8 courts</option><option value="2">2 courts</option><option value="1">1 court</option>
+            <option value="1">1 court</option><option value="2">2 courts</option><option value="3">3 courts</option><option value="4">4 courts</option><option value="5">5 courts</option><option value="6">6 courts</option><option value="7">7 courts</option><option value="8">8 courts</option>
           </select></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Context</label>
           <select class="form-select" id="ai-pair-context" style="padding:8px;font-size:13px;" onchange="document.getElementById('ai-pair-rounds-row').style.display=this.value==='queens'?'block':'none'">
@@ -508,6 +508,16 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
             <option value="scrimmage">Scrimmage (mix it up)</option>
             <option value="queens">Queens Practice (competitive balance)</option>
           </select></div>
+      </div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label>
+          <input type="date" class="form-select" id="ai-pair-date" style="padding:8px;font-size:13px;"></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Location</label>
+          <select class="form-select" id="ai-pair-location" style="padding:8px;font-size:13px;">
+            <option>Tom Brown</option><option>Northside</option><option>4 Oaks</option><option>Away</option>
+          </select></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Time</label>
+          <input type="time" class="form-select" id="ai-pair-time" style="padding:8px;font-size:13px;"></div>
       </div>
       <div id="ai-pair-rounds-row" style="display:none;margin-bottom:10px;">
         <div class="form-group" style="margin-bottom:0;">
@@ -615,11 +625,8 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="card-title blue"><span class="bar"></span> 🏐 Live Dual Score Entry
         <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Auto-loads today's assignment</span>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-        <input type="date" class="form-input" id="live-date" style="max-width:180px;padding:8px 12px;">
-        <button class="btn btn-blue btn-small" onclick="renderLiveScoring()" style="white-space:nowrap;">Load Courts</button>
-      </div>
-      <div id="live-courts-container"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">Select a game date and click Load Courts.</div></div>
+      <div id="live-assignment-list" style="margin-bottom:12px;"></div>
+      <div id="live-courts-container"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">Select an assignment above to load courts.</div></div>
     </div>
 <div class="card" style="border:2px solid var(--charcoal);">
       <div class="card-title" style="color:var(--charcoal);"><span class="bar" style="background:var(--charcoal);"></span> 🔒 Coach Notes
@@ -866,19 +873,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div class="modal-overlay" id="edit-modal">
   <div class="modal"><div class="modal-title">Edit Match <button class="modal-close" onclick="closeEdit()">✕</button></div>
     <div id="edit-modal-body"></div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeEdit()">Cancel</button><button class="btn btn-primary" id="edit-save">Save Changes</button></div>
-  </div>
-</div>
-<!-- SET STATS MODAL -->
-<div class="modal-overlay" id="set-modal">
-  <div class="modal"><div class="modal-title" id="set-modal-title">Add Set <button class="modal-close" onclick="closeSetModal()">✕</button></div>
-    <div id="set-modal-body"></div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeSetModal()">Cancel</button><button class="btn btn-blue" id="set-modal-save">Save Set</button></div>
-  </div>
-</div>
-<div class="toast" id="toast"></div>
-
-<script>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeEdit()">Cancel</button><button class="btn btn-primary" 
 // ============================================================
 // FIREBASE CONFIG
 // ============================================================
@@ -1612,7 +1607,7 @@ function refreshTab(id){
     case'players':renderPlayers();break;
     case'queens':renderQueens();break;
     case'gameday':renderExtMatches('gameday');buildAssignSlots();renderAssignments();break;
-    case'duals':renderDuals();break;
+    case'duals':renderDuals();if(typeof renderLiveAssignmentList==='function')renderLiveAssignmentList();break;
     case'scrimmage':renderExtMatches('scrimmage');break;
     case'goals':renderCoachGoals();break;
     case'settings':renderRoster();break;
@@ -2268,8 +2263,15 @@ function addPlayerGoal(){
   const existing=D.goals[pid]||{};
   if(Object.values(existing).some(g=>g.goalType===goalType)){toast('You already have this goal');return;}
   const gid=gi('goal');
-  fbSet('goals/'+pid+'/'+gid,{goalType,label:GOAL_LABELS[goalType]||goalType,selectedAt:td(),aiFeedback:null});
+  const goalLabel=GOAL_LABELS[goalType]||goalType;
+  fbSet('goals/'+pid+'/'+gid,{goalType,label:goalLabel,selectedAt:td(),aiFeedback:null});
   sel.value='';toast('Goal added!');
+  try{
+    const p=gP(pid);const pname=p?p.firstName+' '+p.lastName:pid;
+    const subj=encodeURIComponent('Leon Queens — New Goal: '+pname);
+    const body=encodeURIComponent('Player: '+pname+'\nGoal: '+goalLabel+'\nDate: '+td()+'\n\nLog in to create an AI development plan.');
+    const a=document.createElement('a');a.href='mailto:markmcnees@gmail.com?subject='+subj+'&body='+body;a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  }catch(e){}
 }
 
 function removeGoal(pid,gid){
@@ -2651,6 +2653,9 @@ async function generateAIPairings(){
   const numCourts=parseInt(document.getElementById('ai-pair-courts').value)||3;
   const context=document.getElementById('ai-pair-context').value;
   const numRounds=context==='queens'?parseInt(document.getElementById('ai-pair-rounds')?.value||1):1;
+  const aiDate=document.getElementById('ai-pair-date')?.value||td();
+  const aiLocation=document.getElementById('ai-pair-location')?.value||'Tom Brown';
+  const aiTime=document.getElementById('ai-pair-time')?.value||'';
   const container=document.getElementById('ai-pairings-result');
   const btn=document.getElementById('ai-pair-btn');
 
@@ -2757,7 +2762,7 @@ ANALYSIS: [2-3 sentences explaining overall strategy]`}`}]
     });
     container.innerHTML=h||'<div style="font-size:13px;line-height:1.7;white-space:pre-wrap;">'+text+'</div>';
     // Store parsed data for editing
-    window._aiPairingData={text,context,numCourts,numRounds:numRounds||1,parsed:[]};
+    window._aiPairingData={text,context,numCourts,numRounds:numRounds||1,aiDate,aiLocation,aiTime,parsed:[]};
     // Parse into structured data for editing
     lines.forEach(line=>{
       const rMatch=line.match(/^ROUND\s*(\d+):/i);
@@ -3510,13 +3515,35 @@ function runMigration(){
 // ============================================================
 // LIVE SCORE ENTRY (Coach)
 // ============================================================
-function renderLiveScoring(){
-  const date=document.getElementById('live-date').value;
-  if(!date){toast('Select a game date first');return;}
+function renderLiveAssignmentList(){
+  const el=document.getElementById('live-assignment-list');if(!el)return;
+  const today=td();
+  const sorted=Object.values(D.assignments||{}).filter(a=>a.courts&&a.courts.length>0).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  if(!sorted.length){el.innerHTML='<div style="color:var(--gray);font-size:13px;padding:8px 0;">No assignments yet. Use the Planner tab to create one.</div>';return;}
+  const tL={gameday:'Dual',scrimmage:'Scrimmage',queens:'Queens'};
+  const tC={gameday:'var(--blue)',scrimmage:'var(--purple)',queens:'var(--red)'};
+  el.innerHTML=sorted.map(a=>{
+    const isToday=a.date===today;
+    const locStr=a.location?' · '+a.location:'';
+    const timeStr=a.time?' · '+a.time:'';
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:6px;border-radius:8px;border:1px solid ${isToday?'var(--blue)':'var(--gray-lighter)'};background:${isToday?'var(--blue-bg)':'var(--white)'};">
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:13px;">${fD(a.date)} — ${a.opponent||'Practice'}${locStr}${timeStr}</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px;"><span style="font-weight:700;color:${tC[a.type||'gameday']}">${tL[a.type||'gameday']||'Dual'}</span> · ${(a.courts||[]).length} courts${isToday?' <strong style="color:var(--blue)">TODAY</strong>':''}</div>
+      </div>
+      <button class="btn btn-blue btn-small" onclick="loadLiveCourts('${a.id}')" style="white-space:nowrap;padding:6px 14px;">Load Courts</button>
+    </div>`;
+  }).join('');
+}
+function loadLiveCourts(id){
+  const a=Object.values(D.assignments||{}).find(x=>x.id===id);
+  if(!a){toast('Assignment not found');return;}
+  renderLiveScoring(a.date,a);
+}
+function renderLiveScoring(dateOverride,assignOverride){
+  const date=dateOverride||td();
   const container=document.getElementById('live-courts-container');
-
-  // Find assignment for this date (any type)
-  const assignment=Object.values(D.assignments).find(a=>a.date===date);
+  const assignment=assignOverride||Object.values(D.assignments).find(a=>a.date===date);
 
   if(!assignment||!(assignment.courts||[]).length){
     container.innerHTML=`<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">No assignment found for ${fD(date)}.<br><span style="font-size:12px;">Create an assignment in the Upcoming Assignments section first.</span></div>`;
@@ -4706,7 +4733,18 @@ function renderPlayerLiveScoring(){
   const today=td();
   const assignment=Object.values(D.assignments).find(a=>a.date===today);
   if(!assignment||!(assignment.courts||[]).length){
-    container.innerHTML=`<div style="text-align:center;padding:24px;color:var(--gray);"><div style="font-size:32px;margin-bottom:8px;">📅</div><div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;">No Assignment Today</div><div style="font-size:13px;margin-top:4px;">Check back on dual day.</div></div>`;
+    // Show all available assignments
+    const allA=Object.values(D.assignments||{}).filter(a=>a.courts&&a.courts.length>0).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    if(!allA.length){container.innerHTML=`<div style="text-align:center;padding:24px;color:var(--gray);"><div style="font-size:32px;margin-bottom:8px;">📅</div><div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;">No Assignments Yet</div></div>`;return;}
+    const tL={gameday:'Dual',scrimmage:'Scrimmage',queens:'Queens'};
+    container.innerHTML='<div>'+allA.map(a=>{
+      const isToday=a.date===today;
+      return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:6px;border-radius:8px;border:1px solid ${isToday?'var(--blue)':'var(--gray-lighter)'};background:${isToday?'var(--blue-bg)':'var(--white)'};">
+        <div style="flex:1;"><div style="font-weight:700;font-size:13px;">${fD(a.date)} — ${a.opponent||'Practice'}${a.location?' · '+a.location:''}${a.time?' · '+a.time:''}</div>
+        <div style="font-size:11px;color:var(--gray);">${tL[a.type||'gameday']||'Dual'} · ${(a.courts||[]).length} courts${isToday?' <strong style="color:var(--blue)">TODAY</strong>':''}</div></div>
+        <button class="btn btn-blue btn-small" onclick="ppLoadCourts('${a.id}')" style="white-space:nowrap;padding:6px 12px;">Load Courts</button>
+      </div>`;
+    }).join('')+'</div>';
     return;
   }
   const aType=assignment.type||'gameday';
@@ -4771,6 +4809,62 @@ function renderPlayerLiveScoring(){
         </div>
       </div>
       <button class="btn btn-blue btn-small" style="width:100%;margin-top:8px;" onclick="ppSaveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${today}',${c.court},'${matchId||''}','${assignment.opponent||''}','${fbNode}')">✓ Save Set — Court ${c.court}</button>
+    </div></div>`;
+  });
+  container.innerHTML=h;
+}
+
+function ppLoadCourts(assignmentId){
+  const a=Object.values(D.assignments||{}).find(x=>x.id===assignmentId);
+  if(!a){toast('Assignment not found');return;}
+  const container=document.getElementById('pp-live-courts');if(!container)return;
+  const aType=a.type||'gameday';
+  const fbNode=aType==='scrimmage'?'scrimmages':'gamedays';
+  const matchList=aType==='scrimmage'?D.scrimmages:D.gamedays;
+  const courts=(a.courts||[]).sort((c1,c2)=>(c1.court||0)-(c2.court||0));
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 12px;background:var(--blue-bg);border-radius:8px;">
+    <span style="font-size:18px;">🏐</span>
+    <div style="flex:1;"><div style="font-weight:700;font-size:14px;">${a.opponent||'Practice'} — ${fD(a.date)}</div>
+    <div style="font-size:11px;color:var(--gray);">${a.location||''}${a.time?' · '+a.time:''}</div></div>
+    <button onclick="renderPlayerLiveScoring()" style="font-size:11px;padding:4px 8px;border:1px solid var(--gray-lighter);border-radius:5px;background:var(--white);cursor:pointer;">← Back</button>
+  </div>`;
+  courts.forEach((c,idx)=>{
+    const existingMatch=matchList.find(m=>m.date===a.date&&arrEq(m.pair||[],[c.p1,c.p2].filter(Boolean)));
+    const matchId=existingMatch?existingMatch.id:null;
+    const sets=existingMatch?existingMatch.sets||[]:[];
+    let sw=0,sl=0,ptDiff=0;
+    sets.forEach(sv=>{const us=sv.scoreUs||0,them=sv.scoreThem||0;us>them?sw++:sl++;ptDiff+=(us-them);});
+    const p1o=gP(c.p1),p2o=gP(c.p2);
+    const partnerLabel=[p1o,p2o].filter(Boolean).map(p=>p.firstName+' '+p.lastName.charAt(0)+'.').join(' & ');
+    const opp=(a.opponent||'Opponent')+' CT'+c.court;
+    h+=`<div class="live-court-card">
+      <div class="live-court-header">
+        <div><span class="court-badge court-${c.court}" style="font-size:12px;">Court ${c.court}</span>
+          <div class="live-pair-name" style="margin-top:4px;">${partnerLabel||'TBD'}</div>
+          <div class="live-opp-name">vs ${opp}</div></div>
+        <div style="text-align:right;">${sets.length?`<div style="font-family:'Bebas Neue';font-size:18px;color:${sw>sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</div>`:'<div style="font-size:12px;color:var(--gray);">No sets yet</div>'}</div>
+      </div>`;
+    if(sets.length){h+='<div style="margin-bottom:8px;padding:0 4px;">';sets.forEach((sv,si)=>{const win=(sv.scoreUs||0)>(sv.scoreThem||0);h+=`<span class="live-set-chip ${win?'win':'loss'}">S${si+1}: ${sv.scoreUs}-${sv.scoreThem} <button style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;" onclick="ppDelLiveSet('${matchId}','${fbNode}',${si})">✕</button></span>`;});h+='</div>';}
+    h+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:10px;">SET ${sets.length+1}</div>
+      <div class="live-score-row">
+        <div class="live-score-col"><div class="live-score-label">LEON</div>
+          <div class="ls-counter">
+            <button class="ls-btn ls-btn-plus" onclick="lsAdj('pp-us-${idx}',1)">+</button>
+            <div class="ls-num" id="pp-us-${idx}">0</div>
+            <input type="number" id="pp-us-${idx}-inp" value="0" min="0" oninput="lsInpChange('pp-us-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
+            <button class="ls-btn ls-btn-minus" onclick="lsAdj('pp-us-${idx}',-1)">−</button>
+          </div></div>
+        <div style="font-family:'Bebas Neue';font-size:24px;color:var(--gray-light);">—</div>
+        <div class="live-score-col"><div class="live-score-label">OPP</div>
+          <div class="ls-counter">
+            <button class="ls-btn ls-btn-plus" onclick="lsAdj('pp-them-${idx}',1)">+</button>
+            <div class="ls-num" id="pp-them-${idx}">0</div>
+            <input type="number" id="pp-them-${idx}-inp" value="0" min="0" oninput="lsInpChange('pp-them-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
+            <button class="ls-btn ls-btn-minus" onclick="lsAdj('pp-them-${idx}',-1)">−</button>
+          </div></div>
+      </div>
+      <button class="btn btn-blue btn-small" style="width:100%;margin-top:8px;" onclick="ppSaveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${a.date}',${c.court},'${matchId||''}','${a.opponent||''}','${fbNode}')">✓ Save Set — Court ${c.court}</button>
     </div></div>`;
   });
   container.innerHTML=h;
@@ -4927,6 +5021,8 @@ function saveAIAssignment(){
   const data=window._aiPairingData;
   const date=document.getElementById('aip-date')?.value||td();
   const opp=document.getElementById('aip-opp')?.value.trim()||null;
+  const loc=document.getElementById('aip-location')?.value||document.getElementById('ai-pair-location')?.value||'Tom Brown';
+  const atime=document.getElementById('aip-time')?.value||document.getElementById('ai-pair-time')?.value||'';
   const context=data?.context||'gameday';
   const type=context==='queens'?'queens':context==='scrimmage'?'scrimmage':'gameday';
   const numRounds=data?.numRounds||1;
@@ -4982,7 +5078,7 @@ function saveAIAssignment(){
       }
       if(!courts.length){toast('No courts to save');return;}
       const id=gi('asgn');
-      fbSet('assignments/'+id,{id,date,type,opponent:opp,courts,createdAt:td()});
+      fbSet('assignments/'+id,{id,date,type,opponent:opp,location:loc,time:atime,courts,createdAt:td()});
       toast('Assignment saved — '+courts.length+' courts!');
     }
   }else{
@@ -5085,6 +5181,13 @@ setTimeout(function(){
       var exSt=snap2.val()||{};
       if(Object.keys(exSt).length<5){var st={'Chiles':{w:7,l:0},'Lincoln':{w:4,l:3},'Florida State University HS':{w:4,l:2},'Wakulla':{w:3,l:3},'Mosley':{w:3,l:3},'Community Christian':{w:1,l:5},'Sneads':{w:1,l:4},'South Walton':{w:4,l:2},'Gulf Breeze':{w:4,l:1},'Destin':{w:2,l:3},'Maclay':{w:2,l:2},'Godby':{w:0,l:3}};Object.keys(st).forEach(function(t){u['leon_queens_matches/standings/'+t]=st[t];});}
       db.ref('leon_queens_matches/_jerseys_seeded').once('value',function(snap3){
+        if(!snap3.val()){var j={p01:9,p02:5,p03:10,p04:2,p05:7,p06:8,p07:13,p08:3,p09:17,p10:6,p11:4,p12:11,p13:15,p14:18,p15:12,p16:1};Object.keys(j).forEach(function(pid){u['leon_queens_matches/players/'+pid+'/jersey']=j[pid];});u['leon_queens_matches/_jerseys_seeded']=true;}
+        if(Object.keys(u).length){db.ref().update(u,function(err){console.log(err?'Seed err':('Seed OK '+Object.keys(u).length));});}else{console.log('Seed: nothing missing');}
+      });
+    });
+  });
+},2500);
+ens_matches/_jerseys_seeded').once('value',function(snap3){
         if(!snap3.val()){var j={p01:9,p02:5,p03:10,p04:2,p05:7,p06:8,p07:13,p08:3,p09:17,p10:6,p11:4,p12:11,p13:15,p14:18,p15:12,p16:1};Object.keys(j).forEach(function(pid){u['leon_queens_matches/players/'+pid+'/jersey']=j[pid];});u['leon_queens_matches/_jerseys_seeded']=true;}
         if(Object.keys(u).length){db.ref().update(u,function(err){console.log(err?'Seed err':('Seed OK '+Object.keys(u).length));});}else{console.log('Seed: nothing missing');}
       });
