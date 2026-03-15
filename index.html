@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260315204350">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -3032,24 +3032,22 @@ document.getElementById('ca-file').addEventListener('change',async function(e){
     try{
       let promptText;
       if(isOpponent){
-        promptText=`You are reading an FHSAA Beach Volleyball Dual Match Lineup Form for the OPPONENT team.
-Extract the starting lineup AND the alternates/subs section.
+        promptText=`TASK: Extract data from an FHSAA Beach Volleyball Dual Match Lineup Form image.
 
-The form has two columns of players per row. Each row (No.1-5) = one court.
-Left column = one player of the pair, right column = the other player of that pair.
-Each player has: First Name, Last Name, Jersey Number.
-There is also an ALTERNATES table listing subs with jersey numbers.
+OUTPUT: Return ONLY a single JSON object. No explanation, no markdown, no code fences. Just the raw JSON.
 
-Return ONLY valid JSON in this exact format:
-{"school":"School Name","starters":[{"court":1,"p1":{"first":"","last":"","jersey":""},"p2":{"first":"","last":"","jersey":""}}],"alternates":[{"first":"","last":"","jersey":""}]}
+JSON FORMAT:
+{"school":"Lincoln HS","starters":[{"court":1,"p1":{"first":"Kenzie","last":"Poppell","jersey":"4"},"p2":{"first":"Londyn","last":"Dickey","jersey":"11"}}],"alternates":[{"first":"Jenny","last":"Heimbach","jersey":"7"}]}
 
-Rules:
-- Read all 5 starter courts (No.1=court 1 ... No.5=court 5)
-- p1 = left-column player, p2 = right-column player
-- jersey: the jersey number as a string, empty string if not visible
-- alternates: all players listed in the Alternates/Subs table
-- school: the school name from the form header
-- Respond with ONLY the JSON object, no other text`;
+READING THE FORM:
+- SCHOOL field at top = school name
+- Each row No.1 through No.5 = one court (No.1=court 1, No.5=court 5)
+- Each row has TWO players: left-side player = p1, right-side player = p2
+- Columns per player: First Name, Last Name, Jersey No.
+- ALTERNATES table at bottom = alternates array
+- jersey field: jersey number as a string (e.g. "4"), or "" if not visible
+
+Return the JSON object only. Start your response with { and end with }`;
       }else{
         promptText=`You are reading a handwritten beach volleyball court assignment sheet for a high school team.
 Extract the court assignments. Each court has two players (a pair) assigned to it.
@@ -3071,7 +3069,7 @@ Rules:
       const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',max_tokens:1500,
+          model:'claude-sonnet-4-20250514',max_tokens:2500,
           messages:[{role:'user',content:[
             {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
             {type:'text',text:promptText}
@@ -3080,12 +3078,31 @@ Rules:
       });
       const data=await response.json();
       const text=data.content?.map(c=>c.text||'').join('')||'';
-      const clean=text.replace(/```json|```/g,'').trim();
+      // Robust JSON extraction — strip fences, then find outermost { } or [ ]
       let parsed;
-      try{parsed=JSON.parse(clean);}catch(pe){
-        result.innerHTML=`<div style="color:var(--loss-red);font-size:13px;">Couldn't parse AI response.</div><pre style="font-size:11px;background:var(--off-white);padding:10px;border-radius:6px;overflow-x:auto;white-space:pre-wrap;">${text}</pre>`;
-        return;
-      }
+      (function(){
+        let clean=text.replace(/```json|```/gi,'').trim();
+        // Try direct parse first
+        try{parsed=JSON.parse(clean);return;}catch(e){}
+        // Try extracting outermost JSON object
+        const objStart=clean.indexOf('{');const objEnd=clean.lastIndexOf('}');
+        if(objStart>=0&&objEnd>objStart){
+          try{parsed=JSON.parse(clean.slice(objStart,objEnd+1));return;}catch(e){}
+        }
+        // Try extracting outermost JSON array
+        const arrStart=clean.indexOf('[');const arrEnd=clean.lastIndexOf(']');
+        if(arrStart>=0&&arrEnd>arrStart){
+          try{parsed=JSON.parse(clean.slice(arrStart,arrEnd+1));return;}catch(e){}
+        }
+        // All parsing failed — show manual entry fallback
+        result.innerHTML=`<div style="background:#fef3c7;border:1px solid var(--gold);border-radius:10px;padding:14px;">
+          <div style="font-family:'Bebas Neue';font-size:14px;color:var(--gold);margin-bottom:8px;">⚠ AI couldn't read the image automatically</div>
+          <div style="font-size:12px;color:var(--gray);margin-bottom:10px;">The image may be angled or low-contrast. Enter the lineup manually below:</div>
+          ${isOpponent?renderManualOppEntry():''}
+          <details style="margin-top:10px;"><summary style="font-size:11px;color:var(--gray);cursor:pointer;">Show AI raw response</summary><pre style="font-size:10px;background:var(--off-white);padding:8px;border-radius:4px;overflow-x:auto;white-space:pre-wrap;margin-top:6px;">${(text||'No response').slice(0,800)}</pre></details>
+        </div>`;
+      })();
+      if(!parsed)return;
       if(isOpponent){
         // New schema: {school, starters:[{court,p1,p2}], alternates:[{first,last,jersey}]}
         const starters=parsed.starters||parsed; // fallback if old format
@@ -3202,6 +3219,46 @@ function confirmCAAssignment(){
   document.getElementById('ca-preview').innerHTML='';
   document.getElementById('ca-opp').value='';
   renderAssignments();
+}
+
+function renderManualOppEntry(){
+  const courts=[1,2,3,4,5];
+  let h='<div style="margin-top:8px;">';
+  courts.forEach(ct=>{
+    h+=`<div style="padding:10px;background:var(--off-white);border-radius:8px;margin-bottom:8px;">
+      <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;margin-bottom:8px;">COURT ${ct}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-bottom:4px;">PLAYER 1</div>
+          <input type="text" id="ca-opp-${ct-1}-p1f" placeholder="First" style="width:100%;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;margin-bottom:4px;">
+          <input type="text" id="ca-opp-${ct-1}-p1l" placeholder="Last" style="width:100%;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;margin-bottom:4px;">
+          <input type="text" id="ca-opp-${ct-1}-p1j" placeholder="#" style="width:60px;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;">
+        </div>
+        <div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-bottom:4px;">PLAYER 2</div>
+          <input type="text" id="ca-opp-${ct-1}-p2f" placeholder="First" style="width:100%;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;margin-bottom:4px;">
+          <input type="text" id="ca-opp-${ct-1}-p2l" placeholder="Last" style="width:100%;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;margin-bottom:4px;">
+          <input type="text" id="ca-opp-${ct-1}-p2j" placeholder="#" style="width:60px;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;">
+        </div>
+      </div>
+      <input type="hidden" id="ca-opp-${ct-1}-court" value="${ct}">
+    </div>`;
+  });
+  h+=`<div style="margin-top:8px;padding:10px;background:var(--off-white);border-radius:8px;">
+    <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;color:var(--purple);margin-bottom:8px;">ALTERNATES (optional)</div>
+    ${[0,1,2,3,4,5].map(i=>`<div style="display:flex;gap:6px;margin-bottom:6px;">
+      <input type="text" id="ca-alt-${i}-f" placeholder="First" style="flex:1;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;">
+      <input type="text" id="ca-alt-${i}-l" placeholder="Last" style="flex:1;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;">
+      <input type="text" id="ca-alt-${i}-j" placeholder="#" style="width:50px;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;">
+    </div>`).join('')}
+  </div>`;
+  h+=`<button class="btn btn-primary btn-small" style="width:100%;margin-top:10px;" onclick="(function(){
+    const starters=[1,2,3,4,5].map(ct=>({court:ct,p1:{first:document.getElementById('ca-opp-'+(ct-1)+'-p1f')?.value||'',last:document.getElementById('ca-opp-'+(ct-1)+'-p1l')?.value||'',jersey:document.getElementById('ca-opp-'+(ct-1)+'-p1j')?.value||''},p2:{first:document.getElementById('ca-opp-'+(ct-1)+'-p2f')?.value||'',last:document.getElementById('ca-opp-'+(ct-1)+'-p2l')?.value||'',jersey:document.getElementById('ca-opp-'+(ct-1)+'-p2j')?.value||''}}));
+    const alts=[0,1,2,3,4,5].map(i=>({first:document.getElementById('ca-alt-'+i+'-f')?.value||'',last:document.getElementById('ca-alt-'+i+'-l')?.value||'',jersey:document.getElementById('ca-alt-'+i+'-j')?.value||''})).filter(a=>a.first||a.last);
+    const schoolName=document.getElementById('ca-opp')?.value.trim()||'Opponent';
+    window._caData={starters,alternates:alts,count:5,altCount:alts.length,schoolName,isOpponent:true};
+    confirmOppLineup();
+  })()">&#x2713; Save Manual Entry</button>`;
+  h+='</div>';
+  return h;
 }
 
 function confirmOppLineup(){
