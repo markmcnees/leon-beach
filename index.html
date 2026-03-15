@@ -308,7 +308,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @media(max-width:480px){.login-box{padding:28px 20px;}.login-logo{font-size:28px;}.login-numpad-btn{padding:12px;font-size:20px;}.header-username{font-size:12px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 </style>
-  <meta name="build-version" content="20260315112254">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -873,7 +873,20 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div class="modal-overlay" id="edit-modal">
   <div class="modal"><div class="modal-title">Edit Match <button class="modal-close" onclick="closeEdit()">✕</button></div>
     <div id="edit-modal-body"></div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeEdit()">Cancel</button><button class="btn btn-primary" 
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeEdit()">Cancel</button><button class="btn btn-primary" id="edit-save">Save Changes</button></div>
+  </div>
+</div>
+<!-- SET STATS MODAL -->
+<div class="modal-overlay" id="set-modal">
+  <div class="modal"><div class="modal-title" id="set-modal-title">Add Set <button class="modal-close" onclick="closeSetModal()">✕</button></div>
+    <div id="set-modal-body"></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeSetModal()">Cancel</button><button class="btn btn-blue" id="set-modal-save">Save Set</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+
 // ============================================================
 // FIREBASE CONFIG
 // ============================================================
@@ -2270,7 +2283,7 @@ function addPlayerGoal(){
     const p=gP(pid);const pname=p?p.firstName+' '+p.lastName:pid;
     const subj=encodeURIComponent('Leon Queens — New Goal: '+pname);
     const body=encodeURIComponent('Player: '+pname+'\nGoal: '+goalLabel+'\nDate: '+td()+'\n\nLog in to create an AI development plan.');
-    const a=document.createElement('a');a.href='mailto:markmcnees@gmail.com?subject='+subj+'&body='+body;a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);
+    const a=document.createElement('a');a.href='mailto:<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="94f9f5e6fff9f7faf1f1e7d4f3f9f5fdf8baf7fbf9">[email&#160;protected]</a>?subject='+subj+'&body='+body;a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);
   }catch(e){}
 }
 
@@ -5186,14 +5199,6 @@ setTimeout(function(){
       });
     });
   });
-},2500);
-ens_matches/_jerseys_seeded').once('value',function(snap3){
-        if(!snap3.val()){var j={p01:9,p02:5,p03:10,p04:2,p05:7,p06:8,p07:13,p08:3,p09:17,p10:6,p11:4,p12:11,p13:15,p14:18,p15:12,p16:1};Object.keys(j).forEach(function(pid){u['leon_queens_matches/players/'+pid+'/jersey']=j[pid];});u['leon_queens_matches/_jerseys_seeded']=true;}
-        if(Object.keys(u).length){db.ref().update(u,function(err){console.log(err?'Seed err':('Seed OK '+Object.keys(u).length));});}else{console.log('Seed: nothing missing');}
-      });
-    });
-  });
-},2500);
-</script>
+},2500);</script>
 </body>
 </html>
