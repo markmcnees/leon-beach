@@ -352,7 +352,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260315134445">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -3682,10 +3682,13 @@ function renderLiveAssignmentList(){
     const isToday=a.date===today;
     const locStr=a.location?' · '+a.location:'';
     const timeStr=a.time?' · '+a.time:'';
+    const roundBadge=a.totalRounds>1?'<span style="background:var(--red-bg);color:var(--red);font-weight:700;padding:1px 6px;border-radius:4px;font-size:10px;margin-left:4px;">RD '+a.round+'/'+a.totalRounds+'</span>':'';
+    const todayBadge=isToday?'<strong style="color:var(--blue);margin-left:4px;">TODAY</strong>':'';
+    const notesStr=a.notes&&!a.totalRounds?' · <em>'+a.notes+'</em>':'';
     return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:6px;border-radius:8px;border:1px solid ${isToday?'var(--blue)':'var(--gray-lighter)'};background:${isToday?'var(--blue-bg)':'var(--white)'};">
       <div style="flex:1;">
         <div style="font-weight:700;font-size:13px;">${fD(a.date)} — ${a.opponent||'Practice'}${locStr}${timeStr}</div>
-        <div style="font-size:11px;color:var(--gray);margin-top:2px;"><span style="font-weight:700;color:${tC[a.type||'gameday']}">${tL[a.type||'gameday']||'Dual'}</span> · ${(a.courts||[]).length} courts${a.totalRounds>1?' <span style="background:var(--red-bg);color:var(--red);font-weight:700;padding:1px 5px;border-radius:4px;font-size:10px;">RD ${a.round||1}/${a.totalRounds}</span>':''} ${isToday?'<strong style="color:var(--blue)">TODAY</strong>':''}</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px;"><span style="font-weight:700;color:${tC[a.type||'gameday']}">${tL[a.type||'gameday']||'Dual'}</span> · ${(a.courts||[]).length} courts${notesStr}${roundBadge}${todayBadge}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;">
         <button class="btn btn-blue btn-small" onclick="loadLiveCourts('${a.id}')" style="white-space:nowrap;padding:6px 12px;">Load</button>
@@ -3698,12 +3701,14 @@ function renderLiveAssignmentList(){
 function loadLiveCourts(id){
   const a=Object.values(D.assignments||{}).find(x=>x.id===id);
   if(!a){toast('Assignment not found');return;}
+  window._loadedAssignment=a;
   renderLiveScoring(a.date,a);
 }
 function renderLiveScoring(dateOverride,assignOverride){
   const date=dateOverride||td();
   const container=document.getElementById('live-courts-container');
   const assignment=assignOverride||Object.values(D.assignments).find(a=>a.date===date);
+  if(assignment)window._loadedAssignment=assignment;
 
   if(!assignment||!(assignment.courts||[]).length){
     container.innerHTML=`<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">No assignment found for ${fD(date)}.<br><span style="font-size:12px;">Create an assignment in the Upcoming Assignments section first.</span></div>`;
@@ -3841,20 +3846,8 @@ function saveLiveSet(idx,p1,p2,date,court,subCourt,existingId,opponent,fbNode){
     fbSet(node+'/'+id,{id,date,court:parseInt(court),pair,opponent:opp,sets:[newSet]});
   }
   toast((us>them?'\u2713 Win':'\u2717 Loss')+' — '+us+'-'+them+' saved');
-  // Preserve other courts' counter values before re-render
-  const savedCounters={};
-  document.querySelectorAll('[id^="ls-us-"],[id^="ls-them-"]').forEach(el=>{savedCounters[el.id]=el.textContent||'0';});
-  setTimeout(()=>{
-    renderLiveScoring();
-    // Restore all courts EXCEPT the one just saved (it resets to 0)
-    Object.entries(savedCounters).forEach(([id,val])=>{
-      if(!id.endsWith('-'+idx)){const el=document.getElementById(id);if(el)el.textContent=val;}
-    });
-    // Also sync any keyboard inputs
-    Object.entries(savedCounters).forEach(([id,val])=>{
-      if(!id.endsWith('-'+idx)){const inp=document.getElementById(id+'-inp');if(inp)inp.value=val;}
-    });
-  },600);
+  // Only re-render this specific court card — leave all other courts untouched
+  setTimeout(()=>refreshSingleCourtCard(idx,date,node),600);
 }
 
 function delLiveSet(matchId,setIdx,fbNode){
@@ -3865,21 +3858,103 @@ function delLiveSet(matchId,setIdx,fbNode){
   const sets=(m.sets||[]).filter((_,i)=>i!==setIdx);
   fbSet(node+'/'+matchId+'/sets',sets.length?sets:null);
   toast('Set deleted');
-  // Preserve counters across re-render
-  const savedCounters={};
-  document.querySelectorAll('[id^="ls-us-"],[id^="ls-them-"]').forEach(el=>{savedCounters[el.id]=el.textContent||'0';});
-  setTimeout(()=>{
-    renderLiveScoring();
-    Object.entries(savedCounters).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.textContent=val;const inp=document.getElementById(id+'-inp');if(inp)inp.value=val;});
-  },400);
+  // Only refresh the specific court card — leave other courts alone
+  const delNode=fbNode||'gamedays';
+  const delDate=(function(){const m=(delNode==='scrimmages'?D.scrimmages:D.gamedays).find(x=>x.id===matchId);return m?m.date:td();})();
+  // find the court idx by matchId so we know which card to refresh
+  const delIdx=(function(){
+    const container=document.getElementById('live-courts-container');
+    if(!container)return -1;
+    const cards=[...container.querySelectorAll('.live-court-card')];
+    for(let i=0;i<cards.length;i++){if(cards[i].querySelector('[onclick*="'+matchId+'"]'))return i;}
+    return -1;
+  })();
+  setTimeout(()=>{if(delIdx>=0)refreshSingleCourtCard(delIdx,delDate,delNode);else renderLiveScoring();},400);
 }
 
 // ============================================================
 // ============================================================
 // QUEENS LIVE SCORING (Leon vs Leon from assignment)
 // ============================================================
+function refreshSingleCourtCard(idx, date, fbNode){
+  // Re-render only the one court card that just saved — never touches other courts
+  const container=document.getElementById('live-courts-container');
+  if(!container)return;
+  const cardEl=document.getElementById('lc-card-'+idx);
+  if(!cardEl)return;
+
+  const node=fbNode||'gamedays';
+  const matchList=node==='scrimmages'?D.scrimmages:D.gamedays;
+  // Find the assignment that's currently loaded
+  const assignment=window._loadedAssignment;
+  if(!assignment)return;
+  const c=(assignment.courts||[])[idx];
+  if(!c)return;
+
+  const p1=gP(c.p1),p2=gP(c.p2);
+  const pairKey=[c.p1,c.p2].filter(Boolean).sort().join('_');
+  const courtLabel='Court '+c.court+(c.subCourt?c.subCourt.toUpperCase():'');
+  const partnerLabel=[p1,p2].filter(Boolean).map(p=>p.firstName+' '+p.lastName.charAt(0)+'.').join(' & ');
+  const opp=assignment.opponent?assignment.opponent+' CT'+c.court:'Opponent CT'+c.court;
+
+  const existingMatch=matchList.find(m=>m.date===date&&arrEq(m.pair||[],[c.p1,c.p2].filter(Boolean)));
+  const matchId=existingMatch?existingMatch.id:null;
+  const sets=existingMatch?existingMatch.sets||[]:[];
+  let sw=0,sl=0,ptDiff=0;
+  sets.forEach(s=>{const us=s.scoreUs||0,them=s.scoreThem||0;(us>them?sw++:sl++);ptDiff+=(us-them);});
+  const diffStr=ptDiff>0?'+'+ptDiff:String(ptDiff);
+  const diffColor=ptDiff>0?'var(--green)':ptDiff<0?'var(--loss-red)':'var(--gray)';
+
+  let inner=`<div class="live-court-header">
+    <div>
+      <span class="court-badge court-${c.court}" style="font-size:12px;">${courtLabel}</span>
+      <div class="live-pair-name" style="margin-top:4px;">${partnerLabel||'TBD'}</div>
+      <div class="live-opp-name">vs ${opp}</div>
+    </div>
+    <div style="text-align:right;">
+      ${sets.length?`<div style="font-family:'Bebas Neue';font-size:18px;color:${sw>sl?'var(--green)':'var(--loss-red)'};">${sw}-${sl}</div><div style="font-size:10px;color:var(--gray);">Match</div><div style="font-family:'Bebas Neue';font-size:15px;color:${diffColor};margin-top:2px;">${diffStr}</div><div style="font-size:10px;color:var(--gray);">Pts</div>`:'<div style="font-size:12px;color:var(--gray);">No sets yet</div>'}
+    </div>
+  </div>`;
+
+  if(sets.length){
+    inner+='<div style="margin-bottom:8px;">';
+    sets.forEach((s,si)=>{
+      const win=(s.scoreUs||0)>(s.scoreThem||0);
+      inner+=`<span class="live-set-chip ${win?'win':'loss'}">S${si+1}: ${s.scoreUs}-${s.scoreThem} <button style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;padding:0 0 0 4px;" onclick="delLiveSet('${matchId}',${si},'${node}')" title="Delete">✕</button></span>`;
+    });
+    inner+='</div>';
+  }
+
+  inner+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;margin-top:4px;">
+    <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:10px;letter-spacing:1px;">SET ${sets.length+1}</div>
+    <div class="live-score-row">
+      <div class="live-score-col">
+        <div class="live-score-label">LEON</div>
+        <div class="ls-counter">
+          <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-us-${idx}',1)">+</button>
+          <div class="ls-num" id="ls-us-${idx}">0</div>
+          <input type="number" id="ls-us-${idx}-inp" value="0" min="0" oninput="lsInpChange('ls-us-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
+          <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-us-${idx}',-1)">−</button>
+        </div>
+      </div>
+      <div style="font-family:'Bebas Neue';font-size:24px;color:var(--gray-light);">—</div>
+      <div class="live-score-col">
+        <div class="live-score-label">OPP</div>
+        <div class="ls-counter">
+          <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-them-${idx}',1)">+</button>
+          <div class="ls-num" id="ls-them-${idx}">0</div>
+          <input type="number" id="ls-them-${idx}-inp" value="0" min="0" oninput="lsInpChange('ls-them-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
+          <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-them-${idx}',-1)">−</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-blue btn-small" style="width:100%;margin-top:6px;" onclick="saveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${date}',${c.court},'${c.subCourt||''}','${matchId||''}','${assignment.opponent||''}','${node}')">✓ Save Set</button>
+  </div>`;
+  cardEl.innerHTML=inner;
+}
+
 function renderLiveScoringQueens(assignment, date, container){
-  const pairs=(assignment.courts||[]).map((c,i)=>({idx:i,court:c.court,p1:c.p1,p2:c.p2}));
+  const pairs=(assignment.courts||[]).map((c,i)=>({idx:i,court:c.court,p1:c.p1,p2:c.p2,b1:c.b1||null,b2:c.b2||null}));
   if(!pairs.length){container.innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;">No court assignments found.</div>';return;}
   let h=`<div style="font-size:12px;color:var(--gray);margin-bottom:10px;padding:8px;background:var(--off-white);border-radius:6px;">👑 Queens mode: each court pair plays an opposing pair. Select Team B for each court and record the final score.</div>`;
   pairs.forEach((c,idx)=>{
@@ -3909,8 +3984,13 @@ function renderLiveScoringQueens(assignment, date, container){
       </div>
       ${resultHtml}
       ${!hasResult?`<div style="background:var(--off-white);border-radius:8px;padding:10px;margin-top:6px;">
-        <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:6px;">VS (select opponent pair)</div>
-        <select class="form-select" id="qls-opp-${idx}" style="font-size:13px;padding:8px;margin-bottom:8px;"><option value="">— Pick opponent pair —</option>${oppOptions}</select>
+        <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:6px;">VS (opponent pair)</div>
+        ${c.b1&&c.b2
+          ?`<div id="qls-opp-${idx}" data-val="${c.b1}|${c.b2}" style="padding:8px;background:var(--off-white);border-radius:6px;font-size:13px;font-weight:600;margin-bottom:8px;">`
+            +[gP(c.b1),gP(c.b2)].filter(Boolean).map(p=>p.firstName+' '+p.lastName.charAt(0)+'.').join(' & ')
+            +` (CT${pairs.find(op=>op.p1===c.b1||op.p2===c.b2)?.court||'—'})</div>`
+          :`<select class="form-select" id="qls-opp-${idx}" style="font-size:13px;padding:8px;margin-bottom:8px;"><option value="">— Pick opponent pair —</option>${oppOptions}</select>`
+        }
         <div class="live-score-row">
           <div class="live-score-col">
             <div class="live-score-label">${p1?p1.firstName:'Team A'}</div>
@@ -3938,7 +4018,8 @@ function renderLiveScoringQueens(assignment, date, container){
 }
 
 function saveQueensLiveSet(idx,p1,p2,date,court){
-  const oppVal=document.getElementById('qls-opp-'+idx)?.value;
+  const oppEl=document.getElementById('qls-opp-'+idx);
+  const oppVal=oppEl?.dataset?.val||oppEl?.value;
   if(!oppVal){toast('Select an opponent pair');return;}
   const [op1,op2]=oppVal.split('|');
   const saEl=document.getElementById('qls-a-'+idx);
@@ -3950,10 +4031,12 @@ function saveQueensLiveSet(idx,p1,p2,date,court){
   const id=gi('qm');
   fbSet('matches/'+id,{id,date,court:parseInt(court),team1:[p1,p2].filter(Boolean),team2:[op1,op2].filter(Boolean),score1:sa,score2:sb});
   toast((sa>sb?'✓ Win':'✗ Loss')+' saved — '+sa+'–'+sb);
+  // Only re-render the saved queens card — leave other courts alone
   setTimeout(()=>{
-    const assignment=Object.values(D.assignments).find(a=>a.date===date);
+    const assignment=window._loadedAssignment||Object.values(D.assignments).find(a=>a.date===date);
     const container=document.getElementById('live-courts-container');
-    if(assignment&&container)renderLiveScoringQueens(assignment,date,container);
+    const cardEl=document.getElementById('lc-card-queens-'+idx);
+    if(assignment&&container){renderLiveScoringQueens(assignment,date,container);}
   },600);
 }
 
@@ -5224,7 +5307,9 @@ function saveAIAssignment(btnEl){
         if(aipType==='queens'){
           const a1=nameToId(document.getElementById('aip-a1-'+i)?.value);
           const a2=nameToId(document.getElementById('aip-a2-'+i)?.value);
-          if(a1&&a2)roundCourts[rnd].push({court:ct,p1:a1,p2:a2});
+          const b1=nameToId(document.getElementById('aip-b1-'+i)?.value);
+          const b2=nameToId(document.getElementById('aip-b2-'+i)?.value);
+          if(a1&&a2)roundCourts[rnd].push({court:ct,p1:a1,p2:a2,b1:b1||null,b2:b2||null});
         }else{
           const p1=nameToId(document.getElementById('aip-p1-'+i)?.value);
           const p2=nameToId(document.getElementById('aip-p2-'+i)?.value);
@@ -5246,7 +5331,9 @@ function saveAIAssignment(btnEl){
         if(aipType==='queens'){
           const a1=nameToId(document.getElementById('aip-a1-'+i)?.value);
           const a2=nameToId(document.getElementById('aip-a2-'+i)?.value);
-          if(a1&&a2)courts.push({court:ct,p1:a1,p2:a2});
+          const b1=nameToId(document.getElementById('aip-b1-'+i)?.value);
+          const b2=nameToId(document.getElementById('aip-b2-'+i)?.value);
+          if(a1&&a2)courts.push({court:ct,p1:a1,p2:a2,b1:b1||null,b2:b2||null});
         }else{
           const p1=nameToId(document.getElementById('aip-p1-'+i)?.value);
           const p2=nameToId(document.getElementById('aip-p2-'+i)?.value);
@@ -5272,7 +5359,9 @@ function saveAIAssignment(btnEl){
         if(p.type==='queens'){
           const a1=nameToId(p.teamA.split('&')[0]?.trim());
           const a2=nameToId(p.teamA.split('&')[1]?.trim());
-          if(a1&&a2)roundCourts[currentRound].push({court:p.court,p1:a1,p2:a2});
+          const b1=nameToId(p.teamB.split('&')[0]?.trim());
+          const b2=nameToId(p.teamB.split('&')[1]?.trim());
+          if(a1&&a2)roundCourts[currentRound].push({court:p.court,p1:a1,p2:a2,b1:b1||null,b2:b2||null});
         }else if(p.type==='pair'){
           const p1=nameToId(p.players.split('+')[0]?.trim());
           const p2=nameToId(p.players.split('+')[1]?.trim());
@@ -5292,7 +5381,9 @@ function saveAIAssignment(btnEl){
         if(p.type==='queens'){
           const a1=nameToId(p.teamA.split('&')[0]?.trim());
           const a2=nameToId(p.teamA.split('&')[1]?.trim());
-          if(a1&&a2)courts.push({court:p.court,p1:a1,p2:a2});
+          const b1=nameToId(p.teamB.split('&')[0]?.trim());
+          const b2=nameToId(p.teamB.split('&')[1]?.trim());
+          if(a1&&a2)courts.push({court:p.court,p1:a1,p2:a2,b1:b1||null,b2:b2||null});
         }else if(p.type==='pair'){
           const p1=nameToId(p.players.split('+')[0]?.trim());
           const p2=nameToId(p.players.split('+')[1]?.trim());
