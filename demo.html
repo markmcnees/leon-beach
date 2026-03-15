@@ -433,6 +433,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <button class="tab" data-tab="gameday">Planner</button>
     <button class="tab" data-tab="duals">Duals</button>
     <button class="tab" data-tab="goals">Goals</button>
+    <button class="tab" data-tab="scouts">Scouts</button>
     <button class="tab" data-tab="settings">Roster</button>
     <button class="tab" style="border-left:1px solid rgba(255,255,255,0.15);opacity:0.4;cursor:default;" title="Profiles not available in demo mode">Profiles ↗</button>
   </div>
@@ -752,6 +753,15 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
   </div>
 
+  <!-- ====== SCOUTS ====== -->
+  <div class="tab-content" id="tab-scouts">
+    <div class="card"><div class="card-title" style="color:#0369a1;"><span class="bar" style="background:#0369a1;"></span> 🕵️ Opponent Scouting</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Notes accumulated across all duals.</p>
+      <div id="scouts-school-list"><div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;">Loading...</div></div>
+    </div>
+    <div id="scouts-detail-panel" style="display:none;"></div>
+  </div>
+
   <!-- ====== ROSTER ====== -->
     <div class="tab-content" id="tab-settings">
 <div class="card"><div class="card-title"><span class="bar"></span> Player Roster</div>
@@ -781,6 +791,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   <div class="pp-tab-bar">
     <button class="pp-tab-btn active" onclick="switchPPTab('stats',this)">📊 My Stats</button>
     <button class="pp-tab-btn" onclick="switchPPTab('live',this)">🏐 Live Score Entry</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('scouts',this)">🕵️ Scouts</button>
     <button class="pp-tab-btn" onclick="switchPPTab('matches',this)">📋 My Matches</button>
   </div>
 
@@ -917,6 +928,12 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="card"><div class="card-title purple"><span class="bar"></span> My Scrimmage Results</div>
       <div id="pp-scrimmage"></div>
     </div>
+  </div>
+
+  <div class="pp-panel" id="pp-panel-scouts">
+    <div class="card"><div class="card-title" style="color:#0369a1;"><span class="bar" style="background:#0369a1;"></span> 🕵️ Scouts</div>
+      <div id="pp-scouts-list"></div></div>
+    <div id="pp-scouts-detail" style="display:none;"></div>
   </div>
 
 </div><!-- end player-portal -->
@@ -1362,7 +1379,54 @@ const _DEMO=(function(){
   }
   seed();
   function getAll(){return mget(R)||{};}
-  function loadInto(D){const v=getAll();D.players=Object.values(v.players||{});D.matches=v.matches?Object.values(v.matches):[];D.planned=[];D.gamedays=v.gamedays?Object.values(v.gamedays):[];D.scrimmages=[];D.schedule=v.schedule?Object.values(v.schedule):[];D.standings=v.standings||{};D.goals=v.goals||{};D.assignments=v.assignments||{};D.duals=[];}
+  function loadInto(D){const v=getAll();D.players=Object.values(v.players||{});D.matches=v.matches?Object.values(v.matches):[];D.planned=[];D.gamedays=v.gamedays?Object.values(v.gamedays):[];D.scrimmages=[];D.schedule=v.schedule?Object.values(v.schedule):[];D.standings=v.standings||{};D.goals=v.goals||{};D.assignments=v.assignments||{};D.duals=[];D.opponents=v.opponents||{};}
+    // ── FAKE OPPONENT SCOUTING DATA ─────────────────
+    var R2='leon_queens_matches';
+    mset(R2+'/opponents/rival_rays/info',{displayName:'Rival Rays',lastDual:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/ashley_chen',{firstName:'Ashley',lastName:'Chen',fullName:'Ashley Chen',jersey:'2',typicalCourt:1,isAlternate:false,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/morgan_walsh',{firstName:'Morgan',lastName:'Walsh',fullName:'Morgan Walsh',jersey:'7',typicalCourt:1,isAlternate:false,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/brianna_scott',{firstName:'Brianna',lastName:'Scott',fullName:'Brianna Scott',jersey:'11',typicalCourt:2,isAlternate:false,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/taylor_nguyen',{firstName:'Taylor',lastName:'Nguyen',fullName:'Taylor Nguyen',jersey:'5',typicalCourt:2,isAlternate:false,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/jade_robinson',{firstName:'Jade',lastName:'Robinson',fullName:'Jade Robinson',jersey:'14',typicalCourt:3,isAlternate:false,firstSeen:'2026-02-10',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/paris_kim',{firstName:'Paris',lastName:'Kim',fullName:'Paris Kim',jersey:'9',typicalCourt:3,isAlternate:false,firstSeen:'2026-02-10',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/sydney_ford',{firstName:'Sydney',lastName:'Ford',fullName:'Sydney Ford',jersey:'3',typicalCourt:4,isAlternate:false,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/cameron_price',{firstName:'Cameron',lastName:'Price',fullName:'Cameron Price',jersey:'18',typicalCourt:4,isAlternate:false,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/reese_hall',{firstName:'Reese',lastName:'Hall',fullName:'Reese Hall',jersey:'22',typicalCourt:5,isAlternate:false,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/drew_patel',{firstName:'Drew',lastName:'Patel',fullName:'Drew Patel',jersey:'16',typicalCourt:5,isAlternate:false,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/kennedy_moss',{firstName:'Kennedy',lastName:'Moss',fullName:'Kennedy Moss',jersey:'8',typicalCourt:null,isAlternate:true,firstSeen:'2026-02-10',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/players/alex_rivers',{firstName:'Alex',lastName:'Rivers',fullName:'Alex Rivers',jersey:'20',typicalCourt:null,isAlternate:true,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/pairs/ashley_chen__morgan_walsh',{player1:'Ashley Chen',player2:'Morgan Walsh',court:1,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/pairs/brianna_scott__taylor_nguyen',{player1:'Brianna Scott',player2:'Taylor Nguyen',court:2,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/pairs/jade_robinson__paris_kim',{player1:'Jade Robinson',player2:'Paris Kim',court:3,firstSeen:'2026-02-10',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/pairs/cameron_price__sydney_ford',{player1:'Cameron Price',player2:'Sydney Ford',court:4,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/pairs/drew_patel__reese_hall',{player1:'Drew Patel',player2:'Reese Hall',court:5,firstSeen:'2026-01-20',lastSeen:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/notes/sn_rr1',{id:'sn_rr1',targetType:'pair',targetId:'ashley_chen__morgan_walsh',targetLabel:'Ashley Chen & Morgan Walsh',text:'Very strong defensive pair. Morgan covers line, Ashley takes cross. Hard to find gaps.',tags:['Good Defense','Hits Cross','Strong Blocker'],authorId:'coach',authorName:'Coach',date:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/notes/sn_rr2',{id:'sn_rr2',targetType:'player',targetId:'ashley_chen',targetLabel:'Ashley Chen',text:'Ace threat on first serve. Spin serve from deuce side curves sharply.',tags:['Strong Server','Ace Threat'],authorId:'coach',authorName:'Coach',date:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/notes/sn_rr3',{id:'sn_rr3',targetType:'player',targetId:'brianna_scott',targetLabel:'Brianna Scott',text:'Tall with a big block. Commits early — run an attack seam if you read her shoulder.',tags:['Tall/Height Advantage','Strong Blocker'],authorId:'d01',authorName:'Zoe',date:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/notes/sn_rr4',{id:'sn_rr4',targetType:'player',targetId:'morgan_walsh',targetLabel:'Morgan Walsh',text:'Left-handed hitter, hits cross almost every time. Block angle and cover angle-deep.',tags:['Left-Handed','Hits Cross'],authorId:'d02',authorName:'Maya',date:'2026-03-12'});
+    mset(R2+'/opponents/rival_rays/notes/sn_rr5',{id:'sn_rr5',targetType:'pair',targetId:'brianna_scott__taylor_nguyen',targetLabel:'Brianna Scott & Taylor Nguyen',text:'Brianna likes to set herself first. Taylor has a reliable short poke.',tags:['Consistent'],authorId:'coach',authorName:'Coach',date:'2026-02-10'});
+    mset(R2+'/opponents/storm_surge/info',{displayName:'Storm Surge',lastDual:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/players/hailey_brooks',{firstName:'Hailey',lastName:'Brooks',fullName:'Hailey Brooks',jersey:'1',typicalCourt:1,isAlternate:false,firstSeen:'2026-02-05',lastSeen:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/players/nina_cross',{firstName:'Nina',lastName:'Cross',fullName:'Nina Cross',jersey:'6',typicalCourt:1,isAlternate:false,firstSeen:'2026-02-05',lastSeen:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/players/riley_stone',{firstName:'Riley',lastName:'Stone',fullName:'Riley Stone',jersey:'10',typicalCourt:2,isAlternate:false,firstSeen:'2026-02-05',lastSeen:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/players/vivian_lake',{firstName:'Vivian',lastName:'Lake',fullName:'Vivian Lake',jersey:'13',typicalCourt:2,isAlternate:false,firstSeen:'2026-02-25',lastSeen:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/players/jenna_wade',{firstName:'Jenna',lastName:'Wade',fullName:'Jenna Wade',jersey:'4',typicalCourt:3,isAlternate:false,firstSeen:'2026-02-05',lastSeen:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/players/chloe_marsh',{firstName:'Chloe',lastName:'Marsh',fullName:'Chloe Marsh',jersey:'17',typicalCourt:3,isAlternate:false,firstSeen:'2026-02-05',lastSeen:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/players/sam_voss',{firstName:'Sam',lastName:'Voss',fullName:'Sam Voss',jersey:'12',typicalCourt:null,isAlternate:true,firstSeen:'2026-02-25',lastSeen:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/pairs/hailey_brooks__nina_cross',{player1:'Hailey Brooks',player2:'Nina Cross',court:1,firstSeen:'2026-02-05',lastSeen:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/pairs/riley_stone__vivian_lake',{player1:'Riley Stone',player2:'Vivian Lake',court:2,firstSeen:'2026-02-05',lastSeen:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/pairs/chloe_marsh__jenna_wade',{player1:'Chloe Marsh',player2:'Jenna Wade',court:3,firstSeen:'2026-02-05',lastSeen:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/notes/sn_ss1',{id:'sn_ss1',targetType:'player',targetId:'hailey_brooks',targetLabel:'Hailey Brooks',text:'Strongest server on team — jump float that moves late.',tags:['Strong Server','Ace Threat'],authorId:'coach',authorName:'Coach',date:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/notes/sn_ss2',{id:'sn_ss2',targetType:'player',targetId:'nina_cross',targetLabel:'Nina Cross',text:'Inconsistent passer when ball comes at hips. Target with sharp angle serves.',tags:['Weak Passer','Inconsistent Under Pressure'],authorId:'coach',authorName:'Coach',date:'2026-02-25'});
+    mset(R2+'/opponents/storm_surge/notes/sn_ss3',{id:'sn_ss3',targetType:'pair',targetId:'riley_stone__vivian_lake',targetLabel:'Riley Stone & Vivian Lake',text:'New pairing — chemistry still developing. Take the first contact zone.',tags:['Inconsistent Under Pressure'],authorId:'d03',authorName:'Chloe',date:'2026-02-25'});
+    mset(R2+'/opponents/coastal_crush/info',{displayName:'Coastal Crush',lastDual:'2026-01-28'});
+    mset(R2+'/opponents/coastal_crush/players/amber_hunt',{firstName:'Amber',lastName:'Hunt',fullName:'Amber Hunt',jersey:'15',typicalCourt:1,isAlternate:false,firstSeen:'2026-01-28',lastSeen:'2026-01-28'});
+    mset(R2+'/opponents/coastal_crush/players/tori_lane',{firstName:'Tori',lastName:'Lane',fullName:'Tori Lane',jersey:'3',typicalCourt:1,isAlternate:false,firstSeen:'2026-01-28',lastSeen:'2026-01-28'});
+    mset(R2+'/opponents/coastal_crush/players/mackenzie_ray',{firstName:'Mackenzie',lastName:'Ray',fullName:'Mackenzie Ray',jersey:'7',typicalCourt:2,isAlternate:false,firstSeen:'2026-01-28',lastSeen:'2026-01-28'});
+    mset(R2+'/opponents/coastal_crush/players/paige_sun',{firstName:'Paige',lastName:'Sun',fullName:'Paige Sun',jersey:'21',typicalCourt:2,isAlternate:false,firstSeen:'2026-01-28',lastSeen:'2026-01-28'});
+    mset(R2+'/opponents/coastal_crush/pairs/amber_hunt__tori_lane',{player1:'Amber Hunt',player2:'Tori Lane',court:1,firstSeen:'2026-01-28',lastSeen:'2026-01-28'});
+    mset(R2+'/opponents/coastal_crush/pairs/mackenzie_ray__paige_sun',{player1:'Mackenzie Ray',player2:'Paige Sun',court:2,firstSeen:'2026-01-28',lastSeen:'2026-01-28'});
+    mset(R2+'/opponents/coastal_crush/notes/sn_cc1',{id:'sn_cc1',targetType:'player',targetId:'amber_hunt',targetLabel:'Amber Hunt',text:'Athletic but new to beach. Strong indoor background. Right side hitter.',tags:['Right Side Dominant','Physical/Athletic'],authorId:'coach',authorName:'Coach',date:'2026-01-28'});
   return{
     isDemo:true,PIN:'1234',PW:'SharkPride',
     fbSet(path,val){mset(R+'/'+path,val);notify();},
@@ -1420,7 +1484,7 @@ const DEF_M=[
   {id:'m09',date:'2026-02-06',court:2,team1:['p15','p04'],team2:['p05','p06'],score1:21,score2:15}
 ];
 
-let D={players:[],matches:[],planned:[],gamedays:[],scrimmages:[],schedule:[],standings:{},goals:{},assignments:{},duals:[]};
+let D={players:[],matches:[],planned:[],gamedays:[],scrimmages:[],schedule:[],standings:{},goals:{},assignments:{},duals:[],opponents:{}};
 let profilesData={}; // from leon_queens node for AI context
 let pgdNotes={}; // player self-notes per date: pgdNotes[pid][date]
 let _autoLoginDone=false;
@@ -1497,6 +1561,11 @@ function listenData(){if(!db)return;
         pgdNotes[pid][date]=notes;
       });
     });
+  });
+  db.ref(DB_ROOT+'/opponents').on('value',s=>{
+    D.opponents=s.val()||{};
+    if(currentRole==='coach'){const t=document.querySelector('.tab.active');if(t&&t.dataset.tab==='scouts')renderScouts();}
+    if(currentRole==='player')renderPlayerScouts();
   });
   db.ref('leon_queens').on('value',s=>{
     profilesData=s.val()||{};
@@ -2158,6 +2227,7 @@ function refreshTab(id){
     case'duals':renderDuals();break;
     case'scrimmage':renderExtMatches('scrimmage');break;
     case'goals':renderCoachGoals();break;
+    case'scouts':renderScouts();break;
     case'settings':renderRoster();break;
   }
 }
@@ -3456,19 +3526,11 @@ document.getElementById('ca-file').addEventListener('change',async function(e){
     try{
       let promptText;
       if(isOpponent){
-        promptText=`You are reading a handwritten or printed FHSAA Beach Volleyball lineup sheet for the OPPONENT team (not Leon).
-Extract each court's player pairs. This is for recording who the opponent played on each court.
-The form typically shows Position (No.1-5) with pairs of players listed side by side.
-Each court position (No.1 through No.5) is one court.
-
-Return ONLY a JSON array like this:
-[{"court":1,"player1":"First Last","player2":"First Last"},{"court":2,"player1":"First Last","player2":"First Last"}]
-
-Rules:
-- court: integer 1-5 (No.1 = court 1, etc.)
-- player1 and player2: full name strings as written on the sheet (left side player and right side player of each pair)
-- Read all 5 court positions
-- Respond with ONLY the JSON array, no other text`;
+        promptText=`You are reading an FHSAA Beach Volleyball Dual Match Lineup Form for the OPPONENT team.
+Extract the starting lineup AND alternates. Each row (No.1-5) = one court with two players.
+Return ONLY valid JSON: {"school":"School Name","starters":[{"court":1,"p1":{"first":"","last":"","jersey":""},"p2":{"first":"","last":"","jersey":""}}],"alternates":[{"first":"","last":"","jersey":""}]}
+- Read all 5 courts. jersey = jersey number string. alternates = all players in the Alternates table.
+- Respond with ONLY the JSON, no other text`;
       }else{
         promptText=`You are reading a handwritten beach volleyball court assignment sheet for a high school team.
 Extract the court assignments. Each court has two players (a pair) assigned to it.
@@ -3506,24 +3568,37 @@ Rules:
         return;
       }
       if(isOpponent){
-        // Opponent lineup — show editable name fields, save as oppLineup on the assignment
-        let h=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;margin-bottom:8px;color:var(--green);">✓ Found ${parsed.length} court(s) — edit if needed</div>`;
-        h+=`<div style="font-size:12px;color:var(--gray);margin-bottom:8px;">These will be saved as the opponent's lineup on your assignment for this date.</div>`;
-        parsed.forEach((m,i)=>{
-          h+=`<div style="padding:8px;background:var(--off-white);border-radius:6px;margin-bottom:6px;">
-            <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;margin-bottom:4px;">COURT ${m.court}</div>
-            <div class="form-row">
-              <input type="text" id="ca-opp-${i}-p1" value="${m.player1||''}" placeholder="Player 1" style="flex:1;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;">
-              <input type="text" id="ca-opp-${i}-p2" value="${m.player2||''}" placeholder="Player 2" style="flex:1;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;">
-            </div>
-            <input type="hidden" id="ca-opp-${i}-court" value="${m.court}">
-          </div>`;
+        const starters=parsed.starters||parsed;
+        const alternates=parsed.alternates||[];
+        const schoolName=parsed.school||document.getElementById('ca-opp').value.trim()||'Opponent';
+        let h=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;margin-bottom:8px;color:var(--green);">✓ Found ${starters.length} court(s) + ${alternates.length} alternate(s)</div>`;
+        starters.forEach((m,i)=>{
+          const p1=m.p1||{first:m.player1||'',last:'',jersey:''};
+          const p2=m.p2||{first:m.player2||'',last:'',jersey:''};
+          h+=`<div style="padding:10px;background:var(--off-white);border-radius:8px;margin-bottom:8px;">
+            <div style="font-family:'Bebas Neue';font-size:12px;margin-bottom:8px;">COURT ${m.court}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-bottom:4px;">PLAYER 1</div>
+                <input type="text" id="ca-opp-${i}-p1f" value="${p1.first||''}" placeholder="First" style="width:100%;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;margin-bottom:4px;">
+                <input type="text" id="ca-opp-${i}-p1l" value="${p1.last||''}" placeholder="Last" style="width:100%;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;margin-bottom:4px;">
+                <input type="text" id="ca-opp-${i}-p1j" value="${p1.jersey||''}" placeholder="#" style="width:60px;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;">
+              </div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--gray);margin-bottom:4px;">PLAYER 2</div>
+                <input type="text" id="ca-opp-${i}-p2f" value="${p2.first||''}" placeholder="First" style="width:100%;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;margin-bottom:4px;">
+                <input type="text" id="ca-opp-${i}-p2l" value="${p2.last||''}" placeholder="Last" style="width:100%;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;margin-bottom:4px;">
+                <input type="text" id="ca-opp-${i}-p2j" value="${p2.jersey||''}" placeholder="#" style="width:60px;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;">
+              </div></div>
+            <input type="hidden" id="ca-opp-${i}-court" value="${m.court}"></div>`;
         });
-        h+=`<div style="margin-top:10px;display:flex;gap:8px;">
-          <button class="btn btn-primary btn-small" onclick="confirmOppLineup()">✓ Save Opponent Lineup</button>
-          <button class="btn btn-secondary btn-small" onclick="document.getElementById('ca-result').innerHTML='';document.getElementById('ca-preview').innerHTML='';">✕ Cancel</button></div>`;
+        if(alternates.length){
+          h+=`<div style="font-family:'Bebas Neue';font-size:12px;color:var(--purple);margin:10px 0 6px;">ALTERNATES</div>`;
+          alternates.forEach((alt,i)=>{
+            h+=`<div style="display:flex;gap:6px;margin-bottom:6px;"><input type="text" id="ca-alt-${i}-f" value="${alt.first||''}" placeholder="First" style="flex:1;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;"><input type="text" id="ca-alt-${i}-l" value="${alt.last||''}" placeholder="Last" style="flex:1;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;"><input type="text" id="ca-alt-${i}-j" value="${alt.jersey||''}" placeholder="#" style="width:50px;padding:5px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:12px;"></div>`;
+          });
+        }
+        h+=`<div style="margin-top:12px;display:flex;gap:8px;"><button class="btn btn-primary btn-small" style="flex:1;" onclick="confirmOppLineup()">✓ Save to Scouts</button><button class="btn btn-secondary btn-small" onclick="document.getElementById('ca-result').innerHTML='';document.getElementById('ca-preview').innerHTML='';">✕ Cancel</button></div>`;
         result.innerHTML=h;
-        window._caData={parsed,count:parsed.length,isOpponent:true};
+        window._caData={starters,alternates,count:starters.length,altCount:alternates.length,schoolName,isOpponent:true};
       }else{
         // Leon's lineup
         const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
@@ -3601,29 +3676,36 @@ function confirmCAAssignment(){
 }
 
 function confirmOppLineup(){
-  const{count}=window._caData||{};
+  const{count,altCount,starters,alternates,schoolName}=window._caData||{};
   if(!count){toast('No data to save');return;}
   const date=document.getElementById('ca-date').value||td();
-  const opp=document.getElementById('ca-opp').value.trim()||'Opponent';
+  const opp=document.getElementById('ca-opp').value.trim()||schoolName||'Opponent';
+  const sk=opp.toLowerCase().replace(/[^a-z0-9]+/g,'_');
   const oppCourts=[];
   for(let i=0;i<count;i++){
     const court=parseInt(document.getElementById(`ca-opp-${i}-court`)?.value)||i+1;
-    const p1=document.getElementById(`ca-opp-${i}-p1`)?.value.trim();
-    const p2=document.getElementById(`ca-opp-${i}-p2`)?.value.trim();
-    if(p1||p2)oppCourts.push({court,player1:p1||'',player2:p2||''});
+    const p1f=document.getElementById(`ca-opp-${i}-p1f`)?.value.trim()||'';
+    const p1l=document.getElementById(`ca-opp-${i}-p1l`)?.value.trim()||'';
+    const p1j=document.getElementById(`ca-opp-${i}-p1j`)?.value.trim()||'';
+    const p2f=document.getElementById(`ca-opp-${i}-p2f`)?.value.trim()||'';
+    const p2l=document.getElementById(`ca-opp-${i}-p2l`)?.value.trim()||'';
+    const p2j=document.getElementById(`ca-opp-${i}-p2j`)?.value.trim()||'';
+    const p1n=(p1f+' '+p1l).trim(),p2n=(p2f+' '+p2l).trim();
+    if(p1n||p2n)oppCourts.push({court,player1:p1n,jersey1:p1j,player2:p2n,jersey2:p2j});
   }
-  if(!oppCourts.length){toast('No courts to save');return;}
-  // Save as opponent lineup under the assignment for this date
-  const existingAssign=Object.values(D.assignments).find(a=>a.date===date);
-  if(existingAssign){
-    fbSet('assignments/'+existingAssign.id+'/oppLineup',oppCourts);
-    toast(`Opponent lineup saved for ${date}!`);
-  }else{
-    // Create a placeholder assignment with just opp lineup
-    const id=gi('asgn');
-    fbSet('assignments/'+id,{id,date,type:'gameday',opponent:opp,courts:[],oppLineup:oppCourts,notes:null,createdAt:new Date().toISOString()});
-    toast(`Opponent lineup saved for ${date}!`);
-  }
+  const existSch=D.opponents[sk]||{};
+  fbSet('opponents/'+sk+'/info',{displayName:opp,lastDual:date});
+  oppCourts.forEach(c=>{
+    const up=(name,jersey,court)=>{if(!name)return;const pk=name.toLowerCase().replace(/[^a-z0-9]+/g,'_');const ex=(existSch.players||{})[pk]||{};fbSet('opponents/'+sk+'/players/'+pk,{...ex,firstName:name.split(' ')[0]||name,lastName:name.split(' ').slice(1).join(' ')||'',fullName:name,jersey:jersey||ex.jersey||'',typicalCourt:court||ex.typicalCourt||null,isAlternate:false,firstSeen:ex.firstSeen||date,lastSeen:date});};
+    up(c.player1,c.jersey1,c.court);up(c.player2,c.jersey2,c.court);
+    if(c.player1&&c.player2){const pk=[c.player1,c.player2].map(n=>n.toLowerCase().replace(/[^a-z0-9]+/g,'_')).sort().join('__');const ep=(existSch.pairs||{})[pk]||{};fbSet('opponents/'+sk+'/pairs/'+pk,{...ep,player1:c.player1,player2:c.player2,court:c.court,firstSeen:ep.firstSeen||date,lastSeen:date});}
+  });
+  const altC=altCount||0;
+  for(let i=0;i<altC;i++){const af=document.getElementById(`ca-alt-${i}-f`)?.value.trim()||'';const al=document.getElementById(`ca-alt-${i}-l`)?.value.trim()||'';const aj=document.getElementById(`ca-alt-${i}-j`)?.value.trim()||'';const an=(af+' '+al).trim();if(an){const pk=an.toLowerCase().replace(/[^a-z0-9]+/g,'_');const ex=(existSch.players||{})[pk]||{};fbSet('opponents/'+sk+'/players/'+pk,{...ex,firstName:af||an,lastName:al||'',fullName:an,jersey:aj||ex.jersey||'',typicalCourt:null,isAlternate:true,firstSeen:ex.firstSeen||date,lastSeen:date});}}
+  const ea=Object.values(D.assignments).find(a=>a.date===date);
+  if(ea){fbSet('assignments/'+ea.id+'/oppLineup',oppCourts);}
+  else{const id=gi('asgn');fbSet('assignments/'+id,{id,date,type:'gameday',opponent:opp,courts:[],oppLineup:oppCourts,notes:null,createdAt:new Date().toISOString()});}
+  toast('Saved '+oppCourts.length+' courts + '+altC+' alternates to Scouts!');
   document.getElementById('ca-result').innerHTML='';
   document.getElementById('ca-preview').innerHTML='';
   renderAssignments();
@@ -3945,6 +4027,321 @@ function openAssignEditModal(id){
   document.getElementById('assign-edit-body').innerHTML=h;
   document.getElementById('assign-edit-modal').classList.add('active');
 }
+
+// ============================================================
+// LIVE SCORE ENTRY STATS (coach portal)
+// ============================================================
+if(!window._lseStats)window._lseStats={};
+
+function lseStatBlock(pid, label, idx){
+  if(!window._lseStats[idx])window._lseStats[idx]={};
+  if(!window._lseStats[idx][pid])window._lseStats[idx][pid]={k:0,a:0,b:0,d:0,e:0};
+  const s=window._lseStats[idx][pid];
+  const stats=['k','a','b','d','e'];
+  const names=['Kills','Aces','Blocks','Digs','Errors'];
+  return `<div style="margin-bottom:10px;">
+    <div style="font-size:11px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">${label}</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;">
+      ${stats.map((st,i)=>`<div style="text-align:center;">
+        <div style="font-size:9px;font-weight:700;color:var(--gray);letter-spacing:0.5px;">${st.toUpperCase()}<br><span style="font-size:8px;font-weight:400;">${names[i]}</span></div>
+        <button onclick="lseStatAdj(${idx},'${pid}','${st}',1)" style="width:100%;background:var(--blue);color:white;border:none;border-radius:4px;padding:4px;font-size:14px;cursor:pointer;margin-bottom:2px;">+</button>
+        <div id="lse-${idx}-${pid}-${st}" style="font-family:'Bebas Neue';font-size:18px;line-height:1;">${s[st]||0}</div>
+        <button onclick="lseStatAdj(${idx},'${pid}','${st}',-1)" style="width:100%;background:var(--gray-lighter);color:var(--charcoal);border:none;border-radius:4px;padding:4px;font-size:14px;cursor:pointer;margin-top:2px;">−</button>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function lseStatAdj(idx,pid,stat,delta){
+  if(!window._lseStats[idx])window._lseStats[idx]={};
+  if(!window._lseStats[idx][pid])window._lseStats[idx][pid]={k:0,a:0,b:0,d:0,e:0};
+  window._lseStats[idx][pid][stat]=Math.max(0,(window._lseStats[idx][pid][stat]||0)+delta);
+  const el=document.getElementById('lse-'+idx+'-'+pid+'-'+stat);
+  if(el)el.textContent=window._lseStats[idx][pid][stat];
+}
+
+function lseToggleStats(idx){
+  const sec=document.getElementById('lse-stats-'+idx);
+  const btn=document.getElementById('lse-stats-toggle-'+idx);
+  if(!sec||!btn)return;
+  const open=sec.style.display==='none';
+  sec.style.display=open?'block':'none';
+  btn.textContent=open?'− Hide stats':'＋ Add set stats (optional)';
+  btn.classList.toggle('open',open);
+}
+
+// ============================================================
+// SCOUTS — COACH PORTAL
+// ============================================================
+const SCOUT_TAGS=['Strong Server','Ace Threat','Weak Passer','Hits Line','Hits Cross','Strong Blocker','Weak Blocker','Good Defense','Tall/Height Advantage','Left-Handed','Right Side Dominant','Left Side Dominant','Physical/Athletic','Smart/Strategic','Consistent','Inconsistent Under Pressure','Communicates Well'];
+
+function schoolKey(name){return name.toLowerCase().replace(/[^a-z0-9]+/g,'_');}
+
+function renderScouts(){
+  const schoolList=document.getElementById('scouts-school-list');
+  const detail=document.getElementById('scouts-detail-panel');
+  if(!schoolList)return;
+  const schools=Object.entries(D.opponents||{});
+  if(!schools.length){
+    schoolList.innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;">No opponents scouted yet. Scan a lineup sheet from the Planner tab.</div>';
+    detail.style.display='none';
+    return;
+  }
+  schoolList.innerHTML=schools.map(([key,sc])=>{
+    const info=sc.info||{};
+    const players=Object.values(sc.players||{});
+    const starters=players.filter(p=>!p.isAlternate);
+    const alts=players.filter(p=>p.isAlternate);
+    const noteCount=Object.values(sc.notes||{}).length;
+    return `<div onclick="openScoutSchool('${key}')" style="cursor:pointer;padding:14px;background:var(--white);border-radius:10px;border:1px solid var(--gray-lighter);margin-bottom:8px;transition:all 0.15s;" onmouseover="this.style.borderColor='#0369a1'" onmouseout="this.style.borderColor='var(--gray-lighter)'">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;">${info.displayName||key}</div>
+          <div style="font-size:12px;color:var(--gray);margin-top:2px;">${starters.length} players · ${alts.length} alternates · ${noteCount} notes</div>
+          ${info.lastDual?`<div style="font-size:11px;color:var(--gray);margin-top:2px;">Last dual: ${info.lastDual}</div>`:''}
+        </div>
+        <div style="font-family:'Bebas Neue';font-size:24px;color:#0369a1;">›</div>
+      </div>
+    </div>`;
+  }).join('');
+  detail.style.display='none';
+}
+
+function openScoutSchool(key){
+  const sc=D.opponents[key];if(!sc)return;
+  const info=sc.info||{};
+  const players=Object.values(sc.players||{}).sort((a,b)=>(a.typicalCourt||99)-(b.typicalCourt||99)||(a.fullName||'').localeCompare(b.fullName||''));
+  const pairs=Object.values(sc.pairs||{}).sort((a,b)=>(a.court||0)-(b.court||0));
+  const notes=sc.notes||{};
+  const detail=document.getElementById('scouts-detail-panel');
+  detail.style.display='block';
+  document.getElementById('scouts-school-list').style.display='none';
+
+  const starters=players.filter(p=>!p.isAlternate);
+  const alts=players.filter(p=>p.isAlternate);
+
+  let h=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+    <button onclick="closeScoutSchool()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--blue);">‹</button>
+    <div style="font-family:'Bebas Neue';font-size:22px;letter-spacing:1.5px;">${info.displayName||key}</div>
+  </div>`;
+
+  // Pairs section
+  if(pairs.length){
+    h+=`<div class="card" style="border-left:4px solid #0369a1;">
+      <div class="card-title" style="color:#0369a1;"><span class="bar" style="background:#0369a1;"></span> Court Pairs</div>`;
+    pairs.forEach(pair=>{
+      const pairKey=[pair.player1,pair.player2].map(n=>n.toLowerCase().replace(/[^a-z0-9]+/g,'_')).sort().join('__');
+      const pairNotes=Object.values(notes).filter(n=>n.targetType==='pair'&&n.targetId===pairKey);
+      h+=`<div style="padding:10px;background:var(--off-white);border-radius:8px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span class="court-badge court-${pair.court}" style="font-size:11px;">CT ${pair.court}</span>
+            <span style="font-weight:700;font-size:13px;margin-left:8px;">${pair.player1} & ${pair.player2}</span>
+            <div style="font-size:11px;color:var(--gray);margin-top:2px;">Last seen: ${pair.lastSeen||'—'}</div>
+          </div>
+          <button class="btn btn-small" style="background:#0369a1;color:white;border:none;" onclick="openAddScoutNote('${key}','pair','${pairKey}','${pair.player1} & ${pair.player2}')">+ Note</button>
+        </div>
+        ${renderScoutNotes(pairNotes)}
+      </div>`;
+    });
+    h+='</div>';
+  }
+
+  // Individual players
+  h+=`<div class="card" style="border-left:4px solid var(--blue);">
+    <div class="card-title blue"><span class="bar"></span> Players</div>`;
+  starters.forEach(p=>{
+    const pKey=(p.fullName||'').toLowerCase().replace(/[^a-z0-9]+/g,'_');
+    const pNotes=Object.values(notes).filter(n=>n.targetType==='player'&&n.targetId===pKey);
+    h+=scoutPlayerCard(key,p,pKey,pNotes,false);
+  });
+  if(alts.length){
+    h+=`<div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1.5px;color:var(--purple);margin:12px 0 6px;">ALTERNATES / SUBS</div>`;
+    alts.forEach(p=>{
+      const pKey=(p.fullName||'').toLowerCase().replace(/[^a-z0-9]+/g,'_');
+      const pNotes=Object.values(notes).filter(n=>n.targetType==='player'&&n.targetId===pKey);
+      h+=scoutPlayerCard(key,p,pKey,pNotes,true);
+    });
+  }
+  h+='</div>';
+
+  detail.innerHTML=h;
+}
+
+function scoutPlayerCard(schoolK,p,pKey,playerNotes,isAlt){
+  return `<div style="padding:10px;background:var(--off-white);border-radius:8px;margin-bottom:8px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <span style="font-weight:700;font-size:14px;">${p.fullName||''}</span>
+        ${p.jersey?`<span style="font-family:'Bebas Neue';font-size:12px;color:var(--gray);margin-left:6px;">#${p.jersey}</span>`:''}
+        ${p.typicalCourt&&!isAlt?`<span class="court-badge court-${p.typicalCourt}" style="font-size:10px;margin-left:6px;">CT ${p.typicalCourt}</span>`:''}
+        ${isAlt?`<span style="font-size:10px;background:var(--purple-bg);color:var(--purple);padding:1px 6px;border-radius:4px;margin-left:6px;">ALT</span>`:''}
+        <div style="font-size:11px;color:var(--gray);margin-top:2px;">Last seen: ${p.lastSeen||'—'}</div>
+      </div>
+      <button class="btn btn-small" style="background:#0369a1;color:white;border:none;" onclick="openAddScoutNote('${schoolK}','player','${pKey}','${p.fullName||''}')">+ Note</button>
+    </div>
+    ${renderScoutNotes(playerNotes)}
+  </div>`;
+}
+
+function renderScoutNotes(notesArr){
+  if(!notesArr.length)return '';
+  return '<div style="margin-top:8px;">'+notesArr.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(n=>`
+    <div style="background:var(--white);border-radius:6px;padding:8px;margin-bottom:4px;border-left:3px solid #0369a1;">
+      <div style="font-size:12px;line-height:1.5;">${n.text||''}</div>
+      ${n.tags&&n.tags.length?`<div style="margin-top:4px;">${n.tags.map(t=>`<span style="background:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-right:3px;">${t}</span>`).join('')}</div>`:''}
+      <div style="font-size:10px;color:var(--gray);margin-top:4px;">${n.authorName||'Coach'} · ${n.date||''}</div>
+    </div>`).join('')+'</div>';
+}
+
+function closeScoutSchool(){
+  document.getElementById('scouts-detail-panel').style.display='none';
+  document.getElementById('scouts-school-list').style.display='block';
+}
+
+// ============================================================
+// SCOUT NOTE MODAL
+// ============================================================
+function openAddScoutNote(schoolK,targetType,targetId,targetLabel){
+  window._scoutNoteCtx={schoolK,targetType,targetId,targetLabel};
+  const isPlayer=targetType==='player';
+  let h=`<div style="font-size:13px;font-weight:700;margin-bottom:12px;">${targetLabel}</div>`;
+  h+=`<div style="margin-bottom:10px;">
+    <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:6px;">QUICK TAGS (select all that apply)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;" id="scout-tag-chips">
+      ${SCOUT_TAGS.map(t=>`<button onclick="toggleScoutTag(this,'${t.replace(/'/g,'\\\'')}')" style="padding:4px 10px;border-radius:20px;border:1px solid var(--gray-lighter);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;" data-tag="${t}">${t}</button>`).join('')}
+    </div>
+  </div>`;
+  h+=`<div><label style="font-size:11px;font-weight:700;color:var(--gray);">NOTES (optional free text)</label>
+    <textarea id="scout-note-text" rows="3" class="form-input" style="margin-top:4px;font-size:13px;" placeholder="e.g. Likes to tip over the block, strong serve from deuce side..."></textarea>
+  </div>`;
+
+  document.getElementById('edit-modal-body').innerHTML=h;
+  document.querySelector('#edit-modal .modal-title').innerHTML=`Scout Note — ${targetType==='pair'?'Pair':'Player'} <button class="modal-close" onclick="closeEdit()">✕</button>`;
+  document.querySelector('#edit-modal .modal-title').style.color='#0369a1';
+  document.getElementById('edit-save').textContent='Save Scout Note';
+  document.getElementById('edit-save').onclick=saveScoutNote;
+  document.getElementById('edit-modal').classList.add('active');
+}
+
+function toggleScoutTag(btn,tag){
+  const active=btn.dataset.active==='1';
+  btn.dataset.active=active?'':'1';
+  btn.style.background=active?'var(--white)':'#0369a1';
+  btn.style.color=active?'var(--black)':'white';
+  btn.style.borderColor=active?'var(--gray-lighter)':'#0369a1';
+}
+
+function saveScoutNote(){
+  const ctx=window._scoutNoteCtx;if(!ctx)return;
+  const text=(document.getElementById('scout-note-text')?.value||'').trim();
+  const tags=[...document.querySelectorAll('#scout-tag-chips button[data-active="1"]')].map(b=>b.dataset.tag);
+  if(!text&&!tags.length){toast('Add a note or select tags');return;}
+  const id=gi('sn');
+  const authorId=currentPlayerId||'coach';
+  const authorName=currentPlayerId?pN(currentPlayerId):'Coach';
+  fbSet('opponents/'+ctx.schoolK+'/notes/'+id,{
+    id,targetType:ctx.targetType,targetId:ctx.targetId,targetLabel:ctx.targetLabel,
+    text,tags,authorId,authorName,date:td(),createdAt:new Date().toISOString()
+  });
+  toast('Scout note saved!');
+  closeEdit();
+  setTimeout(()=>{
+    if(currentRole==='coach'){openScoutSchool(ctx.schoolK);}
+    else{openPlayerScoutSchool(ctx.schoolK);}
+  },400);
+}
+
+// ============================================================
+// SCOUTS — PLAYER PORTAL
+// ============================================================
+function renderPlayerScouts(){
+  const listEl=document.getElementById('pp-scouts-list');
+  const detailEl=document.getElementById('pp-scouts-detail');
+  if(!listEl)return;
+  const schools=Object.entries(D.opponents||{});
+  if(!schools.length){
+    listEl.innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;">No opponents scouted yet.</div>';
+    if(detailEl)detailEl.style.display='none';
+    return;
+  }
+  listEl.innerHTML=schools.map(([key,sc])=>{
+    const info=sc.info||{};
+    const players=Object.values(sc.players||{});
+    const noteCount=Object.values(sc.notes||{}).length;
+    return `<div onclick="openPlayerScoutSchool('${key}')" style="cursor:pointer;padding:14px;background:var(--white);border-radius:10px;border:1px solid var(--gray-lighter);margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-family:'Bebas Neue';font-size:16px;">${info.displayName||key}</div>
+          <div style="font-size:12px;color:var(--gray);">${players.length} players · ${noteCount} notes</div>
+          ${info.lastDual?`<div style="font-size:11px;color:var(--gray);">Last dual: ${info.lastDual}</div>`:''}
+        </div>
+        <div style="font-family:'Bebas Neue';font-size:24px;color:#0369a1;">›</div>
+      </div>
+    </div>`;
+  }).join('');
+  if(detailEl)detailEl.style.display='none';
+}
+
+function openPlayerScoutSchool(key){
+  const sc=D.opponents[key];if(!sc)return;
+  const info=sc.info||{};
+  const players=Object.values(sc.players||{}).sort((a,b)=>(a.typicalCourt||99)-(b.typicalCourt||99));
+  const pairs=Object.values(sc.pairs||{}).sort((a,b)=>(a.court||0)-(b.court||0));
+  const notes=sc.notes||{};
+  const listEl=document.getElementById('pp-scouts-list');
+  const detailEl=document.getElementById('pp-scouts-detail');
+  listEl.style.display='none';
+  detailEl.style.display='block';
+
+  let h=`<div class="card" style="border-left:4px solid #0369a1;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <button onclick="document.getElementById('pp-scouts-list').style.display='block';document.getElementById('pp-scouts-detail').style.display='none';" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--blue);">‹</button>
+      <div style="font-family:'Bebas Neue';font-size:20px;">${info.displayName||key}</div>
+    </div>`;
+
+  // Pairs
+  if(pairs.length){
+    h+=`<div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1.5px;color:#0369a1;margin-bottom:8px;">COURT PAIRS</div>`;
+    pairs.forEach(pair=>{
+      const pairKey=[pair.player1,pair.player2].map(n=>n.toLowerCase().replace(/[^a-z0-9]+/g,'_')).sort().join('__');
+      const pairNotes=Object.values(notes).filter(n=>n.targetType==='pair'&&n.targetId===pairKey);
+      h+=`<div style="padding:10px;background:var(--off-white);border-radius:8px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span class="court-badge court-${pair.court}" style="font-size:11px;">CT ${pair.court}</span>
+            <span style="font-weight:700;font-size:13px;margin-left:8px;">${pair.player1} & ${pair.player2}</span>
+          </div>
+          <button class="btn btn-small" style="background:#0369a1;color:white;border:none;" onclick="openAddScoutNote('${key}','pair','${pairKey}','${pair.player1} & ${pair.player2}')">+ Note</button>
+        </div>
+        ${renderScoutNotes(pairNotes)}
+      </div>`;
+    });
+  }
+
+  // Players
+  h+=`<div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1.5px;color:var(--blue);margin:12px 0 8px;">PLAYERS</div>`;
+  players.forEach(p=>{
+    const pKey=(p.fullName||'').toLowerCase().replace(/[^a-z0-9]+/g,'_');
+    const pNotes=Object.values(notes).filter(n=>n.targetType==='player'&&n.targetId===pKey);
+    h+=`<div style="padding:10px;background:var(--off-white);border-radius:8px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <span style="font-weight:700;font-size:14px;">${p.fullName||''}</span>
+          ${p.jersey?`<span style="font-family:'Bebas Neue';font-size:12px;color:var(--gray);margin-left:6px;">#${p.jersey}</span>`:''}
+          ${p.typicalCourt&&!p.isAlternate?`<span class="court-badge court-${p.typicalCourt}" style="font-size:10px;margin-left:6px;">CT ${p.typicalCourt}</span>`:''}
+          ${p.isAlternate?`<span style="font-size:10px;background:var(--purple-bg);color:var(--purple);padding:1px 6px;border-radius:4px;margin-left:6px;">ALT</span>`:''}
+        </div>
+        <button class="btn btn-small" style="background:#0369a1;color:white;border:none;" onclick="openAddScoutNote('${key}','player','${pKey}','${p.fullName||''}')">+ Note</button>
+      </div>
+      ${renderScoutNotes(pNotes)}
+    </div>`;
+  });
+  h+='</div>';
+  detailEl.innerHTML=h;
+}
+
+
 function closeAssignEditModal(){document.getElementById('assign-edit-modal').classList.remove('active');}
 function saveAssignEdit(){
   const id=window._editAssignId;if(!id)return;
@@ -4203,7 +4600,9 @@ function renderLiveScoring(dateOverride,assignOverride){
     const pairKey=[c.p1,c.p2].filter(Boolean).sort().join('_');
     const courtLabel='Court '+c.court+(c.subCourt?c.subCourt.toUpperCase():'');
     const partnerLabel=[p1,p2].filter(Boolean).map(p=>p.firstName+' '+p.lastName.charAt(0)+'.').join(' & ');
-    const opp=assignment.opponent?assignment.opponent+' CT'+c.court:'Opponent CT'+c.court;
+    let opp=assignment.opponent?assignment.opponent+' CT'+c.court:'Opponent CT'+c.court;
+    const _ol=assignment.oppLineup||[];const _oc=_ol.find(o=>o.court===c.court);
+    if(_oc&&(_oc.player1||_oc.player2)){opp=[_oc.player1+(_oc.jersey1?' #'+_oc.jersey1:''),_oc.player2+(_oc.jersey2?' #'+_oc.jersey2:'')].filter(Boolean).join(' & ');}
 
     // Find existing match for this pair/date
     const existingMatch=matchList.find(m=>m.date===date&&arrEq(m.pair||[],[c.p1,c.p2].filter(Boolean)));
@@ -4301,7 +4700,9 @@ function saveLiveSet(idx,p1,p2,date,court,subCourt,existingId,opponent,fbNode){
   const matchList=node==='scrimmages'?D.scrimmages:D.gamedays;
   const idPrefix=node==='scrimmages'?'sc':'gd';
   const pair=[p1,p2].filter(Boolean);
-  const stats={};pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,d:0,e:0};});
+  const statsOpen=document.getElementById('lse-stats-'+idx)?.style.display!=='none';
+  const stats={};
+  pair.forEach(pid=>{stats[pid]=statsOpen&&window._lseStats&&window._lseStats[idx]&&window._lseStats[idx][pid]?{...window._lseStats[idx][pid]}:{k:0,b:0,a:0,d:0,e:0};});
   const newSet={scoreUs:us,scoreThem:them,stats};
   const courtLabel=court+(subCourt?subCourt:'');
   const opp=(opponent||'Opponent')+' CT'+courtLabel;
@@ -4404,6 +4805,10 @@ function refreshSingleCourtCard(idx, date, fbNode){
           <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-them-${idx}',-1)">−</button>
         </div>
       </div>
+    </div>
+    <button class="pgd-stats-toggle" id="lse-stats-toggle-${idx}" onclick="lseToggleStats(${idx})" style="width:100%;margin-top:8px;">＋ Add set stats (optional)</button>
+    <div id="lse-stats-${idx}" style="display:none;margin-top:8px;">
+      ${[c.p1,c.p2].filter(Boolean).map(pid2=>{const po=gP(pid2);return lseStatBlock(pid2,po?po.firstName:'P',idx);}).join('')}
     </div>
     <button class="btn btn-blue btn-small" style="width:100%;margin-top:6px;" onclick="saveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${date}',${c.court},'${c.subCourt||''}','${matchId||''}','${assignment.opponent||''}','${node}')">✓ Save Set</button>
   </div>`;
@@ -4678,6 +5083,7 @@ function autoSavePairNote(key){
 function switchPPTab(tab,btn){
   document.querySelectorAll('.pp-tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.pp-panel').forEach(p=>p.classList.remove('active'));
+  if(tab==='scouts'){if(btn)btn.classList.add('active');document.getElementById('pp-panel-scouts').classList.add('active');renderPlayerScouts();return;}
   if(btn)btn.classList.add('active');
   document.getElementById('pp-panel-'+tab).classList.add('active');
   if(tab==='live')renderPlayerLiveScoring();
