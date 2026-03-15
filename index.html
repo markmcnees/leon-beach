@@ -352,7 +352,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260315140627">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -2765,7 +2765,7 @@ ${isQueens?`QUEENS RULES:
 - You have 16 players total, assign the top ${numCourts*2} players to courts`}
 
 ${isQueens?`Respond with EXACTLY this format. ${numRounds>1?`Generate all ${numRounds} rounds, each labeled ROUND 1, ROUND 2 etc. Use all 16 players each round with new partners.`:''}
-${numRounds>1?Array.from({length:numRounds},(_,ri)=>`ROUND ${ri+1}:\nCOURT 1: [P1] & [P2] VS [P3] & [P4] | [reason]\nCOURT 2: [P1] & [P2] VS [P3] & [P4] | [reason]\n${numCourts>=3?'COURT 3: [P1] & [P2] VS [P3] & [P4] | [reason]':''}\n${numCourts>=4?'COURT 4: [P1] & [P2] VS [P3] & [P4] | [reason]':''}`).join('\n'):`COURT 1: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [Brief reason - 8 words max]
+${numRounds>1?Array.from({length:numRounds},(_,ri)=>`ROUND ${ri+1}:\nCOURT 1: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [reason 8 words max]\nCOURT 2: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [reason 8 words max]\n${numCourts>=3?'COURT 3: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [reason 8 words max]':''}\n${numCourts>=4?'COURT 4: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [reason 8 words max]':''}`).join('\n'):`COURT 1: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [Brief reason - 8 words max]
 COURT 2: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [Brief reason - 8 words max]
 ${numCourts>=3?'COURT 3: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [Brief reason - 8 words max]':''}
 ${numCourts>=4?'COURT 4: [P1 Full Name] & [P2 Full Name] VS [P3 Full Name] & [P4 Full Name] | [Brief reason - 8 words max]':''}`}
@@ -5199,7 +5199,32 @@ function editAIPairings(){
   if(!data)return;
   const container=document.getElementById('ai-pairings-result');
   const sortedPlayers=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
-  function playerOpts(val=''){
+  function matchPlayer(name){
+    if(!name||!name.trim())return '';
+    const n=name.trim().toLowerCase();
+    // 1. Exact full name match
+    let p=sortedPlayers.find(x=>(x.firstName+' '+x.lastName).toLowerCase()===n);
+    if(p)return p.firstName+' '+p.lastName;
+    // 2. "First Last" with period variations
+    const nClean=n.replace(/\./g,'').replace(/\s+/g,' ').trim();
+    p=sortedPlayers.find(x=>(x.firstName+' '+x.lastName).toLowerCase().replace(/\./g,'')===nClean);
+    if(p)return p.firstName+' '+p.lastName;
+    // 3. "First L." or "First L" — first name + last initial
+    const parts=nClean.split(' ');
+    if(parts.length>=2){
+      const fname=parts[0],linitial=parts[parts.length-1].replace(/\./g,'')[0];
+      p=sortedPlayers.find(x=>x.firstName.toLowerCase()===fname&&x.lastName.toLowerCase().startsWith(linitial));
+      if(p)return p.firstName+' '+p.lastName;
+    }
+    // 4. First name only
+    if(parts.length>=1){
+      p=sortedPlayers.find(x=>x.firstName.toLowerCase()===parts[0]);
+      if(p)return p.firstName+' '+p.lastName;
+    }
+    return '';
+  }
+  function playerOpts(rawVal=''){
+    const val=matchPlayer(rawVal);
     return'<option value="">Select Player</option>'+sortedPlayers.map(p=>`<option value="${p.firstName} ${p.lastName}" ${(p.firstName+' '+p.lastName)===val?'selected':''}>${p.firstName} ${p.lastName} (CT${p.court})</option>`).join('');
   }
   let h=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--blue);margin-bottom:12px;">EDIT PAIRINGS</div>`;
