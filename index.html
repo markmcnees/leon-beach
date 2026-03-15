@@ -62,6 +62,9 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .live-score-input:focus{outline:none;border-color:var(--blue);}
 .ls-counter{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .ls-num{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;min-width:70px;text-align:center;color:var(--black);}
+.ls-inp{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;width:100%;min-width:70px;text-align:center;color:var(--black);background:transparent;border:none;border-bottom:2px dashed transparent;outline:none;padding:0;cursor:default;-moz-appearance:textfield;}
+.ls-inp:focus{border-bottom-color:var(--blue);cursor:text;background:var(--blue-bg);border-radius:6px;}
+.ls-inp::-webkit-inner-spin-button,.ls-inp::-webkit-outer-spin-button{-webkit-appearance:none;}
 .ls-btn{width:100%;padding:10px 0;border-radius:10px;border:none;font-family:'Bebas Neue',sans-serif;font-size:28px;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:manipulation;transition:transform 0.08s,background 0.08s;}
 .ls-btn:active{transform:scale(0.92);}
 .ls-btn-plus{background:var(--blue);color:var(--white);}
@@ -262,6 +265,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .score-input{font-size:26px;padding:12px;}
   /* Live Score Entry: bigger tap targets */
   .ls-num{font-size:64px;}
+  .ls-inp{font-size:64px;}
   .ls-btn{padding:16px 0;font-size:34px;border-radius:14px;}
   .live-court-card{padding:16px;}
   .live-score-row{gap:12px;}
@@ -352,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260315143527">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -3793,8 +3797,7 @@ function renderLiveScoring(dateOverride,assignOverride){
           <div class="live-score-label">LEON</div>
           <div class="ls-counter">
             <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-us-${idx}',1)">+</button>
-            <div class="ls-num" id="ls-us-${idx}">0</div>
-            <input type="number" id="ls-us-${idx}-inp" value="0" min="0" oninput="lsInpChange('ls-us-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
+            <input type="number" class="ls-inp" id="ls-us-${idx}" value="0" min="0" inputmode="numeric" pattern="[0-9]*" onchange="lsAdj('ls-us-${idx}',0)" style="">
             <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-us-${idx}',-1)">−</button>
           </div>
         </div>
@@ -3803,8 +3806,7 @@ function renderLiveScoring(dateOverride,assignOverride){
           <div class="live-score-label">OPP</div>
           <div class="ls-counter">
             <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-them-${idx}',1)">+</button>
-            <div class="ls-num" id="ls-them-${idx}">0</div>
-            <input type="number" id="ls-them-${idx}-inp" value="0" min="0" oninput="lsInpChange('ls-them-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
+            <input type="number" class="ls-inp" id="ls-them-${idx}" value="0" min="0" inputmode="numeric" pattern="[0-9]*" onchange="lsAdj('ls-them-${idx}',0)" style="">
             <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-them-${idx}',-1)">−</button>
           </div>
         </div>
@@ -3820,9 +3822,11 @@ function renderLiveScoring(dateOverride,assignOverride){
 function lsAdj(id,delta){
   const el=document.getElementById(id);
   if(!el)return;
-  const cur=parseInt(el.textContent)||0;
+  // Support both div (ls-num) and input (ls-inp) elements
+  const isInput=el.tagName==='INPUT';
+  const cur=isInput?parseInt(el.value)||0:parseInt(el.textContent)||0;
   const next=Math.max(0,cur+delta);
-  el.textContent=next;
+  if(isInput){el.value=next;}else{el.textContent=next;}
   const inp=document.getElementById(id+'-inp');
   if(inp)inp.value=next;
 }
@@ -3838,8 +3842,8 @@ function lsInpChange(id){
 function saveLiveSet(idx,p1,p2,date,court,subCourt,existingId,opponent,fbNode){
   const usEl=document.getElementById('ls-us-'+idx);
   const themEl=document.getElementById('ls-them-'+idx);
-  const us=parseInt(usEl?.textContent??usEl?.value);
-  const them=parseInt(themEl?.textContent??themEl?.value);
+  const us=parseInt(usEl?.tagName==='INPUT'?usEl.value:usEl?.textContent);
+  const them=parseInt(themEl?.tagName==='INPUT'?themEl.value:themEl?.textContent);
   if(isNaN(us)||isNaN(them)){toast('Enter both scores');return;}
   if(us===them){toast('Scores cannot be tied');return;}
 
@@ -3948,8 +3952,7 @@ function refreshSingleCourtCard(idx, date, fbNode){
         <div class="live-score-label">LEON</div>
         <div class="ls-counter">
           <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-us-${idx}',1)">+</button>
-          <div class="ls-num" id="ls-us-${idx}">0</div>
-          <input type="number" id="ls-us-${idx}-inp" value="0" min="0" oninput="lsInpChange('ls-us-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
+          <input type="number" class="ls-inp" id="ls-us-${idx}" value="0" min="0" inputmode="numeric" pattern="[0-9]*" onchange="lsAdj('ls-us-${idx}',0)">
           <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-us-${idx}',-1)">−</button>
         </div>
       </div>
@@ -3958,8 +3961,7 @@ function refreshSingleCourtCard(idx, date, fbNode){
         <div class="live-score-label">OPP</div>
         <div class="ls-counter">
           <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-them-${idx}',1)">+</button>
-          <div class="ls-num" id="ls-them-${idx}">0</div>
-          <input type="number" id="ls-them-${idx}-inp" value="0" min="0" oninput="lsInpChange('ls-them-${idx}')" style="width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;border:1px solid var(--gray-lighter);border-radius:6px;padding:4px;margin-top:2px;">
+          <input type="number" class="ls-inp" id="ls-them-${idx}" value="0" min="0" inputmode="numeric" pattern="[0-9]*" onchange="lsAdj('ls-them-${idx}',0)">
           <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-them-${idx}',-1)">−</button>
         </div>
       </div>
@@ -4012,7 +4014,7 @@ function renderLiveScoringQueens(assignment, date, container){
             <div class="live-score-label">${p1?p1.firstName:'Team A'}</div>
             <div class="ls-counter">
               <button class="ls-btn ls-btn-plus" onclick="lsAdj('qls-a-${idx}',1)">+</button>
-              <div class="ls-num" id="qls-a-${idx}">0</div>
+              <input type="number" class="ls-inp" id="qls-a-${idx}" value="0" min="0" inputmode="numeric" pattern="[0-9]*" onchange="lsAdj('qls-a-${idx}',0)">
               <button class="ls-btn ls-btn-minus" onclick="lsAdj('qls-a-${idx}',-1)">−</button>
             </div>
           </div>
@@ -4021,7 +4023,7 @@ function renderLiveScoringQueens(assignment, date, container){
             <div class="live-score-label">OPP</div>
             <div class="ls-counter">
               <button class="ls-btn ls-btn-plus" onclick="lsAdj('qls-b-${idx}',1)">+</button>
-              <div class="ls-num" id="qls-b-${idx}">0</div>
+              <input type="number" class="ls-inp" id="qls-b-${idx}" value="0" min="0" inputmode="numeric" pattern="[0-9]*" onchange="lsAdj('qls-b-${idx}',0)">
               <button class="ls-btn ls-btn-minus" onclick="lsAdj('qls-b-${idx}',-1)">−</button>
             </div>
           </div>
@@ -4087,7 +4089,7 @@ function refreshSingleQueensCard(idx, date){
           <div class="live-score-label">${p1o?p1o.firstName:'Team A'}</div>
           <div class="ls-counter">
             <button class="ls-btn ls-btn-plus" onclick="lsAdj('qls-a-${idx}',1)">+</button>
-            <div class="ls-num" id="qls-a-${idx}">0</div>
+            <input type="number" class="ls-inp" id="qls-a-${idx}" value="0" min="0" inputmode="numeric" pattern="[0-9]*" onchange="lsAdj('qls-a-${idx}',0)">
             <button class="ls-btn ls-btn-minus" onclick="lsAdj('qls-a-${idx}',-1)">−</button>
           </div>
         </div>
@@ -4096,7 +4098,7 @@ function refreshSingleQueensCard(idx, date){
           <div class="live-score-label">OPP</div>
           <div class="ls-counter">
             <button class="ls-btn ls-btn-plus" onclick="lsAdj('qls-b-${idx}',1)">+</button>
-            <div class="ls-num" id="qls-b-${idx}">0</div>
+            <input type="number" class="ls-inp" id="qls-b-${idx}" value="0" min="0" inputmode="numeric" pattern="[0-9]*" onchange="lsAdj('qls-b-${idx}',0)">
             <button class="ls-btn ls-btn-minus" onclick="lsAdj('qls-b-${idx}',-1)">−</button>
           </div>
         </div>
@@ -4116,8 +4118,8 @@ function saveQueensLiveSet(idx,p1,p2,date,court){
   const [op1,op2]=oppVal.split('|');
   const saEl=document.getElementById('qls-a-'+idx);
   const sbEl=document.getElementById('qls-b-'+idx);
-  const sa=parseInt(saEl?.textContent??saEl?.value);
-  const sb=parseInt(sbEl?.textContent??sbEl?.value);
+  const sa=parseInt(saEl?.tagName==='INPUT'?saEl.value:saEl?.textContent);
+  const sb=parseInt(sbEl?.tagName==='INPUT'?sbEl.value:sbEl?.textContent);
   if(isNaN(sa)||isNaN(sb)){toast('Enter both scores');return;}
   if(sa===sb){toast('Scores cannot be tied');return;}
   const id=gi('qm');
