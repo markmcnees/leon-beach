@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260316110353">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -5206,26 +5206,32 @@ function pgdSaveNotes(){
 // ============================================================
 function getDualRecord(){
   let w=0,l=0;
+  // Dual W-L: from schedule (dual-level wins)
   (D.schedule||[]).forEach(g=>{if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){parseInt(g.scoreUs)>parseInt(g.scoreThem)?w++:l++;}});
-  let cw=0,cl=0,sw=0,sl=0;
-  // Court (match) W-L and Set W-L from duals node
-  (D.duals||[]).forEach(d=>{(d.courts||[]).filter(c=>!c.isExhibition).forEach(c=>{
-    const csw=(c.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
-    const csl=(c.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-    if(csw>csl)cw++;else if(csl>csw)cl++;
-    sw+=csw;sl+=csl;
-  });});
-  // Fall back to gamedays if no structured duals
-  if(cw===0&&cl===0){
-    (D.gamedays||[]).forEach(m=>{
-      if(m.isExhibition||(m.court||0)>=6)return;
-      const sets=m.sets||[];
-      const csw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
-      const csl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
-      if(csw>csl)cw++;else if(csl>csw)cl++;
-      sw+=csw;sl+=csl;
+
+  // Match W-L (court-level): sum scoreUs/scoreThem from schedule
+  // Schedule stores court scores per dual (e.g. 4-1 means Leon won 4 courts)
+  let cw=0,cl=0;
+  (D.schedule||[]).forEach(g=>{
+    if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){
+      cw+=parseInt(g.scoreUs)||0;
+      cl+=parseInt(g.scoreThem)||0;
+    }
+  });
+
+  // Sets W-L: from gameday individual set records (most accurate source)
+  let sw=0,sl=0;
+  (D.gamedays||[]).forEach(m=>{
+    if(m.isExhibition||(m.court||0)>=6)return;
+    (m.sets||[]).forEach(s=>{
+      (s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++;
     });
-  }
+  });
+  // Also count from structured duals if present
+  (D.duals||[]).forEach(d=>{(d.courts||[]).filter(c=>!c.isExhibition).forEach(c=>{
+    (c.sets||[]).forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++;});
+  });});
+
   return{w,l,cw,cl,sw,sl,total:w+l};
 }
 
