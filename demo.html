@@ -4391,68 +4391,173 @@ function showDemoFans(){var ol=document.getElementById('fans-overlay');if(ol){ol
 function hideDemoFans(){var ol=document.getElementById('fans-overlay');if(ol)ol.style.display='none';}
 function renderDemoFans(){
   var BN='font-family:\"Bebas Neue\",sans-serif';
-  var players=D.players||[];
-  function pN(id){var p=players.find(function(x){return x.id===id;});return p?p.firstName+' '+p.lastName.charAt(0)+'.':'?';}
-  function fD(d){if(!d)return'';var pts=d.split('-');var mon=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return mon[parseInt(pts[1])-1]+' '+parseInt(pts[2]);}
-  var dualMap={};
-  (D.gamedays||[]).forEach(function(gd){
-    var opp=(gd.opponent||'').split(' CT')[0].trim()||'Opponent';
-    var key=gd.date+'__'+opp;
-    if(!dualMap[key])dualMap[key]={date:gd.date,opp:opp,courts:[],wins:0,losses:0};
-    var cW=0,cL=0;(gd.sets||[]).forEach(function(s){s.scoreUs>s.scoreThem?cW++:cL++;});
-    var won=cW>cL;won?dualMap[key].wins++:dualMap[key].losses++;
-    dualMap[key].courts.push({court:gd.court,pair:gd.pair||[],sets:gd.sets||[],courtW:won});
-  });
-  var duals=Object.values(dualMap).sort(function(a,b){return b.date.localeCompare(a.date);});
-  var dW=0,dL=0;duals.forEach(function(d){d.wins>d.losses?dW++:dL++;});
-  var recEl=document.getElementById('fans-record');if(recEl)recEl.textContent=dW+' \u2014 '+dL;
-  var today=new Date().toISOString().slice(0,10);
-  var todayDual=duals.find(function(d){return d.date===today;});
-  var tc=document.getElementById('fans-today');var tcc=document.getElementById('fans-today-courts');
-  if(tc)tc.style.display=todayDual?'block':'none';
-  if(todayDual&&tcc){
-    tcc.innerHTML=todayDual.courts.slice().sort(function(a,b){return a.court-b.court;}).map(function(c){
-      var sets=c.sets||[];var sW=sets.filter(function(s){return s.scoreUs>s.scoreThem;}).length;
-      var sL=sets.filter(function(s){return s.scoreUs<s.scoreThem;}).length;
-      var col=sW>sL?'#48cae4':sL>sW?'#ff6b6b':'#fff';
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.1);">'
-        +'<div><span style="'+BN+';font-size:11px;background:rgba(255,255,255,0.15);color:#fff;padding:2px 7px;border-radius:4px;margin-right:6px;">CT'+c.court+'</span>'
-        +'<span style="color:#fff;font-size:13px;font-weight:700;">'+c.pair.map(pN).join(' & ')+'</span></div>'
-        +'<div style="'+BN+';font-size:18px;color:'+col+';">'+(sets.length?sW+'-'+sL:'&mdash;')+'</div></div>';
+  // ── Hardcoded demo data — works before login ──────────────
+  var ROSTER=[
+    {jersey:1, name:'Zoe Harrington',   cls:'SR',tier:'Top'},
+    {jersey:2, name:'Maya Torres',      cls:'SR',tier:'Top'},
+    {jersey:3, name:'Chloe Bennett',    cls:'JR',tier:'Top'},
+    {jersey:4, name:'Ava Martinez',     cls:'JR',tier:'Mid'},
+    {jersey:5, name:'Lily Johnson',     cls:'JR',tier:'Mid'},
+    {jersey:6, name:'Sofia Williams',   cls:'JR',tier:'Mid'},
+    {jersey:7, name:'Nora Davis',       cls:'SO',tier:'Mid'},
+    {jersey:8, name:'Emma Wilson',      cls:'SO',tier:'Dev'},
+    {jersey:9, name:'Isla Moore',       cls:'SO',tier:'Dev'},
+    {jersey:10,name:'Grace Taylor',     cls:'SO',tier:'Dev'},
+    {jersey:11,name:'Aria Anderson',    cls:'SO',tier:'Dev'},
+    {jersey:12,name:'Ruby Thomas',      cls:'FR',tier:'Dev'},
+    {jersey:13,name:'Lucy Jackson',     cls:'FR',tier:'Dev'},
+    {jersey:14,name:'Mia White',        cls:'FR',tier:'Dev'},
+    {jersey:15,name:'Ellie Harris',     cls:'FR',tier:'Dev'},
+    {jersey:16,name:'Piper Clark',      cls:'FR',tier:'Dev'},
+  ];
+  // Past season results
+  var PAST=[
+    {opp:'Riverside',   date:'2026-01-20', w:4,l:1, courts:[
+      {ct:1,pair:'Zoe H. & Chloe B.',   sets:'21-16, 21-18', win:true},
+      {ct:2,pair:'Ava M. & Lily J.',     sets:'21-18, 21-14', win:true},
+      {ct:3,pair:'Sofia W. & Nora D.',   sets:'21-19, 18-21, 15-12', win:true},
+      {ct:4,pair:'Emma W. & Isla M.',    sets:'21-17, 21-15', win:true},
+      {ct:5,pair:'Grace T. & Aria A.',   sets:'14-21, 18-21', win:false},
+    ]},
+    {opp:'Oceanside',   date:'2026-01-27', w:2,l:3, courts:[
+      {ct:1,pair:'Zoe H. & Maya T.',     sets:'18-21, 21-19, 12-15', win:false},
+      {ct:2,pair:'Chloe B. & Ava M.',    sets:'21-16, 21-18', win:true},
+      {ct:3,pair:'Lily J. & Sofia W.',   sets:'19-21, 17-21', win:false},
+      {ct:4,pair:'Nora D. & Emma W.',    sets:'21-19, 18-21, 15-11', win:true},
+      {ct:5,pair:'Isla M. & Grace T.',   sets:'14-21, 15-21', win:false},
+    ]},
+    {opp:'Bayside',     date:'2026-02-03', w:5,l:0, courts:[
+      {ct:1,pair:'Zoe H. & Chloe B.',   sets:'21-11, 21-9',  win:true},
+      {ct:2,pair:'Ava M. & Lily J.',     sets:'21-14, 21-16', win:true},
+      {ct:3,pair:'Sofia W. & Nora D.',   sets:'21-17, 21-13', win:true},
+      {ct:4,pair:'Emma W. & Isla M.',    sets:'21-15, 21-12', win:true},
+      {ct:5,pair:'Grace T. & Aria A.',   sets:'21-18, 21-16', win:true},
+    ]},
+    {opp:'Surf City',   date:'2026-02-10', w:3,l:2, courts:[
+      {ct:1,pair:'Zoe H. & Maya T.',     sets:'21-19, 19-21, 17-15', win:true},
+      {ct:2,pair:'Chloe B. & Ava M.',    sets:'21-16, 21-14', win:true},
+      {ct:3,pair:'Lily J. & Sofia W.',   sets:'16-21, 14-21', win:false},
+      {ct:4,pair:'Nora D. & Emma W.',    sets:'21-18, 21-17', win:true},
+      {ct:5,pair:'Isla M. & Grace T.',   sets:'17-21, 18-21', win:false},
+    ]},
+    {opp:'Pelican Bay',  date:'2026-02-17', w:5,l:0, courts:[
+      {ct:1,pair:'Zoe H. & Chloe B.',   sets:'21-13, 21-11', win:true},
+      {ct:2,pair:'Ava M. & Lily J.',     sets:'21-15, 21-16', win:true},
+      {ct:3,pair:'Sofia W. & Nora D.',   sets:'21-14, 21-17', win:true},
+      {ct:4,pair:'Emma W. & Isla M.',    sets:'21-12, 21-10', win:true},
+      {ct:5,pair:'Grace T. & Aria A.',   sets:'21-19, 21-15', win:true},
+    ]},
+    {opp:'Wavecrest',   date:'2026-02-24', w:1,l:4, courts:[
+      {ct:1,pair:'Zoe H. & Maya T.',     sets:'16-21, 15-21', win:false},
+      {ct:2,pair:'Chloe B. & Ava M.',    sets:'21-19, 19-21, 14-16', win:false},
+      {ct:3,pair:'Lily J. & Sofia W.',   sets:'21-18, 21-16', win:true},
+      {ct:4,pair:'Nora D. & Emma W.',    sets:'15-21, 17-21', win:false},
+      {ct:5,pair:'Isla M. & Grace T.',   sets:'18-21, 16-21', win:false},
+    ]},
+    {opp:'Coral Ridge',  date:'2026-03-03', w:4,l:1, courts:[
+      {ct:1,pair:'Zoe H. & Chloe B.',   sets:'21-17, 21-14', win:true},
+      {ct:2,pair:'Ava M. & Lily J.',     sets:'21-15, 21-18', win:true},
+      {ct:3,pair:'Sofia W. & Nora D.',   sets:'18-21, 14-21', win:false},
+      {ct:4,pair:'Emma W. & Isla M.',    sets:'21-16, 21-13', win:true},
+      {ct:5,pair:'Grace T. & Aria A.',   sets:'21-14, 21-17', win:true},
+    ]},
+    {opp:'Sandbar Prep', date:'2026-03-10', w:2,l:3, courts:[
+      {ct:1,pair:'Zoe H. & Maya T.',     sets:'19-21, 21-18, 13-15', win:false},
+      {ct:2,pair:'Chloe B. & Ava M.',    sets:'21-19, 21-16', win:true},
+      {ct:3,pair:'Lily J. & Sofia W.',   sets:'17-21, 18-21', win:false},
+      {ct:4,pair:'Nora D. & Emma W.',    sets:'21-17, 14-21, 12-15', win:false},
+      {ct:5,pair:'Isla M. & Grace T.',   sets:'21-16, 21-18', win:true},
+    ]},
+  ];
+  // Live in-progress dual — today
+  var LIVE={
+    opp:'Rival Rays',
+    location:'Tom Brown Beach',
+    courts:[
+      {ct:1, pair:'Zoe H. & Chloe B.',   status:'done',   sW:2,sL:0, sets:'21-17, 21-14'},
+      {ct:2, pair:'Ava M. & Lily J.',     status:'done',   sW:1,sL:1, sets:'21-18, 14-21'},
+      {ct:3, pair:'Sofia W. & Nora D.',   status:'live',   usScore:14, themScore:11, set:2},
+      {ct:4, pair:'Emma W. & Isla M.',    status:'live',   usScore:8,  themScore:12, set:1},
+      {ct:5, pair:'Grace T. & Aria A.',   status:'warmup', sW:0,sL:0, sets:''},
+    ]
+  };
+  var dW=PAST.filter(function(d){return d.w>d.l;}).length;
+  var dL=PAST.filter(function(d){return d.l>d.w;}).length;
+  var recEl=document.getElementById('fans-record');
+  if(recEl)recEl.textContent=dW+'-'+dL;
+
+  // ── IN PROGRESS ──────────────────────────────────────────
+  var tc=document.getElementById('fans-today');
+  var tcc=document.getElementById('fans-today-courts');
+  if(tc)tc.style.display='block';
+  if(tcc){
+    var liveW=LIVE.courts.filter(function(c){return c.status==='done'&&c.sW>c.sL;}).length;
+    var liveL=LIVE.courts.filter(function(c){return c.status==='done'&&c.sL>c.sW;}).length;
+    var headerHtml='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+      +'<div><div style="'+BN+';font-size:16px;color:#fff;">vs '+LIVE.opp+'</div>'
+      +'<div style="font-size:11px;color:rgba(255,255,255,0.6);">\uD83D\uDCCD '+LIVE.location+'</div></div>'
+      +'<div style="'+BN+';font-size:22px;color:#48cae4;">'+liveW+' \u2013 '+liveL+'</div>'
+      +'</div>';
+    tcc.innerHTML=headerHtml+LIVE.courts.map(function(c){
+      var scoreHtml;
+      if(c.status==='done'){
+        var col=c.sW>c.sL?'#48cae4':'#ff6b6b';
+        scoreHtml='<div style="text-align:right;">'
+          +'<div style="'+BN+';font-size:18px;color:'+col+';">'+c.sW+'-'+c.sL+'</div>'
+          +'<div style="font-size:10px;color:'+(c.sW>c.sL?'#48cae4':'#ff6b6b')+';">'+(c.sW>c.sL?'WIN':'LOSS')+'</div>'
+          +'<div style="font-size:10px;color:rgba(255,255,255,0.4);">'+c.sets+'</div>'
+          +'</div>';
+      }else if(c.status==='live'){
+        var ahead=c.usScore>c.themScore;
+        scoreHtml='<div style="text-align:right;">'
+          +'<div style="'+BN+';font-size:22px;color:#fff;">'+c.usScore+' \u2013 '+c.themScore+'</div>'
+          +'<div style="font-size:10px;font-weight:700;color:#facc15;letter-spacing:1px;">Set '+c.set+' \u2022 LIVE</div>'
+          +'</div>';
+      }else{
+        scoreHtml='<div style="font-size:11px;color:rgba(255,255,255,0.35);font-style:italic;">Warming up</div>';
+      }
+      var dot=c.status==='live'?'<span style="display:inline-block;width:7px;height:7px;background:#facc15;border-radius:50%;margin-right:5px;animation:pulse 1.5s infinite;"></span>':'';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08);">'
+        +'<div><span style="'+BN+';font-size:11px;background:rgba(255,255,255,0.15);color:#fff;padding:2px 7px;border-radius:4px;margin-right:8px;">CT'+c.ct+'</span>'
+        +dot+'<span style="color:#fff;font-size:13px;font-weight:700;">'+c.pair+'</span></div>'
+        +scoreHtml+'</div>';
     }).join('');
   }
+
+  // ── SEASON RESULTS ────────────────────────────────────────
   var resEl=document.getElementById('fans-results');
   if(resEl){
-    if(!duals.length){resEl.innerHTML='<div style="color:rgba(255,255,255,0.5);text-align:center;padding:20px;font-size:13px;">No results yet.</div>';}
-    else{resEl.innerHTML=duals.map(function(d){
-      var win=d.wins>d.losses;var rc=win?'#48cae4':'#ff6b6b';
-      var uid='fct'+(d.date+d.opp).replace(/[^a-z0-9]/gi,'');
-      var courts=d.courts.slice().sort(function(a,b){return a.court-b.court;}).map(function(c){
-        var scores=(c.sets||[]).map(function(s){return s.scoreUs+'-'+s.scoreThem;}).join(', ');
+    resEl.innerHTML=PAST.slice().reverse().map(function(d){
+      var win=d.w>d.l;var rc=win?'#48cae4':'#ff6b6b';
+      var uid='fct'+d.opp.replace(/[^a-z0-9]/gi,'');
+      var mon=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var pts=d.date.split('-');var dateStr=mon[parseInt(pts[1])-1]+' '+parseInt(pts[2]);
+      var courts=d.courts.map(function(c){
         return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'
           +'<div style="display:flex;align-items:center;gap:8px;">'
-          +'<span style="'+BN+';font-size:10px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.75);padding:1px 6px;border-radius:3px;">CT'+c.court+'</span>'
-          +'<span style="font-size:12px;color:rgba(255,255,255,0.8);">'+c.pair.map(pN).join(' & ')+'</span></div>'
-          +'<div style="font-size:12px;font-weight:700;color:'+(c.courtW?'#48cae4':'#ff6b6b')+';">'+(scores||'&mdash;')+'</div></div>';
+          +'<span style="'+BN+';font-size:10px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.75);padding:1px 6px;border-radius:3px;">CT'+c.ct+'</span>'
+          +'<span style="font-size:12px;color:rgba(255,255,255,0.8);">'+c.pair+'</span></div>'
+          +'<div style="font-size:12px;font-weight:700;color:'+(c.win?'#48cae4':'#ff6b6b')+';">'+c.sets+'</div></div>';
       }).join('');
       return '<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;margin-bottom:10px;overflow:hidden;">'
         +'<div onclick="fansToggle(\''+uid+'\')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;">'
         +'<div><span style="'+BN+';font-size:15px;color:#fff;">vs '+d.opp+'</span>'
-        +'<span style="font-size:12px;color:rgba(255,255,255,0.5);margin-left:8px;">'+fD(d.date)+'</span></div>'
+        +'<span style="font-size:12px;color:rgba(255,255,255,0.5);margin-left:8px;">'+dateStr+'</span></div>'
         +'<div style="display:flex;align-items:center;gap:10px;">'
-        +'<span style="'+BN+';font-size:14px;color:'+rc+';">'+d.wins+'-'+d.losses+' '+(win?'WIN':'LOSS')+'</span>'
+        +'<span style="'+BN+';font-size:14px;color:'+rc+';">'+d.w+'-'+d.l+' '+(win?'WIN':'LOSS')+'</span>'
         +'<span style="color:rgba(255,255,255,0.4);">\u25b8</span></div></div>'
         +'<div id="'+uid+'_body" style="display:none;padding:10px 14px;">'+courts+'</div></div>';
-    }).join('');}
+    }).join('');
   }
+
+  // ── ROSTER ───────────────────────────────────────────────
   var rostEl=document.getElementById('fans-roster');
   if(rostEl){
-    var lbl=['','Top','Mid','Dev','CT4','CT5'];
-    rostEl.innerHTML=players.slice().sort(function(a,b){return (a.court||5)-(b.court||5)||(a.lastName||'').localeCompare(b.lastName||'');}).map(function(p){
+    rostEl.innerHTML=ROSTER.map(function(p){
       return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,0.08);border-radius:8px;margin-bottom:5px;">'
-        +'<span style="'+BN+';font-size:18px;color:rgba(255,255,255,0.25);min-width:26px;text-align:right;">'+(p.jersey||'')+'</span>'
-        +'<div><div style="font-size:14px;font-weight:700;color:#fff;">'+p.firstName+' '+p.lastName+'</div>'
-        +'<div style="font-size:11px;color:rgba(255,255,255,0.45);">'+p.classYear+' \u00b7 '+(lbl[p.court]||'CT'+p.court)+'</div></div></div>';
+        +'<span style="'+BN+';font-size:18px;color:rgba(255,255,255,0.25);min-width:26px;text-align:right;">'+p.jersey+'</span>'
+        +'<div><div style="font-size:14px;font-weight:700;color:#fff;">'+p.name+'</div>'
+        +'<div style="font-size:11px;color:rgba(255,255,255,0.45);">'+p.cls+' \u00b7 '+p.tier+'</div></div></div>';
     }).join('');
   }
 }
