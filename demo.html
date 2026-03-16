@@ -444,9 +444,9 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="tab-content active" id="tab-dashboard">
 <div class="card"><div class="card-title"><span class="bar"></span> Season Overview</div>
       <div class="stat-grid cols-3">
-        <div class="stat-box"><div class="stat-number gold" id="dash-dual-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
-        <div class="stat-box"><div class="stat-number green" id="dash-gd-rec">0-0</div><div class="stat-label">Dual Sets</div></div>
-        <div class="stat-box"><div class="stat-number" id="dash-courts-rec">0-0</div><div class="stat-label">Court W-L</div></div>
+        <div class="stat-box"><div class="stat-number" style="color:var(--red);" id="dash-dual-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
+        <div class="stat-box"><div class="stat-number" style="color:var(--red);" id="dash-courts-rec">0-0</div><div class="stat-label">Match W-L</div></div>
+        <div class="stat-box"><div class="stat-number" style="color:var(--red);" id="dash-sets-rec">0-0</div><div class="stat-label">Sets W-L</div></div>
       </div>
     </div>
 <div class="card"><div class="card-title"><span class="bar"></span> Season Schedule <span style="font-size:11px;color:var(--gray);font-family:'Barlow';font-weight:600;letter-spacing:0;margin-left:8px;">via MaxPreps</span></div>
@@ -540,6 +540,16 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <span class="score-dash">—</span>
         <div class="score-col"><div class="score-col-label label-b">Team B</div><input type="number" class="score-input" id="q-sb" placeholder="0" min="0" max="99"></div></div>
       <div style="margin-top:16px;"><button class="btn btn-primary" id="save-queens">Save Match</button></div>
+    </div>
+    <div class="card" style="border:2px solid var(--gold);">
+      <div class="card-title gold"><span class="bar" style="background:var(--gold);"></span> 📷 Upload Queens Scoresheet</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Photograph a handwritten Queens scoresheet. AI reads all court matchups and scores then creates match entries.</p>
+      <div class="form-group"><label class="form-label" style="font-size:11px;">Match Date</label>
+        <input type="date" class="form-input" id="qs-scan-date" style="padding:8px;font-size:13px;"></div>
+      <input type="file" id="qs-scan-file" accept="image/*" capture="environment" style="display:none;">
+      <button class="btn btn-small" style="width:100%;background:var(--gold);color:var(--black);border:none;font-size:15px;padding:12px;" onclick="document.getElementById('qs-scan-file').click();">&#128248; Take Photo or Upload Scoresheet</button>
+      <div id="qs-scan-preview" style="margin-top:10px;"></div>
+      <div id="qs-scan-result" style="margin-top:10px;"></div>
     </div>
     <div class="card"><div class="card-title"><span class="bar"></span> Queens Match Log</div>
       <div class="filter-row" id="court-filter-queens">
@@ -667,8 +677,8 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="card-title gold"><span class="bar" style="background:var(--gold);"></span> Dual Match Record</div>
       <div class="stat-grid cols-3">
         <div class="stat-box"><div class="stat-number gold" id="dual-season-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
-        <div class="stat-box"><div class="stat-number" id="dual-season-total">0</div><div class="stat-label">Total Duals</div></div>
-        <div class="stat-box"><div class="stat-number green" id="dual-courts-rec">0-0</div><div class="stat-label">Court W-L</div></div>
+        <div class="stat-box"><div class="stat-number" id="dual-courts-rec">0-0</div><div class="stat-label">Match W-L</div></div>
+        <div class="stat-box"><div class="stat-number green" id="dual-sets-rec">0-0</div><div class="stat-label">Sets W-L</div></div>
       </div>
     </div>
 <div class="card" style="border:2px solid var(--blue);">
@@ -741,6 +751,16 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="card"><div class="card-title purple"><span class="bar"></span> Scrimmage Matches</div>
       <div class="date-filter"><label style="font-size:13px;font-weight:700;">Date:</label><input type="date" id="sc-filter-date" class="form-input" style="max-width:180px;padding:8px 12px;"></div>
       <div id="sc-matches-list"></div>
+    </div>
+    <div class="card" style="border:2px solid var(--purple);">
+      <div class="card-title purple"><span class="bar"></span> 📷 Upload Scrimmage Scoresheet</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Photograph the handwritten scoresheet. AI reads the pairings and set scores then creates individual match entries.</p>
+      <div class="form-group"><label class="form-label" style="font-size:11px;">Match Date</label>
+        <input type="date" class="form-input" id="sc-scan-date" style="padding:8px;font-size:13px;"></div>
+      <input type="file" id="sc-scan-file" accept="image/*" capture="environment" style="display:none;">
+      <button class="btn btn-small" style="width:100%;background:var(--purple);color:var(--white);border:none;font-size:15px;padding:12px;" onclick="document.getElementById('sc-scan-file').click();">&#128248; Take Photo or Upload Scoresheet</button>
+      <div id="sc-scan-preview" style="margin-top:10px;"></div>
+      <div id="sc-scan-result" style="margin-top:10px;"></div>
     </div>
   </div>
 
@@ -1661,6 +1681,7 @@ function renderDash(){
   const _dr=getDualRecord();
   const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dr.w+'-'+_dr.l;
   const _crEl=document.getElementById('dash-courts-rec');if(_crEl)_crEl.textContent=_dr.cw+'-'+_dr.cl;
+  const _srEl=document.getElementById('dash-sets-rec');if(_srEl)_srEl.textContent=_dr.sw+'-'+_dr.sl;
   const totalQM=D.matches.length;
 
   // Game Day sets
@@ -1668,7 +1689,7 @@ function renderDash(){
   D.gamedays.forEach(m=>{gdDays.add(m.date);gdMatches++;
     (m.sets||[]).forEach(s=>{const su=s.scoreUs||0,st=s.scoreThem||0;gdPF+=su;gdPA+=st;su>st?gdSW++:gdSL++;});
   });
-  document.getElementById('dash-gd-rec').textContent=gdSW+'-'+gdSL;
+  const _gdRecEl=document.getElementById('dash-gd-rec');if(_gdRecEl)_gdRecEl.textContent=gdSW+'-'+gdSL;
 
   // Scrimmage sets
   let scSW=0,scSL=0;
@@ -5576,11 +5597,33 @@ function pgdSaveNotes(){
 // ============================================================
 function getDualRecord(){
   let w=0,l=0;
+  // Dual W-L: from schedule (dual-level wins)
   (D.schedule||[]).forEach(g=>{if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){parseInt(g.scoreUs)>parseInt(g.scoreThem)?w++:l++;}});
+
+  // Match W-L (court-level): sum scoreUs/scoreThem from schedule
+  // Schedule stores court scores per dual (e.g. 4-1 means Leon won 4 courts)
   let cw=0,cl=0;
-  (D.duals||[]).forEach(d=>{(d.courts||[]).filter(c=>!c.isExhibition).forEach(c=>{const sw=(c.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length,sl=(c.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;if(sw>sl)cw++;else if(sl>sw)cl++;});});
-  if(cw===0&&cl===0){(D.gamedays||[]).forEach(m=>{if(m.isExhibition||(m.court||0)>=6)return;const sets=m.sets||[];const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length,sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;if(sw>sl)cw++;else if(sl>sw)cl++;});}
-  return{w,l,cw,cl,total:w+l};
+  (D.schedule||[]).forEach(g=>{
+    if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){
+      cw+=parseInt(g.scoreUs)||0;
+      cl+=parseInt(g.scoreThem)||0;
+    }
+  });
+
+  // Sets W-L: from gameday individual set records (most accurate source)
+  let sw=0,sl=0;
+  (D.gamedays||[]).forEach(m=>{
+    if(m.isExhibition||(m.court||0)>=6)return;
+    (m.sets||[]).forEach(s=>{
+      (s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++;
+    });
+  });
+  // Also count from structured duals if present
+  (D.duals||[]).forEach(d=>{(d.courts||[]).filter(c=>!c.isExhibition).forEach(c=>{
+    (c.sets||[]).forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++;});
+  });});
+
+  return{w,l,cw,cl,sw,sl,total:w+l};
 }
 
 // Build synthetic dual records from gamedays, grouped by date + opponent
@@ -5648,10 +5691,11 @@ function renderDuals(){
   const rec=getDualRecord();
   const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   setEl('dual-season-rec',rec.w+'-'+rec.l);
-  setEl('dual-season-total',rec.total);
   setEl('dual-courts-rec',rec.cw+'-'+rec.cl);
+  setEl('dual-sets-rec',rec.sw+'-'+rec.sl);
   setEl('dash-dual-rec',rec.w+'-'+rec.l);
   setEl('dash-courts-rec',rec.cw+'-'+rec.cl);
+  setEl('dash-sets-rec',rec.sw+'-'+rec.sl);
   const container=document.getElementById('duals-list');
   if(!container)return;
 
@@ -5674,7 +5718,8 @@ function renderDuals(){
     const scored=(d.courts||[]).filter(c=>!c.isExhibition).sort((a,b)=>(a.court||0)-(b.court||0));
     const exhib=(d.courts||[]).filter(c=>c.isExhibition).sort((a,b)=>(a.court||0)-(b.court||0));
     h+=`<div class="dual-card ${win?'win':loss?'loss':''}">
-      <div style="position:absolute;top:8px;right:8px;">
+      <div style="position:absolute;top:8px;right:8px;display:flex;gap:4px;">
+        <button class="match-action-btn edit-btn" onclick="openDualEditModal('${d.id}','${(d.opponent||'').replace(/'/g,'')}','${d.date||''}','${d.location||'home'}')" title="Edit">&#x270E;</button>
         <button class="match-action-btn" onclick="deleteDual('${d.id}')" title="Delete">&#x2715;</button>
       </div>
       <div class="dual-header">
@@ -5737,6 +5782,51 @@ function renderDuals(){
 }
 
 let _delDualArmed={};
+function openDualEditModal(id,opp,date,location){
+  if(!id)return;
+  document.getElementById('edit-modal-body').innerHTML=`
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:4px;">DATE</label>
+      <input type="date" id="dual-edit-date" class="form-input" value="${date||td()}" style="padding:8px;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:4px;">OPPONENT</label>
+      <input type="text" id="dual-edit-opp" class="form-input" value="${opp||''}" placeholder="e.g. Lincoln HS" style="font-size:14px;">
+    </div>
+    <div>
+      <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:4px;">LOCATION</label>
+      <select id="dual-edit-loc" class="form-select">
+        <option value="home" ${location==='home'?'selected':''}>Home</option>
+        <option value="away" ${location==='away'?'selected':''}>Away</option>
+        <option value="neutral" ${location==='neutral'?'selected':''}>Neutral</option>
+      </select>
+    </div>`;
+  document.querySelector('#edit-modal .modal-title').innerHTML='Edit Dual <button class="modal-close" onclick="closeEdit()">&#x2715;</button>';
+  document.querySelector('#edit-modal .modal-title').style.color='var(--blue)';
+  document.getElementById('edit-save').textContent='Save Changes';
+  document.getElementById('edit-save').onclick=function(){saveDualEdit(id);};
+  document.getElementById('edit-modal').classList.add('active');
+}
+
+function saveDualEdit(id){
+  const date=document.getElementById('dual-edit-date')?.value;
+  const opp=document.getElementById('dual-edit-opp')?.value.trim();
+  const loc=document.getElementById('dual-edit-loc')?.value;
+  if(!date||!opp){toast('Date and opponent required');return;}
+  const existing=D.duals.find(d=>d.id===id);
+  if(existing){
+    fbSet('duals/'+id+'/date',date);
+    fbSet('duals/'+id+'/opponent',opp);
+    fbSet('duals/'+id+'/location',loc);
+    toast('Dual updated!');
+    closeEdit();
+  }else{
+    // Gameday-derived dual — update all gameday records for this date/opponent
+    toast('This dual is built from individual match records. Edit opponent name on each match in the Match Log tab.');
+    closeEdit();
+  }
+}
+
 function deleteDual(id){
   if(_delDualArmed[id]){clearTimeout(_delDualArmed[id]);delete _delDualArmed[id];fbRemove('duals/'+id);toast('Dual deleted');}
   else{_delDualArmed[id]=setTimeout(()=>{delete _delDualArmed[id];},3000);toast('Tap again to confirm delete');}
@@ -6489,6 +6579,228 @@ function applyDemoDate(){
 // INIT
 // ============================================================
 initDualScanner();
+
+// ── SCRIMMAGE SCORESHEET SCANNER ─────────────────────────────
+(function(){
+  const dateEl=document.getElementById('sc-scan-date');if(dateEl)dateEl.value=td();
+  const fileEl=document.getElementById('sc-scan-file');if(!fileEl)return;
+  fileEl.addEventListener('change',async function(e){
+    const file=e.target.files[0];if(!file)return;
+    const preview=document.getElementById('sc-scan-preview');
+    const result=document.getElementById('sc-scan-result');
+    const reader=new FileReader();
+    reader.onload=async function(ev){
+      const base64=ev.target.result.split(',')[1];
+      const mediaType=file.type||'image/jpeg';
+      preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;border-radius:8px;border:2px solid var(--gray-lighter);">`;
+      result.innerHTML='<div class="ai-loading"><div class="spinner"></div><div style="margin-top:8px;">AI is reading your scrimmage scoresheet...</div></div>';
+      const date=document.getElementById('sc-scan-date').value||td();
+      const playerList=D.players.map(p=>p.firstName+' '+p.lastName+' ('+p.id+')').join(', ');
+      try{
+        const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            model:'claude-sonnet-4-20250514',max_tokens:2500,
+            messages:[{role:'user',content:[
+              {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+              {type:'text',text:`You are reading a handwritten high school beach volleyball SCRIMMAGE scoresheet for Leon Queens.
+PLAYER ROSTER: ${playerList}
+Extract all court matchups and set scores. Each court has Leon pair vs opponent pair.
+Return ONLY valid JSON: {"opponent":"team name or empty","courts":[{"court":1,"pair":["p01","p02"],"opponentPair":"Name & Name","sets":[{"scoreUs":21,"scoreThem":15}]}]}
+- Match player names to IDs from roster. pair = array of 2 player IDs.
+- scoreUs = Leon score, scoreThem = opponent score.
+- Respond with ONLY the JSON, no other text.`}
+            ]}]
+          })
+        });
+        const data=await response.json();
+        const text=data.content?.map(c=>c.text||'').join('')||'';
+        let parsed;
+        (function(){let c=text.replace(/\`\`\`json|\`\`\`/gi,'').trim();try{parsed=JSON.parse(c);return;}catch(e){}const os=c.indexOf('{'),oe=c.lastIndexOf('}');if(os>=0&&oe>os){try{parsed=JSON.parse(c.slice(os,oe+1));return;}catch(e){}}parsed=null;})();
+        if(!parsed||!parsed.courts){result.innerHTML='<div style="color:var(--loss-red);font-size:13px;">Couldn\'t read scoresheet. Enter manually above.</div><pre style="font-size:10px;background:var(--off-white);padding:8px;border-radius:4px;overflow-x:auto;white-space:pre-wrap;">'+text.slice(0,600)+'</pre>';return;}
+        // Show review form
+        const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
+        function pOpts(selId){return'<option value="">Select</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (CT${pl.court})</option>`).join('');}
+        let h=`<div style="font-family:'Bebas Neue';font-size:14px;margin-bottom:8px;color:var(--green);">✓ Found ${parsed.courts.length} court(s) — review & save</div>`;
+        parsed.courts.forEach((c,i)=>{
+          h+=`<div style="padding:10px;background:var(--off-white);border-radius:8px;margin-bottom:8px;">
+            <div style="font-family:'Bebas Neue';font-size:12px;margin-bottom:6px;">COURT ${c.court||i+1}</div>
+            <div class="form-row" style="margin-bottom:6px;">
+              <select class="form-select" id="sc-scan-p1-${i}" style="font-size:12px;">${pOpts((c.pair||[])[0])}</select>
+              <select class="form-select" id="sc-scan-p2-${i}" style="font-size:12px;">${pOpts((c.pair||[])[1])}</select>
+            </div>
+            <div style="margin-bottom:6px;"><input type="text" id="sc-scan-opp-${i}" value="${c.opponentPair||parsed.opponent||''}" class="form-input" placeholder="Opponent pair name" style="font-size:12px;padding:6px;"></div>
+            ${(c.sets||[]).map((s,si)=>`<div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;"><span style="font-size:12px;color:var(--gray);">Set ${si+1}</span><input type="number" id="sc-scan-us-${i}-${si}" value="${s.scoreUs||0}" min="0" style="width:50px;padding:4px;border:1px solid var(--gray-lighter);border-radius:4px;font-family:'Bebas Neue';font-size:14px;text-align:center;"> <span>-</span> <input type="number" id="sc-scan-them-${i}-${si}" value="${s.scoreThem||0}" min="0" style="width:50px;padding:4px;border:1px solid var(--gray-lighter);border-radius:4px;font-family:'Bebas Neue';font-size:14px;text-align:center;"></div>`).join('')}
+            <input type="hidden" id="sc-scan-court-${i}" value="${c.court||i+1}">
+            <input type="hidden" id="sc-scan-sets-count-${i}" value="${(c.sets||[]).length}">
+          </div>`;
+        });
+        h+=`<div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn btn-purple btn-small" style="flex:1;" onclick="scScanSave(${parsed.courts.length},'${date}')">✓ Save Scrimmage</button>
+          <button class="btn btn-secondary btn-small" onclick="document.getElementById('sc-scan-result').innerHTML='';document.getElementById('sc-scan-preview').innerHTML='';">✕ Cancel</button>
+        </div>`;
+        result.innerHTML=h;
+        e.target.value='';
+      }catch(err){result.innerHTML='<div style="color:var(--loss-red);font-size:13px;">Error reading photo. Try a clearer image.</div>';}
+    };
+    reader.readAsDataURL(file);
+    e.target.value='';
+  });
+})();
+
+function scScanSave(count,date){
+  let saved=0;
+  for(let i=0;i<count;i++){
+    const p1=document.getElementById('sc-scan-p1-'+i)?.value;
+    const p2=document.getElementById('sc-scan-p2-'+i)?.value;
+    if(!p1||!p2)continue;
+    const court=parseInt(document.getElementById('sc-scan-court-'+i)?.value)||i+1;
+    const opp=document.getElementById('sc-scan-opp-'+i)?.value.trim()||'Opponent';
+    const setsCount=parseInt(document.getElementById('sc-scan-sets-count-'+i)?.value)||0;
+    const sets=[];
+    for(let si=0;si<setsCount;si++){
+      const us=parseInt(document.getElementById('sc-scan-us-'+i+'-'+si)?.value)||0;
+      const them=parseInt(document.getElementById('sc-scan-them-'+i+'-'+si)?.value)||0;
+      sets.push({scoreUs:us,scoreThem:them,stats:{}});
+    }
+    if(!sets.length)continue;
+    const id=gi('sc');
+    fbSet('scrimmages/'+id,{id,date,court,pair:[p1,p2],opponent:opp,sets});
+    saved++;
+  }
+  toast('Saved '+saved+' scrimmage match'+(saved===1?'':'es')+'!');
+  document.getElementById('sc-scan-result').innerHTML='';
+  document.getElementById('sc-scan-preview').innerHTML='';
+  renderExtMatches('scrimmage');
+}
+
+
+
+function scScanSave(count,date){
+  let saved=0;
+  for(let i=0;i<count;i++){
+    const p1=document.getElementById('sc-scan-p1-'+i)?.value;
+    const p2=document.getElementById('sc-scan-p2-'+i)?.value;
+    if(!p1||!p2)continue;
+    const court=parseInt(document.getElementById('sc-scan-court-'+i)?.value)||i+1;
+    const opp=document.getElementById('sc-scan-opp-'+i)?.value.trim()||'Opponent';
+    const setsCount=parseInt(document.getElementById('sc-scan-sets-count-'+i)?.value)||0;
+    const sets=[];
+    for(let si=0;si<setsCount;si++){
+      const us=parseInt(document.getElementById('sc-scan-us-'+i+'-'+si)?.value)||0;
+      const them=parseInt(document.getElementById('sc-scan-them-'+i+'-'+si)?.value)||0;
+      sets.push({scoreUs:us,scoreThem:them,stats:{}});
+    }
+    if(!sets.length)continue;
+    const id=gi('sc');
+    fbSet('scrimmages/'+id,{id,date,court,pair:[p1,p2],opponent:opp,sets});
+    saved++;
+  }
+  toast('Saved '+saved+' scrimmage match'+(saved===1?'':'es')+'!');
+  document.getElementById('sc-scan-result').innerHTML='';
+  document.getElementById('sc-scan-preview').innerHTML='';
+  renderExtMatches('scrimmage');
+}
+
+// ── QUEENS SCORESHEET SCANNER ─────────────────────────────────
+(function(){
+  const dateEl=document.getElementById('qs-scan-date');if(dateEl)dateEl.value=td();
+  const fileEl=document.getElementById('qs-scan-file');if(!fileEl)return;
+  fileEl.addEventListener('change',async function(e){
+    const file=e.target.files[0];if(!file)return;
+    const preview=document.getElementById('qs-scan-preview');
+    const result=document.getElementById('qs-scan-result');
+    const reader=new FileReader();
+    reader.onload=async function(ev){
+      const base64=ev.target.result.split(',')[1];
+      const mediaType=file.type||'image/jpeg';
+      preview.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;border-radius:8px;border:2px solid var(--gray-lighter);">`;
+      result.innerHTML='<div class="ai-loading"><div class="spinner"></div><div style="margin-top:8px;">AI is reading your Queens scoresheet...</div></div>';
+      const date=document.getElementById('qs-scan-date').value||td();
+      const playerList=D.players.map(p=>p.firstName+' '+p.lastName+' ('+p.id+')').join(', ');
+      try{
+        const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            model:'claude-sonnet-4-20250514',max_tokens:2500,
+            messages:[{role:'user',content:[
+              {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+              {type:'text',text:`You are reading a handwritten QUEENS (Leon vs Leon internal) beach volleyball scoresheet.
+PLAYER ROSTER: ${playerList}
+Each court has Team A (2 players) vs Team B (2 players) — all Leon players.
+Return ONLY valid JSON: {"courts":[{"court":1,"team1":["p01","p02"],"team2":["p03","p04"],"score1":21,"score2":15}]}
+- Match names to IDs from roster. All players are Leon players.
+- score1 = Team A score (first pair), score2 = Team B score.
+- If multiple sets, include the final set score.
+- Respond with ONLY the JSON, no other text.`}
+            ]}]
+          })
+        });
+        const data=await response.json();
+        const text=data.content?.map(c=>c.text||'').join('')||'';
+        let parsed;
+        (function(){let c=text.replace(/\`\`\`json|\`\`\`/gi,'').trim();try{parsed=JSON.parse(c);return;}catch(e){}const os=c.indexOf('{'),oe=c.lastIndexOf('}');if(os>=0&&oe>os){try{parsed=JSON.parse(c.slice(os,oe+1));return;}catch(e){}}parsed=null;})();
+        if(!parsed||!parsed.courts){result.innerHTML='<div style="color:var(--loss-red);font-size:13px;">Couldn\'t read scoresheet.</div><pre style="font-size:10px;background:var(--off-white);padding:8px;border-radius:4px;overflow-x:auto;white-space:pre-wrap;">'+text.slice(0,600)+'</pre>';return;}
+        const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
+        function pOpts(selId){return'<option value="">Select</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (CT${pl.court})</option>`).join('');}
+        let h=`<div style="font-family:'Bebas Neue';font-size:14px;margin-bottom:8px;color:var(--green);">✓ Found ${parsed.courts.length} court(s) — review & save</div>`;
+        parsed.courts.forEach((c,i)=>{
+          h+=`<div style="padding:10px;background:var(--off-white);border-radius:8px;margin-bottom:8px;">
+            <div style="font-family:'Bebas Neue';font-size:12px;margin-bottom:6px;">COURT ${c.court||i+1}</div>
+            <div style="font-size:10px;font-weight:700;color:var(--charcoal);margin-bottom:4px;">TEAM A</div>
+            <div class="form-row" style="margin-bottom:6px;">
+              <select class="form-select" id="qs-scan-a1-${i}" style="font-size:12px;">${pOpts((c.team1||[])[0])}</select>
+              <select class="form-select" id="qs-scan-a2-${i}" style="font-size:12px;">${pOpts((c.team1||[])[1])}</select>
+            </div>
+            <div style="font-size:10px;font-weight:700;color:var(--charcoal);margin-bottom:4px;">TEAM B</div>
+            <div class="form-row" style="margin-bottom:6px;">
+              <select class="form-select" id="qs-scan-b1-${i}" style="font-size:12px;">${pOpts((c.team2||[])[0])}</select>
+              <select class="form-select" id="qs-scan-b2-${i}" style="font-size:12px;">${pOpts((c.team2||[])[1])}</select>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span style="font-size:12px;color:var(--gray);">Score</span>
+              <input type="number" id="qs-scan-s1-${i}" value="${c.score1||0}" min="0" style="width:50px;padding:4px;border:1px solid var(--gray-lighter);border-radius:4px;font-family:'Bebas Neue';font-size:14px;text-align:center;">
+              <span>-</span>
+              <input type="number" id="qs-scan-s2-${i}" value="${c.score2||0}" min="0" style="width:50px;padding:4px;border:1px solid var(--gray-lighter);border-radius:4px;font-family:'Bebas Neue';font-size:14px;text-align:center;">
+            </div>
+            <input type="hidden" id="qs-scan-court-${i}" value="${c.court||i+1}">
+          </div>`;
+        });
+        h+=`<div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn btn-small" style="flex:1;background:var(--gold);color:var(--black);border:none;" onclick="qsScanSave(${parsed.courts.length},'${date}')">✓ Save Queens Results</button>
+          <button class="btn btn-secondary btn-small" onclick="document.getElementById('qs-scan-result').innerHTML='';document.getElementById('qs-scan-preview').innerHTML='';">✕ Cancel</button>
+        </div>`;
+        result.innerHTML=h;
+        e.target.value='';
+      }catch(err){result.innerHTML='<div style="color:var(--loss-red);font-size:13px;">Error reading photo.</div>';}
+    };
+    reader.readAsDataURL(file);
+    e.target.value='';
+  });
+})();
+
+function qsScanSave(count,date){
+  let saved=0;
+  for(let i=0;i<count;i++){
+    const a1=document.getElementById('qs-scan-a1-'+i)?.value;
+    const a2=document.getElementById('qs-scan-a2-'+i)?.value;
+    const b1=document.getElementById('qs-scan-b1-'+i)?.value;
+    const b2=document.getElementById('qs-scan-b2-'+i)?.value;
+    if(!a1||!a2||!b1||!b2)continue;
+    const court=parseInt(document.getElementById('qs-scan-court-'+i)?.value)||i+1;
+    const s1=parseInt(document.getElementById('qs-scan-s1-'+i)?.value)||0;
+    const s2=parseInt(document.getElementById('qs-scan-s2-'+i)?.value)||0;
+    if(s1===s2)continue;
+    const id=gi('qm');
+    fbSet('matches/'+id,{id,date,court,team1:[a1,a2],team2:[b1,b2],score1:s1,score2:s2});
+    saved++;
+  }
+  toast('Saved '+saved+' Queens match'+(saved===1?'':'es')+'!');
+  document.getElementById('qs-scan-result').innerHTML='';
+  document.getElementById('qs-scan-preview').innerHTML='';
+  renderQueens();
+}
+
 document.getElementById('q-date').value=td();
 document.getElementById('sc-date').value=td();
 document.getElementById('sc-filter-date').value=td();
