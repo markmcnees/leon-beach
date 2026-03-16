@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260316112837">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -2529,6 +2529,12 @@ function approveGoal(pid,gid){
   fbSet('goals/'+pid+'/'+gid+'/aiFeedback/status','approved');
   fbSet('goals/'+pid+'/'+gid+'/aiFeedback/approvedAt',td());
   toast('Goal feedback approved — player can now see it');
+  const _ap=gP(pid);
+  const _ag=D.goals?.[pid]?.[gid];
+  notifyPlayer(pid,'plan',
+    'Leon Queens — Your Training Plan is Ready',
+    'Hi '+(_ap?_ap.firstName:'there')+',\n\nCoach has approved your AI training plan for: '+(_ag?_ag.label||_ag.goalType:'your goal')+'.\n\nLog in to the app to view your personalized feedback and next steps.'
+  );
 }
 
 function unapproveGoal(pid,gid){
@@ -3910,6 +3916,12 @@ function saveScoutNote(){
     text,tags,authorId,authorName,date:td(),createdAt:new Date().toISOString()
   });
   toast('Scout note saved!');
+  if(currentRole==='player'){
+    notifyCoaches(
+      'Scout Note from '+authorName+': '+ctx.targetLabel,
+      'Player '+authorName+' added a scouting note.\nAbout: '+ctx.targetLabel+'\nSchool: '+ctx.schoolK.replace(/_/g,' ')+(tags.length?'\nTags: '+tags.join(', '):'')+(text?'\nNote: '+text:'')+'\n\nLog in to view.'
+    );
+  }
   closeEdit();
   setTimeout(()=>{
     if(currentRole==='coach'){openScoutSchool(ctx.schoolK);}
@@ -4004,6 +4016,64 @@ function openPlayerScoutSchool(key){
   });
   h+='</div>';
   detailEl.innerHTML=h;
+}
+
+
+// ============================================================
+// EMAIL NOTIFICATION HELPERS
+// ============================================================
+const COACH_EMAILS=['ecitron0730@gmail.com','markmcnees@gmail.com'];
+
+function notifyCoaches(subject,body){
+  try{
+    const a=document.createElement('a');
+    a.href='mailto:'+COACH_EMAILS.join(',')+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+    a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  }catch(e){}
+}
+
+function notifyPlayer(pid,notifType,subject,body){
+  try{
+    if(!db)return;
+    db.ref('leon_queens_passwords/'+pid+'/emailPrefs').once('value',function(snap){
+      const prefs=snap.val()||{};
+      if(!prefs.email)return;
+      const map={assign:'notifAssign',plan:'notifPlan',cnote:'notifCnote',score:'notifScore'};
+      const key=map[notifType];
+      if(key&&!prefs[key])return;
+      const a=document.createElement('a');
+      a.href='mailto:'+prefs.email+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+      a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);
+    });
+  }catch(e){}
+}
+
+function loadEmailPrefs(pid){
+  if(!db||!pid)return;
+  db.ref('leon_queens_passwords/'+pid+'/emailPrefs').once('value',function(snap){
+    const prefs=snap.val()||{};
+    const el=document.getElementById('pp-email-addr');if(el)el.value=prefs.email||'';
+    const m={'pp-notif-assign':'notifAssign','pp-notif-plan':'notifPlan','pp-notif-cnote':'notifCnote','pp-notif-score':'notifScore'};
+    Object.entries(m).forEach(function(_ref){const elId=_ref[0],key=_ref[1];const e=document.getElementById(elId);if(e)e.checked=!!prefs[key];});
+  });
+}
+
+function saveEmailPrefs(){
+  const pid=currentPlayerId;if(!pid){toast('Not logged in');return;}
+  const email=(document.getElementById('pp-email-addr')?document.getElementById('pp-email-addr').value:'').trim();
+  if(email&&!email.includes('@')){toast('Enter a valid email address');return;}
+  const prefs={
+    email:email||null,
+    notifAssign:!!(document.getElementById('pp-notif-assign')?document.getElementById('pp-notif-assign').checked:false),
+    notifPlan:!!(document.getElementById('pp-notif-plan')?document.getElementById('pp-notif-plan').checked:false),
+    notifCnote:!!(document.getElementById('pp-notif-cnote')?document.getElementById('pp-notif-cnote').checked:false),
+    notifScore:!!(document.getElementById('pp-notif-score')?document.getElementById('pp-notif-score').checked:false),
+    updatedAt:td()
+  };
+  db.ref('leon_queens_passwords/'+pid+'/emailPrefs').set(prefs);
+  toast('Email preferences saved!');
+  const savedEl=document.getElementById('pp-email-saved');
+  if(savedEl){savedEl.style.opacity='1';setTimeout(function(){savedEl.style.opacity='0';},2500);}
 }
 
 function closeAssignEditModal(){document.getElementById('assign-edit-modal').classList.remove('active');}
@@ -5198,6 +5268,11 @@ function pgdSaveNotes(){
   toast('Notes saved!');
   if(!pgdNotes[currentPlayerId])pgdNotes[currentPlayerId]={};
   pgdNotes[currentPlayerId][pgdCurrentDate]={performance:perf,opponent:opp,savedAt:td()};
+  const _np=gP(currentPlayerId);
+  notifyCoaches(
+    'Player Notes: '+(_np?_np.firstName+' '+_np.lastName:currentPlayerId),
+    'Player: '+(_np?_np.firstName+' '+_np.lastName:currentPlayerId)+'\nDate: '+pgdCurrentDate+(perf?'\n\nPerformance: '+perf:'')+(opp?'\nOpponent: '+opp:'')+'\n\nLog in to view full notes.'
+  );
 }
 
 
