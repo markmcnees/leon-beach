@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260317112841">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -398,9 +398,9 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <button class="login-btn" id="player-login-btn" onclick="playerLogin()">View My Stats</button>
     </div>
     <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-lighter);text-align:center;">
-      <a href="fans.html" style="display:inline-flex;align-items:center;gap:6px;font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--white);text-decoration:none;padding:9px 20px;border-radius:8px;background:var(--red);transition:background 0.2s;" onmouseover="this.style.background='var(--red-dark)';" onmouseout="this.style.background='var(--red)';">
+      <button onclick="showLeonFans()" style="display:inline-flex;align-items:center;gap:6px;font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--white);border:none;cursor:pointer;padding:9px 20px;border-radius:8px;background:var(--red);transition:background 0.2s;" onmouseover="this.style.background='var(--red-dark)';" onmouseout="this.style.background='var(--red)';">
         🏐 Leon Beach Fan Page
-      </a>
+      </button>
       <div style="font-size:11px;color:var(--red);font-weight:700;margin-top:6px;">Parents · Fans · Press — No login required</div>
     </div>
   </div>
@@ -981,6 +981,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="modal-footer"><button class="btn btn-secondary" onclick="closeSetModal()">Cancel</button><button class="btn btn-blue" id="set-modal-save">Save Set</button></div>
   </div>
 </div>
+</div><!-- end app-wrapper -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -6296,6 +6297,178 @@ function seedMissingDuals(){
   });
 }
 
+
+// ============================================================
+// LEON QUEENS FAN PAGE
+// ============================================================
+function lfToggle(uid){var el=document.getElementById(uid+'_body');if(el)el.style.display=el.style.display==='none'?'block':'none';}
+
+function showLeonFans(){
+  var loginOl=document.getElementById('login-overlay');
+  if(loginOl)loginOl.classList.add('hidden');
+  var ol=document.getElementById('leon-fans-overlay');
+  if(ol){ol.style.display='block';renderLeonFans();}
+}
+
+function hideLeonFans(){
+  var ol=document.getElementById('leon-fans-overlay');
+  if(ol)ol.style.display='none';
+  if(!currentRole){
+    var loginOl=document.getElementById('login-overlay');
+    if(loginOl)loginOl.classList.remove('hidden');
+  }
+}
+
+function renderLeonFans(){
+  var BN='font-family:"Bebas Neue",sans-serif';
+  var WIN_C='#0a9e5c', LOSS_C='#e63946', RED='#e4002b', DARK_RED='#8b0000', GOLD='#d4a843';
+
+  // ── ROSTER from live D.players ──────────────────────────
+  var TIER={1:'Top',2:'Mid',3:'Dev',4:'Court 4',5:'Court 5'};
+  var ROSTER=(D.players||[]).slice().sort(function(a,b){return (a.court||9)-(b.court||9)||a.lastName.localeCompare(b.lastName);}).map(function(p){
+    return {jersey:p.jersey||'',name:p.firstName+' '+p.lastName,cls:p.classYear||'',tier:TIER[p.court]||'CT'+(p.court||'?')};
+  });
+
+  // ── SEASON RESULTS from D.schedule ──────────────────────
+  var schedDuals=(D.schedule||[]).filter(function(g){return g.scoreUs!=null&&g.scoreUs!==''&&g.scoreThem!=null&&g.scoreThem!=='';});
+  schedDuals.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
+
+  // Build PAST array: each dual → courts from D.gamedays
+  var gdByDate={};
+  (D.gamedays||[]).forEach(function(m){if(!gdByDate[m.date])gdByDate[m.date]={};gdByDate[m.date][m.court]=m;});
+
+  var PAST=schedDuals.map(function(g){
+    var gd=gdByDate[g.date]||{};
+    var courts=[];
+    for(var ct=1;ct<=5;ct++){
+      var m=gd[ct];
+      if(!m)continue;
+      var sets=(m.sets||[]);
+      var sw=sets.filter(function(s){return (s.scoreUs||0)>(s.scoreThem||0);}).length;
+      var sl=sets.length-sw;
+      var setStr=sets.map(function(s){return s.scoreUs+'-'+s.scoreThem;}).join(', ');
+      var pids=m.pair||[];
+      var pairLabel=pids.map(function(pid){var p=(D.players||[]).find(function(x){return x.id===pid;});return p?p.firstName+' '+p.lastName.charAt(0)+'.':'';}).filter(Boolean).join(' & ');
+      courts.push({ct:ct,pair:pairLabel||m.opponent||'CT'+ct,sets:setStr,win:sw>sl});
+    }
+    return {
+      opp:g.opponent||'Opponent',
+      date:g.date||'',
+      w:parseInt(g.scoreUs)||0,
+      l:parseInt(g.scoreThem)||0,
+      courts:courts
+    };
+  });
+
+  // Dual W-L record
+  var dW=PAST.filter(function(d){return d.w>d.l;}).length;
+  var dL=PAST.filter(function(d){return d.l>d.w;}).length;
+  var recEl=document.getElementById('lf-record');
+  if(recEl)recEl.textContent=dW+'-'+dL;
+
+  // ── IN PROGRESS: check today's assignment ───────────────
+  var today=td();
+  var todayAssign=Object.values(D.assignments||{}).find(function(a){return a.date===today;});
+  var todayGD=gdByDate[today]||{};
+  var tc=document.getElementById('lf-today');
+  var tcc=document.getElementById('lf-today-courts');
+
+  if(todayAssign&&Object.keys(todayGD).length>0){
+    // There are scores for today — show in-progress
+    if(tc)tc.style.display='block';
+    if(tcc){
+      var schedToday=(D.schedule||[]).find(function(g){return g.date===today;});
+      var oppName=schedToday?schedToday.opponent:(todayAssign.opponent||'Today\'s Dual');
+      var liveW=0,liveL=0,inProgressCourts=[];
+      (todayAssign.courts||[]).sort(function(a,b){return (a.court||0)-(b.court||0);}).forEach(function(c){
+        var m=todayGD[c.court];
+        var pids=[c.p1,c.p2].filter(Boolean);
+        var pairLabel=pids.map(function(pid){var p=(D.players||[]).find(function(x){return x.id===pid;});return p?p.firstName+' '+p.lastName.charAt(0)+'.':'';}).filter(Boolean).join(' & ');
+        if(m&&(m.sets||[]).length>0){
+          var sets=m.sets||[];
+          var sw=sets.filter(function(s){return (s.scoreUs||0)>(s.scoreThem||0);}).length;
+          var sl=sets.length-sw;
+          var setStr=sets.map(function(s){return s.scoreUs+'-'+s.scoreThem;}).join(', ');
+          sw>sl?liveW++:liveL++;
+          inProgressCourts.push({ct:c.court,pair:pairLabel,status:'done',sW:sw,sL:sl,sets:setStr});
+        } else if(m){
+          // Match exists but no sets yet — in progress
+          var lastSet=null;
+          inProgressCourts.push({ct:c.court,pair:pairLabel,status:'warmup'});
+        } else {
+          inProgressCourts.push({ct:c.court,pair:pairLabel,status:'warmup'});
+        }
+      });
+      var headerHtml='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+        +'<div><div style="'+BN+';font-size:16px;color:'+DARK_RED+';">vs '+oppName+'</div>'
+        +(schedToday&&schedToday.location?'<div style="font-size:11px;color:'+RED+';">\uD83D\uDCCD '+schedToday.location+'</div>':'')
+        +'</div>'
+        +'<div style="'+BN+';font-size:22px;color:'+RED+';">'+liveW+' \u2013 '+liveL+'</div>'
+        +'</div>';
+      tcc.innerHTML=headerHtml+inProgressCourts.map(function(c){
+        var scoreHtml;
+        if(c.status==='done'){
+          var col=c.sW>c.sL?WIN_C:LOSS_C;
+          scoreHtml='<div style="text-align:right;">'
+            +'<div style="'+BN+';font-size:18px;color:'+col+';">'+c.sW+'-'+c.sL+'</div>'
+            +'<div style="font-size:10px;color:'+col+';">'+(c.sW>c.sL?'WIN':'LOSS')+'</div>'
+            +'<div style="font-size:10px;color:#888;">'+c.sets+'</div>'
+            +'</div>';
+        } else {
+          scoreHtml='<div style="font-size:11px;color:#bbb;font-style:italic;">Not started</div>';
+        }
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #fde2e8;">'
+          +'<div><span style="'+BN+';font-size:11px;background:#fde2e8;color:'+RED+';padding:2px 7px;border-radius:4px;margin-right:8px;">CT'+c.ct+'</span>'
+          +'<span style="color:'+DARK_RED+';font-size:13px;font-weight:700;">'+c.pair+'</span></div>'
+          +scoreHtml+'</div>';
+      }).join('');
+    }
+  } else {
+    if(tc)tc.style.display='none';
+  }
+
+  // ── SEASON RESULTS ───────────────────────────────────────
+  var resEl=document.getElementById('lf-results');
+  if(resEl){
+    if(PAST.length===0){
+      resEl.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.5);font-size:13px;padding:16px;">No results yet this season.</div>';
+    } else {
+      resEl.innerHTML=PAST.slice().reverse().map(function(d){
+        var win=d.w>d.l;var rc=win?WIN_C:LOSS_C;
+        var uid='lfc'+d.opp.replace(/[^a-z0-9]/gi,'');
+        var mon=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var pts=d.date.split('-');var dateStr=pts.length>=3?mon[parseInt(pts[1])-1]+' '+parseInt(pts[2]):'';
+        var courts=d.courts.map(function(c){
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #fde2e8;">'
+            +'<div style="display:flex;align-items:center;gap:8px;">'
+            +'<span style="'+BN+';font-size:10px;background:#fde2e8;color:'+RED+';padding:1px 6px;border-radius:3px;">CT'+c.ct+'</span>'
+            +'<span style="font-size:12px;color:#5a0010;">'+c.pair+'</span></div>'
+            +'<div style="font-size:12px;font-weight:700;color:'+(c.win?WIN_C:LOSS_C)+';">'+c.sets+'</div></div>';
+        }).join('');
+        return '<div style="background:#ffffff;border:1px solid #f7a8b8;border-radius:12px;margin-bottom:10px;overflow:hidden;">'
+          +'<div onclick="lfToggle(\''+uid+'\')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;">'
+          +'<div><span style="'+BN+';font-size:15px;color:'+DARK_RED+';">vs '+d.opp+'</span>'
+          +'<span style="font-size:12px;color:#888;margin-left:8px;">'+dateStr+'</span></div>'
+          +'<div style="display:flex;align-items:center;gap:10px;">'
+          +'<span style="'+BN+';font-size:14px;color:'+rc+';">'+d.w+'-'+d.l+' '+(win?'WIN':'LOSS')+'</span>'
+          +'<span style="color:#bbb;">\u25b8</span></div></div>'
+          +'<div id="'+uid+'_body" style="display:none;padding:10px 14px;background:#fff9f9;">'+courts+'</div></div>';
+      }).join('');
+    }
+  }
+
+  // ── ROSTER ───────────────────────────────────────────────
+  var rostEl=document.getElementById('lf-roster');
+  if(rostEl){
+    rostEl.innerHTML=ROSTER.map(function(p){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#ffffff;border:1px solid #f7a8b8;border-radius:8px;margin-bottom:5px;">'
+        +'<span style="'+BN+';font-size:18px;color:#f7a8b8;min-width:26px;text-align:right;">'+p.jersey+'</span>'
+        +'<div><div style="font-size:14px;font-weight:700;color:'+DARK_RED+';">'+p.name+'</div>'
+        +'<div style="font-size:11px;color:'+RED+';">'+p.cls+' \u00b7 '+p.tier+'</div></div></div>';
+    }).join('');
+  }
+}
+
 // ============================================================
 // INIT
 // ============================================================
@@ -6517,5 +6690,27 @@ setTimeout(function(){
     });
   });
 },2500);</script>
+
+<!-- LEON QUEENS FAN PAGE OVERLAY -->
+<div id="leon-fans-overlay" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#8b0000 0%,#e4002b 50%,#c0001f 100%);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <div style="max-width:480px;margin:0 auto;padding:16px 14px 40px;">
+    <div style="text-align:center;padding:24px 0 16px;">
+      <div style="font-size:48px;margin-bottom:6px;">👑</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:#fff;">Leon Queens</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.65);margin-top:2px;">Beach Volleyball &middot; 2026 Season</div>
+      <div id="lf-record" style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#d4a843;margin-top:8px;"></div>
+      <button onclick="hideLeonFans()" style="margin-top:14px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:7px 18px;border-radius:20px;cursor:pointer;">&#x2715; Close</button>
+    </div>
+    <div id="lf-today" style="display:none;background:#ffffff;border:2px solid #e4002b;border-radius:14px;padding:14px;margin-bottom:14px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#e4002b;margin-bottom:10px;">&#x26A1; IN PROGRESS</div>
+      <div id="lf-today-courts"></div>
+    </div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin-bottom:8px;">Season Results</div>
+    <div id="lf-results"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin:16px 0 8px;">Roster</div>
+    <div id="lf-roster"></div>
+  </div>
+</div>
+
 </body>
 </html>
