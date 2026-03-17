@@ -282,7 +282,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .live-score-row{gap:12px;}
 }
 /* LOGIN SCREEN */
-.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100dvh;background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100dvh;background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .login-overlay.hidden{display:none;}
 .login-box{background:var(--white);border-radius:16px;padding:36px 28px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);text-align:center;}
 .login-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;color:var(--red);margin-bottom:4px;}
@@ -410,7 +410,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
     <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-lighter);text-align:center;">
       <button onclick="showDemoFans()" style="display:inline-flex;align-items:center;gap:6px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;color:var(--white);border:none;cursor:pointer;padding:9px 20px;border-radius:8px;background:var(--red);transition:background 0.2s;" onmouseover="this.style.background='var(--red-dark)';" onmouseout="this.style.background='var(--red)';">
-        🦈 Sand Sharks Fans Page
+        🦈 Sand Shark Fan Page
       </button>
       <div style="font-size:11px;color:var(--red);font-weight:700;margin-top:6px;">Parents &middot; Fans &middot; Press &mdash; No login required</div>
     </div>
@@ -2434,6 +2434,7 @@ function pinBack(){pinEntry=pinEntry.slice(0,-1);updatePinDots();document.getEle
 function updatePinDots(){document.querySelectorAll('.login-pin-dot').forEach((d,i)=>{d.classList.toggle('filled',i<pinEntry.length);});}
 
 function loginAsCoach(){
+  hideDemoFans();
   currentRole='coach';currentPlayerId=null;
   sessionStorage.setItem('leonAuth',JSON.stringify({role:'coach'}));
   document.getElementById('login-overlay').classList.add('hidden');
@@ -2445,6 +2446,7 @@ function loginAsCoach(){
   refreshCurrent();
 }
 function playerLogin(){
+  hideDemoFans();
   const pid=document.getElementById('login-player-select').value;
   const pw=document.getElementById('login-pw').value;
   if(!pid){document.getElementById('pw-error').textContent='Select your name';return;}
@@ -4535,11 +4537,11 @@ function renderDemoFans(){
       var courts=d.courts.map(function(c){
         return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'
           +'<div style="display:flex;align-items:center;gap:8px;">'
-          +'<span style="'+BN+';font-size:10px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.75);padding:1px 6px;border-radius:3px;">CT'+c.ct+'</span>'
+          +'<span style="'+BN+';font-size:10px;background:rgba(255,255,255,0.22);color:rgba(255,255,255,0.9);padding:1px 6px;border-radius:3px;">CT'+c.ct+'</span>'
           +'<span style="font-size:12px;color:rgba(255,255,255,0.8);">'+c.pair+'</span></div>'
           +'<div style="font-size:12px;font-weight:700;color:'+(c.win?'#48cae4':'#ff6b6b')+';">'+c.sets+'</div></div>';
       }).join('');
-      return '<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;margin-bottom:10px;overflow:hidden;">'
+      return '<div style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:12px;margin-bottom:10px;overflow:hidden;">'
         +'<div onclick="fansToggle(\''+uid+'\')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;">'
         +'<div><span style="'+BN+';font-size:15px;color:#fff;">vs '+d.opp+'</span>'
         +'<span style="font-size:12px;color:rgba(255,255,255,0.5);margin-left:8px;">'+dateStr+'</span></div>'
@@ -4554,7 +4556,7 @@ function renderDemoFans(){
   var rostEl=document.getElementById('fans-roster');
   if(rostEl){
     rostEl.innerHTML=ROSTER.map(function(p){
-      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,0.08);border-radius:8px;margin-bottom:5px;">'
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,0.18);border-radius:8px;margin-bottom:5px;">'
         +'<span style="'+BN+';font-size:18px;color:rgba(255,255,255,0.25);min-width:26px;text-align:right;">'+p.jersey+'</span>'
         +'<div><div style="font-size:14px;font-weight:700;color:#fff;">'+p.name+'</div>'
         +'<div style="font-size:11px;color:rgba(255,255,255,0.45);">'+p.cls+' \u00b7 '+p.tier+'</div></div></div>';
@@ -6729,7 +6731,7 @@ setTimeout(function(){
       <div id="fans-record" style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#48cae4;margin-top:8px;"></div>
       <button onclick="hideDemoFans()" style="margin-top:14px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:7px 18px;border-radius:20px;cursor:pointer;">&#x2715; Close</button>
     </div>
-    <div id="fans-today" style="display:none;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:14px;padding:14px;margin-bottom:14px;">
+    <div id="fans-today" style="display:none;background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.40);border-radius:14px;padding:14px;margin-bottom:14px;">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#48cae4;margin-bottom:10px;">&#x26A1; IN PROGRESS</div>
       <div id="fans-today-courts"></div></div>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.55);margin-bottom:8px;">Season Results</div>
