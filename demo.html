@@ -4389,8 +4389,21 @@ function openPlayerScoutSchool(key){
 
 
 function fansToggle(uid){var el=document.getElementById(uid+'_body');if(el)el.style.display=el.style.display==='none'?'block':'none';}
-function showDemoFans(){var ol=document.getElementById('fans-overlay');if(ol){ol.style.display='block';renderDemoFans();}}
-function hideDemoFans(){var ol=document.getElementById('fans-overlay');if(ol)ol.style.display='none';}
+function showDemoFans(){
+  var loginOl=document.getElementById('login-overlay');
+  if(loginOl)loginOl.classList.add('hidden');
+  var ol=document.getElementById('fans-overlay');
+  if(ol){ol.style.display='block';renderDemoFans();}
+}
+function hideDemoFans(){
+  var ol=document.getElementById('fans-overlay');
+  if(ol)ol.style.display='none';
+  // Only restore login overlay if not already logged in
+  if(!currentRole){
+    var loginOl=document.getElementById('login-overlay');
+    if(loginOl)loginOl.classList.remove('hidden');
+  }
+}
 function renderDemoFans(){
   var BN='font-family:\"Bebas Neue\",sans-serif';
   // ── Hardcoded demo data — works before login ──────────────
