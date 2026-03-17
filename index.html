@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260317104140">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4562,6 +4562,11 @@ function refreshSingleCourtCard(idx, date, fbNode){
           <button class="ls-btn ls-btn-minus" onclick="lsAdj('ls-them-${idx}',-1)">−</button>
         </div>
       </div>
+    </div>
+    <button class="pgd-stats-toggle" id="lse-stats-toggle-${idx}" onclick="lseToggleStats(${idx})" style="width:100%;margin-top:8px;">＋ Add set stats (optional)</button>
+    <div id="lse-stats-${idx}" style="display:none;margin-top:8px;">
+      <div style="font-size:11px;color:var(--gray);margin-bottom:6px;">Tap +/− to count stats (optional)</div>
+      ${[c.p1,c.p2].filter(Boolean).map(pid2=>{const po=gP(pid2);return lseStatBlock(pid2,po?po.firstName:'P',idx);}).join('')}
     </div>
     <button class="btn btn-blue btn-small" style="width:100%;margin-top:6px;" onclick="saveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${date}',${c.court},'${c.subCourt||''}','${matchId||''}','${assignment.opponent||''}','${node}')">✓ Save Set</button>
   </div>`;
