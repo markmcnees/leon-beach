@@ -978,6 +978,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="modal-footer"><button class="btn btn-secondary" onclick="closeSetModal()">Cancel</button><button class="btn btn-blue" id="set-modal-save">Save Set</button></div>
   </div>
 </div>
+</div><!-- end app-wrapper -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -5222,6 +5223,18 @@ function renderLiveScoringQueens(assignment, date, container){
             </div>
           </div>
         </div>
+        
+      <button class="pgd-stats-toggle" id="lse-stats-toggle-${idx}" onclick="lseToggleStats(${idx})" style="width:100%;margin-top:8px;">＋ Add set stats (optional)</button>
+      <div id="lse-stats-${idx}" style="display:none;margin-top:8px;">
+        <div style="font-size:11px;color:var(--gray);margin-bottom:6px;">Tap +/− to count stats (optional)</div>
+        ${[c.p1,c.p2].filter(Boolean).map(pid2=>{const po=gP(pid2);return lseStatBlock(pid2,po?po.firstName:'P',idx);}).join('')}
+      </div>
+      
+        <button class="pgd-stats-toggle" id="lse-stats-toggle-${idx}" onclick="lseToggleStats(${idx})" style="width:100%;margin-top:8px;">＋ Add set stats (optional)</button>
+        <div id="lse-stats-${idx}" style="display:none;margin-top:8px;">
+          <div style="font-size:11px;color:var(--gray);margin-bottom:6px;">Tap +/− to count stats (optional)</div>
+          ${[c.p1,c.p2].filter(Boolean).map(pid2=>{const po=gP(pid2);return lseStatBlock(pid2,po?po.firstName:'P',idx);}).join('')}
+        </div>
         <button class="btn btn-small" style="width:100%;background:var(--red);color:var(--white);border:none;" onclick="saveQueensLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${date}',${c.court})">Save Queens Result</button>
       </div>`:''}
     </div>`;
@@ -5240,8 +5253,12 @@ function saveQueensLiveSet(idx,p1,p2,date,court){
   const sb=parseInt(sbEl?.tagName==='INPUT'?sbEl.value:sbEl?.textContent);
   if(isNaN(sa)||isNaN(sb)){toast('Enter both scores');return;}
   if(sa===sb){toast('Scores cannot be tied');return;}
+  const statsOpen=document.getElementById('lse-stats-'+idx)?.style.display!=='none';
+  const pair=[p1,p2].filter(Boolean);
+  const stats={};
+  pair.forEach(pid=>{stats[pid]=statsOpen&&window._lseStats&&window._lseStats[idx]&&window._lseStats[idx][pid]?{...window._lseStats[idx][pid]}:{k:0,b:0,a:0,d:0,e:0};});
   const id=gi('qm');
-  fbSet('matches/'+id,{id,date,court:parseInt(court),team1:[p1,p2].filter(Boolean),team2:[op1,op2].filter(Boolean),score1:sa,score2:sb});
+  fbSet('matches/'+id,{id,date,court:parseInt(court),team1:[p1,p2].filter(Boolean),team2:[op1,op2].filter(Boolean),score1:sa,score2:sb,stats});
   toast((sa>sb?'✓ Win':'✗ Loss')+' saved — '+sa+'–'+sb);
   setTimeout(()=>refreshSingleQueensCard(idx,date),600);
 }
