@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260318222906">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -6415,18 +6415,18 @@ function renderLeonFans(){
       if(hasResult){
         var win2=lW>lL;
         bannerEl.innerHTML='<div style="text-align:center;">'
-          +'<div style="'+BN+';font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.7);margin-bottom:4px;">TODAY\'S RESULT</div>'
+          +'<div style="'+BN+';font-size:11px;letter-spacing:3px;color:'+RED+';margin-bottom:4px;">TODAY\'S RESULT</div>'
           +'<div style="'+BN+';font-size:22px;color:#fff;">vs '+schedToday.opponent+'</div>'
           +'<div style="'+BN+';font-size:38px;color:'+(win2?WIN_C:LOSS_C)+';">'+lW+'-'+lL+' '+(win2?'WIN':'LOSS')+'</div>'
-          +(schedToday.location?'<div style="font-size:11px;color:rgba(255,255,255,0.5);">\uD83D\uDCCD '+schedToday.location+'</div>':'')
+          +(schedToday.location?'<div style="font-size:11px;color:#555;">\uD83D\uDCCD '+schedToday.location+'</div>':'')
           +'</div>';
-        bannerEl.style.cssText='border-radius:12px;padding:14px;margin-bottom:14px;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.15);';
+        bannerEl.style.cssText='border-radius:12px;padding:14px;margin-bottom:14px;background:#ffffff;border:1px solid #f7a8b8;';
       } else {
         bannerEl.innerHTML='<div style="display:flex;align-items:center;gap:12px;">'
           +'<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#4ade80;animation:pulse 1.5s infinite;flex-shrink:0;"></span>'
           +'<div><div style="'+BN+';font-size:11px;letter-spacing:3px;color:#4ade80;margin-bottom:2px;">LIVE NOW</div>'
           +'<div style="'+BN+';font-size:20px;color:#fff;">vs '+schedToday.opponent+'</div>'
-          +(schedToday.location?'<div style="font-size:11px;color:rgba(255,255,255,0.6);">\uD83D\uDCCD '+schedToday.location+'</div>':'')
+          +(schedToday.location?'<div style="font-size:11px;color:#555;">\uD83D\uDCCD '+schedToday.location+'</div>':'')
           +'</div></div>';
         bannerEl.style.cssText='border-radius:12px;padding:14px;margin-bottom:14px;background:rgba(10,158,92,0.2);border:1px solid rgba(74,222,128,0.4);';
       }
@@ -6435,13 +6435,13 @@ function renderLeonFans(){
       var pts=ng.date.split('-');
       var dStr=mon[parseInt(pts[1])-1]+' '+parseInt(pts[2]);
       bannerEl.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;">'
-        +'<div><div style="'+BN+';font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.6);margin-bottom:4px;">NEXT GAME</div>'
+        +'<div><div style="'+BN+';font-size:11px;letter-spacing:2px;color:'+RED+';margin-bottom:4px;">NEXT GAME</div>'
         +'<div style="'+BN+';font-size:20px;color:#fff;">'+(ng.location==='away'?'@ ':'vs ')+ng.opponent+'</div>'
-        +(ng.location?'<div style="font-size:12px;color:rgba(255,255,255,0.5);">'+(ng.location==='away'?'Away':'Home')+(ng.time?' \xb7 '+ng.time:'')+'</div>':'')
+        +(ng.location?'<div style="font-size:12px;color:#555;">'+(ng.location==='away'?'Away':'Home')+(ng.time?' \xb7 '+ng.time:'')+'</div>':'')
         +'</div>'
-        +'<div style="'+BN+';font-size:24px;color:'+GOLD+';">'+dStr+'</div>'
+        +'<div style="'+BN+';font-size:24px;color:'+RED+';">'+dStr+'</div>'
         +'</div>';
-      bannerEl.style.cssText='border-radius:12px;padding:14px;margin-bottom:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);';
+      bannerEl.style.cssText='border-radius:12px;padding:14px;margin-bottom:14px;background:#ffffff;border:1px solid #f7a8b8;';
     } else {
       bannerEl.style.display='none';
     }
@@ -6531,10 +6531,10 @@ function renderLeonFans(){
         var pts3=g.date.split('-');
         var dStr3=mon3[parseInt(pts3[1])-1]+' '+parseInt(pts3[2]);
         var loc3=g.location==='away'?'@ ':'vs ';
-        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.08);">'
-          +'<div><div style="'+BN+';font-size:14px;color:#fff;">'+loc3+g.opponent+'</div>'
-          +(g.location?'<div style="font-size:11px;color:rgba(255,255,255,0.5);">'+(g.location==='away'?'Away':'Home')+(g.time?' \xb7 '+g.time:'')+'</div>':'')
-          +'</div><div style="'+BN+';font-size:16px;color:'+GOLD+';">'+dStr3+'</div>'
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #fde2e8;">'
+          +'<div><div style="'+BN+';font-size:14px;color:'+DARK_RED+';">'+loc3+g.opponent+'</div>'
+          +(g.location?'<div style="font-size:11px;color:#555;">'+(g.location==='away'?'Away':'Home')+(g.time?' \xb7 '+g.time:'')+'</div>':'')
+          +'</div><div style="'+BN+';font-size:16px;color:'+RED+';">'+dStr3+'</div>'
           +'</div>';
       }).join('');
       upSec.style.display='block';
@@ -6547,7 +6547,7 @@ function renderLeonFans(){
   var resEl=document.getElementById('lf-results');
   if(resEl){
     if(PAST.length===0){
-      resEl.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.5);font-size:13px;padding:16px;">No results yet this season.</div>';
+      resEl.innerHTML='<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">No results yet this season.</div>';
     } else {
       resEl.innerHTML=PAST.slice().reverse().map(function(d){
         var win=d.w>d.l;var rc=win?WIN_C:LOSS_C;
@@ -6829,8 +6829,8 @@ setTimeout(function(){
       <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#e4002b;margin-bottom:10px;">&#x26A1; IN PROGRESS</div>
       <div id="lf-today-courts"></div>
     </div>
-    <div id="lf-upcoming-section" style="display:none;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:14px;margin-bottom:14px;overflow:hidden;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);padding:12px 14px 8px;">Upcoming Games</div>
+    <div id="lf-upcoming-section" style="display:none;background:#ffffff;border:1px solid #f7a8b8;border-radius:14px;margin-bottom:14px;overflow:hidden;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#8b0000;padding:12px 14px 8px;">Upcoming Games</div>
       <div id="lf-upcoming"></div>
     </div>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin-bottom:8px;">Season Results</div>
