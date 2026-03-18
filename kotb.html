@@ -267,6 +267,16 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
       <div id="week-detail"></div>
     </div>
     <div class="card">
+      <div class="ctitle"><span class="bar"></span>Import Roster from Excel</div>
+      <p style="font-size:13px;color:var(--gray);margin-bottom:10px;">Upload an Excel file (.xlsx or .csv) with player names. Put names in the <strong>first column</strong> — one name per row. A header row (e.g. "Name") is fine, the app will skip it automatically.</p>
+      <label class="btn btn-p btn-w" style="cursor:pointer;justify-content:center;margin-bottom:8px;">
+        📂 Choose Roster File
+        <input type="file" id="roster-file" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importRoster(this)">
+      </label>
+      <div id="roster-import-preview"></div>
+    </div>
+
+    <div class="card">
       <div class="ctitle"><span class="bar"></span>Export</div>
       <p style="font-size:13px;color:var(--gray);margin-bottom:12px;">Download the full season data as an Excel file — standings, all results, partner history, and weekly schedule.</p>
       <button class="btn btn-a btn-w" onclick="exportExcel()">📊 Export to Excel</button>
@@ -951,6 +961,91 @@ function saveForfeit(wid,round,court,t1s,t2s,t1forfeit,idx){
 }
 
 function delResult(id){fbDel(SIDE+'/results/'+id);toast('Result cleared');setTimeout(()=>{renderRoundPills();renderLiveCourts();},400);}
+
+// ─── ROSTER IMPORT ───
+function importRoster(input){
+  const file = input.files[0];
+  if(!file){return;}
+  const preview = $('roster-import-preview');
+  preview.innerHTML = '<div style="font-size:13px;color:var(--gray);padding:8px 0;">Reading file...</div>';
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      if(typeof XLSX === 'undefined'){toast('Excel library not loaded');return;}
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+      // Extract names from first column, skip blank rows and likely headers
+      const names = [];
+      rows.forEach((row, i) => {
+        const cell = String(row[0]||'').trim();
+        if(!cell) return;
+        // Skip header row if it looks like a label (no spaces or common headers)
+        const isHeader = /^(name|player|first|full|#)/i.test(cell) && i === 0;
+        if(isHeader) return;
+        names.push(cell);
+      });
+
+      if(!names.length){
+        preview.innerHTML = '<div style="color:var(--loss);font-size:13px;padding:8px;">No names found. Make sure names are in the first column.</div>';
+        return;
+      }
+
+      // Show preview with confirm button
+      preview.innerHTML = `
+        <div style="background:var(--light);border-radius:10px;padding:12px;margin-top:8px;">
+          <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;color:var(--primary);margin-bottom:8px;">
+            Found ${names.length} player${names.length!==1?'s':''} — review before importing:
+          </div>
+          <div style="max-height:200px;overflow-y:auto;margin-bottom:10px;">
+            ${names.map((n,i)=>`<div style="padding:7px 0;border-bottom:1px solid var(--sand-border);font-size:14px;font-weight:600;">${i+1}. ${n}</div>`).join('')}
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-p" style="flex:1;" onclick="confirmRosterImport(${JSON.stringify(names).replace(/"/g,'&quot;')})">
+              ✓ Import All
+            </button>
+            <button class="btn btn-g" onclick="$('roster-import-preview').innerHTML='';$('roster-file').value='';">
+              Cancel
+            </button>
+          </div>
+          <div style="font-size:11px;color:var(--gray);margin-top:8px;">
+            ⚠️ This adds to your existing roster — it won't delete players already there.
+          </div>
+        </div>`;
+    }catch(err){
+      console.error(err);
+      preview.innerHTML = '<div style="color:var(--loss);font-size:13px;padding:8px;">Error reading file: '+err.message+'</div>';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  input.value = ''; // reset so same file can be re-selected
+}
+
+function confirmRosterImport(names){
+  if(!names||!names.length)return;
+  // Get existing player names to avoid exact duplicates
+  const existing = new Set(
+    Object.values(D[SIDE].players||{}).map(p=>p&&p.name?p.name.toLowerCase().trim():'')
+  );
+  let added = 0, skipped = 0;
+  names.forEach(name=>{
+    const trimmed = name.trim();
+    if(!trimmed)return;
+    if(existing.has(trimmed.toLowerCase())){skipped++;return;}
+    const id = gi('p');
+    fbSet(SIDE+'/players/'+id, {id, name:trimmed, active:true});
+    added++;
+  });
+  $('roster-import-preview').innerHTML = `
+    <div style="background:#dcfce7;border-radius:10px;padding:12px;margin-top:8px;font-size:14px;">
+      ✅ Added <strong>${added}</strong> player${added!==1?'s':''}${skipped?` · Skipped ${skipped} duplicate${skipped!==1?'s':''}`:''}.
+    </div>`;
+  $('roster-file').value='';
+  toast(added+' player'+(added!==1?'s':'')+' imported!');
+}
 
 // ─── EXCEL EXPORT ───
 function exportExcel(){
