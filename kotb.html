@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
 :root{
   --sand:#f5f0e8;--sand-dark:#ede5d5;--sand-border:#d9ceba;
@@ -171,8 +172,8 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
   <div class="tabs">
     <button class="tab on" data-tab="standings">Standings</button>
     <button class="tab" data-tab="roster">Roster</button>
-    <button class="tab" data-tab="planner">Planner</button>
     <button class="tab" data-tab="score">Score</button>
+    <button class="tab" data-tab="planner">Planner</button>
   </div>
 </div>
 
@@ -265,9 +266,14 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
       <button class="btn btn-a btn-w" style="margin-bottom:12px;" onclick="genNight()">🤖 Generate Tonight's Schedule</button>
       <div id="week-detail"></div>
     </div>
+    <div class="card">
+      <div class="ctitle"><span class="bar"></span>Export</div>
+      <p style="font-size:13px;color:var(--gray);margin-bottom:12px;">Download the full season data as an Excel file — standings, all results, partner history, and weekly schedule.</p>
+      <button class="btn btn-a btn-w" onclick="exportExcel()">📊 Export to Excel</button>
+    </div>
   </div>
 
-  <!-- LIVE -->
+  <!-- SCORE (was Live) -->
   <div class="pane" id="pane-score">
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <select class="inp" id="live-sel" style="flex:1;" onchange="loadLive()">
@@ -945,6 +951,82 @@ function saveForfeit(wid,round,court,t1s,t2s,t1forfeit,idx){
 }
 
 function delResult(id){fbDel(SIDE+'/results/'+id);toast('Result cleared');setTimeout(()=>{renderRoundPills();renderLiveCourts();},400);}
+
+// ─── EXCEL EXPORT ───
+function exportExcel(){
+  if(typeof XLSX==='undefined'){toast('Excel library not loaded');return;}
+  const wb = XLSX.utils.book_new();
+  const side = SIDE;
+  const sideName = side==='kings'?'Kings':'Queens';
+
+  // ── Sheet 1: Standings ──
+  const players = Object.values(D[side].players||{}).filter(p=>p&&p.name);
+  const standRows = players.map(p=>{
+    const s = calcStats(p.id);
+    return {Player:p.name, GP:s.gp, W:s.w, L:s.l, 'Win%':s.pct, PF:s.pf, PA:s.pa, '+/-':s.diff};
+  }).sort((a,b)=>b['+/-']-a['+/-']);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(standRows), sideName+' Standings');
+
+  // ── Sheet 2: All Results ──
+  const results = Object.values(D[side].results||{}).sort((a,b)=>a.ts-b.ts);
+  const resultRows = results.map(r=>{
+    const week = D[side].weeks[r.weekId];
+    const t1names = (r.t1||[]).map(id=>pN(id)).join(' & ');
+    const t2names = (r.t2||[]).map(id=>pN(id)).join(' & ');
+    const w1 = r.s1>r.s2;
+    return {
+      Week: week?('Week '+week.weekNum):(r.weekId||''),
+      Date: week?week.date:'',
+      Round: r.round,
+      Court: r.court,
+      'Team 1': t1names,
+      'Score 1': r.s1,
+      'Score 2': r.s2,
+      'Team 2': t2names,
+      Winner: w1?t1names:t2names,
+      Forfeit: r.isForfeit?'Yes':'No'
+    };
+  });
+  if(resultRows.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resultRows), sideName+' Results');
+
+  // ── Sheet 3: Partner History ──
+  const phRows = [];
+  players.forEach(p=>{
+    const ph = partnerHistory(p.id);
+    Object.entries(ph).forEach(([partnerId,s])=>{
+      phRows.push({
+        Player: p.name,
+        Partner: pN(partnerId),
+        GP: s.gp, W: s.w, L: s.l,
+        PF: s.pf, PA: s.pa, '+/-': s.pf-s.pa
+      });
+    });
+  });
+  if(phRows.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(phRows), sideName+' Partners');
+
+  // ── Sheet 4: Weekly Schedule ──
+  const schedRows = [];
+  Object.values(D[side].weeks||{}).sort((a,b)=>a.weekNum-b.weekNum).forEach(week=>{
+    (week.rounds||[]).forEach(rd=>{
+      (rd.courts||[]).forEach(c=>{
+        schedRows.push({
+          Week: 'Week '+week.weekNum,
+          Date: week.date,
+          Round: rd.round,
+          Court: c.court,
+          'Team 1': (c.t1||[]).map(id=>pN(id)).join(' & '),
+          'Team 2': (c.t2||[]).map(id=>pN(id)).join(' & '),
+          'Sitting Out': (rd.sitting||[]).map(id=>pN(id)).join(', ')
+        });
+      });
+    });
+  });
+  if(schedRows.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(schedRows), sideName+' Schedule');
+
+  const today = td();
+  XLSX.writeFile(wb, 'TallyKotB_'+sideName+'_'+today+'.xlsx');
+  toast('Exported! Check your Downloads ✓');
+}
 
 // ─── BOOT ───
 document.addEventListener('DOMContentLoaded',()=>{
