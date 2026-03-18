@@ -153,6 +153,14 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
 .abs-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:600;background:#fee2e2;color:#b91c1c;margin:2px;}
 .sub-chip{background:#fef3c7;color:#92400e;}
 .chip-grp{margin-top:6px;}
+.pin-dot{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid var(--gray-light);background:transparent;transition:background .15s;}
+.pin-dot.filled{background:var(--primary);border-color:var(--primary);}
+.pin-btn{padding:16px 0;border-radius:12px;border:1.5px solid var(--gray-light);background:var(--white);font-family:'Bebas Neue';font-size:24px;cursor:pointer;transition:all .12s;touch-action:manipulation;}
+.pin-btn:active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.week-skipped{color:var(--gray);font-style:italic;}
+.week-cancelled{color:var(--loss);}
+.cancel-btn{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;}
+.cancel-btn:active{background:#b91c1c;color:#fff;}
 </style>
 </head>
 <body>
@@ -252,6 +260,11 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
           <input class="inp" type="number" id="cfg-score" min="11" max="25" value="15">
         </div>
       </div>
+      <div class="fg" style="margin-top:4px;">
+        <label class="lbl">Skip Dates (holidays / breaks)</label>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:6px;">One date per line — YYYY-MM-DD</div>
+        <textarea class="inp" id="cfg-skips" rows="3" placeholder="2026-07-04&#10;2026-11-27" style="font-size:13px;resize:vertical;"></textarea>
+      </div>
       <button class="btn btn-a btn-w" onclick="saveSeasonCfg()">💾 Save Season Config</button>
     </div>
 
@@ -290,11 +303,34 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
         <option value="">— Select Week —</option>
       </select>
     </div>
+    <div id="score-week-actions" style="display:none;margin-bottom:12px;"></div>
     <div class="round-pills" id="round-pills"></div>
     <div id="live-courts"></div>
   </div>
 
 </div><!-- /content -->
+
+<!-- PIN MODAL -->
+<div class="overlay" id="pin-modal">
+  <div class="modal" style="border-radius:20px 20px 0 0;max-width:340px;margin:0 auto;">
+    <div class="mtitle"><span id="pin-modal-title">Admin PIN</span><button class="mclose" onclick="closeModal('pin-modal')">✕</button></div>
+    <div style="text-align:center;padding:8px 0 16px;">
+      <div style="display:flex;justify-content:center;gap:10px;margin-bottom:20px;">
+        <span class="pin-dot" id="pd0"></span><span class="pin-dot" id="pd1"></span>
+        <span class="pin-dot" id="pd2"></span><span class="pin-dot" id="pd3"></span>
+      </div>
+      <div id="pin-error" style="color:var(--loss);font-size:13px;font-weight:700;min-height:18px;margin-bottom:10px;"></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto;">
+        <button class="pin-btn" onclick="pinTap('1')">1</button><button class="pin-btn" onclick="pinTap('2')">2</button><button class="pin-btn" onclick="pinTap('3')">3</button>
+        <button class="pin-btn" onclick="pinTap('4')">4</button><button class="pin-btn" onclick="pinTap('5')">5</button><button class="pin-btn" onclick="pinTap('6')">6</button>
+        <button class="pin-btn" onclick="pinTap('7')">7</button><button class="pin-btn" onclick="pinTap('8')">8</button><button class="pin-btn" onclick="pinTap('9')">9</button>
+        <button class="pin-btn" style="background:var(--gray-lighter);color:var(--gray);" onclick="pinTap('back')">⌫</button>
+        <button class="pin-btn" onclick="pinTap('0')">0</button>
+        <button class="pin-btn" style="background:var(--gray-lighter);color:var(--gray);font-size:11px;" onclick="pinTap('clear')">CLR</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- PARTNER MODAL -->
 <div class="overlay" id="ph-modal">
@@ -327,6 +363,7 @@ const FB_CFG = {
   appId: "1:937804799976:web:02121e68655b4febeb8e5d"
 };
 const DB_ROOT = 'tally_kotb';
+const ADMIN_PIN = '8675';
 const AI_URL  = 'https://leon-beach-ai.markmcnees-479.workers.dev';
 
 // ─── STATE ───
@@ -549,14 +586,18 @@ function saveSeasonCfg(){
     winScore:parseInt($('cfg-score').value)||15
   };
   if(!cfg.startDate){toast('Pick a start date');return;}
+  const skipText=$('cfg-skips')?$('cfg-skips').value.trim():'';
+  const skipDates=skipText?skipText.split('\n').map(x=>x.trim()).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)):[];
+  cfg.skipDates=skipDates;
   fbSet(SIDE+'/config',cfg);
-  // Create week skeletons
   const start=new Date(cfg.startDate+'T12:00:00');
   for(let w=0;w<cfg.numWeeks;w++){
     const d=new Date(start);d.setDate(d.getDate()+w*7);
     const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     const wid='w'+(w+1);
-    if(!D[SIDE].weeks[wid]) fbSet(SIDE+'/weeks/'+wid,{id:wid,weekNum:w+1,date:ds,absences:[],subs:null,rounds:null});
+    const isSk=skipDates.includes(ds);
+    if(!D[SIDE].weeks[wid]) fbSet(SIDE+'/weeks/'+wid,{id:wid,weekNum:w+1,date:ds,absences:[],subs:null,rounds:null,skipped:isSk});
+    else fbSet(SIDE+'/weeks/'+wid+'/skipped',isSk);
   }
   toast('Season saved!');
 }
@@ -568,6 +609,7 @@ function renderPlannerCfg(){
   if(c.numWeeks)$('cfg-weeks').value=c.numWeeks;
   if(c.courts)$('cfg-courts').value=c.courts;
   if(c.winScore)$('cfg-score').value=c.winScore;
+  if(c.skipDates&&c.skipDates.length){const el=$('cfg-skips');if(el)el.value=c.skipDates.join('\n');}
 }
 
 function fillWeekSels(){
@@ -575,7 +617,10 @@ function fillWeekSels(){
   ['week-sel','live-sel'].forEach(selId=>{
     const sel=$(selId);if(!sel)return;
     const cur=sel.value;
-    sel.innerHTML='<option value="">— Select Week —</option>'+weeks.map(w=>`<option value="${w.id}">Week ${w.weekNum} · ${fD(w.date)}</option>`).join('');
+    sel.innerHTML='<option value="">— Select Week —</option>'+weeks.map(w=>{
+      const lbl=w.cancelled?' (Cancelled)':w.skipped?' (Skipped)':'';
+      return`<option value="${w.id}">Week ${w.weekNum} · ${fD(w.date)}${lbl}</option>`;
+    }).join('');
     if(cur)sel.value=cur;
   });
 }
@@ -668,6 +713,14 @@ function saveAbsences(){
   loadWeekDetail();
 }
 
+// ─── SCORE TAB SCHEDULE GENERATION ───
+async function genNightFromScore(){
+  if(!liveWeek){toast('Select a week first');return;}
+  const weekSel=$('week-sel');if(weekSel)weekSel.value=liveWeek;
+  await genNight();
+  renderWeekActions();renderRoundPills();renderLiveCourts();
+}
+
 // ─── AI SCHEDULE GENERATION ───
 async function genNight(){
   const wid=$('week-sel').value;
@@ -749,8 +802,31 @@ Use the exact player IDs provided. Return only the JSON array.`;
 function loadLive(){
   const wid=$('live-sel').value;
   liveWeek=wid;liveRound=1;
+  renderWeekActions();
   renderRoundPills();
   renderLiveCourts();
+}
+
+function renderWeekActions(){
+  const acts=$('score-week-actions');if(!acts)return;
+  const week=D[SIDE].weeks[liveWeek];
+  if(!week){acts.style.display='none';return;}
+  acts.style.display='block';
+  if(week.cancelled){
+    acts.innerHTML=`<div style="background:#fee2e2;border-radius:10px;padding:12px 14px;text-align:center;"><div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--loss);margin-bottom:4px;">Night Cancelled</div><div style="font-size:13px;color:#b91c1c;">Season extended by 1 week.</div></div>`;
+    return;
+  }
+  if(week.skipped){
+    acts.innerHTML=`<div style="background:var(--gray-lighter);border-radius:10px;padding:12px 14px;text-align:center;"><div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--gray);">Scheduled Skip — No Play This Week</div></div>`;
+    return;
+  }
+  const hasSchedule=week.rounds&&week.rounds.length>0;
+  acts.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+    +(hasSchedule
+      ?`<button class="btn btn-g btn-sm" style="flex:1;" onclick="genNightFromScore()">🔄 Regenerate Schedule</button>`
+      :`<button class="btn btn-a" style="flex:1;" onclick="genNightFromScore()">🤖 Generate Tonight's Schedule</button>`)
+    +`<button class="btn btn-sm cancel-btn" onclick="promptCancelNight()">🌧 Cancel Night</button>`
+    +'</div>';
 }
 
 function renderRoundPills(){
@@ -1121,6 +1197,35 @@ function exportExcel(){
   const today = td();
   XLSX.writeFile(wb, 'TallyKotB_'+sideName+'_'+today+'.xlsx');
   toast('Exported! Check your Downloads ✓');
+}
+
+// ─── PIN SYSTEM ───
+let _pinEntry='',_pinAction=null;
+function promptCancelNight(){_pinAction='cancel';_pinEntry='';updatePinDots();$('pin-error').textContent='';$('pin-modal-title').textContent='Admin PIN — Cancel Night';$('pin-modal').classList.add('on');}
+function pinTap(v){
+  if(v==='back')_pinEntry=_pinEntry.slice(0,-1);
+  else if(v==='clear')_pinEntry='';
+  else if(_pinEntry.length<4)_pinEntry+=v;
+  updatePinDots();$('pin-error').textContent='';
+  if(_pinEntry.length===4){
+    if(_pinEntry===ADMIN_PIN){$('pin-modal').classList.remove('on');_pinEntry='';updatePinDots();if(_pinAction==='cancel')doCancelNight();}
+    else{$('pin-error').textContent='Incorrect PIN';setTimeout(()=>{_pinEntry='';updatePinDots();$('pin-error').textContent='';},700);}
+  }
+}
+function updatePinDots(){for(let i=0;i<4;i++){const d=$('pd'+i);if(d)d.classList.toggle('filled',i<_pinEntry.length);}}
+function doCancelNight(){
+  if(!liveWeek)return;
+  fbSet(SIDE+'/weeks/'+liveWeek+'/cancelled',true);
+  const allW=Object.values(D[SIDE].weeks||{}).sort((a,b)=>a.weekNum-b.weekNum);
+  const last=allW[allW.length-1];
+  if(last){
+    const ld=new Date(last.date+'T12:00:00');ld.setDate(ld.getDate()+7);
+    const ds=ld.getFullYear()+'-'+String(ld.getMonth()+1).padStart(2,'0')+'-'+String(ld.getDate()).padStart(2,'0');
+    const nid='w'+(last.weekNum+1);
+    fbSet(SIDE+'/weeks/'+nid,{id:nid,weekNum:last.weekNum+1,date:ds,absences:[],subs:null,rounds:null,skipped:false,cancelled:false});
+  }
+  toast('Night cancelled. Season extended by 1 week.');
+  renderWeekActions();renderRoundPills();renderLiveCourts();
 }
 
 // ─── BOOT ───
