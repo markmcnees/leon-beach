@@ -4580,6 +4580,26 @@ function renderDemoFans(){
 
 
 // ============================================================
+// FAN PAGE EMAIL OPT-IN (demo — no real backend)
+// ============================================================
+function submitFansEmail(){
+  var input=document.getElementById('fans-email-input');
+  var errEl=document.getElementById('fans-email-error');
+  var email=(input?input.value:'').trim();
+  if(!email||!email.includes('@')){
+    if(errEl)errEl.textContent='Please enter a valid email address.';
+    return;
+  }
+  if(errEl)errEl.textContent='';
+  // Demo: just show success (no real backend)
+  var form=document.getElementById('fans-email-form');
+  var success=document.getElementById('fans-email-success');
+  if(form)form.style.display='none';
+  if(success)success.style.display='block';
+}
+
+
+// ============================================================
 // EMAIL NOTIFICATION HELPERS  (no-op in demo)
 // ============================================================
 const COACH_EMAILS=['coach@sandsharksdemo.fake','coach2@sandsharksdemo.fake']; // demo — emails disabled
@@ -6773,6 +6793,29 @@ setTimeout(function(){
     <div id="fans-results"></div>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin:16px 0 8px;">Roster</div>
     <div id="fans-roster"></div>
+
+    <!-- Email Opt-In -->
+    <div id="fans-email-section" style="margin-top:24px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:18px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff;margin-bottom:4px;">&#x1F4E7; Stay Updated</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-bottom:14px;">Get notified about game results and schedule changes.</div>
+      <div id="fans-email-success" style="display:none;text-align:center;padding:10px;background:rgba(74,222,128,0.15);border-radius:8px;border:1px solid rgba(74,222,128,0.4);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:#4ade80;">&#x2713; You&rsquo;re signed up!</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:2px;">We&rsquo;ll keep you in the loop.</div>
+      </div>
+      <div id="fans-email-form">
+        <input type="email" id="fans-email-input" placeholder="your@email.com" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:#fff;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:10px;outline:none;" />
+        <div style="display:flex;gap:8px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.7);cursor:pointer;">
+            <input type="checkbox" id="fans-notif-results" checked style="width:14px;height:14px;accent-color:#48cae4;"> Game Results
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.7);cursor:pointer;">
+            <input type="checkbox" id="fans-notif-schedule" checked style="width:14px;height:14px;accent-color:#48cae4;"> Schedule Updates
+          </label>
+        </div>
+        <button onclick="submitFansEmail()" style="width:100%;margin-top:12px;padding:10px;background:#48cae4;color:#023e8a;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;border:none;border-radius:8px;cursor:pointer;">Subscribe</button>
+        <div id="fans-email-error" style="color:#f87171;font-size:12px;margin-top:6px;text-align:center;"></div>
+      </div>
+    </div>
   </div>
 </div>
 </body>
