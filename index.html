@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260318225941">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -2031,35 +2031,24 @@ function renderPlayerPortal(){
   document.getElementById('pp-name').textContent=p.firstName+' '+p.lastName;
   document.getElementById('pp-meta').innerHTML=`${p.jersey!=null?'<span style="font-family:\'Bebas Neue\',sans-serif;font-size:16px;color:var(--red);margin-right:6px;">#'+p.jersey+'</span>':''}<span class="class-badge class-${p.classYear}">${p.classYear}</span> <span class="court-badge court-${p.court}">Court ${p.court} — ${CL[p.court]||''}</span>`;
 
-  // Summary stats
+  // Summary stats — Dual (game day) only
   const qs=queensStats(pid,D.matches);
   const gs=extStats(pid,D.gamedays);
   const ss=extStats(pid,D.scrimmages);
-  const totalDiff=qs.diff+gs.diff+ss.diff;
-  // Combined stats
-  const allMatchW=qs.wins+gs.setsWon+ss.setsWon;
-  const allMatchL=qs.losses+gs.setsLost+ss.setsLost;
-  const allSetW=gs.setsWon+ss.setsWon;
-  const allSetL=gs.setsLost+ss.setsLost;
-  const allDiff=qs.diff+gs.diff+ss.diff;
-  const allK=gs.k+ss.k;
-  const allA=gs.a+ss.a;
-  const allB=gs.b+ss.b;
-  const allD=gs.d+ss.d;
-  const allE=gs.e+ss.e;
   document.getElementById('pp-summary').innerHTML=`
     <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px;">
-      <div class="stat-box"><div class="stat-number green">${qs.wins+gs.setsWon+ss.setsWon}-${qs.losses+gs.setsLost+ss.setsLost}</div><div class="stat-label">Match W-L</div></div>
-      <div class="stat-box"><div class="stat-number green">${gs.setsWon+ss.setsWon}-${gs.setsLost+ss.setsLost}</div><div class="stat-label">Set W-L</div></div>
-      <div class="stat-box"><div class="stat-number ${pmClass(allDiff)}">${(qs.gp+gs.sets+ss.sets)>0?pmStr(allDiff):'—'}</div><div class="stat-label">Pts +/-</div></div>
+      <div class="stat-box"><div class="stat-number green">${gs.setsWon}-${gs.setsLost}</div><div class="stat-label">Set W-L</div></div>
+      <div class="stat-box"><div class="stat-number green">${gs.matches}</div><div class="stat-label">Matches</div></div>
+      <div class="stat-box"><div class="stat-number ${pmClass(gs.diff)}">${gs.sets>0?pmStr(gs.diff):'—'}</div><div class="stat-label">Pts +/-</div></div>
     </div>
     <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
-      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${allK}</div><div class="stat-label">Kills</div></div>
-      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${allA}</div><div class="stat-label">Aces</div></div>
-      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${allB}</div><div class="stat-label">Blocks</div></div>
-      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${allD}</div><div class="stat-label">Digs</div></div>
-      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${allE}</div><div class="stat-label">Errors</div></div>
-    </div>`;
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.k}</div><div class="stat-label">Kills</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.a}</div><div class="stat-label">Aces</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.b}</div><div class="stat-label">Blocks</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.d}</div><div class="stat-label">Digs</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.e}</div><div class="stat-label">Errors</div></div>
+    </div>
+    <div style="grid-column:1/-1;font-size:10px;color:var(--gray);text-align:center;margin-top:6px;letter-spacing:0.5px;">DUAL MATCHES ONLY</div>`;
 
   // ===== TEAM RANKINGS =====
   // Build stats for all players
@@ -2282,6 +2271,8 @@ function renderPlayerPortal(){
   renderPlayerAssignment(pid);
   // Profile data (skills, drills, verticals, notes)
   renderPlayerProfileData(pid);
+  // Always refresh scouts so data shows without needing a tab click
+  renderPlayerScouts();
   // If matches tab is active, render it too
   const activeTab=document.querySelector('.pp-tab-btn.active');
   if(activeTab&&activeTab.textContent.includes('My Matches'))renderPlayerMatches();
