@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260318234415">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -917,6 +917,31 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-new" placeholder="New Password">
         <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-confirm" placeholder="Confirm New Password">
         <button class="btn btn-primary btn-small" onclick="changePassword()">Update Password</button>
+      </div>
+    </div>
+
+    <!-- Email Notifications -->
+    <div class="card" style="border-top:3px solid var(--blue);">
+      <div class="card-title" style="color:var(--blue);"><span class="bar" style="background:var(--blue);"></span> &#x1F4E7; Email Notifications</div>
+      <div style="padding:4px;">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px;">Get notified about assignments, coach feedback, and game results.</div>
+        <input type="email" id="pp-email-addr" placeholder="your@email.com" style="width:100%;box-sizing:border-box;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:12px;">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="pp-notif-assign" style="width:16px;height:16px;accent-color:var(--blue);"> Court assignments &amp; lineup updates
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="pp-notif-plan" style="width:16px;height:16px;accent-color:var(--blue);"> Training plan approved by coach
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="pp-notif-cnote" style="width:16px;height:16px;accent-color:var(--blue);"> New coach notes for me
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="pp-notif-score" style="width:16px;height:16px;accent-color:var(--blue);"> Game results posted
+          </label>
+        </div>
+        <button class="btn btn-blue btn-small" onclick="saveEmailPrefs(); loadEmailPrefs(currentPlayerId);" style="width:100%;">Save Preferences</button>
+        <div id="pp-email-saved" style="text-align:center;font-size:12px;color:var(--green);margin-top:6px;opacity:0;transition:opacity 0.3s;">&#x2713; Saved!</div>
       </div>
     </div>
 
@@ -6365,8 +6390,8 @@ function renderLeonFans(){
   var today=td();
   var TIER={1:'Top',2:'Mid',3:'Dev',4:'Court 4',5:'Court 5'};
 
-  var ROSTER=(D.players||[]).slice().sort(function(a,b){return (a.court||9)-(b.court||9)||a.lastName.localeCompare(b.lastName);}).map(function(p){
-    return {jersey:p.jersey||'',name:p.firstName+' '+p.lastName,cls:p.classYear||'',tier:TIER[p.court]||'CT'+(p.court||'?')};
+  var ROSTER=(D.players||[]).slice().sort(function(a,b){return (parseInt(a.jersey)||999)-(parseInt(b.jersey)||999);}).map(function(p){
+    return {jersey:p.jersey||'',name:p.firstName+' '+p.lastName,cls:p.classYear||''};
   });
 
   var allSched=(D.schedule||[]).slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
@@ -6571,9 +6596,40 @@ function renderLeonFans(){
       return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#ffffff;border:1px solid #f7a8b8;border-radius:8px;margin-bottom:5px;">'
         +'<span style="'+BN+';font-size:18px;color:#f7a8b8;min-width:26px;text-align:right;">'+p.jersey+'</span>'
         +'<div><div style="font-size:14px;font-weight:700;color:'+DARK_RED+';">'+p.name+'</div>'
-        +'<div style="font-size:11px;color:'+RED+';">'+p.cls+' \u00b7 '+p.tier+'</div></div></div>';
+        +'<div style="font-size:11px;color:'+RED+';">'+p.cls+'</div></div></div>';
     }).join('');
   }
+}
+
+// ============================================================
+// FAN PAGE EMAIL OPT-IN
+// ============================================================
+function submitLeonFanEmail(){
+  var input=document.getElementById('lf-email-input');
+  var errEl=document.getElementById('lf-email-error');
+  var email=(input?input.value:'').trim();
+  if(!email||!email.includes('@')){
+    if(errEl)errEl.textContent='Please enter a valid email address.';
+    return;
+  }
+  if(errEl)errEl.textContent='';
+  var notifResults=document.getElementById('lf-notif-results');
+  var notifSchedule=document.getElementById('lf-notif-schedule');
+  try{
+    if(db){
+      var id='fe'+Date.now().toString(36);
+      db.ref('leon_queens_matches/fan_emails/'+id).set({
+        email:email,
+        notifResults:notifResults?notifResults.checked:true,
+        notifSchedule:notifSchedule?notifSchedule.checked:true,
+        signedUpAt:new Date().toISOString()
+      });
+    }
+  }catch(e){console.error('Fan email save error:',e);}
+  var form=document.getElementById('lf-email-form');
+  var success=document.getElementById('lf-email-success');
+  if(form)form.style.display='none';
+  if(success)success.style.display='block';
 }
 
 // ============================================================
@@ -6828,6 +6884,29 @@ setTimeout(function(){
     <div id="lf-results"></div>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin:16px 0 8px;">Roster</div>
     <div id="lf-roster"></div>
+
+    <!-- Email Opt-In -->
+    <div id="lf-email-section" style="margin-top:24px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:18px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff;margin-bottom:4px;">&#x1F4E7; Stay Updated</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-bottom:14px;">Get notified about game results and schedule changes.</div>
+      <div id="lf-email-success" style="display:none;text-align:center;padding:10px;background:rgba(74,222,128,0.15);border-radius:8px;border:1px solid rgba(74,222,128,0.4);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:#4ade80;">&#x2713; You&rsquo;re signed up!</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:2px;">We&rsquo;ll keep you in the loop.</div>
+      </div>
+      <div id="lf-email-form">
+        <input type="email" id="lf-email-input" placeholder="your@email.com" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:#fff;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:10px;outline:none;" />
+        <div style="display:flex;gap:16px;margin-bottom:12px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.75);cursor:pointer;">
+            <input type="checkbox" id="lf-notif-results" checked style="width:14px;height:14px;accent-color:#d4a843;"> Game Results
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.75);cursor:pointer;">
+            <input type="checkbox" id="lf-notif-schedule" checked style="width:14px;height:14px;accent-color:#d4a843;"> Schedule Updates
+          </label>
+        </div>
+        <button onclick="submitLeonFanEmail()" style="width:100%;padding:10px;background:#d4a843;color:#8b0000;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;border:none;border-radius:8px;cursor:pointer;font-weight:700;">Subscribe</button>
+        <div id="lf-email-error" style="color:#f87171;font-size:12px;margin-top:6px;text-align:center;"></div>
+      </div>
+    </div>
   </div>
 </div>
 
