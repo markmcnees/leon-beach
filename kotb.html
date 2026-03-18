@@ -179,7 +179,6 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
   </div>
   <div class="tabs">
     <button class="tab on" data-tab="standings">Standings</button>
-    <button class="tab" data-tab="roster">Roster</button>
     <button class="tab" data-tab="score">Score</button>
     <button class="tab" data-tab="planner">Planner</button>
   </div>
@@ -194,11 +193,11 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
         <table class="tbl" id="stbl">
           <thead><tr>
             <th style="width:28px;padding-left:14px;">#</th>
-            <th data-sort="name">Player</th>
-            <th data-sort="gp">GP</th>
-            <th data-sort="w">W</th>
-            <th data-sort="l">L</th>
-            <th data-sort="pct">%</th>
+            <th>Player</th>
+            <th>GP</th>
+            <th>W</th>
+            <th>L</th>
+            <th data-sort="pct">Win%</th>
             <th data-sort="diff" class="sorted">+/-</th>
           </tr></thead>
           <tbody id="sbody"></tbody>
@@ -212,8 +211,10 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
     </div>
   </div>
 
-  <!-- ROSTER -->
-  <div class="pane" id="pane-roster">
+
+
+  <!-- PLANNER -->
+  <div class="pane" id="pane-planner">
     <div class="card">
       <div class="ctitle"><span class="bar"></span>Add Player</div>
       <div style="display:flex;gap:8px;">
@@ -225,10 +226,6 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
       <div class="ctitle"><span class="bar"></span>Players <span id="pcnt" style="font-size:13px;font-weight:400;color:var(--gray);margin-left:6px;"></span></div>
       <div id="plist"></div>
     </div>
-  </div>
-
-  <!-- PLANNER -->
-  <div class="pane" id="pane-planner">
     <div class="card">
       <div class="ctitle"><span class="bar"></span>Season Config</div>
       <div class="row2">
@@ -433,6 +430,16 @@ function switchSide(s){
 function initTabs(){
   document.querySelectorAll('.tab').forEach(t=>{
     t.addEventListener('click',()=>{
+      const dest=t.dataset.tab;
+      if(dest==='planner'){
+        _pinAction='planner';_pinEntry='';updatePinDots();
+        $('pin-error').textContent='';
+        $('pin-modal-title').textContent='Admin PIN';
+        $('pin-modal').classList.add('on');
+        // store the tab element for after PIN
+        window._pendingTab=t;
+        return;
+      }
       document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
       document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
       t.classList.add('on');
@@ -442,8 +449,10 @@ function initTabs(){
     });
   });
   document.querySelectorAll('#stbl th[data-sort]').forEach(th=>{
+    th.style.cursor='pointer';
     th.addEventListener('click',()=>{
-      sortK.key===th.dataset.sort?sortK.dir=sortK.dir==='asc'?'desc':'asc':(sortK={key:th.dataset.sort,dir:'desc'});
+      if(sortK.key===th.dataset.sort){sortK.dir=sortK.dir==='asc'?'desc':'asc';}
+      else{sortK={key:th.dataset.sort,dir:'desc'};}
       renderStandings();
     });
   });
@@ -453,8 +462,8 @@ function initTabs(){
 function refreshAll(){fillWeekSels();refreshTab(tab);}
 function refreshTab(t){
   if(t==='standings') renderStandings();
-  else if(t==='roster') renderRoster();
-  else if(t==='planner'){renderPlannerCfg();loadWeekDetail();}
+
+  else if(t==='planner'){renderRoster();renderPlannerCfg();loadWeekDetail();}
   else if(t==='score') loadLive();
 }
 
@@ -516,7 +525,7 @@ function renderStandings(){
   document.querySelectorAll('#stbl th[data-sort]').forEach(th=>{
     const isSorted=th.dataset.sort===sortK.key;
     th.classList.toggle('sorted',isSorted);
-    const labels={name:'Player',gp:'GP',w:'W',l:'L',pct:'%',diff:'+/-'};
+    const labels={pct:'Win%',diff:'+/-'};
     th.textContent=(labels[th.dataset.sort]||th.dataset.sort)+(isSorted?(sortK.dir==='asc'?' ▲':' ▼'):'');
   });
 }
@@ -569,9 +578,21 @@ function renderRoster(){
 function addPlayer(){
   const inp=$('new-name'),name=inp.value.trim();
   if(!name){toast('Enter a name');return;}
+  // Require admin PIN to add players
+  window._pendingPlayerName=name;
+  _pinAction='addplayer';_pinEntry='';updatePinDots();
+  $('pin-error').textContent='';
+  $('pin-modal-title').textContent='Admin PIN';
+  $('pin-modal').classList.add('on');
+}
+function _doAddPlayer(){
+  const name=window._pendingPlayerName;
+  if(!name)return;
   const id=gi('p');
   fbSet(SIDE+'/players/'+id,{id,name,active:true});
-  inp.value='';toast(name+' added!');
+  $('new-name').value='';
+  window._pendingPlayerName=null;
+  toast(name+' added!');
 }
 function removePlayer(id){const p=gP(id);if(p){fbDel(SIDE+'/players/'+id);toast(p.name+' removed');}}
 function toggleActive(id){const p=gP(id);if(p)fbSet(SIDE+'/players/'+id+'/active',p.active===false);}
@@ -1208,9 +1229,28 @@ function pinTap(v){
   else if(_pinEntry.length<4)_pinEntry+=v;
   updatePinDots();$('pin-error').textContent='';
   if(_pinEntry.length===4){
-    if(_pinEntry===ADMIN_PIN){$('pin-modal').classList.remove('on');_pinEntry='';updatePinDots();if(_pinAction==='cancel')doCancelNight();}
-    else{$('pin-error').textContent='Incorrect PIN';setTimeout(()=>{_pinEntry='';updatePinDots();$('pin-error').textContent='';},700);}
+    if(_pinEntry===ADMIN_PIN){
+      $('pin-modal').classList.remove('on');
+      _pinEntry='';updatePinDots();
+      if(_pinAction==='cancel') doCancelNight();
+      else if(_pinAction==='addplayer') _doAddPlayer();
+      else if(_pinAction==='planner') _openPlanner();
+    }else{
+      $('pin-error').textContent='Incorrect PIN';
+      setTimeout(()=>{_pinEntry='';updatePinDots();$('pin-error').textContent='';},700);
+    }
   }
+}
+function _openPlanner(){
+  const t=window._pendingTab;
+  if(!t)return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+  tab='planner';
+  $('pane-planner').classList.add('on');
+  refreshTab('planner');
+  window._pendingTab=null;
 }
 function updatePinDots(){for(let i=0;i<4;i++){const d=$('pd'+i);if(d)d.classList.toggle('filled',i<_pinEntry.length);}}
 function doCancelNight(){
