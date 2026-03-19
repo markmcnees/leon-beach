@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260319212001">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -989,6 +989,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div id="assign-edit-body"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeAssignEditModal()">Cancel</button>
+      <button class="btn btn-secondary" onclick="addAssignEditCourt()" style="background:var(--off-white);color:var(--charcoal);">+ Court</button>
       <button class="btn btn-blue" onclick="saveAssignEdit()">Save Changes</button>
     </div>
   </div>
@@ -4100,6 +4101,27 @@ function saveEmailPrefs(){
 }
 
 function closeAssignEditModal(){document.getElementById('assign-edit-modal').classList.remove('active');}
+function addAssignEditCourt(){
+  const i=window._editAssignCourtCount||0;
+  const nextCt=i+1;
+  const sortedP=[...D.players].sort((x,y)=>x.court-y.court||x.lastName.localeCompare(y.lastName));
+  function pOpts(){
+    return'<option value="">\u2014</option>'+sortedP.map(p=>`<option value="${p.id}">${p.firstName} ${p.lastName.charAt(0)}. (CT${p.court})</option>`).join('');
+  }
+  const div=document.createElement('div');
+  div.style.cssText='background:var(--off-white);border-radius:8px;padding:10px;margin-bottom:8px;';
+  div.innerHTML=`<div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;margin-bottom:6px;">
+    COURT <input type="number" id="ae-ct-${i}" value="${nextCt}" min="1" max="8"
+      style="width:44px;padding:3px;border:1px solid var(--gray-lighter);border-radius:4px;font-size:13px;font-weight:700;">
+  </div>
+  <div class="form-row">
+    <select class="form-select" id="ae-p1-${i}" style="padding:6px;font-size:12px;">${pOpts()}</select>
+    <select class="form-select" id="ae-p2-${i}" style="padding:6px;font-size:12px;">${pOpts()}</select>
+  </div>`;
+  document.getElementById('assign-edit-body').appendChild(div);
+  window._editAssignCourtCount=i+1;
+  toast('Court '+nextCt+' added');
+}
 function saveAssignEdit(){
   const id=window._editAssignId;if(!id)return;
   const a=D.assignments[id];if(!a)return;
