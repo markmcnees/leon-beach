@@ -444,9 +444,9 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="tab-content active" id="tab-dashboard">
 <div class="card"><div class="card-title"><span class="bar"></span> Season Overview</div>
       <div class="stat-grid cols-3">
-        <div class="stat-box"><div class="stat-number gold" id="dash-dual-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
-        <div class="stat-box"><div class="stat-number green" id="dash-gd-rec">0-0</div><div class="stat-label">Dual Sets</div></div>
-        <div class="stat-box"><div class="stat-number" id="dash-courts-rec">0-0</div><div class="stat-label">Court W-L</div></div>
+        <div class="stat-box"><div class="stat-number" style="color:var(--red);" id="dash-dual-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
+        <div class="stat-box"><div class="stat-number" style="color:var(--red);" id="dash-courts-rec">0-0</div><div class="stat-label">Match W-L</div></div>
+        <div class="stat-box"><div class="stat-number" style="color:var(--red);" id="dash-sets-rec">0-0</div><div class="stat-label">Sets W-L</div></div>
       </div>
     </div>
 <div class="card"><div class="card-title"><span class="bar"></span> Season Schedule <span style="font-size:11px;color:var(--gray);font-family:'Barlow';font-weight:600;letter-spacing:0;margin-left:8px;">via MaxPreps</span></div>
@@ -1677,6 +1677,7 @@ function renderDash(){
   const _dr=getDualRecord();
   const _drEl=document.getElementById('dash-dual-rec');if(_drEl)_drEl.textContent=_dr.w+'-'+_dr.l;
   const _crEl=document.getElementById('dash-courts-rec');if(_crEl)_crEl.textContent=_dr.cw+'-'+_dr.cl;
+  const _srEl=document.getElementById('dash-sets-rec');if(_srEl)_srEl.textContent=_dr.sw+'-'+_dr.sl;
   const totalQM=D.matches.length;
 
   // Game Day sets
@@ -1684,7 +1685,7 @@ function renderDash(){
   D.gamedays.forEach(m=>{gdDays.add(m.date);gdMatches++;
     (m.sets||[]).forEach(s=>{const su=s.scoreUs||0,st=s.scoreThem||0;gdPF+=su;gdPA+=st;su>st?gdSW++:gdSL++;});
   });
-  document.getElementById('dash-gd-rec').textContent=gdSW+'-'+gdSL;
+  const _gdRecEl=document.getElementById('dash-gd-rec');if(_gdRecEl)_gdRecEl.textContent=gdSW+'-'+gdSL;
 
   // Scrimmage sets
   let scSW=0,scSL=0;
@@ -5838,11 +5839,32 @@ function pgdSaveNotes(){
 // ============================================================
 function getDualRecord(){
   let w=0,l=0;
+  // Dual W-L: from schedule (dual-level wins)
   (D.schedule||[]).forEach(g=>{if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){parseInt(g.scoreUs)>parseInt(g.scoreThem)?w++:l++;}});
+
+  // Match W-L (court-level): sum scoreUs/scoreThem from schedule
   let cw=0,cl=0;
-  (D.duals||[]).forEach(d=>{(d.courts||[]).filter(c=>!c.isExhibition).forEach(c=>{const sw=(c.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length,sl=(c.sets||[]).filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;if(sw>sl)cw++;else if(sl>sw)cl++;});});
-  if(cw===0&&cl===0){(D.gamedays||[]).forEach(m=>{if(m.isExhibition||(m.court||0)>=6)return;const sets=m.sets||[];const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length,sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;if(sw>sl)cw++;else if(sl>sw)cl++;});}
-  return{w,l,cw,cl,total:w+l};
+  (D.schedule||[]).forEach(g=>{
+    if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){
+      cw+=parseInt(g.scoreUs)||0;
+      cl+=parseInt(g.scoreThem)||0;
+    }
+  });
+
+  // Sets W-L: from gameday individual set records
+  let sw=0,sl=0;
+  (D.gamedays||[]).forEach(m=>{
+    if(m.isExhibition||(m.court||0)>=6)return;
+    (m.sets||[]).forEach(s=>{
+      (s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++;
+    });
+  });
+  // Also count from structured duals if present
+  (D.duals||[]).forEach(d=>{(d.courts||[]).filter(c=>!c.isExhibition).forEach(c=>{
+    (c.sets||[]).forEach(s=>{(s.scoreUs||0)>(s.scoreThem||0)?sw++:sl++;});
+  });});
+
+  return{w,l,cw,cl,sw,sl,total:w+l};
 }
 
 // Build synthetic dual records from gamedays, grouped by date + opponent
