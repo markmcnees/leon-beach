@@ -291,6 +291,15 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
       <p style="font-size:13px;color:var(--gray);margin-bottom:12px;">Download the full season data as an Excel file — standings, all results, partner history, and weekly schedule.</p>
       <button class="btn btn-a btn-w" onclick="exportExcel()">📊 Export to Excel</button>
     </div>
+    <div class="card" style="border:2px solid #e4002b22;">
+      <div class="ctitle"><span class="bar" style="background:var(--loss);"></span>Close Season</div>
+      <p style="font-size:13px;color:var(--gray);margin-bottom:12px;">Archive this season's results and start fresh. Players are kept — weeks and results are cleared. Requires admin PIN.</p>
+      <button class="btn btn-w" style="background:#e4002b;color:#fff;" onclick="promptCloseSeason()">🏁 Close &amp; Archive Season</button>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="bar"></span>Past Seasons</div>
+      <div id="archive-list"><p style="font-size:13px;color:var(--gray);">Open this tab to load archives.</p></div>
+    </div>
   </div>
 
   <!-- SCORE (was Live) -->
@@ -400,6 +409,111 @@ function gP(id){return (D[SIDE].players||{})[id]||null;}
 function pN(id){const p=gP(id);return p?p.name:'?';}
 function closeModal(id){$(id).classList.remove('on');}
 
+
+// ─── SEASON MANAGEMENT ───
+function promptCloseSeason(){
+  const name=(D[SIDE].config.seasonName||'Season '+(new Date().getFullYear()));
+  const label=prompt('Name this season before archiving (e.g. "Spring 2025"):',name);
+  if(!label)return;
+  _pinAction='closeseason';window._pendingSeasonLabel=label;
+  _pinEntry='';updatePinDots();
+  $('pin-error').textContent='';
+  $('pin-modal-title').textContent='Admin PIN';
+  $('pin-modal').classList.add('on');
+}
+
+async function doCloseSeason(){
+  const label=window._pendingSeasonLabel;
+  if(!label)return;
+  const archKey='archive/'+label.replace(/[.#$/[\]]/g,'_')+'/'+SIDE;
+  const snap={
+    config:D[SIDE].config||{},
+    players:D[SIDE].players||{},
+    weeks:D[SIDE].weeks||{},
+    results:D[SIDE].results||{}
+  };
+  // Archive full season
+  await db.ref(DB_ROOT+'/'+archKey).set(snap);
+  // Clear weeks + results, keep players
+  await db.ref(DB_ROOT+'/'+SIDE+'/weeks').remove();
+  await db.ref(DB_ROOT+'/'+SIDE+'/results').remove();
+  // Reset config but preserve courts/day preferences
+  const oldCfg=D[SIDE].config||{};
+  await db.ref(DB_ROOT+'/'+SIDE+'/config').set({
+    courts:oldCfg.courts||2,
+    dayOfWeek:oldCfg.dayOfWeek??1,
+    winScore:oldCfg.winScore||15
+  });
+  window._pendingSeasonLabel=null;
+  toast('Season "'+label+'" archived! Set a new start date to begin.');
+  renderPlannerCfg();
+}
+
+function renderArchives(){
+  const cont=$('archive-list');
+  if(!cont)return;
+  if(!db){cont.innerHTML='<p style="color:var(--gray);font-size:13px;">Not connected.</p>';return;}
+  cont.innerHTML='<p style="font-size:13px;color:var(--gray);">Loading…</p>';
+  db.ref(DB_ROOT+'/archive').once('value',snap=>{
+    const arch=snap.val()||{};
+    const seasons=Object.keys(arch).sort().reverse();
+    if(!seasons.length){cont.innerHTML='<p style="font-size:13px;color:var(--gray);">No archived seasons yet.</p>';return;}
+    cont.innerHTML=seasons.map(name=>{
+      const sd=arch[name][SIDE]||{};
+      const players=Object.values(sd.players||{}).filter(p=>p&&p.name);
+      const results=Object.values(sd.results||{});
+      const wins=results.filter(r=>r.s1>r.s2).length;
+      const label=name.replace(/_/g,' ');
+      return `<div style="padding:12px 0;border-bottom:1px solid var(--sand-border);">
+        <div style="font-weight:700;font-size:14px;">${label}</div>
+        <div style="font-size:12px;color:var(--gray);margin-top:2px;">${players.length} players · ${results.length} games played</div>
+        <button class="btn btn-g btn-sm" style="margin-top:8px;" onclick="viewArchiveSeason('${name}')">📊 View Standings</button>
+      </div>`;
+    }).join('');
+  });
+}
+
+function viewArchiveSeason(name){
+  if(!db)return;
+  db.ref(DB_ROOT+'/archive/'+name+'/'+SIDE).once('value',snap=>{
+    const sd=snap.val()||{};
+    const players=Object.values(sd.players||{}).filter(p=>p&&p.name);
+    const results=Object.values(sd.results||{});
+    const stats={};
+    players.forEach(p=>{stats[p.id]={name:p.name,gp:0,w:0,l:0,pf:0,pa:0};});
+    results.forEach(r=>{
+      const process=(team,sf,sa)=>(team||[]).forEach(pid=>{
+        if(!stats[pid])stats[pid]={name:pid,gp:0,w:0,l:0,pf:0,pa:0};
+        stats[pid].gp++;stats[pid].pf+=sf;stats[pid].pa+=sa;
+        sf>sa?stats[pid].w++:stats[pid].l++;
+      });
+      process(r.t1,r.s1,r.s2);process(r.t2,r.s2,r.s1);
+    });
+    const rows=Object.values(stats).filter(p=>p.gp>0)
+      .sort((a,b)=>(b.w-b.l)-(a.w-a.l)||(b.pf-b.pa)-(a.pf-a.pa))
+      .map((p,i)=>`<tr><td>${i+1}</td><td style="font-weight:700;">${p.name}</td><td>${p.gp}</td><td>${p.w}</td><td>${p.l}</td><td style="font-weight:700;color:${p.pf-p.pa>=0?'var(--win)':'var(--loss)'};">${p.pf-p.pa>=0?'+':''}${p.pf-p.pa}</td></tr>`).join('');
+    const label=name.replace(/_/g,' ');
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;';
+    overlay.innerHTML=`<div style="background:#fff;border-radius:12px;padding:20px;max-width:420px;width:100%;max-height:85vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;">${label}</div>
+        <button onclick="this.closest('div[style]').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="font-size:11px;color:var(--gray);border-bottom:2px solid #eee;">
+          <th style="text-align:left;padding:6px 4px;">#</th>
+          <th style="text-align:left;padding:6px 4px;">Player</th>
+          <th style="padding:6px 4px;">GP</th><th style="padding:6px 4px;">W</th><th style="padding:6px 4px;">L</th>
+          <th style="padding:6px 4px;">+/-</th>
+        </tr></thead>
+        <tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:#aaa;padding:16px;">No results recorded</td></tr>'}</tbody>
+      </table>
+    </div>`;
+    document.body.appendChild(overlay);
+  });
+}
+
 // ─── FIREBASE INIT ───
 function initFB(){
   try{
@@ -472,7 +586,7 @@ function refreshAll(){fillWeekSels();refreshTab(tab);}
 function refreshTab(t){
   if(t==='standings') renderStandings();
 
-  else if(t==='planner'){renderRoster();renderPlannerCfg();loadWeekDetail();}
+  else if(t==='planner'){renderRoster();renderPlannerCfg();loadWeekDetail();renderArchives();}
   else if(t==='score') loadLive();
 }
 
@@ -780,6 +894,14 @@ async function genNight(){
   const playerList=pool.map(p=>p.id+':'+p.name+(p.isSub?' (SUB for '+pN(p.forId)+')':'')).join(', ');
   const pSummary=pool.map(p=>`${p.name}(${p.id}) paired with: ${Object.entries(pCounts[p.id]||{}).filter(([,c])=>c>0).map(([id,c])=>pN(id)||id+' x'+c).join(', ')||'nobody yet'}`).join('\n');
 
+  // Rounds needed so every player gets exactly 6 games
+  const TARGET_GAMES=6;
+  const slotsPerRound=courts*4;
+  const totalRounds=pool.length<=slotsPerRound
+    ? TARGET_GAMES
+    : Math.ceil(pool.length*TARGET_GAMES/slotsPerRound);
+  const sitPerRound=Math.max(0,pool.length-slotsPerRound);
+
   const prompt=`You are scheduling a King/Queen of the Beach recreational league night.
 
 PLAYERS TONIGHT (${pool.length} players, ${courts} courts):
@@ -790,9 +912,10 @@ ${pSummary}
 
 RULES:
 - Each round: ${courts} courts running simultaneously. Each court = 2v2 (4 players per court).
-- Active per round: ${courts*4} players. Sitting out: ${Math.max(0,pool.length-courts*4)} per round.
-- Generate EXACTLY 6 rounds.
-- Rotate sitting-out players so everyone sits roughly equally.
+- Active per round: ${slotsPerRound} players. Sitting out: ${sitPerRound} per round.
+- Generate EXACTLY ${totalRounds} rounds.
+- PRIMARY GOAL: every player must play exactly ${TARGET_GAMES} games total.
+- Distribute sit-outs evenly — each player sits out roughly ${totalRounds-TARGET_GAMES} times.
 - NEVER pair the same two players together twice in one night if possible.
 - Maximize partner variety — reference history above.
 - SUB players: include them in matchups normally. Track by their given IDs.
@@ -800,14 +923,14 @@ RULES:
 Return ONLY a valid JSON array — no explanation, no markdown:
 [
   {"round":1,"courts":[{"court":1,"t1":["id1","id2"],"t2":["id3","id4"]},{"court":2,"t1":["id5","id6"],"t2":["id7","id8"]}],"sitting":["id9","id10"]},
-  ...6 rounds total
+  ...${totalRounds} rounds total
 ]
 
 Use the exact player IDs provided. Return only the JSON array.`;
 
   try{
     const res=await fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const text=data.content?.map(c=>c.text||'').join('')||'';
     let parsed;
@@ -1300,6 +1423,7 @@ function pinTap(v){
       $('pin-modal').classList.remove('on');
       _pinEntry='';updatePinDots();
       if(_pinAction==='cancel') doCancelNight();
+      else if(_pinAction==='closeseason') doCloseSeason();
       else if(_pinAction==='addplayer') _doAddPlayer();
       else if(_pinAction==='planner') _openPlanner();
     }else{
