@@ -434,9 +434,10 @@ async function doCloseSeason(){
   };
   // Archive full season
   await db.ref(DB_ROOT+'/'+archKey).set(snap);
-  // Clear weeks + results, keep players
+  // Clear weeks, results, and players — new season starts fresh
   await db.ref(DB_ROOT+'/'+SIDE+'/weeks').remove();
   await db.ref(DB_ROOT+'/'+SIDE+'/results').remove();
+  await db.ref(DB_ROOT+'/'+SIDE+'/players').remove();
   // Reset config but preserve courts/day preferences
   const oldCfg=D[SIDE].config||{};
   await db.ref(DB_ROOT+'/'+SIDE+'/config').set({
