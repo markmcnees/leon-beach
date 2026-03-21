@@ -1,0 +1,22 @@
+name: Fetch MaxPreps Standings
+
+on:
+  schedule:
+    # Runs every day at 3:00 AM Eastern (07:00 UTC)
+    - cron: '0 7 * * *'
+  workflow_dispatch:   # allows manual trigger from GitHub Actions tab
+
+jobs:
+  fetch-standings:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch standings and write to Firebase
+        run: python scripts/fetch_standings.py
