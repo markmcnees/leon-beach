@@ -5,7 +5,7 @@ Fields confirmed: overallWins, overallLosses (integers), schoolName (string).
 No schoolId on these pages — match by name.
 """
 
-import json, re, sys, time, urllib.request
+import json, re, sys, time, urllib.request, urllib.parse
 
 FIREBASE_BASE = 'https://leon-beach-volleyball-default-rtdb.firebaseio.com/leon_queens_matches/standings'
 
@@ -95,8 +95,9 @@ def find_team(all_rows, fragments):
     return None
 
 def write_team(name, w, l):
-    key = safe_key(name)
-    url = f'{FIREBASE_BASE}/{key}.json'
+    # URL-encode the name for use as Firebase key (preserves spaces as %20)
+    encoded = urllib.parse.quote(name, safe='')
+    url = f'{FIREBASE_BASE}/{encoded}.json'
     payload = json.dumps({'w': w, 'l': l, 'name': name}).encode('utf-8')
     req = urllib.request.Request(url, data=payload, method='PUT',
                                   headers={'Content-Type': 'application/json'})
