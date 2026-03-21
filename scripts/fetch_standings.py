@@ -22,21 +22,21 @@ CLASS_PAGES = [
 
 # display name → (name fragments for class page matching, individual schedule URL)
 TARGET_TEAMS = {
-    'Chiles':                      (['chiles'],                    'https://www.maxpreps.com/fl/tallahassee/chiles-timberwolves/beach-volleyball/'),
-    'Lincoln':                     (['lincoln'],                   'https://www.maxpreps.com/fl/tallahassee/lincoln-trojans/beach-volleyball/'),
-    'Godby':                       (['godby'],                     'https://www.maxpreps.com/fl/tallahassee/godby-cougars/beach-volleyball/'),
-    'Rickards':                    (['rickards'],                  'https://www.maxpreps.com/fl/tallahassee/rickards-raiders/beach-volleyball/'),
-    'Maclay':                      (['maclay'],                    'https://www.maxpreps.com/fl/tallahassee/maclay-marauders/beach-volleyball/'),
-    'Florida State University HS': (['florida state university'],  'https://www.maxpreps.com/fl/tallahassee/florida-state-university-high-school-flying-high/beach-volleyball/'),
-    'Wakulla':                     (['wakulla'],                   'https://www.maxpreps.com/fl/crawfordville/wakulla-warriors/beach-volleyball/'),
-    'Munroe':                      (['munroe'],                    'https://www.maxpreps.com/fl/quincy/munroe-bobcats/beach-volleyball/'),
-    'Community Christian':         (['community christian'],       'https://www.maxpreps.com/fl/tallahassee/community-christian-chargers/beach-volleyball/'),
-    'Gulf Breeze':                 (['gulf breeze'],               'https://www.maxpreps.com/fl/gulf-breeze/gulf-breeze-dolphins/beach-volleyball/'),
-    'South Walton':                (['south walton'],              'https://www.maxpreps.com/fl/santa-rosa-beach/south-walton-seahawks/beach-volleyball/'),
-    'Mosley':                      (['mosley'],                    'https://www.maxpreps.com/fl/lynn-haven/mosley-dolphins/beach-volleyball/'),
-    'Sneads':                      (['sneads'],                    'https://www.maxpreps.com/fl/sneads/sneads-pirates/beach-volleyball/'),
-    'Destin':                      (['destin'],                    'https://www.maxpreps.com/fl/destin/destin-sharks/beach-volleyball/'),
-    'St- John Paul II':            (['john paul', 'jp ii'],        'https://www.maxpreps.com/fl/tallahassee/john-paul-ii-panthers/beach-volleyball/'),
+    'Chiles':                      (['chiles'],                    'https://www.maxpreps.com/fl/tallahassee/chiles-timberwolves/beach-volleyball/standings/'),
+    'Lincoln':                     (['lincoln'],                   'https://www.maxpreps.com/fl/tallahassee/lincoln-trojans/beach-volleyball/standings/'),
+    'Godby':                       (['godby'],                     'https://www.maxpreps.com/fl/tallahassee/godby-cougars/beach-volleyball/standings/'),
+    'Rickards':                    (['rickards'],                  'https://www.maxpreps.com/fl/tallahassee/rickards-raiders/beach-volleyball/standings/'),
+    'Maclay':                      (['maclay'],                    'https://www.maxpreps.com/fl/tallahassee/maclay-marauders/beach-volleyball/standings/'),
+    'Florida State University HS': (['florida state university'],  'https://www.maxpreps.com/fl/tallahassee/florida-state-university-high-school-flying-high/beach-volleyball/standings/'),
+    'Wakulla':                     (['wakulla'],                   'https://www.maxpreps.com/fl/crawfordville/wakulla-warriors/beach-volleyball/standings/'),
+    'Munroe':                      (['munroe'],                    'https://www.maxpreps.com/fl/quincy/munroe-bobcats/beach-volleyball/standings/'),
+    'Community Christian':         (['community christian'],       'https://www.maxpreps.com/fl/tallahassee/community-christian-chargers/beach-volleyball/standings/'),
+    'Gulf Breeze':                 (['gulf breeze'],               'https://www.maxpreps.com/fl/gulf-breeze/gulf-breeze-dolphins/beach-volleyball/standings/'),
+    'South Walton':                (['south walton'],              'https://www.maxpreps.com/fl/santa-rosa-beach/south-walton-seahawks/beach-volleyball/standings/'),
+    'Mosley':                      (['mosley'],                    'https://www.maxpreps.com/fl/lynn-haven/mosley-dolphins/beach-volleyball/standings/'),
+    'Sneads':                      (['sneads'],                    'https://www.maxpreps.com/fl/sneads/sneads-pirates/beach-volleyball/standings/'),
+    'Destin':                      (['destin'],                    'https://www.maxpreps.com/fl/destin/destin-sharks/beach-volleyball/standings/'),
+    'St- John Paul II':            (['john paul', 'jp ii'],        'https://www.maxpreps.com/fl/tallahassee/john-paul-ii-panthers/beach-volleyball/standings/'),
 }
 
 def fetch(url):
@@ -75,53 +75,46 @@ def extract_class_page(html, label):
     print(f'  [{label}] all names: {sorted(fl_teams)}')
     return results
 
+def parse_wlt(wlt_str):
+    """Parse 'W-L-T' string like '6-3-0' -> (6, 3)"""
+    if not wlt_str: return None
+    parts = str(wlt_str).split('-')
+    if len(parts) >= 2:
+        try: return int(parts[0]), int(parts[1])
+        except: pass
+    return None
+
 def extract_schedule_record(html):
-    """Get overall W-L from a team's schedule/home page."""
+    """Get overall W-L from a team's standings page using overallWinLossTies."""
     nd = get_next_data(html)
     pp = (nd.get('props') or {}).get('pageProps') or {}
+    sd = pp.get('standingsData') or {}
+    sections = sd.get('standingSections') or []
+    school_id = sd.get('schoolId')
 
-    # Try teamRecord or similar
-    for key in ('teamRecord', 'overallRecord', 'seasonRecord', 'record'):
-        rec = pp.get(key)
-        if isinstance(rec, dict):
-            w = int(rec.get('wins') or rec.get('overallWins') or rec.get('w') or 0)
-            l = int(rec.get('losses') or rec.get('overallLosses') or rec.get('l') or 0)
-            if w or l: return w, l
+    all_rows = []
+    for section in sections:
+        for key in ('teams', 'standings', 'rows', 'entries'):
+            rows = section.get(key)
+            if isinstance(rows, list):
+                all_rows.extend(rows)
+                break
 
-    # Try teamContext
-    tc = pp.get('teamContext') or {}
-    for key in ('overallRecord', 'record', 'teamRecord'):
-        rec = tc.get(key)
-        if isinstance(rec, dict):
-            w = int(rec.get('wins') or rec.get('w') or 0)
-            l = int(rec.get('losses') or rec.get('l') or 0)
-            if w or l: return w, l
-
-    # Try scheduleData — count wins/losses from schedule entries
-    sd = pp.get('scheduleData') or pp.get('schedule') or []
-    if isinstance(sd, list):
-        w = sum(1 for g in sd if isinstance(g, dict) and str(g.get('result','')).upper().startswith('W'))
-        l = sum(1 for g in sd if isinstance(g, dict) and str(g.get('result','')).upper().startswith('L'))
-        if w or l: return w, l
-
-    # Deep search for wins/losses integers near schoolName
-    def find_record(obj, depth=0):
-        if depth > 6 or not isinstance(obj, dict): return None
-        w = obj.get('overallWins') or obj.get('wins') or obj.get('w')
-        l = obj.get('overallLosses') or obj.get('losses') or obj.get('l')
-        if w is not None and l is not None:
-            try:
-                wi, li = int(w), int(l)
-                if wi or li: return wi, li
-            except: pass
-        for v in obj.values():
-            if isinstance(v, dict):
-                r = find_record(v, depth+1)
-                if r: return r
+    if not all_rows:
         return None
 
-    r = find_record(pp)
-    if r: return r
+    # Match by schoolId first
+    if school_id:
+        for t in all_rows:
+            if t.get('schoolId') == school_id:
+                rec = parse_wlt(t.get('overallWinLossTies'))
+                if rec: return rec
+
+    # Fallback: first row with a non-zero record
+    for t in all_rows:
+        rec = parse_wlt(t.get('overallWinLossTies'))
+        if rec and (rec[0] or rec[1]): return rec
+
     return None
 
 def find_in_class(all_rows, fragments):
