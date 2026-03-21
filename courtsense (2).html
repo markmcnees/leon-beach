@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CourtSense IQ — Level 1 | Leon Queens</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red:#e4002b; --dark-red:#b5001f; --cream:#f7f4f0;
+  --gold:#d4a843; --dark:#1a1a1a; --light:#888;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow-x:hidden;}
+body{font-family:'Barlow',sans-serif;background:var(--dark);color:var(--cream);min-height:100vh;}
+
+/* HEADER */
+header{background:var(--red);padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:3px solid var(--gold);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:#fff;line-height:1;}
+.logo span{color:var(--gold);}
+.logo-sub{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:rgba(255,255,255,0.65);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.hdr-spc{flex:1;}
+.score-badge{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;text-align:center;}
+.score-badge .snum{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:2px;line-height:1;}
+.score-badge .slbl{font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase;}
+
+/* LEVEL + PROGRESS */
+.level-strip{background:#111;border-bottom:1px solid #2a2a2a;padding:6px 18px;display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+.lpip{width:7px;height:7px;border-radius:50%;background:var(--gold);}
+.lpip.off{background:#333;}
+.prog-wrap{background:#0e0e0e;height:4px;}
+.prog-bar{height:4px;background:linear-gradient(90deg,var(--gold),var(--red));transition:width .5s ease;}
+
+/* MAIN APP */
+.app{max-width:620px;margin:0 auto;padding:18px 14px 60px;}
+
+/* PHASE LABEL */
+.phase-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.phase-dot{width:8px;height:8px;border-radius:50%;}
+
+/* Q META */
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.q-cat{background:var(--red);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;padding:3px 9px;border-radius:3px;text-transform:uppercase;}
+.q-num{margin-left:auto;font-size:12px;color:var(--light);}
+.scenario-text{font-size:14px;font-weight:500;line-height:1.55;margin-bottom:14px;color:#ccc;}
+
+/* COURT WRAPPER */
+#court-wrap{position:relative;width:100%;max-width:400px;margin:0 auto 16px;/* height set by JS */}
+#court-svg{display:block;width:100%;position:absolute;top:0;left:0;}
+
+/* STAGING AREA */
+#staging-area{position:absolute;left:0;right:0;/* top set by JS */display:flex;align-items:center;justify-content:space-around;padding:0 30px;}
+#staging-area .stg-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;color:#888;text-transform:uppercase;text-align:center;margin-top:52px;}
+
+/* TOKENS */
+.token{
+  position:absolute;
+  width:44px;height:44px;
+  border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:11px;color:#fff;
+  cursor:grab;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  transform:translate(-50%,-50%);
+  border:2.5px solid #fff;
+  transition:box-shadow .15s, border-color .15s;
+  z-index:20;
+  box-shadow:0 2px 8px rgba(0,0,0,0.5);
+}
+.token:active{cursor:grabbing;}
+.token .tok-lbl{font-size:12px;line-height:1;}
+.token .tok-sub{font-family:'Barlow Condensed',sans-serif;font-size:7px;letter-spacing:1px;opacity:0.85;line-height:1;margin-top:1px;}
+.token.on-court{box-shadow:0 0 0 3px rgba(255,255,255,0.4),0 2px 12px rgba(0,0,0,0.6);}
+.token.result-correct{border-color:#4caf50;box-shadow:0 0 0 3px rgba(76,175,80,0.5);}
+.token.result-wrong{border-color:#e4002b;box-shadow:0 0 0 3px rgba(228,0,43,0.5);}
+.token.frozen{cursor:default;pointer-events:none;}
+
+/* INSTRUCTION BOX */
+.instruct-box{background:#131318;border:1px solid #2a2a2a;border-left:4px solid var(--gold);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#aaa;line-height:1.5;}
+.instruct-box strong{color:var(--gold);}
+
+/* PLACEMENT STATUS */
+.place-status{display:flex;gap:10px;justify-content:center;margin-bottom:12px;}
+.place-pip{background:#1c1c1c;border:1px solid #333;border-radius:20px;padding:5px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:#666;text-transform:uppercase;transition:all .2s;}
+.place-pip.placed{border-color:var(--gold);color:var(--gold);}
+
+/* CONFIRM BUTTON */
+.confirm-btn{display:block;width:100%;background:#222;border:2px solid #444;border-radius:8px;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:#555;cursor:not-allowed;transition:all .2s;margin-bottom:18px;}
+.confirm-btn.ready{background:var(--red);border-color:var(--red);color:#fff;cursor:pointer;}
+.confirm-btn.ready:hover{background:var(--dark-red);}
+
+/* PLACEMENT RESULT BANNER */
+.placement-banner{display:none;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;line-height:1.6;}
+.placement-banner.show{display:block;animation:fadeUp .3s ease;}
+.placement-banner.all-correct{background:rgba(76,175,80,0.12);border:1px solid rgba(76,175,80,0.3);}
+.placement-banner.partial{background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.25);}
+.placement-banner.all-wrong{background:rgba(228,0,43,0.08);border:1px solid rgba(228,0,43,0.2);}
+.placement-banner .pb-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:1px;font-weight:700;text-transform:uppercase;margin-bottom:6px;}
+.placement-banner .hint-row{display:flex;gap:8px;align-items:flex-start;margin-top:5px;font-size:12px;color:#bbb;}
+.hint-icon{flex-shrink:0;font-size:14px;margin-top:1px;}
+
+/* MCQ */
+.question-text{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:12px;line-height:1.35;}
+.choices{display:flex;flex-direction:column;gap:9px;margin-bottom:14px;}
+.choice-btn{background:#1c1c1c;border:2px solid #303030;border-radius:9px;padding:12px 14px;text-align:left;cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:10px;color:var(--cream);font-family:'Barlow',sans-serif;font-size:14px;font-weight:500;line-height:1.4;}
+.choice-btn:hover:not(:disabled){border-color:var(--gold);background:#232318;transform:translateX(3px);}
+.choice-ltr{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold);min-width:16px;margin-top:-1px;flex-shrink:0;}
+.choice-icon{margin-left:auto;font-size:15px;display:none;flex-shrink:0;}
+.choice-btn.correct{border-color:#4caf50;background:rgba(76,175,80,0.1);}
+.choice-btn.correct .choice-icon,.choice-btn.wrong .choice-icon{display:block;}
+.choice-btn.correct .choice-ltr{color:#4caf50;}
+.choice-btn.wrong{border-color:var(--red);background:rgba(228,0,43,0.07);}
+.choice-btn.wrong .choice-ltr{color:var(--red);}
+.choice-btn.dimmed{opacity:.3;}
+.choice-btn:disabled{cursor:default;transform:none!important;}
+
+/* EXPLANATION */
+.explanation{display:none;background:#141420;border-left:4px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 14px;font-size:13px;line-height:1.65;color:#bbb;margin-bottom:15px;}
+.explanation.show{display:block;animation:fadeUp .3s ease;}
+.explanation strong{color:var(--gold);}
+.explanation em{color:#ddd;font-style:normal;font-weight:600;}
+
+/* NEXT BTN */
+.next-btn{display:none;background:var(--red);color:#fff;border:none;border-radius:8px;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;cursor:pointer;width:100%;transition:background .2s;}
+.next-btn:hover{background:var(--dark-red);}
+.next-btn.show{display:block;animation:fadeUp .25s ease;}
+
+/* RESULT SCREEN */
+.result-screen{display:none;text-align:center;padding:10px 0 20px;}
+.result-screen.show{display:block;animation:fadeUp .5s ease;}
+.result-grade{font-family:'Bebas Neue',sans-serif;font-size:88px;line-height:1;color:var(--gold);text-shadow:0 0 50px rgba(212,168,67,0.3);}
+.result-label{font-family:'Barlow Condensed',sans-serif;font-size:20px;letter-spacing:3px;text-transform:uppercase;color:var(--cream);margin:4px 0 6px;}
+.result-sub{font-size:13px;color:var(--light);margin-bottom:24px;line-height:1.5;}
+.result-breakdown{background:#0f0f0f;border:1px solid #2a2a2a;border-radius:10px;padding:18px;margin-bottom:22px;text-align:left;}
+.result-breakdown h3{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.cat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;}
+.cat-name{color:#999;min-width:130px;font-family:'Barlow Condensed',sans-serif;}
+.cat-bar-wrap{flex:1;background:#222;border-radius:4px;height:7px;}
+.cat-bar{height:7px;border-radius:4px;transition:width 1s ease;}
+.cat-score{color:var(--cream);min-width:36px;text-align:right;font-weight:700;}
+.retry-btn{background:transparent;border:2px solid var(--gold);color:var(--gold);border-radius:8px;padding:13px 28px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:6px;}
+.retry-btn:hover{background:var(--gold);color:var(--dark);}
+
+.q-wrap{animation:fadeUp .35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){
+  .scenario-text{font-size:13px;}
+  .question-text{font-size:16px;}
+  .choice-btn{font-size:13px;padding:11px 12px;}
+  .result-grade{font-size:70px;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="logo">Court<span>Sense</span> IQ</div>
+    <div class="logo-sub">Leon Queens — Level 1: Fundamentals</div>
+  </div>
+  <div class="hdr-spc"></div>
+  <div class="score-badge">
+    <div class="snum" id="score-display">0</div>
+    <div class="slbl">correct</div>
+  </div>
+</header>
+<div class="level-strip"><div class="lpip"></div>LEVEL 1<div class="lpip off" style="margin-left:4px"></div><div class="lpip off"></div></div>
+<div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+<div class="app" id="app"></div>
+
+<script>
+// ─── SVG HELPERS ─────────────────────────────────────────────
+const W=260,H=360;
+const LEON='#e4002b', OPP='#1565C0', GOLD='#d4a843';
+
+function windSVG(dir,str){
+  const cols={light:'#87ceeb',mod:'#5ba8e0',strong:'#2070c0'};
+  const lws={light:1.2,mod:1.8,strong:2.6};
+  const col=cols[str]||'#87ceeb', lw=lws[str]||1.5;
+  const lbl={light:'LIGHT',mod:'MODERATE',strong:'STRONG'}[str]||'WIND';
+  const dm={right:{dx:1,dy:0},left:{dx:-1,dy:0},toward:{dx:0,dy:1},away:{dx:0,dy:-1},'diag-r':{dx:.7,dy:.7},'diag-l':{dx:-.7,dy:.7}};
+  const d=dm[dir]||dm.right;
+  const len=30, ox=223, oy=32;
+  const x2=ox+d.dx*len, y2=oy+d.dy*len;
+  const ux=d.dx, uy=d.dy;
+  const hx=x2-ux*9, hy=y2-uy*9;
+  const cnt=str==='strong'?3:str==='mod'?2:1;
+  let ls='';
+  for(let i=0;i<cnt;i++){const off=(i-(cnt-1)/2)*3.5,px=-uy*off,py=ux*off;ls+=`<line x1="${ox+px}" y1="${oy+py}" x2="${hx+px}" y2="${hy+py}" stroke="${col}" stroke-width="${lw}" opacity="0.85"/>`;}
+  return `<g><rect x="195" y="19" width="60" height="28" rx="4" fill="rgba(0,0,0,0.5)"/>
+    <text x="225" y="28" text-anchor="middle" fill="${col}" font-size="7.5" font-family="Barlow Condensed" font-weight="700" letter-spacing="1">WIND</text>
+    <text x="225" y="38" text-anchor="middle" fill="${col}" font-size="7" font-family="Barlow Condensed" letter-spacing="0.5">${lbl}</text>
+    ${ls}<polygon points="${x2},${y2} ${hx-uy*4},${hy+ux*4} ${hx+uy*4},${hy-ux*4}" fill="${col}" opacity="0.85"/>
+  </g>`;
+}
+
+function buildCourtSVG(q, overlays=[]){
+  // base court
+  const base=`<defs><pattern id="sp" width="5" height="5" patternUnits="userSpaceOnUse">
+    <rect width="5" height="5" fill="#b89a62"/>
+    <circle cx="1.2" cy="1.2" r="0.5" fill="#a07840" opacity="0.4"/>
+    <circle cx="3.5" cy="3.8" r="0.35" fill="#ccb06a" opacity="0.35"/>
+  </pattern></defs>
+  <rect width="${W}" height="${H}" fill="url(#sp)" rx="3"/>
+  <rect x="20" y="20" width="${W-40}" height="${H-40}" fill="none" stroke="#fff" stroke-width="2.5" rx="2"/>
+  <line x1="20" y1="${H/2}" x2="${W-20}" y2="${H/2}" stroke="#2a2a2a" stroke-width="6"/>
+  <line x1="20" y1="${H/2}" x2="${W-20}" y2="${H/2}" stroke="#e8c840" stroke-width="2.5" stroke-dasharray="7,4" opacity="0.85"/>
+  <line x1="20" y1="126" x2="${W-20}" y2="126" stroke="#fff" stroke-width="1" stroke-dasharray="4,4" opacity="0.28"/>
+  <line x1="20" y1="234" x2="${W-20}" y2="234" stroke="#fff" stroke-width="1" stroke-dasharray="4,4" opacity="0.28"/>
+  <line x1="${W/2}" y1="20" x2="${W/2}" y2="${H-20}" stroke="#fff" stroke-width="0.8" opacity="0.12"/>
+  <text x="${W/2}" y="13" text-anchor="middle" fill="#888" font-size="8" font-family="Barlow Condensed" letter-spacing="1">OPPONENT</text>
+  <text x="${W/2}" y="${H-4}" text-anchor="middle" fill="#888" font-size="8" font-family="Barlow Condensed" letter-spacing="1">YOUR SIDE</text>
+  <!-- Zone numbers YOUR side (below net) -->
+  <text x="28"  y="193" text-anchor="middle" fill="#d4a843" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.75">1</text>
+  <text x="75"  y="193" text-anchor="middle" fill="#d4a843" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.75">2</text>
+  <text x="130" y="193" text-anchor="middle" fill="#d4a843" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.75">3</text>
+  <text x="185" y="193" text-anchor="middle" fill="#d4a843" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.75">4</text>
+  <text x="232" y="193" text-anchor="middle" fill="#d4a843" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.75">5</text>
+  <!-- Zone numbers OPPONENT side (above net) -->
+  <text x="28"  y="172" text-anchor="middle" fill="#5ba8e0" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.6">1</text>
+  <text x="75"  y="172" text-anchor="middle" fill="#5ba8e0" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.6">2</text>
+  <text x="130" y="172" text-anchor="middle" fill="#5ba8e0" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.6">3</text>
+  <text x="185" y="172" text-anchor="middle" fill="#5ba8e0" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.6">4</text>
+  <text x="232" y="172" text-anchor="middle" fill="#5ba8e0" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.6">5</text>`;
+  // wind
+  const wind=(q.wind)?windSVG(q.wind[0],q.wind[1]):'';
+  // decorations
+  const decs=q.decs.map(renderDec).join('\n');
+  // opponents
+  const opps=q.opps.map(o=>oppPlayer(o.x,o.y,o.lbl,o.sub||'')).join('\n');
+
+  return `<svg id="court-svg" class="court-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
+    ${base}${wind}${decs}${opps}
+    ${overlays.join('\n')}
+  </svg>`;
+}
+
+function renderDec(d){
+  if(d.t==='ball') return `<g><circle cx="${d.x}" cy="${d.y}" r="7" fill="#fffde7" stroke="#e0c060" stroke-width="1.5"/><ellipse cx="${d.x}" cy="${d.y}" rx="4" ry="7" fill="none" stroke="#d4b840" stroke-width="0.8" opacity="0.6"/><ellipse cx="${d.x}" cy="${d.y}" rx="7" ry="3" fill="none" stroke="#d4b840" stroke-width="0.8" opacity="0.6"/></g>`;
+  if(d.t==='zone') return `<g><rect x="${d.x}" y="${d.y}" width="${d.w}" height="${d.h}" fill="${d.c}" opacity="${d.op||0.15}" rx="3"/>${d.lbl?`<text x="${d.x+d.w/2}" y="${d.y+d.h/2}" text-anchor="middle" dominant-baseline="middle" fill="${d.c}" font-size="8.5" font-family="Barlow Condensed" font-weight="700" opacity="0.9">${d.lbl}</text>`:''}</g>`;
+  if(d.t==='arrow'){const dx=d.x2-d.x1,dy=d.y2-d.y1,len=Math.sqrt(dx*dx+dy*dy),ux=dx/len,uy=dy/len,hx=d.x2-ux*11,hy=d.y2-uy*11,da=d.dsh?'stroke-dasharray="6,3"':'',lx=(d.x1+d.x2)/2,ly=(d.y1+d.y2)/2;return `<g><line x1="${d.x1}" y1="${d.y1}" x2="${hx}" y2="${hy}" stroke="${d.c||'#fff'}" stroke-width="1.8" ${da} opacity="0.9"/><polygon points="${d.x2},${d.y2} ${hx-uy*4},${hy+ux*4} ${hx+uy*4},${hy-ux*4}" fill="${d.c||'#fff'}" opacity="0.9"/>${d.lbl?`<rect x="${lx-18}" y="${ly-8}" width="36" height="13" fill="rgba(0,0,0,0.6)" rx="3"/><text x="${lx}" y="${ly+1}" text-anchor="middle" dominant-baseline="middle" fill="${d.c||'#fff'}" font-size="8" font-family="Barlow Condensed" font-weight="700">${d.lbl}</text>`:''}</g>`;}
+  if(d.t==='text') return `<text x="${d.x}" y="${d.y}" text-anchor="${d.anchor||'middle'}" fill="${d.c||'#aaa'}" font-size="${d.fs||9}" font-family="Barlow Condensed" font-weight="${d.fw||'600'}" opacity="${d.op||1}">${d.txt}</text>`;
+  if(d.t==='playerdown') return `<g><ellipse cx="${d.x}" cy="${d.y}" rx="19" ry="10" fill="${OPP}" stroke="#fff" stroke-width="1.5" opacity="0.85"/><text x="${d.x}" y="${d.y+1}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7" font-family="Barlow Condensed" font-weight="700">${d.lbl}</text><text x="${d.x}" y="${d.y+20}" text-anchor="middle" fill="${OPP}" font-size="7" font-family="Barlow Condensed">▼ DOWN</text></g>`;
+  return '';
+}
+
+function oppPlayer(x,y,lbl,sub){
+  return `<g><circle cx="${x}" cy="${y}" r="12" fill="${OPP}" stroke="#fff" stroke-width="2"/>
+    <text x="${x}" y="${y+1}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7.5" font-family="Barlow Condensed" font-weight="700">${lbl}</text>
+    ${sub?`<text x="${x}" y="${y+21}" text-anchor="middle" fill="${OPP}" font-size="7.5" font-family="Barlow Condensed" font-weight="600">${sub}</text>`:''}
+  </g>`;
+}
+
+function placementOverlay(leon, placedSVGX, placedSVGY, correct){
+  const cx=leon.cx, cy=leon.cy;
+  const els=[];
+  if(correct){
+    els.push(`<circle cx="${cx}" cy="${cy}" r="18" fill="none" stroke="#4caf50" stroke-width="2.5" opacity="0.9" stroke-dasharray="5,2"/>`);
+    els.push(`<text x="${cx}" y="${cy+1}" text-anchor="middle" dominant-baseline="middle" fill="#4caf50" font-size="16">✓</text>`);
+  } else {
+    // correct position ghost
+    els.push(`<circle cx="${cx}" cy="${cy}" r="20" fill="#4caf50" opacity="0.1" stroke="#4caf50" stroke-width="2" stroke-dasharray="5,3"/>`);
+    els.push(`<text x="${cx}" y="${cy+30}" text-anchor="middle" fill="#4caf50" font-size="7.5" font-family="Barlow Condensed" font-weight="700">SHOULD BE</text>`);
+    // arrow from placed to correct
+    if(placedSVGX!==null && placedSVGY!==null){
+      const dx=cx-placedSVGX, dy=cy-placedSVGY, len=Math.sqrt(dx*dx+dy*dy);
+      if(len>8){
+        const ux=dx/len, uy=dy/len;
+        const ax1=placedSVGX+ux*16, ay1=placedSVGY+uy*16;
+        const ax2=cx-ux*18, ay2=cy-uy*18;
+        const hx=ax2-ux*10, hy=ay2-uy*10;
+        els.push(`<line x1="${ax1}" y1="${ay1}" x2="${hx}" y2="${hy}" stroke="#4caf50" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.8"/>`);
+        els.push(`<polygon points="${ax2},${ay2} ${hx-uy*3.5},${hy+ux*3.5} ${hx+uy*3.5},${hy-ux*3.5}" fill="#4caf50" opacity="0.8"/>`);
+      }
+    }
+  }
+  return els.join('\n');
+}
+
+// ─── QUESTIONS DATA ────────────────────────────────────────────
+const QUESTIONS=[
+  // Q1 ─ Line/Cross Defense
+  {
+    cat:'Defense',
+    scenario:'Your BLOCKER has called LINE and is set at the left sideline near the net. The opponent hitter is right-handed, loading on their right side. Moderate wind blowing left to right.',
+    instruct:'Place YOUR BLOCKER and YOUR DEFENDER where they should be positioned BEFORE the hit.',
+    wind:['right','mod'],
+    opps:[{x:65,y:100,lbl:'S',sub:'SETTER'},{x:198,y:75,lbl:'H',sub:'HITTER'}],
+    decs:[
+      {t:'ball',x:198,y:62},
+      {t:'zone',x:20,y:182,w:55,h:160,c:GOLD,lbl:'LINE',op:0.14},
+      {t:'zone',x:75,y:182,w:165,h:160,c:'#4caf50',lbl:'CROSS',op:0.1},
+    ],
+    leons:[
+      {id:'p1',lbl:'BLKR',sub:'YOU',cx:115,cy:188,tol:48,hint:'Your BLOCKER should be at the net, slightly to the line side — she owns the line lane.'},
+      {id:'p2',lbl:'DEF',sub:'PRTNR',cx:185,cy:268,tol:52,hint:'Your DEFENDER belongs in the cross-court lane — right half of the court, mid-depth.'},
+    ],
+    q:'Why does the back defender position cross-court when the blocker takes line?',
+    choices:['The wind pushes most hit balls in that direction anyway.','The blocker has sealed the line — cross is the only open attack lane.','Standard beach volleyball positioning always places the defender cross-court.','The hitter\'s dominant hand biases shots cross more often.'],
+    correct:1,
+    expl:'<strong>Block-defense pairing is intentional.</strong> When your blocker commits to line, she removes that lane. Your job is to own what\'s left — the cross. The moderate L-to-R wind pushes cross shots even further toward you. If the hitter gets a set at zone <strong>5</strong> (right antenna), expect a sharp cross; if she gets a <strong>50</strong> (quick right antenna), the shot comes even faster — be pre-loaded. Centering leaves both zones uncovered.',
+  },
+  // Q2 ─ Seam Serve Receive
+  {
+    cat:'Serve Receive',
+    scenario:'A float serve is drifting into the seam between you and your partner. Light wind is blowing toward the net (from your side).',
+    instruct:'Position both of YOUR receivers to handle this seam serve.',
+    wind:['toward','light'],
+    opps:[{x:130,y:18,lbl:'SRV',sub:''}],
+    decs:[
+      {t:'ball',x:130,y:215},
+      {t:'arrow',x1:130,y1:35,x2:130,y2:205,c:'#fffde7',dsh:true},
+      {t:'zone',x:100,y:190,w:60,h:110,c:'#e4002b',lbl:'SEAM',op:0.09},
+    ],
+    leons:[
+      {id:'p1',lbl:'YOU',sub:'',cx:128,cy:265,tol:55,hint:'YOU step toward the seam — the player whose forehand faces the ball takes it.'},
+      {id:'p2',lbl:'PRTNR',sub:'',cx:178,cy:272,tol:55,hint:'Your PARTNER holds the right side and lets you claim the seam.'},
+    ],
+    q:'On a seam ball, who takes it — and what decides?',
+    choices:['Whoever is closer when it crosses the attack line.','The left-side player always owns the seam.','The player whose forehand side is facing the incoming ball.','Either player — just make sure someone calls it.'],
+    correct:2,
+    expl:'<strong>Forehand wins the seam.</strong> Whoever faces the ball with their passing-arm side has a stronger, more reliable platform. The light tailwind means this float may stall — even more reason to commit loudly and early. "Either player" thinking is exactly how seam balls hit the sand between two healthy players.',
+  },
+  // Q3 ─ Post-Block Transition
+  {
+    cat:'Transition',
+    scenario:'Your BLOCKER jumped to block but the ball got past her. Your DIGGER dug it up — the ball is now being set near zone <strong>1</strong> (left antenna). The blocker is still recovering near the net post. Light wind right to left.',
+    instruct:'Position YOUR BLOCKER and YOUR DIGGER where they should be RIGHT NOW, after the dig.',
+    wind:['left','light'],
+    opps:[{x:52,y:178,lbl:'B1',sub:''},{x:100,y:178,lbl:'B2',sub:''}],
+    decs:[
+      {t:'ball',x:52,y:215},
+      {t:'arrow',x1:178,y1:282,x2:88,y2:282,c:GOLD,lbl:'SET'},
+    ],
+    leons:[
+      {id:'p1',lbl:'BLKR',sub:'YOU',cx:50,cy:232,tol:50,hint:'Your BLOCKER retreats to the 3-meter line — covers tips and short balls, out of the dead zone at the net.'},
+      {id:'p2',lbl:'DIGR',sub:'PRTNR',cx:178,cy:302,tol:52,hint:'Your DIGGER stays deep, ready for a driven attack.'},
+    ],
+    q:'After missing a block attempt, your immediate move should be to...',
+    choices:['Stay at the net — try to tip or dump while still in position.','Retreat to the 3-meter line to cover tips and short balls.','Sprint all the way to the back corner to clear court for your partner.','Hold still — moving suddenly will interfere with your partner\'s read.'],
+    correct:1,
+    expl:'<strong>Off the net, on to the attack line.</strong> Standing at the net after a missed block means you\'re in dead space — too close to dig anything deep and blocking your partner\'s sightlines. The 3-meter area lets you cover tips, roll shots, and short sets. Call "I\'m back!" so your partner can swing freely.',
+  },
+  // Q4 ─ Opponent Defender Down — Attack
+  {
+    cat:'Game Sense',
+    scenario:'Your partner has set you a good ball. The opponent blocker (B) is at the net, but their defender (D) just dove for the last ball and is still down on the sand recovering. Light wind left to right.',
+    instruct:'Place your players to take advantage of this situation.',
+    wind:['right','light'],
+    opps:[{x:130,y:178,lbl:'B',sub:'BLKR'}],
+    decs:[
+      {t:'playerdown',x:175,y:118,lbl:'D'},
+      {t:'ball',x:130,y:300},
+      {t:'zone',x:25,y:25,w:205,h:95,c:'#4caf50',lbl:'OPEN',op:0.18},
+    ],
+    leons:[
+      {id:'p1',lbl:'SET',sub:'SETR',cx:130,cy:310,tol:52,hint:'Setter holds center/slightly back, ready to deliver the set.'},
+      {id:'p2',lbl:'HIT',sub:'YOU',cx:68,cy:278,tol:55,hint:'Hitter approaches from the left — attack deep into the open court while the defender is down.'},
+    ],
+    q:'With the defender still recovering, the highest-percentage attack is...',
+    choices:['Rip a hard cross-court angle to exploit the open zone.','A sharp cut shot close to the tape.','A deep controlled roll behind the blocker while she\'s pinned at the net.','A full-power swing — use this momentum.'],
+    correct:2,
+    expl:'<strong>Free point — don\'t overthink it.</strong> The blocker is pinned at the net and the defender is still down. A deep roll or controlled placement to zones <strong>1</strong> or <strong>2</strong> on their side ends the rally immediately — the blocker can\'t recover that far back. Hard cross-court swings risk errors and give the defender extra seconds to scramble. <em>When the point is already won, take it cleanly.</em>',
+  },
+  // Q5 ─ Lefty Hitter Defense
+  {
+    cat:'Defense',
+    scenario:'Their hitter is LEFT-HANDED and is being set on their LEFT antenna — your right side of the net. A strong wind is blowing toward your side.',
+    instruct:'Position YOUR BLOCKER and YOUR DEFENDER to defend this left-handed hitter.',
+    wind:['toward','strong'],
+    opps:[{x:208,y:75,lbl:'H',sub:'LEFTY'},{x:80,y:102,lbl:'S',sub:''}],
+    decs:[
+      {t:'ball',x:208,y:62},
+      {t:'arrow',x1:208,y1:78,x2:65,y2:270,c:'#fffde7',dsh:true,lbl:'POWER'},
+      {t:'zone',x:20,y:182,w:120,h:160,c:'#e4002b',lbl:'L-HAND CROSS',op:0.15},
+    ],
+    leons:[
+      {id:'p1',lbl:'BLKR',sub:'',cx:208,cy:183,tol:45,hint:'Your BLOCKER belongs at the net on the right side — she must take CROSS for a lefty here.'},
+      {id:'p2',lbl:'DEF',sub:'',cx:58,cy:268,tol:52,hint:'Your DEFENDER covers the cross lane — the LEFT side of your court, where the lefty\'s power shot goes.'},
+    ],
+    q:'A left-handed hitter on the left antenna swings her power shot...',
+    choices:['Down the line (to your right) — same as any hitter on that side.','Cross-court, toward your left side.','Up the middle — lefties angle differently than right-handers.','Either direction with equal tendency.'],
+    correct:1,
+    expl:'<strong>Mirror your blocking for lefties.</strong> A lefty on the LEFT antenna (zone <strong>1</strong> on their side) swings cross to HER right — your left, toward your zone 1. That\'s where the power goes. So your blocker takes CROSS and your defender covers the cross lane (your zone 1 side). The strong wind toward your side carries a hard cross even wider. Taking line against this matchup leaves the power lane completely open.',
+  },
+  // Q6 ─ Free Ball Rush to Attack
+  {
+    cat:'Game Sense',
+    scenario:'The opponents\' attack has gone into the net — it\'s floating over as a free ball to your side. Both opponents are in the back court, flat-footed. Moderate wind blowing away from you.',
+    instruct:'Position your players to attack this free ball.',
+    wind:['away','mod'],
+    opps:[{x:85,y:115,lbl:'D1',sub:''},{x:185,y:118,lbl:'D2',sub:''}],
+    decs:[
+      {t:'ball',x:130,y:195},
+      {t:'arrow',x1:130,y1:195,x2:130,y2:145,c:'#fffde7',lbl:'FREE'},
+    ],
+    leons:[
+      {id:'p1',lbl:'SET',sub:'SETR',cx:175,cy:305,tol:52,hint:'Setter moves to center-right to receive the free ball and deliver the set — call your zone (1, 3, or 5).'},
+      {id:'p2',lbl:'HIT',sub:'YOU',cx:70,cy:272,tol:55,hint:'Hitter sprints to the attack zone — call for a 1 or a 3, both opponents are out of position.'},
+    ],
+    q:'When the opponent gifts you a free ball over the net, your FIRST priority is...',
+    choices:['Hold your defensive base — it might come back if the wind catches it.','Pass the free ball safely and reset into a clean rally.','Sprint to your attack position and call your zone — this is a scoring opportunity.','Signal your setter to handle the pass so you\'re ready to swing.'],
+    correct:2,
+    expl:'<strong>A free ball is a gift — go take it.</strong> Both opponents are out of position. Sprint to your attack zone and call it immediately ("1!" or "3!") so your setter knows where to deliver. The tailwind carries your attack deep into their scrambling defense. Holding back defensively when the ball is already going over means voluntarily surrendering a point you could have owned.',
+  },
+  // Q7 ─ Defensive Base After Serving
+  {
+    cat:'Defense',
+    scenario:'You just served and the ball is in play. The two opponents are setting up to receive. Moderate wind blowing right to left.',
+    instruct:'Set up YOUR defensive base positions after serving.',
+    wind:['left','mod'],
+    opps:[{x:190,y:100,lbl:'OPP',sub:''},{x:68,y:100,lbl:'OPP',sub:''}],
+    decs:[
+      {t:'ball',x:130,y:30},
+    ],
+    leons:[
+      {id:'p1',lbl:'YOU',sub:'',cx:75,cy:285,tol:52,hint:'YOU take the left half of the court, mid-depth — your standard defensive base.'},
+      {id:'p2',lbl:'PRTNR',sub:'',cx:183,cy:285,tol:52,hint:'Your PARTNER takes the right half, same depth — splitting the court evenly.'},
+    ],
+    q:'After serving, your defensive starting positions should be...',
+    choices:['Both players at the net — anticipate a free ball or tip.','Both players deep in the back corners — protect the hard attack.','Split the court evenly, mid-depth — one each side.','One player at the net, one in the far back corner.'],
+    correct:2,
+    expl:'<strong>Split and cover mid-depth.</strong> After serving, split the court — one player each side, roughly mid-depth. This gives you coverage of tips, rolls, and driven attacks without over-committing to either extreme. The L-to-R wind means driven shots may drift — your split formation stays balanced regardless of wind direction.',
+  },
+  // Q8 ─ Receive Adjustment for Tailwind Serve
+  {
+    cat:'Serve Receive',
+    scenario:'Strong wind is blowing toward your side. The opponent is serving — their float serve normally lands near mid-court but the wind will push it much deeper today.',
+    instruct:'Position both receivers to account for the wind-assisted serve.',
+    wind:['toward','strong'],
+    opps:[{x:130,y:18,lbl:'SRV',sub:''}],
+    decs:[
+      {t:'arrow',x1:130,y1:35,x2:130,y2:210,c:'#fffde7',dsh:true},
+      {t:'zone',x:22,y:220,w:216,h:60,c:'#888',lbl:'NORMAL DEPTH',op:0.12},
+      {t:'zone',x:22,y:285,w:216,h:65,c:GOLD,lbl:'ADJUSTED DEPTH',op:0.18},
+    ],
+    leons:[
+      {id:'p1',lbl:'P1',sub:'YOU',cx:78,cy:302,tol:55,hint:'Shift 2–3 steps deeper than your normal receive position — the wind will push the serve further back.'},
+      {id:'p2',lbl:'P2',sub:'PRTNR',cx:180,cy:302,tol:55,hint:'P2 also shifts deeper — maintain your normal left/right split, just further back.'},
+    ],
+    q:'With a strong wind pushing the opponent\'s serve deeper than normal, you should...',
+    choices:['Move closer to the net to take the ball earlier, before the wind affects it.','Keep your standard receive depth — trust your mechanics.','Shift your formation 2–3 steps deeper to account for the extra carry.','One player stays standard depth, one shifts deep to cover both zones.'],
+    correct:2,
+    expl:'<strong>The wind carries the ball — adjust your depth.</strong> A strong tailwind pushes a float serve past its normal landing zone. Shifting deeper keeps the ball in front of you for a clean pass. Moving up is exactly wrong — you\'ll be passing a ball sailing over your head. Once you pass cleanly, your setter can deliver a proper set call to zones 1, 3, or 5. Adjust before the serve, not after.',
+  },
+  // Q9 ─ Tight Pass / Blocker Loaded
+  {
+    cat:'Setting',
+    scenario:'Your partner passed the ball tight to the net — about 2 feet off. The opponent blocker has already jumped to load up on zone <strong>5</strong> (right antenna). Your hitter is calling for a <strong>5</strong>. Moderate wind blowing left to right.',
+    instruct:'Position your setter and hitter for this compromised pass.',
+    wind:['right','mod'],
+    opps:[{x:192,y:176,lbl:'BLK',sub:''}],
+    decs:[
+      {t:'ball',x:190,y:197},
+      {t:'zone',x:155,y:182,w:85,h:170,c:'#666',lbl:'LOADED',op:0.16},
+      {t:'zone',x:20,y:182,w:128,h:170,c:'#4caf50',lbl:'OPEN',op:0.12},
+    ],
+    leons:[
+      {id:'p1',lbl:'SET',sub:'SETR',cx:190,cy:208,tol:45,hint:'Setter must be right at the ball — near zone 5, tight to the net — to handle the tight pass.'},
+      {id:'p2',lbl:'HIT',sub:'HITR',cx:78,cy:298,tol:55,hint:'Hitter positions toward zone 1 — away from the loaded blocker at zone 5, in the open lane.'},
+    ],
+    q:'Your hitter called a 5 but the blocker is loaded there. The pass is tight. What\'s LEAST advisable?',
+    choices:['Redirect and set a 1 — use the open zone on the left side.','Execute a quick setter shot over the already-committed blocker.','Take it over as a controlled free ball and reset the rally.','Force the 5 anyway — your hitter called it and you trust her.'],
+    correct:3,
+    expl:'<strong>Never force a 5 into a loaded block when the pass is already tight.</strong> Options A (redirect to zone 1), B (setter dump), and C (free ball reset) all have merit. A 1 uses the open lane and the cross-wind. A setter shot catches a blocker who already committed. Even a free ball gives you another swing. Forcing the 5 with a compromised pass into a waiting block maximizes error risk for zero upside — change the call.',
+  },
+  // Q10 ─ Full Defense vs. Strong Cross-Court Hitter
+  {
+    cat:'Defense',
+    scenario:'Scouting shows their right-side hitter goes cross-court on 80% of her attacks from zone <strong>5</strong> (right antenna). You have no blocker up — both of you are in full defense. Moderate wind left to right.',
+    instruct:'Position both defenders to cover this hitter\'s tendency.',
+    wind:['right','mod'],
+    opps:[{x:198,y:75,lbl:'H',sub:'80% CROSS'},{x:68,y:100,lbl:'S',sub:''}],
+    decs:[
+      {t:'ball',x:198,y:62},
+      {t:'arrow',x1:198,y1:80,x2:185,y2:265,c:'#fffde7',dsh:true,lbl:'80%'},
+      {t:'arrow',x1:198,y1:80,x2:40,y2:270,c:'#fffde7',dsh:true,lbl:'20%'},
+    ],
+    leons:[
+      {id:'p1',lbl:'YOU',sub:'',cx:185,cy:265,tol:55,hint:'YOU cheat toward zone 4–5 on your side — in the path of her 80% cross shot.'},
+      {id:'p2',lbl:'PRTNR',sub:'',cx:65,cy:280,tol:55,hint:'Your PARTNER covers the line — zone 1 side — playing the 20% while you own the cross.'},
+    ],
+    q:'She\'s hitting from their zone 5. Your scouting says 80% cross to your zone 4–5. You should...',
+    choices:['Split zones 3 and 4 evenly and react to what comes.','Cheat into zones 4–5 yourself while your partner covers zone 1.','Both crash zones 4–5 — if it\'s 80%, double up there.','Hold your standard split — don\'t gamble on tendencies.'],
+    correct:1,
+    expl:'<strong>Play the percentages.</strong> She\'s hitting from their zone 5 and going cross 80% of the time — that ball lands in your zones 4–5. You cheat into that lane; your partner holds zone 1. The L-to-R wind also pushes cross shots further toward your right, tightening coverage. "Splitting evenly" sounds disciplined but is actually sub-optimal against a clear tendency. Note: if she clocks the cheat and starts going line to zone 1, adjust mid-match.',
+  },
+];
+
+// ─── QUIZ STATE ────────────────────────────────────────────────
+let qIndex=0, score=0;
+const catScores={};
+function shuffleArr(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+let shuffled=shuffleArr(QUESTIONS);
+
+// ─── TOKEN DRAG STATE ──────────────────────────────────────────
+let tokenState={}; // {id: {pxX,pxY,placed,svgX,svgY}}
+let activeDrag=null; // {tokenId, pointerId}
+
+function initTokenState(q){
+  tokenState={};
+  q.leons.forEach((l,i)=>{
+    tokenState[l.id]={placed:false,pxX:null,pxY:null,svgX:null,svgY:null};
+  });
+}
+
+function getStagingPos(idx, total){
+  const wrap=document.getElementById('court-wrap');
+  const svgEl=document.getElementById('court-svg');
+  if(!wrap||!svgEl) return {pxX:80,pxY:400};
+  const svgH=svgEl.offsetHeight;
+  const wW=wrap.offsetWidth;
+  const step=wW/(total+1);
+  return {pxX:step*(idx+1), pxY:svgH+42};
+}
+
+function getCourtSVGDims(){
+  const svgEl=document.getElementById('court-svg');
+  if(!svgEl) return {w:260,h:360};
+  return {w:svgEl.offsetWidth, h:svgEl.offsetHeight};
+}
+
+function pxToSVG(pxX,pxY){
+  const {w,h}=getCourtSVGDims();
+  return {svgX:pxX/w*260, svgY:pxY/h*360};
+}
+
+function svgToPx(svgX,svgY){
+  const {w,h}=getCourtSVGDims();
+  return {pxX:svgX/260*w, pxY:svgY/360*h};
+}
+
+function isOnCourt(pxX,pxY){
+  const {w,h}=getCourtSVGDims();
+  return pxX>15 && pxX<w-15 && pxY>15 && pxY<h-15;
+}
+
+function setTokenPos(tokenId, pxX, pxY){
+  const tok=document.getElementById('tok-'+tokenId);
+  if(!tok) return;
+  tok.style.left=pxX+'px';
+  tok.style.top=pxY+'px';
+}
+
+function snapToStaging(tokenId, q){
+  const leons=q.leons;
+  const idx=leons.findIndex(l=>l.id===tokenId);
+  const pos=getStagingPos(idx, leons.length);
+  tokenState[tokenId]={placed:false,pxX:pos.pxX,pxY:pos.pxY,svgX:null,svgY:null};
+  setTokenPos(tokenId, pos.pxX, pos.pxY);
+  updateTokenStyle(tokenId);
+}
+
+function updateTokenStyle(tokenId){
+  const tok=document.getElementById('tok-'+tokenId);
+  if(!tok) return;
+  const st=tokenState[tokenId];
+  tok.classList.toggle('on-court', st.placed);
+}
+
+function updatePlacePips(q){
+  q.leons.forEach(l=>{
+    const pip=document.getElementById('pip-'+l.id);
+    if(pip) pip.classList.toggle('placed', tokenState[l.id].placed);
+  });
+  const allPlaced=q.leons.every(l=>tokenState[l.id].placed);
+  const btn=document.getElementById('confirm-btn');
+  if(btn) btn.classList.toggle('ready', allPlaced);
+}
+
+// ─── POINTER EVENTS ────────────────────────────────────────────
+function onTokenPointerDown(e){
+  if(activeDrag) return;
+  e.preventDefault();
+  const tokenId=e.currentTarget.dataset.id;
+  e.currentTarget.setPointerCapture(e.pointerId);
+  activeDrag={tokenId, pointerId:e.pointerId};
+}
+
+function onTokenPointerMove(e){
+  if(!activeDrag || activeDrag.tokenId!==e.currentTarget.dataset.id) return;
+  e.preventDefault();
+  const wrap=document.getElementById('court-wrap');
+  const rect=wrap.getBoundingClientRect();
+  const pxX=e.clientX-rect.left;
+  const pxY=e.clientY-rect.top;
+  tokenState[activeDrag.tokenId].pxX=pxX;
+  tokenState[activeDrag.tokenId].pxY=pxY;
+  setTokenPos(activeDrag.tokenId, pxX, pxY);
+}
+
+function onTokenPointerUp(e){
+  if(!activeDrag || activeDrag.tokenId!==e.currentTarget.dataset.id) return;
+  const tokenId=activeDrag.tokenId;
+  activeDrag=null;
+  const q=shuffled[qIndex];
+  const {pxX,pxY}=tokenState[tokenId];
+  if(isOnCourt(pxX,pxY)){
+    const {svgX,svgY}=pxToSVG(pxX,pxY);
+    tokenState[tokenId].placed=true;
+    tokenState[tokenId].svgX=svgX;
+    tokenState[tokenId].svgY=svgY;
+  } else {
+    snapToStaging(tokenId,q);
+  }
+  updateTokenStyle(tokenId);
+  updatePlacePips(q);
+}
+
+function attachTokenEvents(tok){
+  tok.addEventListener('pointerdown',onTokenPointerDown,{passive:false});
+  tok.addEventListener('pointermove',onTokenPointerMove,{passive:false});
+  tok.addEventListener('pointerup',onTokenPointerUp);
+  tok.addEventListener('lostpointercapture',e=>{if(activeDrag&&activeDrag.tokenId===tok.dataset.id)activeDrag=null;});
+}
+
+// ─── PHASES ────────────────────────────────────────────────────
+let answered=false;
+
+function confirmPlacement(){
+  const q=shuffled[qIndex];
+  const allPlaced=q.leons.every(l=>tokenState[l.id].placed);
+  if(!allPlaced) return;
+
+  // Freeze tokens
+  q.leons.forEach(l=>{
+    const tok=document.getElementById('tok-'+l.id);
+    if(tok) tok.classList.add('frozen');
+    // Store final SVG coords
+    const {svgX,svgY}=pxToSVG(tokenState[l.id].pxX, tokenState[l.id].pxY);
+    tokenState[l.id].svgX=svgX; tokenState[l.id].svgY=svgY;
+  });
+
+  // Evaluate placement
+  let correctCount=0;
+  const results={};
+  q.leons.forEach(l=>{
+    const st=tokenState[l.id];
+    const dist=Math.sqrt((st.svgX-l.cx)**2+(st.svgY-l.cy)**2);
+    const ok=dist<=l.tol;
+    if(ok) correctCount++;
+    results[l.id]={correct:ok,svgX:st.svgX,svgY:st.svgY};
+    // Style token
+    const tok=document.getElementById('tok-'+l.id);
+    if(tok){tok.classList.add(ok?'result-correct':'result-wrong');}
+  });
+
+  // Rebuild SVG with overlays
+  const overlays=q.leons.map(l=>placementOverlay(l,results[l.id].svgX,results[l.id].svgY,results[l.id].correct));
+  const wrap=document.getElementById('court-wrap');
+  const oldSVG=document.getElementById('court-svg');
+  if(oldSVG) oldSVG.remove();
+  wrap.insertAdjacentHTML('afterbegin', buildCourtSVG(q,overlays));
+
+  // Show placement banner
+  const banner=document.getElementById('placement-banner');
+  let hintRows=q.leons.map(l=>`<div class="hint-row"><span class="hint-icon">${results[l.id].correct?'✅':'❌'}</span><span><strong>${l.lbl}:</strong> ${l.hint}</span></div>`).join('');
+  let bClass=correctCount===q.leons.length?'all-correct':correctCount===0?'all-wrong':'partial';
+  let bTitle=correctCount===q.leons.length?'✓ Both players correctly positioned!':correctCount===0?'Neither player was in the right zone.':'One player was correct.';
+  banner.className='placement-banner '+bClass+' show';
+  banner.innerHTML=`<div class="pb-title">${bTitle}</div>${hintRows}`;
+
+  // Hide confirm, show MCQ
+  document.getElementById('confirm-btn').style.display='none';
+  document.getElementById('place-status').style.display='none';
+  document.getElementById('mcq-section').style.display='block';
+}
+
+function pickAnswer(idx){
+  if(answered) return;
+  answered=true;
+  const q=shuffled[qIndex];
+  document.querySelectorAll('.choice-btn').forEach((btn,i)=>{
+    btn.disabled=true;
+    if(i===q.correct){btn.classList.add('correct');btn.querySelector('.choice-icon').textContent='✓';}
+    else if(i===idx){btn.classList.add('wrong');btn.querySelector('.choice-icon').textContent='✗';}
+    else btn.classList.add('dimmed');
+  });
+  if(idx===q.correct){
+    score++;
+    document.getElementById('score-display').textContent=score;
+  }
+  const cat=q.cat;
+  if(!catScores[cat]) catScores[cat]={correct:0,total:0};
+  catScores[cat].total++;
+  if(idx===q.correct) catScores[cat].correct++;
+  document.getElementById('explanation').classList.add('show');
+  document.getElementById('next-btn').classList.add('show');
+}
+
+// ─── RENDER ────────────────────────────────────────────────────
+function renderQuestion(){
+  const q=shuffled[qIndex];
+  answered=false;
+  initTokenState(q);
+
+  document.getElementById('prog-bar').style.width=(qIndex/shuffled.length*100)+'%';
+  document.getElementById('score-display').textContent=score;
+
+  const ltrs=['A','B','C','D'];
+  const choicesHTML=q.choices.map((c,i)=>`
+    <button class="choice-btn" onclick="pickAnswer(${i})">
+      <span class="choice-ltr">${ltrs[i]}</span>
+      <span>${c}</span>
+      <span class="choice-icon"></span>
+    </button>`).join('');
+
+  const pipHTML=q.leons.map(l=>`<div class="place-pip" id="pip-${l.id}">${l.lbl} — not placed</div>`).join('');
+
+  document.getElementById('app').innerHTML=`
+    <div class="q-wrap">
+      <div class="q-meta"><span class="q-cat">${q.cat}</span><span class="q-num">Q${qIndex+1} of ${shuffled.length}</span></div>
+      <p class="scenario-text">${q.scenario}</p>
+
+      <!-- STEP 1: PLACE -->
+      <div class="instruct-box"><strong>Step 1 — Place Your Players:</strong> ${q.instruct}</div>
+
+      <!-- COURT -->
+      <div id="court-wrap">${buildCourtSVG(q)}</div>
+
+      <!-- STAGING LABELS -->
+      <div style="text-align:center;padding:8px 0 2px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--red);text-transform:uppercase;font-weight:700;">
+        ↑ YOUR PLAYERS (Leon Queens) — DRAG ONTO COURT ↑
+      </div>
+
+      <!-- COURT LEGEND -->
+      <div style="display:flex;gap:14px;flex-wrap:wrap;padding:6px 2px 6px;font-family:'Barlow Condensed',sans-serif;font-size:11px;color:#777;">
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:50%;background:#e4002b;flex-shrink:0;display:inline-block"></span><strong style="color:#e4002b">YOUR TEAM</strong></span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:50%;background:#1565C0;flex-shrink:0;display:inline-block"></span><strong style="color:#1565C0">OPPONENT</strong></span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:50%;background:#5ba8e0;flex-shrink:0;display:inline-block"></span>Wind</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:50%;background:#fffde7;border:1px solid #777;flex-shrink:0;display:inline-block"></span>Ball</span>
+      </div>
+      <div style="background:#111;border:1px solid #252525;border-radius:6px;padding:7px 12px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;color:#888;display:flex;flex-wrap:wrap;gap:6px 16px;">
+        <span style="color:#d4a843;font-weight:700;letter-spacing:1px;">SET ZONES:</span>
+        <span><strong style="color:#d4a843">1</strong> = left antenna</span>
+        <span><strong style="color:#d4a843">3</strong> = middle net</span>
+        <span><strong style="color:#d4a843">5</strong> = right antenna</span>
+        <span style="color:#666;">|</span>
+        <span><strong style="color:#d4a843">1/3/5</strong> = high set &nbsp;<strong style="color:#d4a843">10/30/50</strong> = quick set</span>
+      </div>
+
+      <!-- PLACEMENT STATUS -->
+      <div id="place-status" class="place-status">${pipHTML}</div>
+
+      <!-- CONFIRM -->
+      <button id="confirm-btn" class="confirm-btn" onclick="confirmPlacement()">CONFIRM PLACEMENT</button>
+
+      <!-- PLACEMENT RESULT BANNER -->
+      <div id="placement-banner" class="placement-banner"></div>
+
+      <!-- STEP 2: MCQ (hidden until placement confirmed) -->
+      <div id="mcq-section" style="display:none">
+        <div class="instruct-box"><strong>Step 2 — Answer the Question:</strong></div>
+        <p class="question-text">❓ ${q.q}</p>
+        <div class="choices">${choicesHTML}</div>
+        <div class="explanation" id="explanation">${q.expl}</div>
+        <button class="next-btn" id="next-btn" onclick="nextQ()">
+          ${qIndex<shuffled.length-1?'NEXT SCENARIO →':'SEE MY RESULTS →'}
+        </button>
+      </div>
+    </div>`;
+
+  // Size the court-wrap and position tokens
+  requestAnimationFrame(()=>{
+    sizeCourtWrap(q);
+  });
+}
+
+function sizeCourtWrap(q){
+  const wrap=document.getElementById('court-wrap');
+  const svgEl=document.getElementById('court-svg');
+  if(!wrap||!svgEl) return;
+  const svgH=svgEl.offsetHeight;
+  wrap.style.height=(svgH+88)+'px';
+
+  // Create tokens
+  q.leons.forEach((l,i)=>{
+    const pos=getStagingPos(i, q.leons.length);
+    tokenState[l.id].pxX=pos.pxX;
+    tokenState[l.id].pxY=pos.pxY;
+
+    const tok=document.createElement('div');
+    tok.className='token';
+    tok.id='tok-'+l.id;
+    tok.dataset.id=l.id;
+    tok.style.background=LEON;
+    tok.style.left=pos.pxX+'px';
+    tok.style.top=pos.pxY+'px';
+    tok.innerHTML=`<span class="tok-lbl">${l.lbl}</span><span class="tok-sub">${l.sub}</span>`;
+    attachTokenEvents(tok);
+    wrap.appendChild(tok);
+  });
+}
+
+function nextQ(){
+  qIndex++;
+  if(qIndex>=shuffled.length) showResult();
+  else{ renderQuestion(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function showResult(){
+  document.getElementById('prog-bar').style.width='100%';
+  const pct=score/shuffled.length;
+  const tiers=[
+    {min:.9,grade:'A+',label:'ELITE COURT IQ',sub:'You see the game a step ahead. The Queens need that.'},
+    {min:.7,grade:'B',label:'SHARP PLAYER',sub:'Solid reads with a few gaps to close.'},
+    {min:.5,grade:'C',label:'DEVELOPING',sub:'The instincts are there — now build the habits.'},
+    {min:0,grade:'D',label:'KEEP GRINDING',sub:'Court sense is a trainable skill. Review the explanations and go again.'},
+  ];
+  const t=tiers.find(x=>pct>=x.min);
+  const catHTML=Object.entries(catScores).map(([cat,s])=>{
+    const p=s.total>0?s.correct/s.total:0;
+    const bc=p>=.67?'#4caf50':p>=.34?'#d4a843':'#e4002b';
+    return `<div class="cat-row"><span class="cat-name">${cat}</span><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round(p*100)}%;background:${bc}"></div></div><span class="cat-score">${s.correct}/${s.total}</span></div>`;
+  }).join('');
+  document.getElementById('app').innerHTML=`
+    <div class="result-screen show">
+      <div class="result-grade">${t.grade}</div>
+      <div class="result-label">${t.label}</div>
+      <div class="result-sub">${score} / ${shuffled.length} correct — ${t.sub}</div>
+      <div class="result-breakdown"><h3>📊 Performance by Category</h3>${catHTML}</div>
+      <button class="retry-btn" onclick="restart()">RETAKE LEVEL 1</button>
+    </div>`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restart(){
+  qIndex=0; score=0;
+  Object.keys(catScores).forEach(k=>delete catScores[k]);
+  shuffled=shuffleArr(QUESTIONS);
+  renderQuestion();
+}
+
+// Handle resize — reposition tokens from stored SVG coords
+window.addEventListener('resize',()=>{
+  const q=shuffled[qIndex];
+  if(!q) return;
+  const svgEl=document.getElementById('court-svg');
+  const wrap=document.getElementById('court-wrap');
+  if(!svgEl||!wrap) return;
+  const svgH=svgEl.offsetHeight;
+  wrap.style.height=(svgH+88)+'px';
+  q.leons.forEach((l,i)=>{
+    const st=tokenState[l.id];
+    if(!st) return;
+    if(st.placed && st.svgX!==null){
+      const {pxX,pxY}=svgToPx(st.svgX,st.svgY);
+      st.pxX=pxX; st.pxY=pxY;
+      setTokenPos(l.id,pxX,pxY);
+    } else {
+      const pos=getStagingPos(i,q.leons.length);
+      st.pxX=pos.pxX; st.pxY=pos.pxY;
+      setTokenPos(l.id,pos.pxX,pos.pxY);
+    }
+  });
+});
+
+// Init
+renderQuestion();
+</script>
+</body>
+</html>
