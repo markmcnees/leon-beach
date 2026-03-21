@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260321032700">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -1373,93 +1373,127 @@ async function fetchMaxPrepsStandings(){
   if(!el)return;
   if(st)st.textContent='🔄 loading…';
 
-  try{
-    const proxyUrl=PROXY_BASE+'?url='+encodeURIComponent(MAXPREPS_URL);
-    const resp=await fetch(proxyUrl);
-    if(!resp.ok)throw new Error('proxy '+resp.status);
-    const raw=await resp.text();
+  // Two URLs to try: their internal JSON API first, then the HTML page
+  const ATTEMPTS=[
+    PROXY_BASE+'?url='+encodeURIComponent('https://api.maxpreps.com/gateways/sports-content-service/v1/sports/beach-volleyball/standings?state=fl&classification=5a&season=2025-2026'),
+    PROXY_BASE+'?url='+encodeURIComponent(MAXPREPS_URL),
+  ];
 
-    // ── Try __NEXT_DATA__ (Next.js server props) ──
-    const ndMatch=raw.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-    let teams=null;
+  let teams=null;
 
-    if(ndMatch){
-      try{
-        const nd=JSON.parse(ndMatch[1]);
-        // Walk the props tree looking for an array that looks like standings rows
-        const find=(obj,depth)=>{
-          if(depth>8||!obj||typeof obj!=='object')return null;
-          if(Array.isArray(obj)&&obj.length>=2){
-            const s=obj[0];
-            if(s&&(s.wins!==undefined||s.w!==undefined||s.overallRecord!==undefined))return obj;
-          }
-          for(const v of Object.values(obj)){const r=find(v,depth+1);if(r)return r;}
-          return null;
-        };
-        const raw_teams=find(nd?.props?.pageProps,0)||find(nd,0);
-        if(raw_teams&&raw_teams.length){
-          teams=raw_teams.map(t=>{
-            // MaxPreps uses various field names depending on page version
-            const name=t.schoolName||t.name||t.teamName||t.school?.name||'?';
-            const rec=t.overallRecord||t.record||{};
-            const w=t.wins??t.w??rec.wins??rec.w??0;
-            const l=t.losses??t.l??rec.losses??rec.l??0;
-            return{name:String(name),w:+w,l:+l};
-          }).filter(t=>t.name!=='?');
-        }
-      }catch(e){console.warn('NEXT_DATA parse error:',e.message);}
-    }
+  for(const proxyUrl of ATTEMPTS){
+    try{
+      const resp=await fetch(proxyUrl);
+      const xStatus=resp.headers.get('X-Proxy-Status')||'?';
+      const raw=await resp.text();
+      console.log('[MaxPreps] tried:',proxyUrl.slice(-60));
+      console.log('[MaxPreps] X-Proxy-Status:',xStatus,'| body preview:',raw.slice(0,400));
 
-    // ── Fallback: scrape a visible table from the HTML ──
-    if(!teams||!teams.length){
-      const parser=new DOMParser();
-      const doc=parser.parseFromString(raw,'text/html');
-      const trs=[...doc.querySelectorAll('table tr')];
-      const rows=trs.filter(tr=>{
-        const cells=[...tr.querySelectorAll('td')];
-        return cells.length>=3&&/^\d+$/.test((cells[1]?.textContent||'').trim())&&/^\d+$/.test((cells[2]?.textContent||'').trim());
-      });
-      if(rows.length){
-        teams=rows.map(tr=>{
-          const c=[...tr.querySelectorAll('td')];
-          return{name:(c[0]?.textContent||'').trim(),w:+(c[1]?.textContent||0),l:+(c[2]?.textContent||0)};
-        }).filter(t=>t.name);
+      if(xStatus==='406'||xStatus==='403'||xStatus==='429'){
+        console.log('[MaxPreps] blocked on this URL, trying next…');
+        continue;
       }
-    }
 
-    if(!teams||!teams.length)throw new Error('no standings data found');
+      // ── Try JSON response (API endpoint) ──
+      if(raw.trim().startsWith('{')||raw.trim().startsWith('[')){
+        try{
+          const json=JSON.parse(raw);
+          console.log('[MaxPreps] got JSON, top keys:',Object.keys(json).join(', '));
+          // Walk for standings array
+          const find=(obj,depth)=>{
+            if(depth>8||!obj||typeof obj!=='object')return null;
+            if(Array.isArray(obj)&&obj.length>=2){
+              const s=obj[0];
+              if(s&&typeof s==='object'&&(s.wins!==undefined||s.losses!==undefined||s.schoolName!==undefined||s.overallRecord!==undefined))return obj;
+            }
+            for(const v of Object.values(obj)){const r=find(v,depth+1);if(r)return r;}
+            return null;
+          };
+          const rows=find(json,0);
+          if(rows){
+            teams=rows.map(t=>{
+              const name=t.schoolName||t.name||t.teamName||t.school?.name||'?';
+              const rec=t.overallRecord||t.record||{};
+              const w=+(t.wins??t.w??rec.wins??rec.w??0);
+              const l=+(t.losses??t.l??rec.losses??rec.l??0);
+              return{name:String(name).trim(),w,l};
+            }).filter(t=>t.name&&t.name!=='?');
+            console.log('[MaxPreps] JSON parse got',teams.length,'teams');
+            if(teams.length)break;
+          }
+        }catch(e){console.warn('[MaxPreps] JSON parse failed:',e.message);}
+      }
 
-    // Sort by win %, then wins
-    teams.sort((a,b)=>{
-      const pa=(a.w+a.l)>0?a.w/(a.w+a.l):0;
-      const pb=(b.w+b.l)>0?b.w/(b.w+b.l):0;
-      return pb-pa||b.w-a.w;
-    });
+      // ── Try __NEXT_DATA__ ──
+      const ndMatch=raw.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+      if(ndMatch){
+        console.log('[MaxPreps] found __NEXT_DATA__ len=',ndMatch[1].length);
+        try{
+          const nd=JSON.parse(ndMatch[1]);
+          const find=(obj,depth,path)=>{
+            if(depth>10||!obj||typeof obj!=='object')return null;
+            if(Array.isArray(obj)&&obj.length>=2){
+              const s=obj[0];
+              if(s&&typeof s==='object'&&(s.wins!==undefined||s.losses!==undefined||s.schoolName!==undefined)){
+                console.log('[MaxPreps] standings array at path:',path,'len=',obj.length);
+                return obj;
+              }
+            }
+            for(const [k,v] of Object.entries(obj)){const r=find(v,depth+1,path+'.'+k);if(r)return r;}
+            return null;
+          };
+          const rows=find(nd,0,'root');
+          if(rows){
+            teams=rows.map(t=>{
+              const name=t.schoolName||t.name||t.school?.name||'?';
+              const rec=t.overallRecord||t.record||{};
+              const w=+(t.wins??rec.wins??0);
+              const l=+(t.losses??rec.losses??0);
+              return{name:String(name).trim(),w,l};
+            }).filter(t=>t.name&&t.name!=='?');
+            console.log('[MaxPreps] __NEXT_DATA__ parse got',teams.length,'teams');
+            if(teams.length)break;
+          }
+        }catch(e){console.warn('[MaxPreps] __NEXT_DATA__ parse failed:',e.message);}
+      }
 
-    let h='<div style="overflow-x:auto;"><table class="player-table" style="min-width:280px;"><thead><tr><th style="width:30px;">#</th><th>Team</th><th>W</th><th>L</th><th>Pct</th></tr></thead><tbody>';
-    teams.forEach(({name,w,l},i)=>{
-      const pct=(w+l)>0?((w/(w+l))*100).toFixed(0)+'%':'—';
-      const isLeon=/leon/i.test(name);
-      h+=`<tr style="${isLeon?'background:var(--red-bg);font-weight:700;':''}">
-        <td style="font-family:'Bebas Neue';font-size:14px;color:var(--gray);">${i+1}</td>
-        <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦁':''}</td>
-        <td style="font-family:'Bebas Neue';font-size:16px;color:var(--green);">${w}</td>
-        <td style="font-family:'Bebas Neue';font-size:16px;color:var(--loss-red);">${l}</td>
-        <td style="font-family:'Bebas Neue';font-size:14px;">${pct}</td></tr>`;
-    });
-    h+='</tbody></table></div>';
-    h+=`<div style="font-size:10px;color:var(--gray);margin-top:6px;font-style:italic;">📡 Live · MaxPreps · ${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;
-    el.innerHTML=h;
-    if(st)st.textContent='';
+      // ── Log what we got if nothing parsed ──
+      if(!teams||!teams.length){
+        console.log('[MaxPreps] could not extract data from this URL');
+        console.log('[MaxPreps] __NEXT_DATA__ found?',!!ndMatch,'| JSON?',raw.trim().startsWith('{'));
+      }
 
-  }catch(err){
-    console.warn('MaxPreps standings fetch failed:',err.message);
-    if(st)st.textContent='(MaxPreps unavailable)';
-    // Leave existing Firebase-based standings visible — no destructive change
+    }catch(e){console.warn('[MaxPreps] fetch error:',e.message);}
   }
+
+  if(!teams||!teams.length){
+    console.warn('[MaxPreps] all attempts failed — falling back to Firebase data');
+    if(st)st.textContent='(offline)';
+    return;
+  }
+
+  teams.sort((a,b)=>{
+    const pa=(a.w+a.l)>0?a.w/(a.w+a.l):0;
+    const pb=(b.w+b.l)>0?b.w/(b.w+b.l):0;
+    return pb-pa||b.w-a.w;
+  });
+
+  let h='<div style="overflow-x:auto;"><table class="player-table" style="min-width:280px;"><thead><tr><th style="width:30px;">#</th><th>Team</th><th>W</th><th>L</th><th>Pct</th></tr></thead><tbody>';
+  teams.forEach(({name,w,l},i)=>{
+    const pct=(w+l)>0?((w/(w+l))*100).toFixed(0)+'%':'—';
+    const isLeon=/leon/i.test(name);
+    h+=`<tr style="${isLeon?'background:var(--red-bg);font-weight:700;':''}">
+      <td style="font-family:'Bebas Neue';font-size:14px;color:var(--gray);">${i+1}</td>
+      <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦁':''}</td>
+      <td style="font-family:'Bebas Neue';font-size:16px;color:var(--green);">${w}</td>
+      <td style="font-family:'Bebas Neue';font-size:16px;color:var(--loss-red);">${l}</td>
+      <td style="font-family:'Bebas Neue';font-size:14px;">${pct}</td></tr>`;
+  });
+  h+='</tbody></table></div>';
+  h+=`<div style="font-size:10px;color:var(--gray);margin-top:6px;font-style:italic;">📡 Live · MaxPreps · ${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;
+  el.innerHTML=h;
+  if(st)st.textContent='';
 }
-
-
 function updateStanding(){
   const team=document.getElementById('stand-team').value;
   const w=parseInt(document.getElementById('stand-w').value)||0;
