@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260321133806">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -458,7 +458,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <button class="btn btn-primary btn-small" onclick="addScheduleGame()">Add Game</button>
       </div>
     </div>
-<div class="card"><div class="card-title"><span class="bar"></span> Area Standings</div>
+<div class="card"><div class="card-title"><span class="bar"></span> Area Standings<span id="maxpreps-status" style="font-size:10px;font-weight:400;font-family:'Barlow',sans-serif;color:var(--gray);margin-left:8px;letter-spacing:0;"></span></div>
       <div id="dash-standings"></div>
       <div id="dash-standings-add" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-lighter);">
         <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Update Team Record</div>
@@ -608,7 +608,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label><input type="text" class="form-input" id="assign-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Courts</label>
             <select class="form-select" id="assign-courts" style="padding:8px;font-size:13px;">
-              <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="2">2</option><option value="1">1</option>
+              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
             </select></div>
         </div>
         <div id="assign-court-slots"></div>
@@ -1343,6 +1343,7 @@ function renderStandings(){
   h+='</tbody></table></div>';
   if(Object.keys(oppFromSchedule).length)h+='<div style="font-size:10px;color:var(--gray);margin-top:6px;font-style:italic;">Records marked "vs Leon" are auto-calculated from schedule. Update with full season records using the form below.</div>';
   document.getElementById('dash-standings').innerHTML=h;
+  fetchMaxPrepsStandings(); // async — overlays with live MaxPreps data
 
   // Populate team dropdown for coaches
   const sel=document.getElementById('stand-team');
@@ -1366,10 +1367,133 @@ function renderStandings(){
 const MAXPREPS_URL='https://www.maxpreps.com/fl/tallahassee/leon-lions/beach-volleyball/';
 const PROXY_BASE='https://leon-beach-ai.markmcnees-479.workers.dev/proxy';
 
-// fetchMaxPrepsStandings: data is now written to Firebase nightly
-// by the GitHub Action (scripts/fetch_standings.py).
-// renderDash() reads D.standings from Firebase and renders the table automatically.
-function fetchMaxPrepsStandings(){ /* no-op — data comes from Firebase */ }
+async function fetchMaxPrepsStandings(){
+  const el=document.getElementById('dash-standings');
+  const st=document.getElementById('maxpreps-status');
+  if(!el)return;
+  if(st)st.textContent='🔄 loading…';
+
+  // Two URLs to try: their internal JSON API first, then the HTML page
+  const ATTEMPTS=[
+    PROXY_BASE+'?url='+encodeURIComponent('https://api.maxpreps.com/gateways/sports-content-service/v1/sports/beach-volleyball/standings?state=fl&classification=5a&season=2025-2026'),
+    PROXY_BASE+'?url='+encodeURIComponent(MAXPREPS_URL),
+  ];
+
+  let teams=null;
+
+  for(const proxyUrl of ATTEMPTS){
+    try{
+      const resp=await fetch(proxyUrl);
+      const xStatus=resp.headers.get('X-Proxy-Status')||'?';
+      const raw=await resp.text();
+      console.log('[MaxPreps] tried:',proxyUrl.slice(-60));
+      console.log('[MaxPreps] X-Proxy-Status:',xStatus,'| body preview:',raw.slice(0,400));
+
+      if(xStatus==='406'||xStatus==='403'||xStatus==='429'){
+        console.log('[MaxPreps] blocked on this URL, trying next…');
+        continue;
+      }
+
+      // ── Try JSON response (API endpoint) ──
+      if(raw.trim().startsWith('{')||raw.trim().startsWith('[')){
+        try{
+          const json=JSON.parse(raw);
+          console.log('[MaxPreps] got JSON, top keys:',Object.keys(json).join(', '));
+          // Walk for standings array
+          const find=(obj,depth)=>{
+            if(depth>8||!obj||typeof obj!=='object')return null;
+            if(Array.isArray(obj)&&obj.length>=2){
+              const s=obj[0];
+              if(s&&typeof s==='object'&&(s.wins!==undefined||s.losses!==undefined||s.schoolName!==undefined||s.overallRecord!==undefined))return obj;
+            }
+            for(const v of Object.values(obj)){const r=find(v,depth+1);if(r)return r;}
+            return null;
+          };
+          const rows=find(json,0);
+          if(rows){
+            teams=rows.map(t=>{
+              const name=t.schoolName||t.name||t.teamName||t.school?.name||'?';
+              const rec=t.overallRecord||t.record||{};
+              const w=+(t.wins??t.w??rec.wins??rec.w??0);
+              const l=+(t.losses??t.l??rec.losses??rec.l??0);
+              return{name:String(name).trim(),w,l};
+            }).filter(t=>t.name&&t.name!=='?');
+            console.log('[MaxPreps] JSON parse got',teams.length,'teams');
+            if(teams.length)break;
+          }
+        }catch(e){console.warn('[MaxPreps] JSON parse failed:',e.message);}
+      }
+
+      // ── Try __NEXT_DATA__ ──
+      const ndMatch=raw.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+      if(ndMatch){
+        console.log('[MaxPreps] found __NEXT_DATA__ len=',ndMatch[1].length);
+        try{
+          const nd=JSON.parse(ndMatch[1]);
+          const find=(obj,depth,path)=>{
+            if(depth>10||!obj||typeof obj!=='object')return null;
+            if(Array.isArray(obj)&&obj.length>=2){
+              const s=obj[0];
+              if(s&&typeof s==='object'&&(s.wins!==undefined||s.losses!==undefined||s.schoolName!==undefined)){
+                console.log('[MaxPreps] standings array at path:',path,'len=',obj.length);
+                return obj;
+              }
+            }
+            for(const [k,v] of Object.entries(obj)){const r=find(v,depth+1,path+'.'+k);if(r)return r;}
+            return null;
+          };
+          const rows=find(nd,0,'root');
+          if(rows){
+            teams=rows.map(t=>{
+              const name=t.schoolName||t.name||t.school?.name||'?';
+              const rec=t.overallRecord||t.record||{};
+              const w=+(t.wins??rec.wins??0);
+              const l=+(t.losses??rec.losses??0);
+              return{name:String(name).trim(),w,l};
+            }).filter(t=>t.name&&t.name!=='?');
+            console.log('[MaxPreps] __NEXT_DATA__ parse got',teams.length,'teams');
+            if(teams.length)break;
+          }
+        }catch(e){console.warn('[MaxPreps] __NEXT_DATA__ parse failed:',e.message);}
+      }
+
+      // ── Log what we got if nothing parsed ──
+      if(!teams||!teams.length){
+        console.log('[MaxPreps] could not extract data from this URL');
+        console.log('[MaxPreps] __NEXT_DATA__ found?',!!ndMatch,'| JSON?',raw.trim().startsWith('{'));
+      }
+
+    }catch(e){console.warn('[MaxPreps] fetch error:',e.message);}
+  }
+
+  if(!teams||!teams.length){
+    console.warn('[MaxPreps] all attempts failed — falling back to Firebase data');
+    if(st)st.textContent='(offline)';
+    return;
+  }
+
+  teams.sort((a,b)=>{
+    const pa=(a.w+a.l)>0?a.w/(a.w+a.l):0;
+    const pb=(b.w+b.l)>0?b.w/(b.w+b.l):0;
+    return pb-pa||b.w-a.w;
+  });
+
+  let h='<div style="overflow-x:auto;"><table class="player-table" style="min-width:280px;"><thead><tr><th style="width:30px;">#</th><th>Team</th><th>W</th><th>L</th><th>Pct</th></tr></thead><tbody>';
+  teams.forEach(({name,w,l},i)=>{
+    const pct=(w+l)>0?((w/(w+l))*100).toFixed(0)+'%':'—';
+    const isLeon=/leon/i.test(name);
+    h+=`<tr style="${isLeon?'background:var(--red-bg);font-weight:700;':''}">
+      <td style="font-family:'Bebas Neue';font-size:14px;color:var(--gray);">${i+1}</td>
+      <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦁':''}</td>
+      <td style="font-family:'Bebas Neue';font-size:16px;color:var(--green);">${w}</td>
+      <td style="font-family:'Bebas Neue';font-size:16px;color:var(--loss-red);">${l}</td>
+      <td style="font-family:'Bebas Neue';font-size:14px;">${pct}</td></tr>`;
+  });
+  h+='</tbody></table></div>';
+  h+=`<div style="font-size:10px;color:var(--gray);margin-top:6px;font-style:italic;">📡 Live · MaxPreps · ${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;
+  el.innerHTML=h;
+  if(st)st.textContent='';
+}
 function updateStanding(){
   const team=document.getElementById('stand-team').value;
   const w=parseInt(document.getElementById('stand-w').value)||0;
