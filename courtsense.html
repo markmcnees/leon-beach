@@ -46,7 +46,7 @@ header{background:var(--red);padding:12px 18px;display:flex;align-items:center;g
 
 /* COURT WRAPPER */
 #court-wrap{position:relative;width:100%;max-width:400px;margin:0 auto 16px;/* height set by JS */}
-#court-svg{display:block;width:100%;position:absolute;top:0;left:0;}
+#court-svg{display:block;width:100%;position:relative;}
 
 /* STAGING AREA */
 #staging-area{position:absolute;left:0;right:0;/* top set by JS */display:flex;align-items:center;justify-content:space-around;padding:0 30px;}
@@ -774,9 +774,10 @@ function sizeCourtWrap(q){
   const svgEl=document.getElementById('court-svg');
   if(!wrap||!svgEl) return;
   const svgH=svgEl.offsetHeight;
+  // wrap must be tall enough for SVG + token staging row (88px) below it
   wrap.style.height=(svgH+88)+'px';
 
-  // Create tokens
+  // Create tokens — staged below the SVG
   q.leons.forEach((l,i)=>{
     const pos=getStagingPos(i, q.leons.length);
     tokenState[l.id].pxX=pos.pxX;
