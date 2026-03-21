@@ -42,7 +42,7 @@ TARGET_TEAMS = {
 }
 
 def safe_key(name):
-    return re.sub(r'[.$#\[\]/]', '-', name).strip()
+    return re.sub(r'[.$#\[\]/ ]', '-', name).strip()
 
 def fetch(url):
     req = urllib.request.Request(url, headers=HEADERS)
@@ -64,7 +64,7 @@ def extract_teams_from_page(html, label):
         if depth > 8 or not obj:
             return
         if isinstance(obj, list) and len(obj) > 0 and isinstance(obj[0], dict):
-            if 'overallWins' in obj[0] or 'schoolName' in obj[0]:
+            if 'overallWins' in obj[0]:
                 all_rows.extend(obj)
                 return
         if isinstance(obj, dict):
