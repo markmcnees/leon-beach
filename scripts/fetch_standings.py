@@ -27,7 +27,7 @@ TARGET_TEAMS = {
     'Godby':                       (['godby'],                     'https://www.maxpreps.com/fl/tallahassee/godby-cougars/beach-volleyball/standings/'),
     'Rickards':                    (['rickards'],                  'https://www.maxpreps.com/fl/tallahassee/rickards-raiders/beach-volleyball/standings/'),
     'Maclay':                      (['maclay'],                    'https://www.maxpreps.com/fl/tallahassee/maclay-marauders/beach-volleyball/standings/'),
-    'Florida State University HS': (['florida state university'],  'https://www.maxpreps.com/fl/tallahassee/florida-state-university-high-school-flying-high/beach-volleyball/standings/'),
+    'Florida State University HS': (['florida state university'],  'https://www.maxpreps.com/fl/tallahassee/florida-state-university-high-school-seminoles/beach-volleyball/standings/'),
     'Wakulla':                     (['wakulla'],                   'https://www.maxpreps.com/fl/crawfordville/wakulla-warriors/beach-volleyball/standings/'),
     'Munroe':                      (['munroe'],                    'https://www.maxpreps.com/fl/quincy/munroe-bobcats/beach-volleyball/standings/'),
     'Community Christian':         (['community christian'],       'https://www.maxpreps.com/fl/tallahassee/community-christian-chargers/beach-volleyball/standings/'),
@@ -36,7 +36,7 @@ TARGET_TEAMS = {
     'Mosley':                      (['mosley'],                    'https://www.maxpreps.com/fl/lynn-haven/mosley-dolphins/beach-volleyball/standings/'),
     'Sneads':                      (['sneads'],                    'https://www.maxpreps.com/fl/sneads/sneads-pirates/beach-volleyball/standings/'),
     'Destin':                      (['destin'],                    'https://www.maxpreps.com/fl/destin/destin-sharks/beach-volleyball/standings/'),
-    'St- John Paul II':            (['john paul', 'jp ii'],        'https://www.maxpreps.com/fl/tallahassee/john-paul-ii-panthers/beach-volleyball/standings/'),
+    'St- John Paul II':            (['john paul', 'jp ii'],        'https://www.maxpreps.com/fl/tallahassee/st-john-paul-ii-panthers/beach-volleyball/standings/'),
 }
 
 def fetch(url):
