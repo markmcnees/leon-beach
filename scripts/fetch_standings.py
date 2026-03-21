@@ -5,7 +5,7 @@ to Firebase Realtime Database under leon_queens_matches/standings.
 Runs as a GitHub Action on a nightly schedule.
 """
 
-import json, re, sys, urllib.request, urllib.parse
+import json, re, sys, urllib.request
 
 MAXPREPS_URL = 'https://www.maxpreps.com/fl/tallahassee/leon-lions/beach-volleyball/'
 FIREBASE_URL = 'https://leon-beach-volleyball-default-rtdb.firebaseio.com/leon_queens_matches/standings.json'
@@ -15,6 +15,10 @@ HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.9',
 }
+
+def safe_key(name):
+    """Firebase keys cannot contain . $ # [ ] / — replace with safe chars."""
+    return re.sub(r'[.$#\[\]/]', '-', name).strip()
 
 def fetch(url):
     req = urllib.request.Request(url, headers=HEADERS)
@@ -56,7 +60,8 @@ def parse_next_data(html):
         l = int(t.get('losses') or t.get('l') or rec.get('losses') or rec.get('l') or 0)
         name = str(name).strip()
         if name and name != '?':
-            teams[name] = {'w': w, 'l': l}
+            key = safe_key(name)
+            teams[key] = {'w': w, 'l': l, 'name': name}  # store original name too
     print(f'  Parsed {len(teams)} teams from __NEXT_DATA__')
     return teams if teams else None
 
@@ -79,7 +84,9 @@ def parse_html_table(html):
     teams = {}
     for row in p.rows:
         if len(row) >= 3 and re.match(r'^\d+$', row[1]) and re.match(r'^\d+$', row[2]):
-            teams[row[0]] = {'w': int(row[1]), 'l': int(row[2])}
+            name = row[0]
+            key = safe_key(name)
+            teams[key] = {'w': int(row[1]), 'l': int(row[2]), 'name': name}
     print(f'  HTML table scrape found {len(teams)} teams')
     return teams if teams else None
 
@@ -102,7 +109,6 @@ def main():
 
     if not teams:
         print('ERROR: could not parse any standings — aborting Firebase write')
-        # Print first 1000 chars of page title area for debugging
         m = re.search(r'<title>(.*?)</title>', html)
         print(f'  Page title: {m.group(1) if m else "none"}')
         sys.exit(1)
@@ -113,4 +119,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
