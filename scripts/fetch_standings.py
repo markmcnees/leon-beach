@@ -70,6 +70,9 @@ def extract_class_page(html, label):
         l = int(t.get('overallLosses') or 0)
         if name: results.append({'name': name, 'w': w, 'l': l})
     print(f'  [{label}] {len(results)} teams')
+    # Print all FL-area team names for debugging
+    fl_teams = [r['name'] for r in results if r['w'] or r['l'] or True]
+    print(f'  [{label}] all names: {sorted(fl_teams)}')
     return results
 
 def extract_schedule_record(html):
