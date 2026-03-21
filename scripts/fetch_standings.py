@@ -29,7 +29,7 @@ TARGET_TEAMS = {
     'Godby':                                ['godby'],
     'Rickards':                             ['rickards'],
     'Maclay':                               ['maclay'],
-    'Florida State University High School': ['florida state university high', 'fsu high', 'fsus'],
+    'Florida State University HS':          ['florida state university high', 'fsuhs', 'flying high'],
     'Wakulla':                              ['wakulla'],
     'Munroe':                               ['munroe'],
     'Community Christian':                  ['community christian'],
