@@ -322,7 +322,7 @@ const QUESTIONS=[
 // Ball token: student slides ball to show where the hit lands. Correct = cross lane (your zones 4-5, screen-right).
 {
   cat:'Defense',
-  scenario:'You are playing right. Their setter delivers a high set to their zone 5. The left-handed hitter is loading up. Your partner has called LINE. Moderate wind blowing left to right.',
+  scenario:'You are playing right. Their setter delivers a high set to their zone 5. The left-handed hitter is loading up. Your partner shows one finger — she has called LINE. Moderate wind blowing left to right.',
   instruct:'Drag the 🏐 to where the hitter will make contact with the ball. Drag YOUR BLOCKER and DEFENDER into position — place YOUR token where you expect the attack to land on your side.',
   wind:['right','mod'],
   opps:[
@@ -434,18 +434,18 @@ const QUESTIONS=[
   ],
   ballToken:{startSVG:{x:28,y:72},target:{cx:38,cy:252,tol:65,hint:'Your partner took CROSS — the line shot from a lefty at zone 5 travels down your left sideline. That\'s your responsibility as the left-side defender.'}},
   leons:[
-    {id:'p1',lbl:'PRTNR',sub:'',cx:28,cy:182,tol:55,hint:'PARTNER is at the net on zone 1 — two fingers means she seals the CROSS lane.'},
-    {id:'p2',lbl:'YOU',  sub:'',cx:38,cy:252,tol:58,hint:'YOU cover the LINE on the left side — partner closed cross, so you own the line shot down the left sideline.'},
+    {id:'p1',lbl:'PRTNR',sub:'',cx:28,cy:182,tol:70,hint:'PARTNER is at the net on zone 1 — two fingers means she is taking the ANGLE (cross). She seals that lane.'},
+    {id:'p2',lbl:'YOU',  sub:'',cx:38,cy:252,tol:72,hint:'YOU cover the LINE on the left side — partner closed the angle, so you own the line shot down the left sideline.'},
   ],
-  q:'Your partner signals two fingers — she\'s taking cross. Where do you go?',
+  q:'Your partner signals two fingers — she\'s taking the angle. Where do you go?',
   choices:[
-    'Right side of the court — the cross is the power shot so cover that.',
-    'Center court — split the difference between line and cross.',
-    'Left side of the court — partner closed cross, so you own the line.',
+    'Right side of the court — the angle is the power shot so cover that.',
+    'Center court — split the difference between line and angle.',
+    'Left side of the court — partner closed the angle, so you own the line.',
     'At the net — anticipate a tip over your partner.',
   ],
   correct:2,
-  expl:'<strong>Two fingers means CROSS is blocked — you own the line.</strong> When your partner signals two fingers she seals the cross lane. A lefty at their zone 5 hits line down YOUR left sideline. You cover that lane. The strong wind toward your side can carry both shots — stay on the line and trust your partner to take cross.',
+  expl:'<strong>Two fingers means ANGLE is blocked — you own the line.</strong> When your partner signals two fingers she is taking the angle (cross). A lefty at their zone 5 hits line down YOUR left sideline. You cover that lane. The strong wind toward your side can carry both shots — stay on the line and trust your partner to take the angle.',
 },
 
 // Q6 — FREE BALL: ROLL OR CUT TO ZONE 5
@@ -794,7 +794,7 @@ function confirmPlacement(){
     :`Positioning: ${placementPts}/6 pts — review hints below.`;
   const banner=document.getElementById('placement-banner');
   banner.className='placement-banner '+bc+' show';
-  banner.innerHTML=`<div class="pb-title">${bt}</div>${hints}`;
+  banner.innerHTML=`<div class="pb-title">${bt}</div>${hints}${correctCount<total?buildReferenceLegend():''}`;
 
   document.getElementById('confirm-btn').style.display='none';
   document.getElementById('place-status').style.display='none';
@@ -832,6 +832,7 @@ function pickAnswer(idx){
 
 // ── LEGEND ────────────────────────────────────────────────────
 function buildLegend(){
+  // Basic key only — shown during the question. No zones, no signals.
   const readySVG=`<svg class="lsvg" width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="${OPP}" stroke="#fff" stroke-width="1.8"/><text x="11" y="14" text-anchor="middle" fill="#fff" font-size="8" font-family="Barlow Condensed" font-weight="700">OPP</text></svg>`;
   const downSVG=`<svg class="lsvg" width="36" height="22" viewBox="0 0 36 22"><ellipse cx="18" cy="11" rx="17" ry="9" fill="${OPP}" stroke="#fff" stroke-width="1.8" opacity=".85"/><text x="18" y="15" text-anchor="middle" fill="#fff" font-size="7" font-family="Barlow Condensed" font-weight="700">▼DOWN</text></svg>`;
   const yourSVG=`<svg class="lsvg" width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="${YOUR}" stroke="#fff" stroke-width="1.8"/></svg>`;
@@ -849,7 +850,12 @@ function buildLegend(){
       </svg>
       <span>Gold arrow — shows where you are directing the ball</span>
     </div>
-    <div class="divider"></div>
+  </div>`;
+}
+
+function buildReferenceLegend(){
+  // Full reference — zones + blocking signals — shown only after incorrect placement
+  return `<div class="legend-panel" style="border-color:#333;margin-top:12px;">
     <div class="legend-title">📍 SET ZONES</div>
     <div class="zone-grid">
       <div class="zone-item"><span class="zone-num">1/10</span><span>Left antenna</span></div>
@@ -858,7 +864,14 @@ function buildLegend(){
       <div class="zone-item"><span class="zone-num">4/40</span><span>Right center</span></div>
       <div class="zone-item"><span class="zone-num">5/50</span><span>Right antenna</span></div>
     </div>
-    <div style="margin-top:6px;font-size:10px;color:#555;">1–5 = high set &nbsp;·&nbsp; 10–50 = quick/low set</div>
+    <div style="margin-top:4px;font-size:10px;color:#555;">1–5 = high set &nbsp;·&nbsp; 10–50 = quick/low set</div>
+    <div class="divider"></div>
+    <div class="legend-title">🤙 BLOCKING SIGNALS</div>
+    <div class="legend-row"><span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);min-width:32px;">1</span><span>Block LINE — defender plays the angle. If set is off the net and blocker pulls, she digs line.</span></div>
+    <div class="legend-row"><span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);min-width:32px;">2</span><span>Block ANGLE — defender slides to dig line. If blocker pulls on a bad set, she pulls toward the angle.</span></div>
+    <div class="legend-row"><span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);min-width:32px;">✊</span><span>Closed fist — read block. Blocker reads and goes for the block; defender reads and digs what she sees. Offensive move going for the point.</span></div>
+    <div class="legend-row"><span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);min-width:32px;">3</span><span>Bait LINE — blocker shows line open early, then dive-blocks line at the last second.</span></div>
+    <div class="legend-row"><span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);min-width:32px;">4</span><span>Bait ANGLE — blocker shows angle open early, then dive-blocks the angle at the last second.</span></div>
   </div>`;
 }
 
