@@ -115,7 +115,7 @@ header{background:#111;padding:11px 16px;display:flex;align-items:center;gap:10p
 <header>
   <div><div class="logo">Court<span>Sense</span> IQ</div><div class="logo-sub">Beach Volleyball · Level 1</div></div>
   <div class="hdr-spc"></div>
-  <div class="score-badge"><div class="snum" id="score-display">0</div><div class="slbl">correct</div></div>
+  <div class="score-badge"><div class="snum" id="score-display">0</div><div class="slbl">pts</div></div>
 </header>
 <div class="level-strip"><div class="lpip"></div>LEVEL 1 — FUNDAMENTALS<div class="lpip off" style="margin-left:6px"></div><div class="lpip off"></div></div>
 <div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
@@ -322,8 +322,8 @@ const QUESTIONS=[
 // Ball token: student slides ball to show where the hit lands. Correct = cross lane (your zones 4-5, screen-right).
 {
   cat:'Defense',
-  scenario:'Their setter delivers a high set to their zone 5. The right-handed hitter is loading up. Your partner has called LINE. Moderate wind blowing left to right.',
-  instruct:'Drag the 🏐 to where the hitter will make contact with the ball. Drag YOUR BLOCKER and DEFENDER into position — place your DEFENDER where you expect the attack to land on your side.',
+  scenario:'You are playing right. Their setter delivers a high set to their zone 5. The left-handed hitter is loading up. Your partner has called LINE. Moderate wind blowing left to right.',
+  instruct:'Drag the 🏐 to where the hitter will make contact with the ball. Drag YOUR BLOCKER and DEFENDER into position — place YOUR token where you expect the attack to land on your side.',
   wind:['right','mod'],
   opps:[
     {x:130,y:115,lbl:'S', sub:'SETTER'},
@@ -332,20 +332,20 @@ const QUESTIONS=[
   decs:[],
   ballToken:{startSVG:{x:130,y:115},target:{cx:28,cy:165,tol:42,hint:'Ball contact point — zone 5 near the net, where the hitter attacks.'}},
   leons:[
-    {id:'p1',lbl:'BLKR',sub:'PRTNR',cx:28, cy:182,tol:30, hint:'BLOCKER seals the LINE — at the net directly in front of the hitter.'},
-    {id:'p2',lbl:'DEF', sub:'YOU',  cx:185,cy:265,tol:55, hint:'DEFENDER covers the CROSS lane — a right-hander at zone 5 attacks cross toward your zones 4–5.'},
+    {id:'p1',lbl:'PRTNR',sub:'',cx:28, cy:182,tol:30, hint:'Your PARTNER seals the LINE — at the net directly in front of the hitter.'},
+    {id:'p2',lbl:'YOU',  sub:'',cx:185,cy:265,tol:55, hint:'YOU cover the CROSS lane — a right-hander at zone 5 attacks cross toward your right side.'},
   ],
   q:'Your partner called LINE. Where does the back defender position?',
   choices:['Center court — cover all options equally.','In the cross-court lane — blocker owns line, you own the cross.','Behind the blocker to double-seal the line.','Up at the 3-meter line to take tips.'],
   correct:1,
-  expl:'<strong>Block-defense must pair up.</strong> When your partner commits to line she removes that lane. You own the only remaining open path — the cross. A right-hander at their zone 5 attacks cross toward your zones 4–5. The moderate L-to-R wind carries cross shots further toward you. Standing center covers nothing well.',
+  expl:'<strong>Block-defense must pair up.</strong> When your partner commits to line she removes that lane. You own the only remaining open path — the cross. A left-handed hitter at their zone 5 (their right side, conventional positioning) attacks cross toward your right side. The moderate L-to-R wind carries cross shots further toward you. Standing center covers nothing well.',
 },
 
 // Q2 — SEAM SERVE RECEIVE
 // Server at top. Ball travels down toward seam. Ball token: pass to setter.
 {
   cat:'Serve Receive',
-  scenario:'The server sends a float serve drifting into the seam between you and your partner. Light wind blowing toward your side.',
+  scenario:'You are playing left. The server sends a float serve drifting into the seam between you and your partner. Light wind blowing toward your side.',
   instruct:'Drag your players into receive positions. Then drag the 🏐 to where you want to direct your pass — the gold arrow will show the pass direction.',
   wind:['toward','light'],
   opps:[
@@ -356,9 +356,9 @@ const QUESTIONS=[
     {t:'ball', x:130,y:25},
     {t:'arrow',x1:130,y1:34,x2:130,y2:198,c:'#fffde7',dsh:true},
   ],
-  ballToken:{startSVG:{x:130,y:215},target:{cx:178,cy:258,tol:58,hint:'Pass to your setter (right-center area) — gives a clean platform to work from.'}},
+  ballToken:{startSVG:{x:130,y:215},target:{cx:178,cy:258,tol:58,hint:'Pass to your partner in right-center — gives a clean platform to work from.'}},
   leons:[
-    {id:'p1',lbl:'YOU',  sub:'',cx:115,cy:262,tol:55,hint:'YOU step toward the seam — your forehand faces the incoming ball.'},
+    {id:'p1',lbl:'YOU',  sub:'',cx:115,cy:262,tol:55,hint:'YOU step toward the seam from the left side — your forehand faces the incoming ball.'},
     {id:'p2',lbl:'PRTNR',sub:'',cx:178,cy:262,tol:55,hint:'PARTNER holds the right side and lets you claim the seam.'},
   ],
   q:'The float serve drifts into the seam. Who takes it — and what decides?',
@@ -371,18 +371,18 @@ const QUESTIONS=[
 // Blocker missed. Digger dug, ball set to zone 1. Ball token: drag ball to show where attack goes.
 {
   cat:'Transition',
-  scenario:'Your blocker took line but the hitter went cross. You dug it and popped it up to zone 1 for the option. Light wind right to left.',
-  instruct:'Drag YOUR BLOCKER into her transition position. Drag YOUR PARTNER into their attack approach. Then drag the 🏐 to show where the attack will go.',
+  scenario:'You are playing left. Your partner took line but the hitter went cross. You dug it and popped it up to zone 1 for the option. Light wind right to left.',
+  instruct:'Drag YOU into your transition position. Drag PRTNR into their attack approach. Then drag the 🏐 to show where the attack will go.',
   wind:['left','light'],
   opps:[
     {x:52, y:155,lbl:'B1',sub:'BLKR'},
     {x:115,y:152,lbl:'B2',sub:'BLKR'},
   ],
   decs:[],
-  ballToken:{startSVG:{x:52,y:215},target:{cx:130,cy:80,tol:105,hint:'Any attack into the opponent\'s court is valid here — a high line, cross, or deep angle all work from zone 1.'}},
+  ballToken:{startSVG:{x:52,y:215},target:{cx:130,cy:80,tol:105,hint:'Any attack into the opponent\'s court works — a high line, cross, or deep angle all work from zone 1.'}},
   leons:[
-    {id:'p1',lbl:'BLKR',sub:'YOU',  cx:52, cy:234,tol:50,hint:'BLOCKER peels to the 3-meter line — covers tips and short balls, out of the dead zone.'},
-    {id:'p2',lbl:'PRTNR',sub:'',    cx:178,cy:302,tol:52,hint:'PARTNER holds deep, ready for a driven attack back at you.'},
+    {id:'p1',lbl:'YOU',  sub:'',cx:52, cy:234,tol:50,hint:'YOU peel to the 3-meter line after the missed block — covers tips and short balls, out of the dead zone at the net.'},
+    {id:'p2',lbl:'PRTNR',sub:'',cx:178,cy:302,tol:52,hint:'PARTNER holds deep on the right, ready to attack from zone 1.'},
   ],
   q:'After missing a block, your immediate move should be to...',
   choices:['Stay at the net — try to tip or dump while still up.','Peel back to the 3-meter line to cover tips and short balls.','Sprint to the back corner to clear space.','Hold still so your partner can read the play.'],
@@ -396,7 +396,7 @@ const QUESTIONS=[
 // Ball token: drag to opponent's open back-right corner.
 {
   cat:'Game Sense',
-  scenario:'The ball crossed from the opponent\'s side and dropped in front of you. Their blocker (B) is pinned at the net. Their defender (D) dove left and is still down recovering. Light wind left to right.',
+  scenario:'You are playing left. The ball crossed from the opponent\'s side and dropped in front of you. Their blocker (B) is pinned at the net. Their defender (D) dove left and is still down recovering. Light wind left to right.',
   instruct:'Drag YOUR players into position. Then drag the 🏐 to where you want to send the ball.',
   wind:['right','light'],
   opps:[
@@ -408,8 +408,8 @@ const QUESTIONS=[
   ],
   ballToken:{startSVG:{x:130,y:228},target:{cx:215,cy:55,tol:90,hint:'Bump it to the open back-right corner — D is still down on the left, B can\'t leave the net to cover that depth.'}},
   leons:[
-    {id:'p1',lbl:'YOU',  sub:'',cx:130,cy:295,tol:68,hint:'YOU back up into a ready defensive position after the bump — don\'t stand at the ball contact point.'},
-    {id:'p2',lbl:'PRTNR',sub:'',cx:195,cy:295,tol:68,hint:'PARTNER holds the right side — ready to cover if the ball comes back over toward that corner.'},
+    {id:'p1',lbl:'YOU',  sub:'',cx:130,cy:295,tol:68,hint:'YOU back up into a ready position after the bump — don\'t stand at the ball contact point.'},
+    {id:'p2',lbl:'PRTNR',sub:'',cx:195,cy:295,tol:68,hint:'PARTNER holds the right side — ready to cover if the ball comes back over.'},
   ],
   q:'Defender is down left, blocker is pinned at the net. The back-right corner is open. What\'s the play?',
   choices:['Pass to your partner and run a full 3-contact offense.','Bump it directly over to the open back-right corner — one touch, free point.','Tip softly just over the blocker\'s hands.','Wait and let your partner call for the ball.'],
@@ -422,8 +422,8 @@ const QUESTIONS=[
 // Lefty's power cross → screen-LEFT (YOUR zone 1). Ball token: drag to where cross lands.
 {
   cat:'Defense',
-  scenario:'Their hitter is LEFT-HANDED, positioned on their zone 5. Your blocker shows two fingers. A strong wind blows toward your side.',
-  instruct:'Drag YOUR BLOCKER and DEFENDER into position. Then drag the 🏐 to where the line shot will land.',
+  scenario:'You are playing left. Their hitter is LEFT-HANDED, positioned on their zone 5. Your partner shows two fingers. A strong wind blows toward your side.',
+  instruct:'Drag YOUR PARTNER and YOU into position. Then drag the 🏐 to where the line shot will land.',
   wind:['toward','strong'],
   opps:[
     {x:155,y:155,lbl:'S', sub:'SETTER'},
@@ -432,20 +432,20 @@ const QUESTIONS=[
   decs:[
     {t:'ball', x:155,y:155},
   ],
-  ballToken:{startSVG:{x:28,y:72},target:{cx:38,cy:252,tol:65,hint:'Blocker took CROSS — the line shot from a lefty at zone 5 travels down YOUR left sideline (zone 1). That\'s the defender\'s responsibility.'}},
+  ballToken:{startSVG:{x:28,y:72},target:{cx:38,cy:252,tol:65,hint:'Your partner took CROSS — the line shot from a lefty at zone 5 travels down your left sideline. That\'s your responsibility as the left-side defender.'}},
   leons:[
-    {id:'p1',lbl:'BLKR',sub:'',cx:28,cy:182,tol:55,hint:'BLOCKER at the net on zone 1 — directly across from the hitter, two fingers means she seals the CROSS lane.'},
-    {id:'p2',lbl:'DEF', sub:'',cx:38,cy:252,tol:58,hint:'DEFENDER covers the LINE — left side of your court (zone 1). Blocker closed cross, so you own the line shot down the left sideline.'},
+    {id:'p1',lbl:'PRTNR',sub:'',cx:28,cy:182,tol:55,hint:'PARTNER is at the net on zone 1 — two fingers means she seals the CROSS lane.'},
+    {id:'p2',lbl:'YOU',  sub:'',cx:38,cy:252,tol:58,hint:'YOU cover the LINE on the left side — partner closed cross, so you own the line shot down the left sideline.'},
   ],
-  q:'Your blocker signals two fingers — she\'s taking cross. Where does the defender go?',
+  q:'Your partner signals two fingers — she\'s taking cross. Where do you go?',
   choices:[
     'Right side of the court — the cross is the power shot so cover that.',
     'Center court — split the difference between line and cross.',
-    'Left side of the court — blocker closed cross, so you own the line.',
-    'At the net — anticipate a tip over the blocker.',
+    'Left side of the court — partner closed cross, so you own the line.',
+    'At the net — anticipate a tip over your partner.',
   ],
   correct:2,
-  expl:'<strong>Two fingers means CROSS is blocked — you own the line.</strong> When your blocker signals two fingers she seals the cross lane. A lefty at their zone 5 (screen-left) hits line down YOUR left sideline — your zone 1. Your defender covers that lane. The strong wind toward your side can carry both shots — stay on the line and trust your blocker to take cross.',
+  expl:'<strong>Two fingers means CROSS is blocked — you own the line.</strong> When your partner signals two fingers she seals the cross lane. A lefty at their zone 5 hits line down YOUR left sideline. You cover that lane. The strong wind toward your side can carry both shots — stay on the line and trust your partner to take cross.',
 },
 
 // Q6 — FREE BALL: ROLL OR CUT TO ZONE 5
@@ -454,8 +454,8 @@ const QUESTIONS=[
 // Ball target: opponent's zone 5 area (screen-right, x~232). Wide tol accepts near-net roll or deep cut.
 {
   cat:'Game Sense',
-  scenario:'Their attack hit the net and floated over to your side. Both opponents are flat-footed deep in their back court. Moderate wind blowing away from you.',
-  instruct:'Drag your players into position. Place PRTNR at her HITTING POSITION. Then drag the 🏐 to where you will send the ball.',
+  scenario:'You are playing left. Their attack hit the net and floated over to your side. Both opponents are flat-footed deep in their back court. Moderate wind blowing away from you.',
+  instruct:'Drag your players into position. Place PRTNR at her hitting position. Then drag the 🏐 to where you will send the ball.',
   wind:['away','mod'],
   opps:[
     {x:185,y:112,lbl:'D1',sub:''},
@@ -467,8 +467,8 @@ const QUESTIONS=[
   ],
   ballToken:{startSVG:{x:130,y:245},target:{cx:215,cy:130,tol:130,hint:'Right side of the opponent\'s court — a roll to zone 5 near the tape, a cut shot to zone 5, or a high line deep to the back-right corner. All three work with both opponents flat-footed deep.'}},
   leons:[
-    {id:'p1',lbl:'YOU',  sub:'',cx:130,cy:268,tol:62,hint:'YOU are under the free ball at center court — play it directly or feed your partner.'},
-    {id:'p2',lbl:'PRTNR',sub:'',cx:210,cy:192,tol:65,hint:'PARTNER is at her hitting position at zone 5 near the net — ready to swing a cut shot to that corner if you call the option.'},
+    {id:'p1',lbl:'YOU',  sub:'',cx:130,cy:268,tol:62,hint:'YOU are under the free ball at center — play it directly or feed your partner.'},
+    {id:'p2',lbl:'PRTNR',sub:'',cx:210,cy:192,tol:65,hint:'PARTNER is at her hitting position on the right side near the net — ready to swing a cut shot or go high line if you call the option.'},
   ],
   q:'Both opponents are flat-footed deep in the back court. The free ball is yours. What are your best options?',
   choices:[
@@ -485,8 +485,8 @@ const QUESTIONS=[
 // Ball is your serve traveling up/away. Ball token: drag to where serve lands on their side.
 {
   cat:'Defense',
-  scenario:'You just served. The ball is in the air in the seam of the opponent\'s side. Moderate wind blowing right to left.',
-  instruct:'Drag YOUR two players into your starting positions. Then drag the 🏐 to where your serve will land.',
+  scenario:'You are playing left. You just served. The ball is in the air in the seam of the opponent\'s side. Moderate wind blowing right to left.',
+  instruct:'Drag your players into your starting positions. Then drag the 🏐 to where your serve will land.',
   wind:['left','mod'],
   opps:[
     {x:185,y:105,lbl:'R1',sub:''},
@@ -495,8 +495,8 @@ const QUESTIONS=[
   decs:[],
   ballToken:{startSVG:{x:130,y:88},target:{cx:130,cy:65,tol:80,hint:'Serve into the seam between the two receivers — forces a communication decision and a tougher pass.'}},
   leons:[
-    {id:'p1',lbl:'YOU',  sub:'',cx:72,cy:248,tol:75,hint:'YOU take the left half of your court — you can sit mid-depth or shade up to handle a short ball or tip. Both are valid starting reads after serving.'},
-    {id:'p2',lbl:'PRTNR',sub:'',cx:185,cy:285,tol:65,hint:'PARTNER takes the right half at mid-depth — balanced split one player each side.'},
+    {id:'p1',lbl:'YOU',  sub:'',cx:72,cy:248,tol:75,hint:'YOU on the left side — shade forward to cover a short ball or step up and block if the pass is bad.'},
+    {id:'p2',lbl:'PRTNR',sub:'',cx:185,cy:285,tol:65,hint:'PARTNER takes the right side at mid-depth — balanced split, one player each side.'},
   ],
   q:'You just served into the seam. Where do you and your partner start?',
   choices:[
@@ -513,8 +513,8 @@ const QUESTIONS=[
 // Strong wind pushes serve deeper. Ball token: drag to adjusted pass target (setter position).
 {
   cat:'Serve Receive',
-  scenario:'Strong wind is blowing toward your side. Their float serve normally lands at mid-court but today the wind will carry it much deeper.',
-  instruct:'Drag YOUR receivers to the adjusted depth. Then drag the 🏐 to where you will pass it.',
+  scenario:'You are playing left. Strong wind is blowing toward your side. Their float serve normally lands at mid-court but today the wind will carry it much deeper.',
+  instruct:'Drag your players to the adjusted depth. Then drag the 🏐 to where you will pass it.',
   wind:['toward','strong'],
   opps:[
     {x:130,y:22, lbl:'SRV',sub:'SERVER'},
@@ -524,10 +524,10 @@ const QUESTIONS=[
     {t:'ball', x:130,y:22},
     {t:'arrow',x1:130,y1:32,x2:130,y2:318,c:'#fffde7',dsh:true},
   ],
-  ballToken:{startSVG:{x:130,y:308},target:{cx:130,cy:290,tol:85,hint:'Pass to center court for your setter — a clean platform anywhere in the middle of your side works. Deep passes to the back are harder to set from, especially into wind.'}},
+  ballToken:{startSVG:{x:130,y:308},target:{cx:130,cy:290,tol:85,hint:'Pass to center court — a clean platform anywhere in the middle works. Deep passes to the back are harder to set from, especially into wind.'}},
   leons:[
-    {id:'p1',lbl:'YOU',  sub:'',cx:75, cy:305,tol:55,hint:'YOU shift 2–3 steps deeper — the strong wind carries the serve further back.'},
-    {id:'p2',lbl:'PRTNR',sub:'',cx:185,cy:305,tol:55,hint:'PARTNER also shifts deeper — keep the left/right split, just further back.'},
+    {id:'p1',lbl:'YOU',  sub:'',cx:75, cy:305,tol:55,hint:'YOU shift 2–3 steps deeper on the left — the strong wind carries the serve further back.'},
+    {id:'p2',lbl:'PRTNR',sub:'',cx:185,cy:305,tol:55,hint:'PARTNER also shifts deeper on the right — keep the left/right split, just further back.'},
   ],
   q:'With a strong wind pushing the serve deeper than normal, you should...',
   choices:['Move closer to the net to take the ball before the wind affects it.','Keep standard receive depth — trust your mechanics.','Shift 2–3 steps deeper so the wind-assisted serve stays in front of you.','One player stays standard depth, one shifts deep.'],
@@ -541,28 +541,28 @@ const QUESTIONS=[
 // hitter must audible to zone 3 or zone 4 to give setter a workable set.
 {
   cat:'Setting',
-  scenario:'Your partner passed the ball tight to the net at zone 5. The setter is pinned there to handle it. The opponent blocker is already loaded at zone 5. The hitter originally called for a 5, but now calls an audible to zone 3 or 4. Moderate wind blowing left to right.',
-  instruct:'Drag your SETTER and HITTER into position. Then drag the 🏐 to the zone the hitter audibles to — place it at the net where she will hit.',
+  scenario:'You are playing left. Your partner passed the ball tight to the net at zone 5. Your partner is pinned there to handle it. The opponent blocker is already loaded at zone 5. You originally called for a 5, but now call an audible to zone 3 or 4. Moderate wind blowing left to right.',
+  instruct:'Drag YOU and PRTNR into position. Then drag the 🏐 to the zone you audible to — place it at the net where you will hit.',
   wind:['right','mod'],
   opps:[
     {x:232,y:160,lbl:'BLK',sub:'LOADED'},
     {x:165,y:112,lbl:'DEF',sub:''},
   ],
   decs:[],
-  ballToken:{startSVG:{x:218,y:200},target:{cx:130,cy:190,tol:75,hint:'Set delivered to zone 3 or 4 — near the net, just off the tape. Setter sets from zone 5 to wherever the hitter called the audible.'}},
+  ballToken:{startSVG:{x:218,y:200},target:{cx:130,cy:190,tol:75,hint:'Set delivered to zone 3 or 4 — near the net, just off the tape. Your partner sets from zone 5 to wherever you called the audible.'}},
   leons:[
-    {id:'p1',lbl:'SET',sub:'SETR',cx:218,cy:210,tol:42,hint:'SETTER stays at zone 5 handling the tight pass and delivers the set from there.'},
-    {id:'p2',lbl:'HIT',sub:'HITR',cx:130,cy:190,tol:65,hint:'HITTER approaches to zone 3 or 4 at the net — her hitting position for the audible call.'},
+    {id:'p1',lbl:'PRTNR',sub:'',cx:218,cy:210,tol:42,hint:'PARTNER is pinned at zone 5 handling the tight pass — she delivers the set from there.'},
+    {id:'p2',lbl:'YOU',  sub:'',cx:130,cy:190,tol:65,hint:'YOU approach to zone 3 or 4 at the net — your hitting position for the audible call.'},
   ],
-  q:'The setter is pinned at zone 5 on a tight pass. The blocker is loaded at zone 5. What should the hitter do?',
+  q:'Your partner is pinned at zone 5 on a tight pass. The blocker is loaded at zone 5. What do you do?',
   choices:[
-    'Stick with the zone 5 call — the setter can still deliver it.',
-    'Audible to zone 3 or 4 — give the setter a workable set away from the loaded blocker.',
+    'Stick with the zone 5 call — your partner can still deliver it.',
+    'Audible to zone 3 or 4 — give your partner a workable set away from the loaded blocker.',
     'Stop the play and call a timeout.',
     'Sprint to zone 1 — get as far from the blocker as possible.',
   ],
   correct:1,
-  expl:'<strong>The hitter must audible.</strong> When the setter is pinned at zone 5 handling a tight pass, she physically cannot deliver a zone 5 set — she is already there. The hitter reads this immediately and calls zone 3 or 4, giving the setter a realistic delivery angle. Zone 3 or 4 also moves the attack away from the loaded blocker. This is basic communication — the hitter\'s job is to adjust when the pass changes everything.',
+  expl:'<strong>You must audible.</strong> When your partner is pinned at zone 5 handling a tight pass, she physically cannot deliver a zone 5 set — she is already there. You read this immediately and call zone 3 or 4, giving her a realistic delivery angle. Zone 3 or 4 also moves your attack away from the loaded blocker. This is basic communication — your job is to adjust when the pass changes everything.',
 },
 
 // Q10 — TENDENCY DEFENSE
@@ -570,8 +570,8 @@ const QUESTIONS=[
 // Ball token: drag to where the 80% cross lands.
 {
   cat:'Defense',
-  scenario:'Scouting: their right-side hitter attacks cross-court 80% of the time from their zone 5. Both of you are in full defense — no blocker up. Moderate wind left to right.',
-  instruct:'Drag YOUR two defenders to play the tendency. Then drag the 🏐 to where the 80% shot will land.',
+  scenario:'You are playing right. Scouting: their right-side hitter attacks cross-court 80% of the time from their zone 5. Both of you are in full defense — no blocker up. Moderate wind left to right.',
+  instruct:'Drag your players to play the tendency. Then drag the 🏐 to where the 80% shot will land.',
   wind:['right','mod'],
   opps:[
     {x:28, y:158,lbl:'H',sub:'80%CROSS'},
@@ -580,10 +580,10 @@ const QUESTIONS=[
   decs:[
     {t:'ball', x:28,y:158},
   ],
-  ballToken:{startSVG:{x:28,y:158},target:{cx:185,cy:252,tol:68,hint:'80% cross from their zone 5 lands in your zones 4–5 at mid-depth.'}},
+  ballToken:{startSVG:{x:28,y:158},target:{cx:185,cy:252,tol:68,hint:'80% cross from their zone 5 lands on your right side at mid-depth.'}},
   leons:[
-    {id:'p1',lbl:'YOU',  sub:'',cx:130,cy:252,tol:115,hint:'Either player mid-depth on the right side — cheat toward the cross-court angle where 80% of her shots land.'},
-    {id:'p2',lbl:'PRTNR',sub:'',cx:130,cy:258,tol:115,hint:'Either player mid-depth on the left side — covering the 20% line option without hugging the sideline.'},
+    {id:'p1',lbl:'YOU',  sub:'',cx:130,cy:252,tol:115,hint:'YOU cheat toward the cross-court angle — right side mid-depth, in the path of the 80% shot.'},
+    {id:'p2',lbl:'PRTNR',sub:'',cx:130,cy:258,tol:115,hint:'PARTNER covers the line option — left side mid-depth, not hugging the sideline.'},
   ],
   q:'She hits cross-court 80% of the time from their zone 5. You should...',
   choices:['Split exactly in half and react.','Cheat toward center court while your partner covers the cross-court angle.','Both crowd the cross-court — double up on the 80%.','Keep standard split — don\'t gamble on tendencies.'],
@@ -746,26 +746,32 @@ function confirmPlacement(){
     tokenState[id].svgX=svgX;tokenState[id].svgY=svgY;
   });
 
-  // Grade players
-  let correct=0;
+  // Grade players — 2pts each
+  let placementPts=0;
   const results={};
   q.leons.forEach(l=>{
     const st=tokenState[l.id];
     const dist=Math.sqrt((st.svgX-l.cx)**2+(st.svgY-l.cy)**2);
     const ok=dist<=l.tol;
-    if(ok) correct++;
+    if(ok) placementPts+=2;
     results[l.id]={ok,svgX:st.svgX,svgY:st.svgY};
   });
 
-  // Grade ball
+  // Grade ball — 2pts
   const bst=tokenState['ball'];
   const bdist=Math.sqrt((bst.svgX-q.ballToken.target.cx)**2+(bst.svgY-q.ballToken.target.cy)**2);
   const bok=bdist<=q.ballToken.target.tol;
-  if(bok) correct++;
+  if(bok) placementPts+=2;
+
+  // Store placement pts for this question so MCQ can add to it
+  shuffled[qIndex]._placementPts=placementPts;
+
+  // Add placement points to score now
+  score+=placementPts;
+  document.getElementById('score-display').textContent=score;
 
   // Rebuild SVG with overlays
   const overlays=q.leons.map(l=>placementOverlay(l,results[l.id].svgX,results[l.id].svgY,results[l.id].ok));
-  // Add ball placement overlay
   overlays.push(ballPlacementOverlay(
     q.ballToken.startSVG,
     {svgX:bst.svgX,svgY:bst.svgY},
@@ -777,12 +783,15 @@ function confirmPlacement(){
   wrap.insertAdjacentHTML('afterbegin',buildCourtSVG(q,overlays));
   updateArrowOverlay(q);
 
-  // Banner
+  // Banner — show pts earned
+  const correctCount=q.leons.filter(l=>results[l.id].ok).length+(bok?1:0);
   const total=q.leons.length+1;
   let hints=q.leons.map(l=>`<div class="hint-row"><span class="hint-icon">${results[l.id].ok?'✅':'❌'}</span><span><strong>${l.lbl}:</strong> ${l.hint}</span></div>`).join('');
   hints+=`<div class="hint-row"><span class="hint-icon">${bok?'✅':'❌'}</span><span><strong>🏐 BALL:</strong> ${q.ballToken.target.hint}</span></div>`;
-  const bc=correct===total?'all-correct':correct===0?'all-wrong':'partial';
-  const bt=correct===total?'✓ Perfect positioning!':correct===0?'Not quite — review the hints below.':'Partially correct — see hints.';
+  const bc=correctCount===total?'all-correct':correctCount===0?'all-wrong':'partial';
+  const bt=correctCount===total
+    ?`✓ Perfect positioning! +${placementPts} pts`
+    :`Positioning: ${placementPts}/6 pts — review hints below.`;
   const banner=document.getElementById('placement-banner');
   banner.className='placement-banner '+bc+' show';
   banner.innerHTML=`<div class="pb-title">${bt}</div>${hints}`;
@@ -803,12 +812,21 @@ function pickAnswer(idx){
     else if(i===idx){btn.classList.add('wrong');btn.querySelector('.choice-icon').textContent='✗';}
     else btn.classList.add('dimmed');
   });
-  if(idx===q.correct){score++;document.getElementById('score-display').textContent=score;}
+  const correct=idx===q.correct;
+  if(correct){
+    score+=4;
+    document.getElementById('score-display').textContent=score;
+  }
   const cat=q.cat;
-  if(!catScores[cat]) catScores[cat]={correct:0,total:0};
-  catScores[cat].total++;
-  if(idx===q.correct) catScores[cat].correct++;
+  if(!catScores[cat]) catScores[cat]={pts:0,total:0};
+  catScores[cat].total+=10;
+  catScores[cat].pts+=(q._placementPts||0)+(correct?4:0);
   document.getElementById('explanation').classList.add('show');
+  // Show pts earned on question
+  const ptNote=document.createElement('div');
+  ptNote.style.cssText='font-family:Barlow Condensed,sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;';
+  ptNote.textContent=correct?'+4 pts — correct answer ✓':'+0 pts — incorrect answer';
+  document.getElementById('explanation').insertAdjacentElement('beforebegin',ptNote);
   document.getElementById('next-btn').classList.add('show');
 }
 
@@ -865,7 +883,7 @@ function renderQuestion(){
     <div class="q-wrap">
       <div class="q-meta"><span class="q-cat">${q.cat}</span><span class="q-num">Q${qIndex+1} of ${shuffled.length}</span></div>
       <p class="scenario-text">${q.scenario}</p>
-      <div class="instruct-box"><strong>Step 1:</strong> ${q.instruct}</div>
+      <div class="instruct-box"><strong>Step 1 — Positioning (6 pts):</strong> ${q.instruct}</div>
       <div id="court-wrap">
         ${buildCourtSVG(q)}
         <svg id="arrow-overlay" style="position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:11;overflow:visible;"></svg>
@@ -878,7 +896,7 @@ function renderQuestion(){
       <button id="confirm-btn" class="confirm-btn" onclick="confirmPlacement()">CONFIRM POSITIONS</button>
       <div id="placement-banner" class="placement-banner"></div>
       <div id="mcq-section" style="display:none">
-        <div class="instruct-box"><strong>Step 2 — Answer the Question:</strong></div>
+        <div class="instruct-box"><strong>Step 2 — Answer the Question (4 pts):</strong></div>
         <p class="question-text">❓ ${q.q}</p>
         <div class="choices">${choicesHTML}</div>
         <div class="explanation" id="explanation">${q.expl}</div>
@@ -936,7 +954,8 @@ function nextQ(){
 
 function showResult(){
   document.getElementById('prog-bar').style.width='100%';
-  const pct=score/shuffled.length;
+  const maxScore=shuffled.length*10;
+  const pct=score/maxScore;
   const tiers=[
     {min:.9,grade:'A+',label:'ELITE COURT IQ',sub:'You see the game a step ahead.'},
     {min:.7,grade:'B', label:'SHARP PLAYER', sub:'Solid reads with a few gaps to close.'},
@@ -945,15 +964,15 @@ function showResult(){
   ];
   const t=tiers.find(x=>pct>=x.min);
   const catHTML=Object.entries(catScores).map(([cat,s])=>{
-    const p=s.total>0?s.correct/s.total:0;
-    const bc=p>=.67?'#4caf50':p>=.34?'#d4a843':'#e4002b';
-    return `<div class="cat-row"><span class="cat-name">${cat}</span><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round(p*100)}%;background:${bc}"></div></div><span class="cat-score">${s.correct}/${s.total}</span></div>`;
+    const p=s.total>0?s.pts/s.total:0;
+    const bc=p>=.7?'#4caf50':p>=.4?'#d4a843':'#e4002b';
+    return `<div class="cat-row"><span class="cat-name">${cat}</span><div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round(p*100)}%;background:${bc}"></div></div><span class="cat-score">${s.pts}/${s.total}</span></div>`;
   }).join('');
   document.getElementById('app').innerHTML=`
     <div class="result-screen show">
       <div class="result-grade">${t.grade}</div>
       <div class="result-label">${t.label}</div>
-      <div class="result-sub">${score} / ${shuffled.length} correct — ${t.sub}</div>
+      <div class="result-sub">${score} / ${maxScore} pts — ${t.sub}</div>
       <div class="result-breakdown"><h3>📊 By Category</h3>${catHTML}</div>
       <button class="retry-btn" onclick="restart()">RETAKE LEVEL 1</button>
     </div>`;
