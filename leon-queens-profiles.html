@@ -81,6 +81,14 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .profile-stat:last-child{border-bottom:none;}
 .profile-stat .label{color:var(--gray);font-weight:600;}.profile-stat .value{font-weight:700;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.quiz-score-wrap{display:flex;gap:10px;margin-bottom:6px;align-items:stretch;}
+.quiz-score-box{flex:1;background:rgba(0,0,0,0.04);border-radius:8px;padding:8px 10px;text-align:center;border:1px solid rgba(0,0,0,0.07);}
+.quiz-score-box.avg{background:var(--red);color:#fff;border-color:var(--red);}
+.quiz-score-box .qs-label{font-size:10px;font-weight:600;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.quiz-score-box.avg .qs-label{color:rgba(255,255,255,0.8);}
+.quiz-score-box .qs-val{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;color:var(--black);}
+.quiz-score-box.avg .qs-val{color:#fff;}
+.quiz-hist-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(0,0,0,0.04);color:var(--gray);}
 @media(max-width:480px){.header{padding:10px 14px 8px;}.header h1{font-size:20px;letter-spacing:2px;}.tab{font-size:10px;padding:7px 2px;letter-spacing:0.5px;}.content{padding:12px;}.card{padding:14px;}.data-table{font-size:12px;}.data-table thead th{font-size:10px;padding:6px 4px;}.data-table tbody td{padding:8px 4px;}.modal{padding:18px;}}
 @media(max-width:360px){.header h1{font-size:17px;}.tab{font-size:9px;}}
 /* LOGIN */
@@ -238,6 +246,16 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   <div class="card"><div class="card-title"><span class="bar"></span> My Star Drill Times</div><div id="pv-drills"></div></div>
   <div class="card"><div class="card-title"><span class="bar"></span> My Verticals</div><div id="pv-verts"></div></div>
   <div class="card"><div class="card-title"><span class="bar"></span> Coach Notes</div><div id="pv-notes"></div></div>
+  <!-- LEARN TAB CARD -->
+  <div class="card" id="pv-learn-card">
+    <div class="card-title"><span class="bar"></span> Learn — CourtSense IQ</div>
+    <p style="font-size:13px;color:var(--gray);margin-bottom:12px;">Test your beach volleyball court knowledge. Your score counts toward your Court Sense rating.</p>
+    <div id="pv-quiz-history" style="margin-bottom:12px;"></div>
+    <button class="btn btn-primary" id="start-quiz-btn" onclick="openQuiz()" style="width:100%;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;">TAKE COURTSENSE IQ QUIZ</button>
+    <div id="pv-quiz-frame-wrap" style="display:none;margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,0.1);">
+      <iframe id="pv-quiz-iframe" src="" style="width:100%;height:700px;border:none;display:block;" allow="accelerometer"></iframe>
+    </div>
+  </div>
   <div class="card"><div class="card-title"><span class="bar"></span> Change Password</div>
     <div class="pw-change-form">
       <input type="password" class="login-pw-input" id="pw-current" placeholder="Current Password">
@@ -287,7 +305,7 @@ const DEF_P={
   p16:{id:'p16',name:'Reagan Giles',classYear:'FR',court:2,height:'5\'7"',standingReach:'7\'2"',dominantHand:'right',preferredSide:'right',position:'hitter'}
 };
 
-let D={players:{},starDrills:{},verticals:{},skills:{},pairings:{},notes:{}};
+let D={players:{},starDrills:{},verticals:{},skills:{},pairings:{},notes:{},quizScores:{}};
 let passwords={}; // stored in Firebase
 const COACH_PIN='8675';
 const DEFAULT_PW='Pride2026';
@@ -325,7 +343,11 @@ function initFB(){
       else{populatePlayerLogin();if(!_autoLoginDone){_autoLoginDone=true;autoLogin();}}
     },err=>{console.error(err);setSS(false);});
     // Load passwords
-    db.ref('leon_queens_passwords').on('value',snap=>{passwords=snap.val()||{};});
+    db.ref('leon_queens/quizScores').on('value',snap=>{
+    D.quizScores=snap.val()||{};
+    if(currentRole==='player')renderPlayerView();
+  });
+  db.ref('leon_queens_passwords').on('value',snap=>{passwords=snap.val()||{};});
     db.ref('.info/connected').on('value',s=>{setSS(s.val()===true);});
   }catch(e){console.error(e);setSS(false);}
 }
@@ -697,12 +719,33 @@ function renderPlayerView(){
   // Skills
   const sk=D.skills[pid]||{};
   if(SKILL_NAMES.some(k=>sk[k]>0)){
-    let h='';SKILL_NAMES.forEach(k=>{const v=sk[k]||0;
-      h+=`<div class="skill-row"><span class="skill-label">${SKILL_LABELS[k]}</span>
-        <div style="flex:1;"><div class="skill-bar"><div class="skill-fill" style="width:${v*10}%;background:${skillColor(v)}"></div></div></div>
-        <span class="skill-val" style="color:${skillColor(v)}">${v}</span></div>`;});
+    let h='';SKILL_NAMES.forEach(k=>{
+      const v=sk[k]||0;
+      if(k==='courtSense'){
+        // Get quiz score — convert 0-100 to 0-10
+        const quizAttempts=D.quizScores&&D.quizScores[pid]?Object.values(D.quizScores[pid]):[]; 
+        const latestQuiz=quizAttempts.length>0?quizAttempts.sort((a,b)=>b.date.localeCompare(a.date))[0]:null;
+        const quizVal=latestQuiz?Math.round((latestQuiz.score/latestQuiz.maxScore)*10*10)/10:0;
+        const coachVal=v||0;
+        const avgVal=Math.round(((coachVal+quizVal)/2)*10)/10;
+        h+=`<div class="skill-row"><span class="skill-label">Court Sense</span>
+          <div style="flex:1;">
+            <div class="quiz-score-wrap">
+              <div class="quiz-score-box"><div class="qs-label">Coach</div><div class="qs-val" style="color:${skillColor(coachVal)}">${coachVal}</div></div>
+              <div class="quiz-score-box"><div class="qs-label">Quiz</div><div class="qs-val" style="color:${quizVal>0?skillColor(quizVal):'var(--gray)'}">${quizVal>0?quizVal:'—'}</div></div>
+              <div class="quiz-score-box avg"><div class="qs-label">Average</div><div class="qs-val">${avgVal}</div></div>
+            </div>
+            <div class="skill-bar"><div class="skill-fill" style="width:${avgVal*10}%;background:${skillColor(avgVal)}"></div></div>
+          </div></div>`;
+      } else {
+        h+=`<div class="skill-row"><span class="skill-label">${SKILL_LABELS[k]}</span>
+          <div style="flex:1;"><div class="skill-bar"><div class="skill-fill" style="width:${v*10}%;background:${skillColor(v)}"></div></div></div>
+          <span class="skill-val" style="color:${skillColor(v)}">${v}</span></div>`;
+      }
+    });
     document.getElementById('pv-skills').innerHTML=h;
   }else{document.getElementById('pv-skills').innerHTML='<div style="color:var(--gray);font-size:13px;">No skill ratings yet.</div>';}
+  renderQuizHistory();
   // Drills
   const drills=Object.values(D.starDrills).filter(d=>(d.player===pid||d.playerId===pid)).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   if(drills.length){
@@ -730,6 +773,54 @@ function renderPlayerView(){
     document.getElementById('pv-notes').innerHTML=notes.map(n=>`<div class="note-item"><div class="note-date">${fD(n.date)}</div><div class="note-text">${n.text}</div></div>`).join('');
   }else{document.getElementById('pv-notes').innerHTML='<div style="color:var(--gray);font-size:13px;">No coach notes yet.</div>';}
 }
+
+function openQuiz(){
+  if(!currentPlayerId)return;
+  const wrap=document.getElementById('pv-quiz-frame-wrap');
+  const iframe=document.getElementById('pv-quiz-iframe');
+  const btn=document.getElementById('start-quiz-btn');
+  if(wrap.style.display==='none'){
+    iframe.src='https://markmcnees.github.io/leon-beach/courtsense.html?player='+currentPlayerId;
+    wrap.style.display='block';
+    btn.textContent='CLOSE QUIZ';
+  } else {
+    wrap.style.display='none';
+    iframe.src='';
+    btn.textContent='TAKE COURTSENSE IQ QUIZ';
+  }
+}
+
+function renderQuizHistory(){
+  const pid=currentPlayerId;if(!pid)return;
+  const el=document.getElementById('pv-quiz-history');if(!el)return;
+  const attempts=D.quizScores&&D.quizScores[pid]?Object.values(D.quizScores[pid]).sort((a,b)=>b.date.localeCompare(a.date)):[];
+  if(!attempts.length){el.innerHTML='<div style="font-size:12px;color:var(--gray);">No attempts yet. Take the quiz to add to your Court Sense score!</div>';return;}
+  let h='<div style="font-size:11px;font-weight:600;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Your Attempts</div>';
+  attempts.slice(0,5).forEach(a=>{
+    const pct=Math.round(a.score/a.maxScore*100);
+    const grade=pct>=90?'A+':pct>=70?'B':pct>=50?'C':'D';
+    const col=pct>=70?'var(--green)':pct>=50?'#f5a623':'var(--red)';
+    h+=`<div class="quiz-hist-row"><span>${a.date}</span><span style="font-family:'Bebas Neue';font-size:15px;color:${col};">${a.score}/${a.maxScore} pts — ${grade}</span></div>`;
+  });
+  el.innerHTML=h;
+}
+
+// Listen for quiz score postMessage from iframe
+window.addEventListener('message',function(e){
+  if(!e.data||e.data.type!=='courtsenseScore')return;
+  const {playerId,score,maxScore,date}=e.data;
+  if(!playerId)return;
+  const key=date.replace(/-/g,'')+'_'+Date.now();
+  db.ref('leon_queens/quizScores/'+playerId+'/'+key).set({score,maxScore,date});
+  // Close quiz, refresh view
+  const wrap=document.getElementById('pv-quiz-frame-wrap');
+  const btn=document.getElementById('start-quiz-btn');
+  if(wrap){wrap.style.display='none';}
+  const iframe=document.getElementById('pv-quiz-iframe');
+  if(iframe){iframe.src='';}
+  if(btn){btn.textContent='RETAKE COURTSENSE IQ QUIZ';}
+  setTimeout(()=>{if(currentRole==='player')renderPlayerView();},500);
+});
 
 function changePassword(){
   if(!currentPlayerId)return;
