@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260322223701">
+  <meta name="build-version" content="20260322131519">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -809,6 +809,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <button class="pp-tab-btn" onclick="switchPPTab('live',this)">🏐 Live Score Entry</button>
     <button class="pp-tab-btn" onclick="switchPPTab('scouts',this)">🕵️ Scouts</button>
     <button class="pp-tab-btn" onclick="switchPPTab('matches',this)">📋 My Matches</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('learn',this)">🎓 Learn</button>
   </div>
 
   <!-- ══ MY STATS PANEL ══ -->
@@ -979,6 +980,17 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div id="pp-scouts-detail" style="display:none;"></div>
   </div>
 
+  <div class="pp-panel" id="pp-panel-learn">
+    <div class="card">
+      <div class="card-title" style="color:var(--red);"><span class="bar"></span> 🎓 CourtSense IQ</div>
+      <p style="font-size:13px;color:var(--gray);margin-bottom:12px;line-height:1.5;">Test your beach volleyball court knowledge. Your score averages with your coach rating for Court Sense.</p>
+      <div id="pp-quiz-history" style="margin-bottom:14px;"></div>
+      <button class="btn btn-primary" id="pp-start-quiz-btn" onclick="togglePPQuiz()" style="width:100%;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:10px;">TAKE COURTSENSE IQ QUIZ</button>
+      <div id="pp-quiz-frame-wrap" style="display:none;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,0.1);">
+        <iframe id="pp-quiz-iframe" src="" style="width:100%;height:720px;border:none;display:block;"></iframe>
+      </div>
+    </div>
+  </div>
 </div><!-- end player-portal -->
 
 <!-- EDIT MODAL -->
@@ -5077,6 +5089,7 @@ function switchPPTab(tab,btn){
   document.querySelectorAll('.pp-tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.pp-panel').forEach(p=>p.classList.remove('active'));
   if(tab==='scouts'){if(btn)btn.classList.add('active');document.getElementById('pp-panel-scouts').classList.add('active');renderPlayerScouts();return;}
+  if(tab==='learn'){if(btn)btn.classList.add('active');document.getElementById('pp-panel-learn').classList.add('active');renderPPQuizHistory();return;}
   if(btn)btn.classList.add('active');
   document.getElementById('pp-panel-'+tab).classList.add('active');
   if(tab==='live')renderPlayerLiveScoring();
@@ -7008,7 +7021,46 @@ setTimeout(function(){
       });
     });
   });
-},2500);</script>
+},2500);
+function togglePPQuiz(){
+  const pid=currentPlayer&&currentPlayer.id;if(!pid)return;
+  const wrap=document.getElementById('pp-quiz-frame-wrap');
+  const iframe=document.getElementById('pp-quiz-iframe');
+  const btn=document.getElementById('pp-start-quiz-btn');
+  if(wrap.style.display==='none'){
+    iframe.src='https://markmcnees.github.io/leon-beach/courtsense.html?v=2&player='+pid;
+    wrap.style.display='block';btn.textContent='CLOSE QUIZ';
+  } else {
+    wrap.style.display='none';iframe.src='';btn.textContent='TAKE COURTSENSE IQ QUIZ';
+  }
+}
+function renderPPQuizHistory(){
+  const pid=currentPlayer&&currentPlayer.id;
+  const el=document.getElementById('pp-quiz-history');if(!el)return;
+  const attempts=D.quizScores&&D.quizScores[pid]?Object.values(D.quizScores[pid]).sort((a,b)=>b.date.localeCompare(a.date)):[];
+  if(!attempts.length){el.innerHTML='<div style="font-size:12px;color:var(--gray);padding:8px 0;">No attempts yet. Your quiz score will average with your coach rating for Court Sense.</div>';return;}
+  let h='<div style="font-size:11px;font-weight:700;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Your Attempts</div>';
+  attempts.slice(0,5).forEach(a=>{
+    const pct=Math.round(a.score/a.maxScore*100);
+    const grade=pct>=90?'A+':pct>=70?'B':pct>=50?'C':'D';
+    const col=pct>=70?'green':pct>=50?'#f5a623':'var(--red)';
+    h+=`<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid rgba(0,0,0,0.05);color:var(--gray);"><span>${a.date}</span><span style="font-family:'Bebas Neue';font-size:15px;color:${col};">${a.score}/${a.maxScore} pts — ${grade}</span></div>`;
+  });
+  el.innerHTML=h;
+}
+window.addEventListener('message',function(e){
+  if(!e.data||e.data.type!=='courtsenseScore')return;
+  const {playerId,score,maxScore,date}=e.data;if(!playerId)return;
+  const key=date.replace(/-/g,'')+'_'+Date.now();
+  db.ref('leon_queens/quizScores/'+playerId+'/'+key).set({score,maxScore,date});
+  const wrap=document.getElementById('pp-quiz-frame-wrap');
+  const iframe=document.getElementById('pp-quiz-iframe');
+  const btn=document.getElementById('pp-start-quiz-btn');
+  if(wrap)wrap.style.display='none';if(iframe)iframe.src='';
+  if(btn)btn.textContent='RETAKE COURTSENSE IQ QUIZ';
+  setTimeout(()=>renderPPQuizHistory(),600);
+});
+</script>
 
 <!-- LEON QUEENS FAN PAGE OVERLAY -->
 <div id="leon-fans-overlay" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#8b0000 0%,#e4002b 50%,#c0001f 100%);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
