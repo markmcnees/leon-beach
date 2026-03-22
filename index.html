@@ -356,13 +356,13 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260322235843">
+  <meta name="build-version" content="20260322233041">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
-    <div class="login-logo"><span class="crown">👑</span> Leon Beach</div>
+    <div class="login-logo" style="flex-direction:column;align-items:center;gap:6px;"><img src="leon-logo.png" style="height:72px;width:auto;" alt="Leon"><span>Leon Beach</span></div>
     <div class="login-sub">2026 Beach Volleyball Season</div>
     <div class="login-toggle">
       <button class="login-toggle-btn active" onclick="switchLogin('coach')">Coach</button>
@@ -410,7 +410,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div id="app-wrapper" style="display:none;">
 <div class="header">
   <div class="header-top">
-    <h1><span class="crown">👑</span> Leon Beach <span class="sync-dot" id="sync-dot"></span></h1>
+    <h1><span class="crown"><img src="leon-logo.png" style="height:28px;width:auto;vertical-align:middle;filter:brightness(0) invert(1);"></span> Leon Beach <span class="sync-dot" id="sync-dot"></span></h1>
     <div class="header-user">
       <span class="header-username" id="header-username"></span>
       <button class="logout-btn" onclick="logout()">Logout</button>
@@ -1064,7 +1064,7 @@ const DEF_M=[
   {id:'m09',date:'2026-02-06',court:2,team1:['p15','p04'],team2:['p05','p06'],score1:21,score2:15}
 ];
 
-let D={players:[],matches:[],planned:[],gamedays:[],scrimmages:[],schedule:[],standings:{},goals:{},assignments:{},duals:[],opponents:{},liveScoring:{}};
+let D={players:[],matches:[],planned:[],gamedays:[],scrimmages:[],schedule:[],standings:{},goals:{},assignments:{},duals:[],opponents:{},liveScoring:{},quizScores:{}};
 let profilesData={}; // from leon_queens node for AI context
 let pgdNotes={}; // player self-notes per date: pgdNotes[pid][date]
 let _autoLoginDone=false;
@@ -1079,6 +1079,8 @@ function initFB(){
 }
 function setSS(on){const d=document.getElementById('sync-dot');d.className='sync-dot '+(on?'online':'offline');d.title=on?'Connected':'Offline';}
 function listenData(){if(!db)return;
+  db.ref(DB_ROOT+'/config/coachPin').once('value',function(snap){if(snap.val())window._coachPin=snap.val();});
+  db.ref('leon_queens/quizScores').on('value',snap=>{D.quizScores=snap.val()||{};if(currentRole==='player')renderPlayerPortal();});
   db.ref(DB_ROOT).on('value',snap=>{
     const val=snap.val();
     const hasP=val&&val.players&&Object.keys(val.players).length>0;
@@ -1135,7 +1137,7 @@ function listenData(){if(!db)return;
 }
 function seedDB(){if(!db)return;
   const u={};
-  DEF_P.forEach(p=>{u[DB_ROOT+'/players/'+p.id]=JSON.parse(JSON.stringify(p));});
+  DEF_P.forEach(p=>{u[DB_ROOT+'/players/'+p.id]=JSON.parse(JSON.stringify(p));u['leon_queens/players/'+p.id]=JSON.parse(JSON.stringify(p));});
   DEF_M.forEach(m=>{u[DB_ROOT+'/matches/'+m.id]=JSON.parse(JSON.stringify(m));});
   db.ref().update(u);
 }
@@ -1254,7 +1256,7 @@ function renderSchedule(){
   if(!games.length){document.getElementById('dash-schedule').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No schedule data yet.</div>';return;}
   const today=td();
   let wins=0,losses=0;
-  games.forEach(g=>{if(g.scoreUs!=null&&g.scoreThem!=null){g.scoreUs>g.scoreThem?wins++:losses++;}});
+  games.forEach(g=>{if(g.scoreUs!=null&&g.scoreThem!=null){if(g.type==='scrimmage')return;g.scoreUs>g.scoreThem?wins++:losses++;}});
   let h=`<div style="display:flex;gap:12px;margin-bottom:14px;">
     <div style="font-family:'Bebas Neue';font-size:22px;color:var(--green);">${wins}-${losses}</div>
     <div style="font-size:12px;color:var(--gray);align-self:center;">Season Record (Courts W-L)</div></div>`;
@@ -2102,7 +2104,7 @@ function pinPress(n){
   pinEntry+=n;
   updatePinDots();
   if(pinEntry.length===4){
-    if(pinEntry===COACH_PIN){
+    if(pinEntry===(window._coachPin||COACH_PIN)){
       loginAsCoach();
     }else{
       document.getElementById('pin-error').textContent='Incorrect PIN';
@@ -5517,7 +5519,7 @@ function pgdSaveNotes(){
 function getDualRecord(){
   let w=0,l=0;
   // Dual W-L: from schedule (dual-level wins)
-  (D.schedule||[]).forEach(g=>{if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){parseInt(g.scoreUs)>parseInt(g.scoreThem)?w++:l++;}});
+  (D.schedule||[]).forEach(g=>{if(g.type==='scrimmage')return;if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){parseInt(g.scoreUs)>parseInt(g.scoreThem)?w++:l++;}});
 
   // Match W-L (court-level): sum scoreUs/scoreThem from schedule
   // Schedule stores court scores per dual (e.g. 4-1 means Leon won 4 courts)
@@ -6456,7 +6458,7 @@ function nameToId(fullName){
 // ============================================================
 // SEED MISSING DUAL DATA (CCS, FSU HS, Mosley)
 // ============================================================
-function seedMissingDuals(){
+function seedMissingDuals(){return;//disabled
   if(!db){toast('Not connected');return;}
   const MISSING=[
     // Community Christian 2/24 — W 4-1
@@ -6564,7 +6566,7 @@ function renderLeonFans(){
   });
 
   var allSched=(D.schedule||[]).slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
-  var schedPast=allSched.filter(function(g){return g.scoreUs!=null&&g.scoreUs!==''&&g.scoreThem!=null&&g.scoreThem!=='';});
+  var schedPast=allSched.filter(function(g){return g.type!=='scrimmage'&&g.scoreUs!=null&&g.scoreUs!==''&&g.scoreThem!=null&&g.scoreThem!=='';});
   var schedUpcoming=allSched.filter(function(g){return (g.scoreUs==null||g.scoreUs==='')&&g.date>=today;});
   var schedToday=allSched.find(function(g){return g.date===today;});
 
