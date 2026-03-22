@@ -381,8 +381,8 @@ const QUESTIONS=[
   decs:[],
   ballToken:{startSVG:{x:52,y:215},target:{cx:130,cy:80,tol:105,hint:'Any attack into the opponent\'s court works — a high line, cross, or deep angle all work from zone 1.'}},
   leons:[
-    {id:'p1',lbl:'YOU',  sub:'',cx:52, cy:234,tol:50,hint:'YOU peel to the 3-meter line after the missed block — covers tips and short balls, out of the dead zone at the net.'},
-    {id:'p2',lbl:'PRTNR',sub:'',cx:178,cy:302,tol:52,hint:'PARTNER holds deep on the right, ready to attack from zone 1.'},
+    {id:'p1',lbl:'YOU',  sub:'',cx:52, cy:234,tol:70,hint:'YOU peel off the net to the 3-meter line on the left — dig transition position, out of the dead zone.'},
+    {id:'p2',lbl:'PRTNR',sub:'',cx:185,cy:295,tol:75,hint:'PRTNR approaches from the right side as the hitter — ready to attack from zone 1.'},
   ],
   q:'After missing a block, your immediate move should be to...',
   choices:['Stay at the net — try to tip or dump while still up.','Peel back to the 3-meter line to cover tips and short balls.','Sprint to the back corner to clear space.','Hold still so your partner can read the play.'],
@@ -541,7 +541,7 @@ const QUESTIONS=[
 // hitter must audible to zone 3 or zone 4 to give setter a workable set.
 {
   cat:'Setting',
-  scenario:'You are playing left. Your partner passed the ball tight to the net at zone 5. Your partner is pinned there to handle it. The opponent blocker is already loaded at zone 5. You originally called for a 5, but now call an audible to zone 3 or 4. Moderate wind blowing left to right.',
+  scenario:'You are playing left. You passed the ball tight to the net at zone 5. Your partner is pinned there to handle it. The opponent blocker is already loaded at zone 5. You originally called for a 2, but now call an audible to zone 3 or 4. Moderate wind blowing left to right.',
   instruct:'Drag YOU and PRTNR into position. Then drag the 🏐 to the zone you audible to — place it at the net where you will hit.',
   wind:['right','mod'],
   opps:[
@@ -554,15 +554,15 @@ const QUESTIONS=[
     {id:'p1',lbl:'PRTNR',sub:'',cx:218,cy:210,tol:42,hint:'PARTNER is pinned at zone 5 handling the tight pass — she delivers the set from there.'},
     {id:'p2',lbl:'YOU',  sub:'',cx:130,cy:190,tol:65,hint:'YOU approach to zone 3 or 4 at the net — your hitting position for the audible call.'},
   ],
-  q:'Your partner is pinned at zone 5 on a tight pass. The blocker is loaded at zone 5. What do you do?',
+  q:'Your partner is pinned at zone 5 on a tight pass. The blocker is loaded at zone 5. You called a 2 but now audible. What do you call?',
   choices:[
-    'Stick with the zone 5 call — your partner can still deliver it.',
+    'Stick with the 2 — your partner can still deliver it from zone 5.',
     'Audible to zone 3 or 4 — give your partner a workable set away from the loaded blocker.',
     'Stop the play and call a timeout.',
     'Sprint to zone 1 — get as far from the blocker as possible.',
   ],
   correct:1,
-  expl:'<strong>You must audible.</strong> When your partner is pinned at zone 5 handling a tight pass, she physically cannot deliver a zone 5 set — she is already there. You read this immediately and call zone 3 or 4, giving her a realistic delivery angle. Zone 3 or 4 also moves your attack away from the loaded blocker. This is basic communication — your job is to adjust when the pass changes everything.',
+  expl:'<strong>You must audible.</strong> You passed tight to zone 5 and your partner is pinned there — she physically cannot deliver a 2 from that position. You read this immediately and call zone 3 or 4, giving her a realistic delivery angle and moving your attack away from the loaded blocker at zone 5. This is basic communication — your job is to adjust when the pass changes everything.',
 },
 
 // Q10 — TENDENCY DEFENSE
