@@ -422,7 +422,7 @@ const QUESTIONS=[
 // Lefty's power cross → screen-LEFT (YOUR zone 1). Ball token: drag to where cross lands.
 {
   cat:'Defense',
-  scenario:'Their hitter is LEFT-HANDED, positioned on their zone 5. Your blocker shows two fingers — she is taking CROSS. A strong wind blows toward your side.',
+  scenario:'Their hitter is LEFT-HANDED, positioned on their zone 5. Your blocker shows two fingers. A strong wind blows toward your side.',
   instruct:'Drag YOUR BLOCKER and DEFENDER into position. Then drag the 🏐 to where the line shot will land.',
   wind:['toward','strong'],
   opps:[
@@ -473,12 +473,12 @@ const QUESTIONS=[
   q:'Both opponents are flat-footed deep in the back court. The free ball is yours. What are your best options?',
   choices:[
     'Pass it to your partner and run your full offense — take your time.',
-    'A roll shot short near their zone 5, your partner calls a 4 or 5 and goes deep line, OR a high line shot — all three put the ball where they can\'t reach it.',
+    'A one-touch roll over to their zone 5, OR your partner calls an option for a cut shot to zone 5, OR a high line to zone 5 — all three work.',
     'Hit a hard cross-court swing and use the open space.',
     'Play it safe — just get the ball over and reset.',
   ],
   correct:1,
-  expl:'<strong>Three good reads, same open side.</strong> Both opponents are deep and flat-footed so their right side is wide open. A <em>roll shot</em> drops short near the tape — they can\'t sprint forward in time. Your partner <em>calls a 4 or 5 and goes deep line</em> — drives it past them on the same side. Or a <em>high line shot</em> floats deep down the right sideline with the tailwind carrying it away. Running a slow full offense gives them time to recover.',
+  expl:'<strong>Three good reads, all going to zone 5.</strong> Both opponents are deep and flat-footed — their zone 5 is wide open. A <em>one-touch roll</em> drops short near the tape at zone 5 — they can\'t sprint forward in time. Your partner <em>calls an option and cuts</em> hard to zone 5 on a sharp angle. Or a <em>high line shot</em> floats deep to zone 5 with the tailwind carrying it away. Running a slow full offense gives them time to recover.',
 },
 
 // Q7 — DEFENSIVE BASE AFTER SERVING
@@ -492,10 +492,7 @@ const QUESTIONS=[
     {x:185,y:105,lbl:'R1',sub:''},
     {x:75, y:105,lbl:'R2',sub:''},
   ],
-  decs:[
-    {t:'ball', x:130,y:88},
-    {t:'arrow',x1:130,y1:330,x2:130,y2:98,c:'#fffde7',dsh:true},
-  ],
+  decs:[],
   ballToken:{startSVG:{x:130,y:88},target:{cx:130,cy:65,tol:80,hint:'Serve into the seam between the two receivers — forces a communication decision and a tougher pass.'}},
   leons:[
     {id:'p1',lbl:'YOU',  sub:'',cx:72,cy:248,tol:75,hint:'YOU take the left half of your court — you can sit mid-depth or shade up to handle a short ball or tip. Both are valid starting reads after serving.'},
@@ -544,7 +541,7 @@ const QUESTIONS=[
 // hitter must audible to zone 3 or zone 4 to give setter a workable set.
 {
   cat:'Setting',
-  scenario:'Your partner passed the ball tight to the net at zone 5. The setter is pinned there to handle it. The opponent blocker is already loaded at zone 5. The hitter originally called for a 5, but now calls an audible. Moderate wind blowing left to right.',
+  scenario:'Your partner passed the ball tight to the net at zone 5. The setter is pinned there to handle it. The opponent blocker is already loaded at zone 5. The hitter originally called for a 5, but now calls an audible to zone 3 or 4. Moderate wind blowing left to right.',
   instruct:'Drag your SETTER and HITTER into position. Then drag the 🏐 to the zone the hitter audibles to — place it at the net where she will hit.',
   wind:['right','mod'],
   opps:[
@@ -585,8 +582,8 @@ const QUESTIONS=[
   ],
   ballToken:{startSVG:{x:28,y:158},target:{cx:185,cy:252,tol:68,hint:'80% cross from their zone 5 lands in your zones 4–5 at mid-depth.'}},
   leons:[
-    {id:'p1',lbl:'YOU',  sub:'',cx:185,cy:252,tol:68,hint:'YOU cheat toward zones 4–5 at mid-depth — in the path of the 80% cross.'},
-    {id:'p2',lbl:'PRTNR',sub:'',cx:90, cy:258,tol:72,hint:'PARTNER covers left-center mid-depth — not hugging the sideline. Leaves less center court open while still covering the 20% line option.'},
+    {id:'p1',lbl:'YOU',  sub:'',cx:130,cy:252,tol:115,hint:'Either player mid-depth on the right side — cheat toward the cross-court angle where 80% of her shots land.'},
+    {id:'p2',lbl:'PRTNR',sub:'',cx:130,cy:258,tol:115,hint:'Either player mid-depth on the left side — covering the 20% line option without hugging the sideline.'},
   ],
   q:'She hits cross-court 80% of the time from their zone 5. You should...',
   choices:['Split exactly in half and react.','Cheat toward center court while your partner covers the cross-court angle.','Both crowd the cross-court — double up on the 80%.','Keep standard split — don\'t gamble on tendencies.'],
