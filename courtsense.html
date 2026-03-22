@@ -990,6 +990,18 @@ function showResult(){
       <button class="retry-btn" onclick="restart()">RETAKE LEVEL 1</button>
     </div>`;
   window.scrollTo({top:0,behavior:'smooth'});
+  // Notify parent app with score if embedded in player portal
+  const urlParams=new URLSearchParams(window.location.search);
+  const playerId=urlParams.get('player');
+  if(playerId && window.parent !== window){
+    window.parent.postMessage({
+      type:'courtsenseScore',
+      playerId:playerId,
+      score:score,
+      maxScore:shuffled.length*10,
+      date:new Date().toISOString().split('T')[0]
+    },'*');
+  }
 }
 
 function restart(){
