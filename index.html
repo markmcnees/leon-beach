@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260323011610">
+  <meta name="build-version" content="20260322233041">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -686,6 +686,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
       <div id="live-assignment-list" style="margin-bottom:12px;"></div>
       <div id="live-courts-container"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">Select an assignment above to load courts.</div></div>
+    <div id="shared-lineup-panel" style="display:none;background:#f0f7ff;border:1px solid #bcd6f5;border-radius:10px;padding:14px;margin-top:12px;"></div>
     </div>
 <div class="card" style="border:2px solid var(--charcoal);">
       <div class="card-title" style="color:var(--charcoal);"><span class="bar" style="background:var(--charcoal);"></span> 🔒 Coach Notes
@@ -1029,6 +1030,162 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 // ============================================================
 const FB_CONFIG={apiKey:"AIzaSyC8Ue06XPvGXo1XTloewPvDRBWtK5tDAj8",authDomain:"leon-beach-volleyball.firebaseapp.com",databaseURL:"https://leon-beach-volleyball-default-rtdb.firebaseio.com",projectId:"leon-beach-volleyball",storageBucket:"leon-beach-volleyball.firebasestorage.app",messagingSenderId:"937804799976",appId:"1:937804799976:web:02121e68655b4febeb8e5d"};
 const DB_ROOT='leon_queens_matches';
+
+// ── SHARED LINEUP — school name → Firebase key map ─────────────────────────
+const SCHOOL_KEY_MAP={
+  'Leon':'leon_queens_matches',
+  'Leon Beach':'leon_queens_matches',
+  'South Walton':'south_walton_matches',
+  'SW Beach':'south_walton_matches',
+  // Add new schools here as they join the platform
+};
+const MY_SCHOOL_KEY=DB_ROOT; // e.g. 'leon_queens_matches'
+
+function getSharedLineupKey(date, oppScheduleName){
+  const oppKey=SCHOOL_KEY_MAP[oppScheduleName];
+  if(!oppKey)return null; // opponent not on platform
+  const keys=[MY_SCHOOL_KEY, oppKey].sort();
+  return 'shared_lineups/'+date.replace(/-/g,'')+'_'+keys[0].replace('_matches','')+'_'+keys[1].replace('_matches','');
+}
+
+function getMyLineupSubKey(){
+  return MY_SCHOOL_KEY.replace('_matches','');
+}
+
+function getOppLineupSubKey(oppScheduleName){
+  const oppKey=SCHOOL_KEY_MAP[oppScheduleName];
+  if(!oppKey)return null;
+  return oppKey.replace('_matches','');
+}
+
+// ── Shared lineup Firebase listeners (per loaded assignment) ─────────────────
+let _sharedLineupListener=null;
+let _sharedLineupRef=null;
+
+function listenSharedLineup(date, oppName){
+  // Detach previous listener
+  if(_sharedLineupRef&&_sharedLineupListener){
+    _sharedLineupRef.off('value',_sharedLineupListener);
+    _sharedLineupRef=null; _sharedLineupListener=null;
+  }
+  const sharedKey=getSharedLineupKey(date, oppName);
+  if(!sharedKey||!db)return;
+  _sharedLineupRef=db.ref(sharedKey);
+  _sharedLineupListener=_sharedLineupRef.on('value',snap=>{
+    const val=snap.val()||{};
+    const oppSubKey=getOppLineupSubKey(oppName);
+    const mySubKey=getMyLineupSubKey();
+    // If opponent has released their lineup, auto-populate into the loaded assignment
+    if(oppSubKey&&val[oppSubKey]&&val[oppSubKey].released){
+      const oppCourts=val[oppSubKey].courts||{};
+      const a=window._loadedAssignment;
+      if(a){
+        // Build oppLineup array from their courts object
+        const oppLineup=Object.entries(oppCourts).map(([ct,c])=>({
+          court:parseInt(ct),
+          player1:c.p1||'',
+          player2:c.p2||'',
+          jersey1:c.j1||'',
+          jersey2:c.j2||''
+        }));
+        a.oppLineup=oppLineup;
+        // Re-render live scoring to show opponent names
+        const container=document.getElementById('live-courts-container');
+        if(container&&a.date)renderLiveScoring(a.date,a);
+        toast('Opponent lineup received from '+oppName+' ✓');
+      }
+    }
+    // Store draft status for UI
+    window._myLineupDraft=val[mySubKey]||null;
+    renderSharedLineupPanel(date, oppName, val);
+  });
+}
+
+function renderSharedLineupPanel(date, oppName, sharedVal){
+  const el=document.getElementById('shared-lineup-panel');
+  if(!el)return;
+  const sharedKey=getSharedLineupKey(date, oppName);
+  if(!sharedKey){
+    el.style.display='none';return;
+  }
+  el.style.display='block';
+  const mySubKey=getMyLineupSubKey();
+  const oppSubKey=getOppLineupSubKey(oppName);
+  const myData=sharedVal[mySubKey]||null;
+  const oppData=oppSubKey?sharedVal[oppSubKey]:null;
+  const myReleased=myData&&myData.released;
+  const oppReleased=oppData&&oppData.released;
+
+  let h=`<div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;color:var(--blue);margin-bottom:10px;">📋 SHARED LINEUP — vs ${oppName}</div>`;
+
+  // My status
+  h+=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">`;
+  if(!myData){
+    h+=`<span style="font-size:12px;color:var(--gray);">Your lineup: not posted</span>
+    <button class="btn btn-primary btn-small" onclick="saveLineupDraft('${date}','${oppName}')">💾 Save Draft</button>`;
+  } else if(!myReleased){
+    h+=`<span style="font-size:12px;color:var(--gold);font-weight:700;">✓ Draft saved</span>
+    <button class="btn btn-primary btn-small" onclick="saveLineupDraft('${date}','${oppName}')">↺ Update Draft</button>
+    <button class="btn btn-small" style="background:var(--green);color:#fff;border:none;" onclick="releaseLineup('${date}','${oppName}')">🚀 Release to ${oppName}</button>`;
+  } else {
+    h+=`<span style="font-size:12px;color:var(--green);font-weight:700;">✓ Released to ${oppName}</span>
+    <button class="btn btn-secondary btn-small" onclick="saveLineupDraft('${date}','${oppName}')">↺ Update</button>`;
+  }
+  h+=`</div>`;
+
+  // Opponent status
+  if(oppSubKey){
+    if(!oppData){
+      h+=`<div style="font-size:12px;color:var(--gray);padding:6px 0;">⏳ Waiting for ${oppName} to post their lineup...</div>`;
+    } else if(!oppReleased){
+      h+=`<div style="font-size:12px;color:var(--gold);padding:6px 0;">⏳ ${oppName} has a draft saved but hasn't released yet.</div>`;
+    } else {
+      h+=`<div style="font-size:12px;color:var(--green);padding:6px 0;">✓ ${oppName}'s lineup is live — auto-populated into courts above.</div>`;
+    }
+  }
+
+  el.innerHTML=h;
+}
+
+function saveLineupDraft(date, oppName){
+  const a=window._loadedAssignment;
+  if(!a||!db){toast('No assignment loaded');return;}
+  const sharedKey=getSharedLineupKey(date, oppName);
+  if(!sharedKey)return;
+  const mySubKey=getMyLineupSubKey();
+  // Build courts map from current assignment
+  const courts={};
+  (a.courts||[]).forEach(c=>{
+    if(!c.court)return;
+    const p1=gP(c.p1),p2=gP(c.p2);
+    courts[c.court]={
+      p1:p1?p1.firstName+' '+p1.lastName:'',
+      p2:p2?p2.firstName+' '+p2.lastName:'',
+      pid1:c.p1||'',pid2:c.p2||''
+    };
+  });
+  const existing=window._myLineupDraft;
+  db.ref(sharedKey+'/'+mySubKey).update({
+    courts,
+    released:existing?existing.released:false,
+    updatedAt:new Date().toISOString(),
+    school:MY_SCHOOL_KEY
+  });
+  toast('Lineup draft saved ✓');
+}
+
+function releaseLineup(date, oppName){
+  const sharedKey=getSharedLineupKey(date, oppName);
+  if(!sharedKey||!db)return;
+  const mySubKey=getMyLineupSubKey();
+  // Save draft first, then release
+  saveLineupDraft(date, oppName);
+  setTimeout(()=>{
+    db.ref(sharedKey+'/'+mySubKey+'/released').set(true);
+    toast('Lineup released to '+oppName+' ✓');
+  },400);
+}
+
 const COURTS=[1,2,3,4,5,6,7,8],CL={1:'Top',2:'Mid',3:'Dev',4:'Court 4',5:'Court 5',6:'Exhib',7:'Exhib',8:'Exhib'};
 const EXHIBITION_COURTS=new Set([6,7,8]);
 const CO={SR:0,JR:1,SO:2,FR:3};
@@ -4497,6 +4654,10 @@ function loadLiveCourts(id){
   if(!a){toast('Assignment not found');return;}
   window._loadedAssignment=a;
   renderLiveScoring(a.date,a);
+  // Start shared lineup listener if opponent is on platform
+  if(a.opponent&&SCHOOL_KEY_MAP[a.opponent]){
+    listenSharedLineup(a.date, a.opponent);
+  }
 }
 function renderLiveScoring(dateOverride,assignOverride){
   const date=dateOverride||td();
