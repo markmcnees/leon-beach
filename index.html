@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260323180200">
+  <meta name="build-version" content="20260323024238">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4501,64 +4501,9 @@ function renderAssignments(){
     if(a.notes){h+=`<div style="font-size:12px;color:var(--gray);margin-top:6px;font-style:italic;background:var(--white);padding:8px;border-radius:6px;">📝 ${a.notes}</div>`;}
     // Generate Matches button
     h+=`<button class="btn btn-small" style="width:100%;margin-top:10px;background:${typeColor};color:var(--white);border:none;" onclick="generateMatchesFromLineup('${a.id}')">⚡ Generate Matches from Lineup</button>`;
-    h+=`<div style="display:flex;gap:8px;margin-top:8px;">
-      <button class="btn btn-small" style="flex:1;background:var(--charcoal);color:#fff;border:none;" onclick="copyLineup('${a.id}')">📋 Copy Lineup</button>
-      <button class="btn btn-small" style="flex:1;background:var(--green);color:#fff;border:none;" onclick="exportLineup('${a.id}')">📥 Export Lineup</button>
-    </div>`;
     h+='</div>';
   });
   container.innerHTML=h;
-}
-
-// ── Lineup copy & export ──────────────────────────────────────────────────────
-function getLineupRows(assignId){
-  const a=(D.assignments||{})[assignId];
-  if(!a)return[];
-  return (a.courts||[]).slice().sort((x,y)=>(x.court||0)-(y.court||0)).map(c=>{
-    const p1=gP(c.p1),p2=gP(c.p2);
-    return {
-      court:c.court,
-      name1:p1?p1.firstName+' '+p1.lastName:'TBD',
-      jersey1:p1&&p1.jersey!=null?p1.jersey:'',
-      name2:p2?p2.firstName+' '+p2.lastName:'TBD',
-      jersey2:p2&&p2.jersey!=null?p2.jersey:''
-    };
-  });
-}
-
-function copyLineup(assignId){
-  const a=(D.assignments||{})[assignId];
-  if(!a){toast('Assignment not found');return;}
-  const rows=getLineupRows(assignId);
-  const header=fD(a.date)+(a.opponent?' vs '+a.opponent:'')+(a.type==='gameday'?' — Dual':a.type==='scrimmage'?' — Scrimmage':' — Queens');
-  const lines=[header,''];
-  rows.forEach(r=>{
-    const j1=r.jersey1!==''?` (#${r.jersey1})`:'';
-    const j2=r.jersey2!==''?` (#${r.jersey2})`:'';
-    lines.push(`Court ${r.court}: ${r.name1}${j1} / ${r.name2}${j2}`);
-  });
-  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('Lineup copied to clipboard ✓')).catch(()=>toast('Copy failed — try again'));
-}
-
-function exportLineup(assignId){
-  const a=(D.assignments||{})[assignId];
-  if(!a){toast('Assignment not found');return;}
-  const rows=getLineupRows(assignId);
-  const wb=XLSX.utils.book_new();
-  const header=fD(a.date)+(a.opponent?' vs '+a.opponent:'')+(a.type==='gameday'?' — Dual':a.type==='scrimmage'?' — Scrimmage':' — Queens');
-  const sheetData=[
-    [header],
-    [],
-    ['Court','Player 1','Jersey 1','Player 2','Jersey 2']
-  ];
-  rows.forEach(r=>sheetData.push([`Court ${r.court}`,r.name1,r.jersey1!==''?r.jersey1:'',r.name2,r.jersey2!==''?r.jersey2:'']));
-  const ws=XLSX.utils.aoa_to_sheet(sheetData);
-  ws['!cols']=[{wch:10},{wch:22},{wch:10},{wch:22},{wch:10}];
-  XLSX.utils.book_append_sheet(wb,ws,'Lineup');
-  const dateStr=(a.date||td()).replace(/-/g,'');
-  const oppStr=a.opponent?'_'+a.opponent.replace(/\s+/g,''):'';
-  XLSX.writeFile(wb,'Lineup_'+dateStr+oppStr+'.xlsx');
-  toast('Lineup exported!');
 }
 
 // Render player assignment in their schedule section
@@ -5915,12 +5860,45 @@ function renderDuals(){
         </div>`;
       });
     }
+    // Copy lineup button
+    const allCourts=(d.courts||[]).sort((a,b)=>(a.court||0)-(b.court||0));
+    if(allCourts.length){
+      const dIdx=duals.indexOf(d);
+      h+=`<button class="btn btn-small" style="width:100%;margin-top:10px;background:var(--charcoal);color:#fff;border:none;" onclick="copyDualLineup(${dIdx})">📋 Copy Lineup</button>`;
+    }
     h+='</div>';
   });
   container.innerHTML=h;
+  // stash merged duals so copyDualLineup can access them
+  window._renderedDuals=duals;
 }
 
 let _delDualArmed={};
+function copyDualLineup(idx){
+  const duals=window._renderedDuals||[];
+  const d=duals[idx];
+  if(!d){toast('Lineup not found');return;}
+  const locLabel=d.location==='away'?'@ ':d.location==='neutral'?'(N) ':'vs ';
+  const header=fD(d.date)+' '+locLabel+(d.opponent||'TBD');
+  const lines=[header,''];
+  const courts=(d.courts||[]).slice().sort((a,b)=>(a.court||0)-(b.court||0));
+  const scored=courts.filter(c=>!c.isExhibition);
+  const exhib=courts.filter(c=>c.isExhibition);
+  scored.forEach(c=>{
+    const ids=c.pair||[];
+    const fmt=id=>{const p=gP(id);if(!p)return'TBD';return p.firstName+' '+p.lastName+(p.jersey!=null?' (#'+p.jersey+')':'');};
+    lines.push('Court '+c.court+': '+fmt(ids[0])+' / '+fmt(ids[1]));
+  });
+  if(exhib.length){
+    lines.push('');
+    exhib.forEach(c=>{
+      const ids=c.pair||[];
+      const fmt=id=>{const p=gP(id);if(!p)return'TBD';return p.firstName+' '+p.lastName+(p.jersey!=null?' (#'+p.jersey+')':'');};
+      lines.push('Court '+c.court+' (Exhibition): '+fmt(ids[0])+' / '+fmt(ids[1]));
+    });
+  }
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('Lineup copied ✓')).catch(()=>toast('Copy failed — try again'));
+}
 function openDualEditModal(id,opp,date,location){
   if(!id)return;
   document.getElementById('edit-modal-body').innerHTML=`
