@@ -617,6 +617,10 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
       <div id="assignments-list"></div>
     </div>
+<div class="card"><div class="card-title blue"><span class="bar"></span> 📅 Past Court Lineups</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Court assignments from past duals and scrimmages, derived from match records.</p>
+      <div id="past-lineups-list"><div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">Loading...</div></div>
+    </div>
 <div class="card"><div class="card-title"><span class="bar"></span> Data Management</div>
       <div class="data-actions">
         <button class="btn btn-primary btn-small" id="export-excel">📊 Export Excel</button>
@@ -2077,7 +2081,7 @@ function refreshTab(id){
     case'dashboard':renderDash();break;
     case'players':renderPlayers();break;
     case'queens':renderQueens();break;
-    case'gameday':renderExtMatches('gameday');buildAssignSlots();renderAssignments();break;
+    case'gameday':renderExtMatches('gameday');buildAssignSlots();renderAssignments();renderPastLineups();break;
     case'duals':renderDuals();if(typeof renderLiveAssignmentList==='function')renderLiveAssignmentList();break;
     case'scrimmage':renderExtMatches('scrimmage');break;
     case'goals':renderCoachGoals();break;
@@ -4622,6 +4626,78 @@ function renderAssignments(){
   });
   container.innerHTML=h;
 }
+
+// ── Past Court Lineups (from gamedays + scrimmages) ──────────────────────────
+function renderPastLineups(){
+  const container=document.getElementById('past-lineups-list');
+  if(!container)return;
+  const today=td();
+
+  // Collect all past matches from gamedays + scrimmages
+  const allMatches=[
+    ...D.gamedays.map(m=>({...m,_src:'gameday'})),
+    ...(D.scrimmages||[]).map(m=>({...m,_src:'scrimmage'}))
+  ].filter(m=>m.date&&m.date<today);
+
+  if(!allMatches.length){
+    container.innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No past lineups found.</div>';
+    return;
+  }
+
+  // Clean opponent name helper
+  function cleanOpp(raw){
+    if(!raw)return'Unknown';
+    return raw.replace(/\s*(CT\s*\d+|Court\s*\d+|Exhibition|\s+\d+).*$/i,'').trim()||'Unknown';
+  }
+
+  // Group by date + cleaned opponent
+  const groups={};
+  allMatches.forEach(m=>{
+    const opp=cleanOpp(m.opponent);
+    const key=m.date+'||'+opp+'||'+m._src;
+    if(!groups[key])groups[key]={date:m.date,opponent:opp,type:m._src,courts:[]};
+    // Only add if court not already present
+    if(!groups[key].courts.find(c=>c.court===m.court)){
+      groups[key].courts.push({court:m.court||1,pair:m.pair||[]});
+    }
+  });
+
+  // Sort newest first
+  const sorted=Object.values(groups).sort((a,b)=>b.date.localeCompare(a.date));
+
+  let h='';
+  sorted.forEach(g=>{
+    const typeLabel=g.type==='scrimmage'?'🤝 Scrimmage':'🏐 Dual';
+    const typeColor=g.type==='scrimmage'?'var(--purple)':'var(--blue)';
+    const courtsOrdered=[...g.courts].sort((a,b)=>(a.court||0)-(b.court||0));
+    const id='plid-'+g.date+g.opponent.replace(/\s+/g,'');
+    h+=`<div style="border-left:4px solid ${typeColor};background:var(--gray-lighter);border-radius:8px;padding:12px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="const b=document.getElementById('${id}');b.style.display=b.style.display==='none'?'block':'none';">
+        <div>
+          <span style="font-family:'Bebas Neue';font-size:16px;">${fD(g.date)}</span>
+          <span style="font-size:12px;margin-left:6px;color:${typeColor};font-weight:700;">${typeLabel}</span>
+          <span style="font-size:12px;margin-left:4px;color:var(--gray);">vs ${g.opponent}</span>
+        </div>
+        <span style="color:var(--gray);font-size:12px;">${courtsOrdered.length} court${courtsOrdered.length!==1?'s':''} ▾</span>
+      </div>
+      <div id="${id}" style="display:none;margin-top:8px;">
+        ${courtsOrdered.map(c=>{
+          const p1=gP((c.pair||[])[0]),p2=gP((c.pair||[])[1]);
+          const n1=p1?p1.firstName+' '+p1.lastName.charAt(0)+'.':'TBD';
+          const n2=p2?p2.firstName+' '+p2.lastName.charAt(0)+'.':'TBD';
+          return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;">
+            <span class="court-badge court-${c.court}" style="font-size:11px;min-width:40px;text-align:center;">CT ${c.court}</span>
+            <span style="font-weight:700;">${n1}</span>
+            <span style="color:var(--gray);">&amp;</span>
+            <span style="font-weight:700;">${n2}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  container.innerHTML=h||'<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No past lineups found.</div>';
+}
+
 
 // Render player assignment in their schedule section
 function renderPlayerAssignment(pid){
