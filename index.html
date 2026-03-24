@@ -2950,46 +2950,129 @@ function renderPlayerProfileData(pid){
   }else{document.getElementById('pp-notes').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No coach notes yet.</div>';}
 }
 
+function playerGoalCollapse(gid){
+  const el=document.getElementById('pgfb-'+gid);
+  const btn=document.getElementById('pgcol-'+gid);
+  if(!el||!btn)return;
+  const hidden=el.style.display==='none';
+  el.style.display=hidden?'':'none';
+  btn.textContent=hidden?'\u25b2 Collapse':'\u25bc Show Plan';
+}
+function archivePlayerGoal(pid,gid){
+  fbSet('goals/'+pid+'/'+gid+'/archived',true);
+  toast('Goal archived \u2014 find it in Past Goals any time');
+}
+function unarchivePlayerGoal(pid,gid){
+  fbSet('goals/'+pid+'/'+gid+'/archived',false);
+}
 function renderPlayerGoals(){
   if(!currentPlayerId)return;
   const pid=currentPlayerId;
   const goals=D.goals[pid]||{};
   const entries=Object.entries(goals);
   if(!entries.length){
-    document.getElementById('pp-goals-list').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;"><div style="font-size:28px;margin-bottom:8px;">🎯</div>No goals set yet — choose one from the dropdown below!</div>';
+    document.getElementById('pp-goals-list').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;"><div style="font-size:28px;margin-bottom:8px;">\ud83c\udfaf</div>No goals set yet \u2014 choose one from the dropdown below!</div>';
     return;
   }
+  const active=entries.filter(([,g])=>!g.archived);
+  const archived=entries.filter(([,g])=>g.archived);
   let h='';
-  entries.forEach(([gid,g])=>{
+  if(!active.length){
+    h+='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;"><div style="font-size:24px;margin-bottom:6px;">\ud83c\udfaf</div>All goals responded to \u2014 add a new one below or check Past Goals!</div>';
+  }
+  active.forEach(([gid,g])=>{
     const fb=g.aiFeedback;
     const approved=fb&&fb.status==='approved';
     const hasDraft=fb&&fb.status==='draft';
     h+=`<div class="goal-card ${approved?'approved':hasDraft?'draft':''}">
       <div class="goal-header">
         <span class="goal-label">${g.label||g.goalType}</span>
-        ${approved?'<span class="goal-status approved">✓ Plan Ready</span>':
+        ${approved?'<span class="goal-status approved">\u2713 Plan Ready</span>':
           hasDraft?'<span class="goal-status ai-ready">Pending Coach Review</span>':
-          '<span class="goal-status pending">Awaiting AI Plan</span>'}
+          '<span class="goal-status pending">Awaiting Coach\'s Plan</span>'}
       </div>
       <div style="font-size:11px;color:var(--gray);">Set on ${fD(g.selectedAt)}</div>`;
     if(approved&&fb){
-      h+=`<div class="goal-feedback">${fb.text}
-        <div class="coach-stamp">Approved by coach on ${fD(fb.approvedAt)}</div></div>`;
+      h+=`<div id="pgfb-${gid}" class="goal-feedback">${fb.text}
+        <div class="coach-stamp">Approved by coach on ${fD(fb.approvedAt)}</div></div>
+        <div class="goal-actions">
+          <button id="pgcol-${gid}" class="btn btn-secondary btn-small" onclick="playerGoalCollapse('${gid}')">\u25b2 Collapse</button>
+          <button class="btn btn-small" style="background:var(--green);color:#fff;border:none;" onclick="archivePlayerGoal('${pid}','${gid}')">\u2713 Archive</button>
+        </div>`;
     }else if(hasDraft){
       h+='<div style="font-size:12px;color:var(--gray);margin-top:8px;font-style:italic;">Your coach is reviewing your development plan. Check back soon!</div>';
+      h+=`<div class="goal-actions"><button class="btn btn-danger btn-small" onclick="removeGoal('${pid}','${gid}')">Remove Goal</button></div>`;
     }else{
-      h+='<div style="font-size:12px;color:var(--gray);margin-top:8px;font-style:italic;">Your coach will create a personalized plan for this goal.</div>';
+      h+='<div style="font-size:12px;color:var(--gray);margin-top:8px;font-style:italic;">Your coach will create a personalized development plan for this goal.</div>';
+      h+=`<div class="goal-actions"><button class="btn btn-danger btn-small" onclick="removeGoal('${pid}','${gid}')">Remove Goal</button></div>`;
     }
-    h+=`<button class="btn btn-danger btn-small" style="margin-top:8px;width:auto;" onclick="removeGoal('${pid}','${gid}')">Remove Goal</button>`;
     h+='</div>';
   });
+  if(archived.length){
+    const showId='past-goals-section';
+    h+=`<div style="margin-top:16px;">
+      <button class="btn btn-secondary btn-small" style="width:100%;margin-bottom:8px;" onclick="(function(b){const el=document.getElementById('${showId}');const hidden=el.style.display==='none';el.style.display=hidden?'':'none';b.textContent=hidden?'\u25b2 Hide Past Goals':'\u25bc Past Goals (${archived.length})';}).call(this,this)">\u25bc Past Goals (${archived.length})</button>
+      <div id="${showId}" style="display:none;">`;
+    archived.forEach(([gid,g])=>{
+      const fb=g.aiFeedback;
+      h+=`<div class="goal-card approved" style="opacity:0.7;">
+        <div class="goal-header">
+          <span class="goal-label">${g.label||g.goalType}</span>
+          <span class="goal-status approved">\u2713 Archived</span>
+        </div>
+        <div style="font-size:11px;color:var(--gray);">Set on ${fD(g.selectedAt)}</div>`;
+      if(fb&&fb.text){
+        h+=`<div class="goal-feedback" style="margin-top:8px;">${fb.text}
+          <div class="coach-stamp">Approved on ${fD(fb.approvedAt)}</div></div>`;
+      }
+      h+=`<div class="goal-actions">
+        <button class="btn btn-secondary btn-small" onclick="unarchivePlayerGoal('${pid}','${gid}')">\u21a9 Restore</button>
+      </div></div>`;
+    });
+    h+='</div></div>';
+  }
   document.getElementById('pp-goals-list').innerHTML=h;
 }
 
 // Coach goals rendering
+let _showArchivedGoals=false;
+let _selectedGoals={};
+
+function toggleArchivedGoals(){
+  _showArchivedGoals=!_showArchivedGoals;
+  renderCoachGoals();
+}
+function toggleGoalCheck(pid,gid){
+  if(!_selectedGoals[pid])_selectedGoals[pid]=new Set();
+  if(_selectedGoals[pid].has(gid))_selectedGoals[pid].delete(gid);
+  else _selectedGoals[pid].add(gid);
+  const btn=document.getElementById('combine-btn-'+pid);
+  if(btn)btn.style.display=(_selectedGoals[pid]&&_selectedGoals[pid].size>=2)?'inline-block':'none';
+}
+function combineGoals(pid){
+  const sel=_selectedGoals[pid];
+  if(!sel||sel.size<2){toast('Select at least 2 goals to combine');return;}
+  const goals=D.goals[pid]||{};
+  const gids=[...sel];
+  const labels=gids.map(gid=>(goals[gid]?.label||goals[gid]?.goalType||gid));
+  const combinedLabel=labels.join(' + ');
+  const combinedFrom=gids.map(gid=>({gid,label:goals[gid]?.label||goals[gid]?.goalType||gid}));
+  const newGid=gi('goal');
+  fbSet('goals/'+pid+'/'+newGid,{goalType:'combined',label:combinedLabel,selectedAt:td(),aiFeedback:null,combinedFrom});
+  gids.forEach(gid=>fbRemove('goals/'+pid+'/'+gid));
+  _selectedGoals[pid]=new Set();
+  toast('Goals combined \u2713');
+}
+function archiveCoachGoal(pid,gid){
+  fbSet('goals/'+pid+'/'+gid+'/archived',true);
+  toast('Goal archived');
+}
+function unarchiveCoachGoal(pid,gid){
+  fbSet('goals/'+pid+'/'+gid+'/archived',false);
+  toast('Goal restored');
+}
 function renderCoachGoals(){
   const filter=document.getElementById('goals-player-filter');
-  // Populate player filter
   const curFilter=filter.value;
   filter.innerHTML='<option value="all">All Players</option>';
   const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
@@ -3000,52 +3083,86 @@ function renderCoachGoals(){
   let h='';
   const playerIds=curFilter==='all'?D.players.map(p=>p.id):[curFilter];
 
+  h+=`<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+    <button class="btn btn-secondary btn-small" onclick="toggleArchivedGoals()">
+      ${_showArchivedGoals?'\ud83d\udd12 Hide Archived':'\ud83d\udcc2 Show Archived'}
+    </button>
+  </div>`;
+
+  let anyGoals=false;
   playerIds.forEach(pid=>{
     const p=gP(pid);if(!p)return;
     const goals=D.goals[pid]||{};
-    const entries=Object.entries(goals);
+    const allEntries=Object.entries(goals);
+    const active=allEntries.filter(([,g])=>!g.archived);
+    const archiveCount=allEntries.filter(([,g])=>g.archived).length;
+    const entries=_showArchivedGoals?allEntries:active;
+    if(!entries.length&&!archiveCount)return;
+    if(!entries.length&&archiveCount&&!_showArchivedGoals)return;
     if(!entries.length)return;
+    anyGoals=true;
+    if(!_selectedGoals[pid])_selectedGoals[pid]=new Set();
 
-    h+=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--charcoal);margin:16px 0 8px;">
-      ${p.firstName} ${p.lastName} <span class="court-badge court-${p.court}">CT${p.court}</span> <span class="class-badge class-${p.classYear}">${p.classYear}</span></div>`;
+    h+=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--charcoal);margin:16px 0 8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      ${p.firstName} ${p.lastName} <span class="court-badge court-${p.court}">CT${p.court}</span><span class="class-badge class-${p.classYear}">${p.classYear}</span>
+      <button id="combine-btn-${pid}" class="btn btn-small" style="display:none;background:var(--blue);color:#fff;border:none;font-size:11px;padding:3px 10px;" onclick="combineGoals('${pid}')">\ud83d\udd17 Combine Selected</button>
+    </div>`;
 
     entries.forEach(([gid,g])=>{
       const fb=g.aiFeedback;
       const approved=fb&&fb.status==='approved';
       const hasDraft=fb&&fb.status==='draft';
       const hasFeedback=!!fb;
+      const isArchived=!!g.archived;
+      const canCombine=!approved&&!isArchived;
 
-      h+=`<div class="goal-card ${approved?'approved':hasDraft?'draft':''}">
+      h+=`<div class="goal-card ${approved?'approved':hasDraft?'draft':''}" style="${isArchived?'opacity:0.55;':''}">
         <div class="goal-header">
-          <span class="goal-label">${g.label||g.goalType}</span>
-          ${approved?'<span class="goal-status approved">✓ Approved</span>':
-            hasDraft?'<span class="goal-status ai-ready">Draft — Review</span>':
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${canCombine?`<input type="checkbox" style="width:15px;height:15px;accent-color:var(--blue);cursor:pointer;" onchange="toggleGoalCheck('${pid}','${gid}')" ${_selectedGoals[pid]&&_selectedGoals[pid].has(gid)?'checked':''}>`:''}
+            <span class="goal-label">${g.label||g.goalType}</span>
+            ${g.combinedFrom?'<span style="font-size:10px;color:var(--gray);font-style:italic;">combined</span>':''}
+          </div>
+          ${isArchived?'<span class="goal-status pending">Archived</span>':
+            approved?'<span class="goal-status approved">\u2713 Approved</span>':
+            hasDraft?'<span class="goal-status ai-ready">Draft \u2014 Review</span>':
             '<span class="goal-status pending">No Plan Yet</span>'}
         </div>
-        <div style="font-size:11px;color:var(--gray);">Set by player on ${fD(g.selectedAt)}</div>`;
+        ${g.combinedFrom?`<div style="font-size:11px;color:var(--gray);margin-bottom:4px;">Combined from: ${g.combinedFrom.map(x=>x.label).join(' \u00b7 ')}</div>`:''}
+        <div style="font-size:11px;color:var(--gray);">Set on ${fD(g.selectedAt)}</div>`;
 
       if(hasFeedback){
         h+=`<div class="goal-feedback">${fb.text}
           ${fb.editedBy?'<div class="coach-stamp">Edited by '+fb.editedBy+'</div>':''}
           ${approved?'<div class="coach-stamp">Approved on '+fD(fb.approvedAt)+'</div>':''}</div>`;
       }
-
       h+='<div id="ai-loading-'+gid+'"></div>';
       h+='<div class="goal-actions">';
-      if(!hasFeedback){
-        h+=`<button class="btn btn-small" style="background:var(--gold);color:var(--black);" onclick="generateAIPlan('${pid}','${gid}')">🤖 Generate AI Plan</button>`;
+      if(isArchived){
+        h+=`<button class="btn btn-secondary btn-small" onclick="unarchiveCoachGoal('${pid}','${gid}')">\u21a9 Restore</button>`;
+        h+=`<button class="btn btn-danger btn-small" onclick="removeGoal('${pid}','${gid}')">\u2715 Delete</button>`;
       }else{
-        h+=`<button class="btn btn-small" style="background:var(--gold);color:var(--black);" onclick="generateAIPlan('${pid}','${gid}')">🔄 Regenerate</button>`;
-        h+=`<button class="btn btn-secondary btn-small" onclick="openEditFeedback('${pid}','${gid}')">✎ Edit</button>`;
-        if(!approved)h+=`<button class="btn btn-success btn-small" onclick="approveGoal('${pid}','${gid}')">✓ Approve</button>`;
-        else h+=`<button class="btn btn-secondary btn-small" onclick="unapproveGoal('${pid}','${gid}')">↩ Unapprove</button>`;
+        if(!hasFeedback){
+          h+=`<button class="btn btn-small" style="background:var(--gold);color:var(--black);" onclick="generateAIPlan('${pid}','${gid}')">\ud83e\udd16 Generate AI Plan</button>`;
+        }else{
+          h+=`<button class="btn btn-small" style="background:var(--gold);color:var(--black);" onclick="generateAIPlan('${pid}','${gid}')">\ud83d\udd04 Regenerate</button>`;
+          h+=`<button class="btn btn-secondary btn-small" onclick="openEditFeedback('${pid}','${gid}')">\u270e Edit</button>`;
+          if(!approved)h+=`<button class="btn btn-success btn-small" onclick="approveGoal('${pid}','${gid}')">\u2713 Approve</button>`;
+          else{
+            h+=`<button class="btn btn-secondary btn-small" onclick="unapproveGoal('${pid}','${gid}')">\u21a9 Unapprove</button>`;
+            h+=`<button class="btn btn-small" style="background:var(--green);color:#fff;border:none;" onclick="archiveCoachGoal('${pid}','${gid}')">\ud83d\udcc2 Archive</button>`;
+          }
+        }
+        h+=`<button class="btn btn-danger btn-small" onclick="removeGoal('${pid}','${gid}')">\u2715</button>`;
       }
-      h+=`<button class="btn btn-danger btn-small" onclick="removeGoal('${pid}','${gid}')">✕</button>`;
       h+='</div></div>';
     });
+    if(!_showArchivedGoals&&archiveCount){
+      h+=`<div style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:8px;">\ud83d\udcc2 ${archiveCount} archived goal${archiveCount>1?'s':''} hidden</div>`;
+    }
   });
 
-  if(!h)h='<div class="empty-state"><div class="emoji">🎯</div><p>No player goals set yet. Players can set goals from their portal.</p></div>';
+  if(!anyGoals)h+='<div class="empty-state"><div class="emoji">\ud83c\udfaf</div><p>No player goals set yet. Players can set goals from their portal.</p></div>';
   container.innerHTML=h;
 }
 
