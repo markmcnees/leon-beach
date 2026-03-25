@@ -907,18 +907,31 @@ async function genNight(){
   const pool=[...present,...subPlayers];
   if(pool.length<4){toast('Need at least 4 players (present + subs)');return;}
 
-  // Partner counts for optimization
+  // Partner counts + opponent counts for optimization
   const pCounts={};
-  pool.forEach(p=>{pCounts[p.id]={};pool.forEach(q=>{if(p.id!==q.id)pCounts[p.id][q.id]=0;});});
+  const oCounts={};
+  pool.forEach(p=>{
+    pCounts[p.id]={};
+    oCounts[p.id]={};
+    pool.forEach(q=>{if(p.id!==q.id){pCounts[p.id][q.id]=0;oCounts[p.id][q.id]=0;}});
+  });
   Object.values(D[SIDE].results||{}).forEach(r=>{
+    // Partners: teammates on same team
     const processTeam=team=>{if(!team||team.length<2)return;const[a,b]=team;if(pCounts[a]&&pCounts[a][b]!=null)pCounts[a][b]++;if(pCounts[b]&&pCounts[b][a]!=null)pCounts[b][a]++;};
     processTeam(r.t1);processTeam(r.t2);
+    // Opponents: players on opposite teams
+    const t1=r.t1||[],t2=r.t2||[];
+    t1.forEach(a=>t2.forEach(b=>{
+      if(oCounts[a]&&oCounts[a][b]!=null)oCounts[a][b]++;
+      if(oCounts[b]&&oCounts[b][a]!=null)oCounts[b][a]++;
+    }));
   });
 
   $('week-detail').innerHTML='<div class="ai-load"><div class="spin"></div><div>AI is building tonight\'s rotation...</div></div>';
 
   const playerList=pool.map(p=>p.id+':'+p.name+(p.isSub?' (SUB for '+pN(p.forId)+')':'')).join(', ');
-  const pSummary=pool.map(p=>`${p.name}(${p.id}) paired with: ${Object.entries(pCounts[p.id]||{}).filter(([,c])=>c>0).map(([id,c])=>pN(id)||id+' x'+c).join(', ')||'nobody yet'}`).join('\n');
+  const pSummary=pool.map(p=>`${p.name}(${p.id}) partnered with: ${Object.entries(pCounts[p.id]||{}).filter(([,c])=>c>0).map(([id,c])=>pN(id)||id+' x'+c).join(', ')||'nobody yet'}`).join('\n');
+  const oSummary=pool.map(p=>`${p.name}(${p.id}) faced: ${Object.entries(oCounts[p.id]||{}).filter(([,c])=>c>0).map(([id,c])=>pN(id)||id+' x'+c).join(', ')||'nobody yet'}`).join('\n');
 
   // Rounds needed so every player gets exactly 6 games
   const TARGET_GAMES=6;
@@ -933,8 +946,11 @@ async function genNight(){
 PLAYERS TONIGHT (${pool.length} players, ${courts} courts):
 ${playerList}
 
-PAST PARTNER HISTORY (minimize repeats — pair people who haven't played together):
+PAST PARTNER HISTORY (who has played on the same team together):
 ${pSummary}
+
+PAST OPPONENT HISTORY (who has played against each other):
+${oSummary}
 
 RULES:
 - Each round: ${courts} courts running simultaneously. Each court = 2v2 (4 players per court).
@@ -942,8 +958,9 @@ RULES:
 - Generate EXACTLY ${totalRounds} rounds.
 - PRIMARY GOAL: every player must play exactly ${TARGET_GAMES} games total.
 - Distribute sit-outs evenly — each player sits out roughly ${totalRounds-TARGET_GAMES} times.
-- NEVER pair the same two players together twice in one night if possible.
-- Maximize partner variety — reference history above.
+- PARTNER VARIETY: NEVER pair the same two players as partners twice in one night if possible. Prioritize pairs who have never partnered before.
+- OPPONENT VARIETY: equally important — avoid putting the same two players on opposite sides of the net repeatedly. Spread opponent matchups as evenly as possible across all players.
+- SEASON GOAL: by end of season every player should have partnered with AND faced every other player roughly equal times.
 - SUB players: include them in matchups normally. Track by their given IDs.
 
 Return ONLY a valid JSON array — no explanation, no markdown:
