@@ -2965,11 +2965,11 @@ function playerGoalCollapse(gid){
   btn.textContent=hidden?'\u25b2 Collapse':'\u25bc Show Plan';
 }
 function archivePlayerGoal(pid,gid){
-  fbSet('goals/'+pid+'/'+gid+'/archived',true);
+  fbSet('goals/'+pid+'/'+gid+'/archivedPlayer',true);
   toast('Goal archived \u2014 find it in Past Goals any time');
 }
 function unarchivePlayerGoal(pid,gid){
-  fbSet('goals/'+pid+'/'+gid+'/archived',false);
+  fbSet('goals/'+pid+'/'+gid+'/archivedPlayer',false);
 }
 function renderPlayerGoals(){
   if(!currentPlayerId)return;
@@ -2980,8 +2980,8 @@ function renderPlayerGoals(){
     document.getElementById('pp-goals-list').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;"><div style="font-size:28px;margin-bottom:8px;">\ud83c\udfaf</div>No goals set yet \u2014 choose one from the dropdown below!</div>';
     return;
   }
-  const active=entries.filter(([,g])=>!g.archived);
-  const archived=entries.filter(([,g])=>g.archived);
+  const active=entries.filter(([,g])=>!(g.archivedPlayer??g.archived));
+  const archived=entries.filter(([,g])=>!!(g.archivedPlayer??g.archived));
   let h='';
   if(!active.length){
     h+='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;"><div style="font-size:24px;margin-bottom:6px;">\ud83c\udfaf</div>All goals responded to \u2014 add a new one below or check Past Goals!</div>';
@@ -3070,12 +3070,12 @@ function combineGoals(pid){
   toast('Goals combined \u2713');
 }
 function archiveCoachGoal(pid,gid){
-  fbSet('goals/'+pid+'/'+gid+'/archived',true);
-  toast('Goal archived');
+  fbSet('goals/'+pid+'/'+gid+'/archivedCoach',true);
+  toast('Goal archived from your view — player can still see it');
 }
 function unarchiveCoachGoal(pid,gid){
-  fbSet('goals/'+pid+'/'+gid+'/archived',false);
-  toast('Goal restored');
+  fbSet('goals/'+pid+'/'+gid+'/archivedCoach',false);
+  toast('Goal restored to coach view');
 }
 function renderCoachGoals(){
   const filter=document.getElementById('goals-player-filter');
@@ -3100,8 +3100,8 @@ function renderCoachGoals(){
     const p=gP(pid);if(!p)return;
     const goals=D.goals[pid]||{};
     const allEntries=Object.entries(goals);
-    const active=allEntries.filter(([,g])=>!g.archived);
-    const archiveCount=allEntries.filter(([,g])=>g.archived).length;
+    const active=allEntries.filter(([,g])=>!(g.archivedCoach??g.archived));
+    const archiveCount=allEntries.filter(([,g])=>!!(g.archivedCoach??g.archived)).length;
     const entries=_showArchivedGoals?allEntries:active;
     if(!entries.length&&!archiveCount)return;
     if(!entries.length&&archiveCount&&!_showArchivedGoals)return;
@@ -3119,7 +3119,7 @@ function renderCoachGoals(){
       const approved=fb&&fb.status==='approved';
       const hasDraft=fb&&fb.status==='draft';
       const hasFeedback=!!fb;
-      const isArchived=!!g.archived;
+      const isArchived=!!(g.archivedCoach??g.archived);
       const canCombine=!approved&&!isArchived;
 
       h+=`<div class="goal-card ${approved?'approved':hasDraft?'draft':''}" style="${isArchived?'opacity:0.55;':''}">
