@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260325232833">
+  <meta name="build-version" content="20260325163415">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -1312,33 +1312,22 @@ function listenData(){if(!db)return;
           }
         }
       }
-      // Player view
+      // Player view — mirror coach view: update counters + show who's scoring
       if(currentRole==='player'){
-        const card=document.getElementById('pp-lc-'+idx);
-        if(card){
-          let badge=card.querySelector('.pp-live-badge');
-          if(!badge){
-            badge=document.createElement('div');
-            badge.className='pp-live-badge';
-            badge.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:rgba(230,121,0,0.08);border-radius:8px;border:1px solid rgba(230,121,0,0.25);margin:4px 0;';
-            const hdr=card.querySelector('.live-court-header');
-            if(hdr)hdr.insertAdjacentElement('afterend',badge);
+        const usEl=document.getElementById('pp-us-'+idx);
+        const themEl=document.getElementById('pp-them-'+idx);
+        if(usEl&&themEl){
+          usEl.textContent=live.us;
+          themEl.textContent=live.them;
+          const card=document.getElementById('pp-lc-'+idx);
+          if(card&&live.scoredBy){
+            let lbl=card.querySelector('.live-scored-by');
+            if(!lbl){lbl=document.createElement('div');lbl.className='live-scored-by';lbl.style.cssText='font-size:10px;color:var(--gray);font-style:italic;text-align:center;margin-top:4px;';card.querySelector('.live-score-row')?.after(lbl);}
+            lbl.textContent='✎ '+live.scoredBy+' keeping score';
           }
-          badge.innerHTML='<span style="font-size:10px;font-weight:700;color:#e67e00;letter-spacing:1px;">⚡ SET '+live.setNum+' LIVE</span>'
-            +'<span style="font-family:Bebas Neue,sans-serif;font-size:20px;color:#8b0000;">'+live.us+' – '+live.them+'</span>'
-            +(live.scoredBy?'<span style="font-size:9px;color:#e67e00;">✎ '+live.scoredBy+'</span>':'');
         }
       }
     });
-    // Remove stale player badges
-    if(currentRole==='player'){
-      document.querySelectorAll('.pp-live-badge').forEach(b=>{
-        const card=b.closest('[id^="pp-lc-"]');
-        if(!card)return;
-        const i=card.id.replace('pp-lc-','');
-        if(!D.liveScoring[i]||D.liveScoring[i].date!==today)b.remove();
-      });
-    }
   });
 }
 function seedDB(){if(!db)return;
