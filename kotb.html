@@ -1677,4 +1677,8 @@ function doCancelNight(){
     const nid='w'+(last.weekNum+1);
     fbSet(SIDE+'/weeks/'+nid,{id:nid,weekNum:last.weekNum+1,date:ds,absences:[],subs:null,rounds:null,skipped:false,cancelled:false});
   }
-  toast('N
+  toast('Night cancelled — new week added.');
+}
+</script>
+</body>
+</html>
