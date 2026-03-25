@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260325161205">
+  <meta name="build-version" content="20260325121012">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4261,7 +4261,7 @@ function openScoutSchool(key){
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div>
             <span class="court-badge court-${pair.court}" style="font-size:11px;">CT ${pair.court}</span>
-            <span style="font-weight:700;font-size:13px;margin-left:8px;">${pair.player1} & ${pair.player2}</span>
+            <span style="font-weight:700;font-size:13px;margin-left:8px;">${(()=>{const j=players.find(p=>(p.fullName||'')===(pair.player1||''));return (pair.player1||'')+( j&&j.jersey?' #'+j.jersey:'');})()} & ${(()=>{const j=players.find(p=>(p.fullName||'')===(pair.player2||''));return (pair.player2||'')+( j&&j.jersey?' #'+j.jersey:'');})()}</span>
             <div style="font-size:11px;color:var(--gray);margin-top:2px;">Last seen: ${pair.lastSeen||'—'}</div>
           </div>
           <button class="btn btn-small" style="background:#0369a1;color:white;border:none;" onclick="openAddScoutNote('${key}','pair','${pairKey}','${pair.player1} & ${pair.player2}')">+ Note</button>
@@ -4441,7 +4441,7 @@ function openPlayerScoutSchool(key){
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div>
             <span class="court-badge court-${pair.court}" style="font-size:11px;">CT ${pair.court}</span>
-            <span style="font-weight:700;font-size:13px;margin-left:8px;">${pair.player1} & ${pair.player2}</span>
+            <span style="font-weight:700;font-size:13px;margin-left:8px;">${(()=>{const j=players.find(p=>(p.fullName||'')===(pair.player1||''));return (pair.player1||'')+( j&&j.jersey?' #'+j.jersey:'');})()} & ${(()=>{const j=players.find(p=>(p.fullName||'')===(pair.player2||''));return (pair.player2||'')+( j&&j.jersey?' #'+j.jersey:'');})()}</span>
           </div>
           <button class="btn btn-small" style="background:#0369a1;color:white;border:none;" onclick="openAddScoutNote('${key}','pair','${pairKey}','${pair.player1} & ${pair.player2}')">+ Note</button>
         </div>
