@@ -1491,7 +1491,7 @@ function _openPlanner(){
 function updatePinDots(){for(let i=0;i<4;i++){const d=$('pd'+i);if(d)d.classList.toggle('filled',i<_pinEntry.length);}}
 function doCancelNight(){
   if(!liveWeek)return;
-  if(!confirm('Are you sure? This action will wipe out the whole evening's scores and extend the season by one week. This cannot be undone.'))return;
+  if(!confirm('Are you sure? This action will wipe out the whole evening\'s scores and extend the season by one week. This cannot be undone.'))return;
   fbSet(SIDE+'/weeks/'+liveWeek+'/cancelled',true);
   const allW=Object.values(D[SIDE].weeks||{}).sort((a,b)=>a.weekNum-b.weekNum);
   const last=allW[allW.length-1];
