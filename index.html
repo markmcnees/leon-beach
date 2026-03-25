@@ -4856,6 +4856,48 @@ function loadLiveCourts(id){
     listenSharedLineup(a.date, a.opponent);
   }
 }
+
+function closeDual(){
+  const a=window._loadedAssignment;
+  if(!a){toast('No assignment loaded');return;}
+  const date=a.date||td();
+  const opponent=a.opponent||'Opponent';
+  const aType=a.type||'gameday';
+  if(aType==='scrimmage'||aType==='queens'){toast('Close Dual is for season games only');return;}
+
+  // Count regulation courts (skip court 6+) from saved gameday records
+  let leonCourts=0,oppCourts=0;
+  const courts=(a.courts||[]).filter(c=>(c.court||0)<=5);
+  courts.forEach(c=>{
+    const m=D.gamedays.find(gd=>gd.date===date&&arrEq(gd.pair||[],[c.p1,c.p2].filter(Boolean)));
+    if(!m||(m.sets||[]).length===0)return;
+    const sets=m.sets||[];
+    const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
+    const sl=sets.length-sw;
+    if(sw>sl)leonCourts++;else if(sl>sw)oppCourts++;
+  });
+
+  const dualWin=leonCourts>oppCourts;
+  const loc=a.location||'home';
+
+  // Save to duals/ node
+  const dualId='dual-'+date+'-'+opponent.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const existing=D.duals.find(d=>d.date===date&&(d.opponent||'').toLowerCase()===opponent.toLowerCase());
+  const id=existing?existing.id:dualId;
+  fbSet('duals/'+id,{id,date,opponent,location:loc,leonCourts,oppCourts,dualWin,createdAt:existing?existing.createdAt:td()});
+
+  // Also update schedule entry if it exists
+  const schedMatch=(D.schedule||[]).find(g=>g.date===date&&(g.opponent||'').toLowerCase()===opponent.toLowerCase());
+  if(schedMatch){
+    fbSet('schedule/'+schedMatch.id+'/scoreUs',leonCourts);
+    fbSet('schedule/'+schedMatch.id+'/scoreThem',oppCourts);
+  }
+
+  // Clear live_scoring node
+  if(db)db.ref(DB_ROOT+'/live_scoring').remove();
+
+  toast('Dual closed! Leon '+leonCourts+' – Opp '+oppCourts+' ('+(dualWin?'WIN':'LOSS')+')');
+}
 function renderLiveScoring(dateOverride,assignOverride){
   const date=dateOverride||td();
   const container=document.getElementById('live-courts-container');
@@ -4962,6 +5004,10 @@ function renderLiveScoring(dateOverride,assignOverride){
     h+='</div>';
   });
 
+  // Add Close Dual button at bottom
+  h+=`<div style="margin-top:16px;padding:0 4px;">
+    <button class="btn btn-red" style="width:100%;padding:12px;font-size:15px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;" onclick="closeDual()">&#10003; Close Dual &amp; Save Result</button>
+  </div>`;
   container.innerHTML=h;
 }
 
@@ -5914,6 +5960,12 @@ function getDualRecord(){
   let w=0,l=0;
   // Dual W-L: from schedule (dual-level wins)
   (D.schedule||[]).forEach(g=>{if(g.type==='scrimmage')return;if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){parseInt(g.scoreUs)>parseInt(g.scoreThem)?w++:l++;}});
+  // Also count from D.duals that have no matching schedule entry with scores
+  (D.duals||[]).forEach(d=>{
+    if(d.leonCourts==null&&d.oppCourts==null)return;
+    const hasSchedEntry=(D.schedule||[]).some(g=>g.type!=='scrimmage'&&g.date===d.date&&(g.opponent||'').toLowerCase()===(d.opponent||'').toLowerCase()&&g.scoreUs!=null&&g.scoreUs!=='');
+    if(!hasSchedEntry){d.dualWin?w++:l++;}
+  });
 
   // Match W-L (court-level): sum scoreUs/scoreThem from schedule
   // Schedule stores court scores per dual (e.g. 4-1 means Leon won 4 courts)
