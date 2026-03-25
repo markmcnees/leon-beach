@@ -320,7 +320,7 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
     <div style="background:var(--sand-bg);border:1px solid var(--sand-border);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--gray);text-align:center;line-height:1.7;">
       Questions or suggestions about the app? Contact <strong style="color:var(--black);">Mark McNees</strong><br>
       📞 <a href="tel:8509737687" style="color:var(--primary);text-decoration:none;">850.973.7687</a> &nbsp;·&nbsp;
-      ✉️ <a href="mailto:markmcnees@gmail.com" style="color:var(--primary);text-decoration:none;">markmcnees@gmail.com</a>
+      ✉️ <a href="/cdn-cgi/l/email-protection#640905160f09070a010117240309050d084a070b09" style="color:var(--primary);text-decoration:none;"><span class="__cf_email__" data-cfemail="99f4f8ebf2f4faf7fcfcead9fef4f8f0f5b7faf6f4">[email&#160;protected]</span></a>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <select class="inp" id="live-sel" style="flex:1;" onchange="loadLive()">
@@ -385,7 +385,7 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ─── FIREBASE CONFIG (shared with leon-beach-volleyball, separate DB root) ───
 const FB_CFG = {
   apiKey: "AIzaSyC8Ue06XPvGXo1XTloewPvDRBWtK5tDAj8",
@@ -973,7 +973,7 @@ Use the exact player IDs provided. Return only the JSON array.`;
 
   try{
     const res=await fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:16000,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const text=data.content?.map(c=>c.text||'').join('')||'';
     let parsed;
@@ -982,7 +982,7 @@ Use the exact player IDs provided. Return only the JSON array.`;
       const s=clean.indexOf('['),e=clean.lastIndexOf(']');
       parsed=JSON.parse(clean.slice(s,e+1));
     }catch(pe){
-      $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">Couldn't parse AI response.<br><pre style="font-size:10px;margin-top:6px;overflow-x:auto;white-space:pre-wrap;">${text.slice(0,400)}</pre></div>`;
+      $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">Couldn't parse AI response — the AI response may have been cut off or malformed. Tap Retry to try again.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
       return;
     }
     fbSet(SIDE+'/weeks/'+wid+'/rounds',parsed);
@@ -990,7 +990,7 @@ Use the exact player IDs provided. Return only the JSON array.`;
     loadWeekDetail();
   }catch(err){
     console.error(err);
-    $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">Error connecting to AI. Check connection.</div>`;
+    $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">Error connecting to AI — check your connection and try again.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
   }
 }
 
@@ -1677,15 +1677,4 @@ function doCancelNight(){
     const nid='w'+(last.weekNum+1);
     fbSet(SIDE+'/weeks/'+nid,{id:nid,weekNum:last.weekNum+1,date:ds,absences:[],subs:null,rounds:null,skipped:false,cancelled:false});
   }
-  toast('Night cancelled. Season extended by 1 week.');
-  renderWeekActions();renderRoundPills();renderLiveCourts();
-}
-
-// ─── BOOT ───
-document.addEventListener('DOMContentLoaded',()=>{
-  initTabs();
-  initFB();
-});
-</script>
-</body>
-</html>
+  toast('N
