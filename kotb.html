@@ -214,20 +214,10 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
 
 
   <!-- PLANNER -->
-  <div class="pane" id="pane-planner">
+    <div class="pane" id="pane-planner">
+
     <div class="card">
-      <div class="ctitle"><span class="bar"></span>Add Player</div>
-      <div style="display:flex;gap:8px;">
-        <input class="inp" id="new-name" placeholder="First Last" style="flex:1;" onkeypress="if(event.key==='Enter')addPlayer()">
-        <button class="btn btn-p" onclick="addPlayer()" style="white-space:nowrap;">+ Add</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ctitle"><span class="bar"></span>Players <span id="pcnt" style="font-size:13px;font-weight:400;color:var(--gray);margin-left:6px;"></span></div>
-      <div id="plist"></div>
-    </div>
-    <div class="card">
-      <div class="ctitle"><span class="bar"></span>Season Config</div>
+      <div class="ctitle"><span class="bar"></span><span style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:1px;margin-right:6px;">STEP 1</span>Season Config</div>
       <div class="row2">
         <div class="fg" style="margin:0;">
           <label class="lbl">League Night</label>
@@ -266,18 +256,7 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
     </div>
 
     <div class="card">
-      <div class="ctitle"><span class="bar"></span>Weekly Schedule</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-        <select class="inp" id="week-sel" style="flex:1;min-width:160px;" onchange="loadWeekDetail()">
-          <option value="">— Select Week —</option>
-        </select>
-        <button class="btn btn-p btn-sm" onclick="openAbsModal()">Absences / Subs</button>
-      </div>
-      <button class="btn btn-a btn-w" style="margin-bottom:12px;" onclick="genNight()">🤖 Generate Tonight's Schedule</button>
-      <div id="week-detail"></div>
-    </div>
-    <div class="card">
-      <div class="ctitle"><span class="bar"></span>Import Roster from Excel</div>
+      <div class="ctitle"><span class="bar"></span><span style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:1px;margin-right:6px;">STEP 2</span>Import Roster from Excel</div>
       <p style="font-size:13px;color:var(--gray);margin-bottom:10px;">Upload an Excel file (.xlsx or .csv) with player names. Put names in the <strong>first column</strong> — one name per row. A header row (e.g. "Name") is fine, the app will skip it automatically.</p>
       <label class="btn btn-p btn-w" style="cursor:pointer;justify-content:center;margin-bottom:8px;">
         📂 Choose Roster File
@@ -287,21 +266,48 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
     </div>
 
     <div class="card">
-      <div class="ctitle"><span class="bar"></span>Export</div>
+      <div class="ctitle"><span class="bar"></span><span style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:1px;margin-right:6px;">STEP 3</span>Add Player Manually</div>
+      <div style="display:flex;gap:8px;">
+        <input class="inp" id="new-name" placeholder="First Last" style="flex:1;" onkeypress="if(event.key==='Enter')addPlayer()">
+        <button class="btn btn-p" onclick="addPlayer()" style="white-space:nowrap;">+ Add</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span class="bar"></span><span style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:1px;margin-right:6px;">STEP 4</span>Roster <span id="pcnt" style="font-size:13px;font-weight:400;color:var(--gray);margin-left:6px;"></span></div>
+      <div id="plist"></div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span class="bar"></span><span style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:1px;margin-right:6px;">STEP 5</span>Weekly Schedule</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <select class="inp" id="week-sel" style="flex:1;min-width:160px;" onchange="loadWeekDetail()">
+          <option value="">— Select Week —</option>
+        </select>
+        <button class="btn btn-p btn-sm" onclick="openAbsModal()">Absences / Subs</button>
+      </div>
+      <button class="btn btn-a btn-w" style="margin-bottom:12px;" onclick="genNight()">🤖 Generate Tonight's Schedule</button>
+      <div id="week-detail"></div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span class="bar"></span><span style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:1px;margin-right:6px;">STEP 6</span>Export</div>
       <p style="font-size:13px;color:var(--gray);margin-bottom:12px;">Download the full season data as an Excel file — standings, all results, partner history, and weekly schedule.</p>
       <button class="btn btn-a btn-w" onclick="exportExcel()">📊 Export to Excel</button>
     </div>
+
     <div class="card" style="border:2px solid #e4002b22;">
-      <div class="ctitle"><span class="bar" style="background:var(--loss);"></span>Close Season</div>
+      <div class="ctitle"><span class="bar" style="background:var(--loss);"></span><span style="font-size:11px;font-weight:700;color:var(--loss);letter-spacing:1px;margin-right:6px;">STEP 7</span>Close Season</div>
       <p style="font-size:13px;color:var(--gray);margin-bottom:12px;">Archive this season's results and start fresh. Players are kept — weeks and results are cleared. Requires admin PIN.</p>
       <button class="btn btn-w" style="background:#e4002b;color:#fff;" onclick="promptCloseSeason()">🏁 Close &amp; Archive Season</button>
     </div>
+
     <div class="card">
-      <div class="ctitle"><span class="bar"></span>Past Seasons</div>
+      <div class="ctitle"><span class="bar"></span><span style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:1px;margin-right:6px;">STEP 8</span>Past Seasons</div>
       <div id="archive-list"><p style="font-size:13px;color:var(--gray);">Open this tab to load archives.</p></div>
     </div>
-  </div>
 
+  </div>
   <!-- SCORE (was Live) -->
   <div class="pane" id="pane-score">
     <div style="background:var(--sand-bg);border:1px solid var(--sand-border);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--gray);line-height:1.7;">
