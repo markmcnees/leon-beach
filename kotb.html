@@ -304,6 +304,13 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
 
   <!-- SCORE (was Live) -->
   <div class="pane" id="pane-score">
+    <div style="background:var(--sand-bg);border:1px solid var(--sand-border);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--gray);line-height:1.7;">
+      <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--primary);margin-bottom:6px;">📋 Scoring Rules</div>
+      <div>🏐 <strong>Games play to 15</strong> (or agreed target). No cap — win by 1.</div>
+      <div>🚫 <strong>Forfeit:</strong> If <em>both</em> players on a team are subs, the game is an automatic <strong>15–10</strong> forfeit. Use the ⚡ Record Forfeit button.</div>
+      <div>👤 <strong>Sub scores are excluded</strong> from registered players' standings, win %, and +/−.</div>
+      <div>✏️ Tap <strong>Edit Players</strong> on any court to swap in a sub or mark a player as a sub for tonight.</div>
+    </div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <select class="inp" id="live-sel" style="flex:1;" onchange="loadLive()">
         <option value="">— Select Week —</option>
@@ -597,6 +604,8 @@ function calcStats(pid){
   Object.values(D[SIDE].results||{}).forEach(r=>{
     const in1=(r.t1||[]).includes(pid),in2=(r.t2||[]).includes(pid);
     if(!in1&&!in2)return;
+    // Skip if this player was flagged as a sub for this game
+    if(r.subSlots&&r.subSlots.includes(pid))return;
     gp++;const ms=in1?r.s1:r.s2,os=in1?r.s2:r.s1;
     pf+=ms;pa+=os;ms>os?w++:l++;
   });
@@ -1023,7 +1032,7 @@ function renderLiveCourts(){
     // Build team arrays with any runtime sub overrides
     const resolveTeam = (team) => team.map(id => ({
       id,
-      displayName: overrides[id] || pN(id),
+      displayName: overrides[id]==='__SUB__' ? pN(id) : (overrides[id] || pN(id)),
       isSub: !!overrides[id]
     }));
     const t1r = resolveTeam(c.t1);
@@ -1114,13 +1123,21 @@ function openSubSwap(weekId, round, idx, t1s, t2s){
     h += `<div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--primary);margin:12px 0 8px;">${label}</div>`;
     team.forEach(pid => {
       const current = overrides[pid] || '';
-      h += `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--sand-border);">
-        <div style="flex:1;">
-          <div style="font-weight:700;font-size:14px;">${pN(pid)}</div>
-          <div style="font-size:12px;color:var(--gray);">Scheduled player</div>
+      const isSub = current === '__SUB__';
+      const subName = isSub ? '' : current;
+      h += `<div style="padding:10px 0;border-bottom:1px solid var(--sand-border);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:14px;">${pN(pid)}</div>
+            <div style="font-size:12px;color:var(--gray);">Scheduled player</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;background:${isSub?'var(--primary)':'var(--gray-lighter)'};color:${isSub?'#fff':'var(--gray)'};padding:7px 12px;border-radius:8px;transition:.15s;">
+            <input type="checkbox" id="issub-${pid}" ${isSub?'checked':''} onchange="toggleSubMode('${pid}')" style="display:none;">
+            👤 Sub
+          </label>
         </div>
-        <div style="flex:1;">
-          <input class="inp" id="swap-${pid}" placeholder="Sub name (or blank)" value="${current}" style="font-size:13px;padding:10px 12px;">
+        <div id="subname-row-${pid}" style="display:${isSub?'none':'block'};">
+          <input class="inp" id="swap-${pid}" placeholder="Replace with sub name (optional)" value="${subName}" style="font-size:13px;padding:10px 12px;">
         </div>
       </div>`;
     });
@@ -1133,6 +1150,27 @@ function openSubSwap(weekId, round, idx, t1s, t2s){
   $('abs-modal').querySelector('.btn.btn-p.btn-w').textContent = 'Apply Changes';
   $('abs-modal').querySelector('.btn.btn-p.btn-w').onclick = applySubSwap;
   $('abs-modal').classList.add('on');
+}
+
+function toggleSubMode(pid){
+  const cb=document.getElementById('issub-'+pid);
+  const nameRow=document.getElementById('subname-row-'+pid);
+  const lbl=cb?cb.closest('label'):null;
+  if(!cb)return;
+  if(cb.checked){
+    // Mark as sub — hide name input, set hidden value
+    if(nameRow)nameRow.style.display='none';
+    // Store __SUB__ marker in a hidden field
+    let hidden=document.getElementById('swap-'+pid);
+    if(!hidden){hidden=document.createElement('input');hidden.id='swap-'+pid;hidden.type='hidden';nameRow.appendChild(hidden);}
+    hidden.value='__SUB__';
+    if(lbl){lbl.style.background='var(--primary)';lbl.style.color='#fff';}
+  }else{
+    if(nameRow)nameRow.style.display='block';
+    const inp=document.getElementById('swap-'+pid);
+    if(inp)inp.value='';
+    if(lbl){lbl.style.background='var(--gray-lighter)';lbl.style.color='var(--gray)';}
+  }
 }
 
 function applySubSwap(){
@@ -1171,11 +1209,16 @@ function saveScore(wid,round,court,t1s,t2s,idx){
   const t2=t2s.split(',').filter(Boolean);
   const id=gi('r');
   const ov=(window._courtSubs&&window._courtSubs[wid+':'+round+':'+idx])||{};
-  const applyOv=team=>team.map(pid=>ov[pid]?ov[pid]:pid);
-  fbSet(SIDE+'/results/'+id,{id,weekId:wid,round,court,t1:applyOv(t1),t2:applyOv(t2),s1,s2,isForfeit:false,ts:Date.now()});
+  // For __SUB__ markers: keep original pid but record them in subSlots so stats skip them
+  const applyOv=team=>team.map(pid=>ov[pid]&&ov[pid]!=='__SUB__'?ov[pid]:pid);
+  const subSlots=[...t1,...t2].filter(pid=>ov[pid]==='__SUB__');
+  // Named subs (non-registered): store name string directly
+  const namedSubs=[...t1,...t2].filter(pid=>ov[pid]&&ov[pid]!=='__SUB__').map(pid=>ov[pid]);
+  fbSet(SIDE+'/results/'+id,{id,weekId:wid,round,court,t1:applyOv(t1),t2:applyOv(t2),s1,s2,isForfeit:false,subSlots:subSlots.length?subSlots:null,namedSubs:namedSubs.length?namedSubs:null,ts:Date.now()});
   lscore[idx]={us:0,them:0};
   toast((s1>s2?'Win':'Loss')+' · '+s1+'–'+s2+' saved ✓');
-  setTimeout(()=>{renderRoundPills();renderLiveCourts();},400);
+  const _sy=window.scrollY;
+  setTimeout(()=>{renderRoundPills();renderLiveCourts();window.scrollTo({top:_sy,behavior:'instant'});},400);
 }
 
 function saveForfeit(wid,round,court,t1s,t2s,t1forfeit,idx){
@@ -1188,7 +1231,8 @@ function saveForfeit(wid,round,court,t1s,t2s,t1forfeit,idx){
   const st1=resolveIds(t1),st2=resolveIds(t2);
   fbSet(SIDE+'/results/'+id,{id,weekId:wid,round,court,t1:st1,t2:st2,s1:t1forfeit?10:15,s2:t1forfeit?15:10,isForfeit:true,ts:Date.now()});
   toast('Forfeit recorded · 15–10');
-  setTimeout(()=>{renderRoundPills();renderLiveCourts();},400);
+  const _sf=window.scrollY;
+  setTimeout(()=>{renderRoundPills();renderLiveCourts();window.scrollTo({top:_sf,behavior:'instant'});},400);
 }
 
 function openEditResult(id){
@@ -1248,7 +1292,7 @@ function saveEditResult(){
   setTimeout(()=>{renderRoundPills();renderLiveCourts();},300);
 }
 
-function delResult(id){fbDel(SIDE+'/results/'+id);toast('Result cleared');setTimeout(()=>{renderRoundPills();renderLiveCourts();},400);}
+function delResult(id){fbDel(SIDE+'/results/'+id);toast('Result cleared');const _sd=window.scrollY;setTimeout(()=>{renderRoundPills();renderLiveCourts();window.scrollTo({top:_sd,behavior:'instant'});},400);}
 
 // ─── ROSTER IMPORT ───
 function importRoster(input){
@@ -1447,6 +1491,7 @@ function _openPlanner(){
 function updatePinDots(){for(let i=0;i<4;i++){const d=$('pd'+i);if(d)d.classList.toggle('filled',i<_pinEntry.length);}}
 function doCancelNight(){
   if(!liveWeek)return;
+  if(!confirm('Are you sure? This action will wipe out the whole evening's scores and extend the season by one week. This cannot be undone.'))return;
   fbSet(SIDE+'/weeks/'+liveWeek+'/cancelled',true);
   const allW=Object.values(D[SIDE].weeks||{}).sort((a,b)=>a.weekNum-b.weekNum);
   const last=allW[allW.length-1];
