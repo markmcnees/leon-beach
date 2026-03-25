@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260325231738">
+  <meta name="build-version" content="20260325163415">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -1290,10 +1290,55 @@ function listenData(){if(!db)return;
     if(currentRole==='coach'){const t=document.querySelector('.tab.active');if(t&&t.dataset.tab==='goals')renderCoachGoals();}
   });
   db.ref('.info/connected').on('value',s=>{setSS(s.val()===true);});
-  db.ref(DB_ROOT+'/live_scoring').on('value',s=>{
-    D.liveScoring=s.val()||{};
+  db.ref(DB_ROOT+'/live_scoring').on('value',snap=>{
+    D.liveScoring=snap.val()||{};
     var fo=document.getElementById('leon-fans-overlay');
     if(fo&&fo.style.display!=='none')renderLeonFans();
+    const today=td();
+    Object.entries(D.liveScoring).forEach(([idx,live])=>{
+      if(!live||live.date!==today)return;
+      // Coach view
+      if(currentRole==='coach'&&window._loadedAssignment){
+        const usEl=document.getElementById('ls-us-'+idx);
+        const themEl=document.getElementById('ls-them-'+idx);
+        if(usEl&&themEl){
+          if(usEl.tagName==='INPUT'){usEl.value=live.us;}else{usEl.textContent=live.us;}
+          if(themEl.tagName==='INPUT'){themEl.value=live.them;}else{themEl.textContent=live.them;}
+          const card=document.getElementById('lc-card-'+idx);
+          if(card&&live.scoredBy){
+            let lbl=card.querySelector('.live-scored-by');
+            if(!lbl){lbl=document.createElement('div');lbl.className='live-scored-by';lbl.style.cssText='font-size:10px;color:var(--gray);font-style:italic;text-align:center;margin-top:4px;';card.querySelector('.live-score-row')?.after(lbl);}
+            lbl.textContent='✎ '+live.scoredBy+' keeping score';
+          }
+        }
+      }
+      // Player view
+      if(currentRole==='player'){
+        const card=document.getElementById('pp-lc-'+idx);
+        if(card){
+          let badge=card.querySelector('.pp-live-badge');
+          if(!badge){
+            badge=document.createElement('div');
+            badge.className='pp-live-badge';
+            badge.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:rgba(230,121,0,0.08);border-radius:8px;border:1px solid rgba(230,121,0,0.25);margin:4px 0;';
+            const hdr=card.querySelector('.live-court-header');
+            if(hdr)hdr.insertAdjacentElement('afterend',badge);
+          }
+          badge.innerHTML='<span style="font-size:10px;font-weight:700;color:#e67e00;letter-spacing:1px;">⚡ SET '+live.setNum+' LIVE</span>'
+            +'<span style="font-family:Bebas Neue,sans-serif;font-size:20px;color:#8b0000;">'+live.us+' – '+live.them+'</span>'
+            +(live.scoredBy?'<span style="font-size:9px;color:#e67e00;">✎ '+live.scoredBy+'</span>':'');
+        }
+      }
+    });
+    // Remove stale player badges
+    if(currentRole==='player'){
+      document.querySelectorAll('.pp-live-badge').forEach(b=>{
+        const card=b.closest('[id^="pp-lc-"]');
+        if(!card)return;
+        const i=card.id.replace('pp-lc-','');
+        if(!D.liveScoring[i]||D.liveScoring[i].date!==today)b.remove();
+      });
+    }
   });
 }
 function seedDB(){if(!db)return;
