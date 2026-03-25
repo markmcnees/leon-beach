@@ -317,11 +317,17 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
       <div>👤 <strong>Sub scores are excluded</strong> from registered players' standings, win %, and +/−.</div>
       <div>✏️ Tap <strong>Edit Players</strong> on any court to swap in a sub or mark a player as a sub for tonight.</div>
     </div>
+    <div style="background:var(--sand-bg);border:1px solid var(--sand-border);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--gray);text-align:center;line-height:1.7;">
+      Questions or suggestions about the app? Contact <strong style="color:var(--black);">Mark McNees</strong><br>
+      📞 <a href="tel:8509737687" style="color:var(--primary);text-decoration:none;">850.973.7687</a> &nbsp;·&nbsp;
+      ✉️ <a href="mailto:markmcnees@gmail.com" style="color:var(--primary);text-decoration:none;">markmcnees@gmail.com</a>
+    </div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <select class="inp" id="live-sel" style="flex:1;" onchange="loadLive()">
         <option value="">— Select Week —</option>
       </select>
     </div>
+    <div id="score-absence-panel" style="display:none;margin-bottom:12px;"></div>
     <div id="score-week-actions" style="display:none;margin-bottom:12px;"></div>
     <div class="round-pills" id="round-pills"></div>
     <div id="live-courts"></div>
@@ -601,7 +607,7 @@ function refreshTab(t){
   if(t==='standings') renderStandings();
 
   else if(t==='planner'){renderRoster();renderPlannerCfg();loadWeekDetail();renderArchives();}
-  else if(t==='score') loadLive();
+  else if(t==='score'){fillWeekSels();renderScoreAbsencePanel();renderWeekActions();renderRoundPills();renderLiveCourts();}
 }
 
 // ─── STATS ───
@@ -888,12 +894,16 @@ async function genNight(){
   const week=D[SIDE].weeks[wid];if(!week)return;
   const cfg=D[SIDE].config||{};
   const courts=cfg.courts||2;
-  const absences=week.absences||[];
-  const subs=week.subs||[];
+  const absences=getSessionAbsences();
   const allP=Object.values(D[SIDE].players||{}).filter(p=>p&&p.name&&p.active!==false);
   const present=allP.filter(p=>!absences.includes(p.id));
-  // Add subs as pseudo-players
-  const subPlayers=subs.map(s=>({id:'sub_'+gi('s'),name:s.name,isSub:true,forId:s.forPlayerId}));
+  // Auto-label absent players as Sub 1, Sub 2, etc.
+  let subCounter=0;
+  const subPlayers=absences.map(abPid=>{
+    const existing=null; // session-based, no named subs stored
+    const subName='Sub '+(++subCounter);
+    return {id:subName,name:subName,isSub:true,forId:abPid};
+  });
   const pool=[...present,...subPlayers];
   if(pool.length<4){toast('Need at least 4 players (present + subs)');return;}
 
@@ -968,9 +978,152 @@ Use the exact player IDs provided. Return only the JSON array.`;
 }
 
 // ─── LIVE SCORING ───
+
+// ─── SCORE TAB INLINE ABSENCE PANEL (localStorage, same-day persistence) ────
+function _absKey(){
+  const today=td();
+  return'kotb_abs_'+SIDE+'_'+today;
+}
+function getSessionAbsences(){
+  try{const v=localStorage.getItem(_absKey());return v?JSON.parse(v):[];}catch(e){return[];}
+}
+function setSessionAbsences(arr){
+  try{localStorage.setItem(_absKey(),JSON.stringify(arr));}catch(e){}
+  // Clean up other days
+  try{
+    Object.keys(localStorage).forEach(k=>{
+      if(k.startsWith('kotb_abs_')&&k!==_absKey())localStorage.removeItem(k);
+    });
+  }catch(e){}
+}
+
+function renderScoreAbsencePanel(){
+  const panel=$('score-absence-panel');if(!panel)return;
+  if(!liveWeek){panel.style.display='none';return;}
+  const week=D[SIDE].weeks[liveWeek];
+  if(!week||week.cancelled||week.skipped){panel.style.display='none';return;}
+  panel.style.display='block';
+
+  const players=Object.values(D[SIDE].players||{}).filter(p=>p&&p.name&&p.active!==false)
+    .sort((a,b)=>a.name.localeCompare(b.name));
+  const absences=getSessionAbsences();
+  const absentCount=absences.length;
+  const hasSchedule=!!(week.rounds&&week.rounds.length);
+
+  // Figure out which sub slots are still unscored (for late arrival)
+  const scoredRounds=new Set(
+    Object.values(D[SIDE].results||{})
+      .filter(r=>r.weekId===liveWeek)
+      .map(r=>r.round)
+  );
+
+  let h=`<div style="background:var(--sand-bg);border:1px solid var(--sand-border);border-radius:10px;overflow:hidden;">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--sand-border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleAbsPanel()">
+      <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--primary);">👥 Tonight's Roster</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${absentCount?`<span style="background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">${absentCount} absent</span>`:'<span style="font-size:12px;color:var(--gray);">All present</span>'}
+        <span id="abs-panel-arrow" style="font-size:12px;color:var(--gray);">▾</span>
+      </div>
+    </div>
+    <div id="abs-panel-body" style="display:none;padding:10px 14px;">
+      <div style="font-size:12px;color:var(--gray);margin-bottom:10px;">Tap to mark a player absent. Their spot fills as Sub 1, Sub 2, etc. when the schedule generates.</div>`;
+
+  let subN=0;
+  players.forEach(p=>{
+    const isAbs=absences.includes(p.id);
+    if(isAbs)subN++;
+    const subLabel=isAbs?'Sub '+subN:'';
+    const roundsLeft=hasSchedule?(week.rounds||[]).filter(rd=>!scoredRounds.has(rd.round)).length:0;
+    h+=`<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--sand-border);">
+      <div style="flex:1;font-weight:${isAbs?'400':'700'};font-size:14px;color:${isAbs?'var(--gray)':'var(--black)'};text-decoration:${isAbs?'line-through':'none'};">${p.name}</div>
+      ${isAbs?`<span style="font-size:11px;color:#92400e;font-weight:600;font-style:italic;white-space:nowrap;">${subLabel}</span>`:''}
+      ${isAbs&&hasSchedule&&roundsLeft>0
+        ?`<button onclick="lateArrival('${p.id}')" style="background:#d1fae5;color:#065f46;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">🏃 Arrived</button>`
+        :''}
+      <button onclick="toggleScoreAbsence('${p.id}')" style="background:${isAbs?'#fee2e2':'var(--gray-lighter)'};color:${isAbs?'#b91c1c':'var(--gray)'};border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">
+        ${isAbs?'✕ Absent':'Absent'}
+      </button>
+    </div>`;
+  });
+
+  h+=`<div style="padding-top:10px;font-size:12px;color:var(--gray);">${absentCount} absent · ${players.length-absentCount} playing tonight</div>
+    </div></div>`;
+
+  panel.innerHTML=h;
+  if(window._absPanelOpen){
+    const body=$('abs-panel-body'),arrow=$('abs-panel-arrow');
+    if(body)body.style.display='block';
+    if(arrow)arrow.textContent='▴';
+  }
+}
+
+function toggleAbsPanel(){
+  const body=$('abs-panel-body'),arrow=$('abs-panel-arrow');
+  if(!body)return;
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  if(arrow)arrow.textContent=open?'▴':'▾';
+  window._absPanelOpen=open;
+}
+
+function toggleScoreAbsence(pid){
+  if(!liveWeek)return;
+  let absences=getSessionAbsences();
+  const isAbs=absences.includes(pid);
+  if(isAbs) absences=absences.filter(id=>id!==pid);
+  else absences.push(pid);
+  setSessionAbsences(absences);
+  window._absPanelOpen=true;
+  renderScoreAbsencePanel();
+}
+
+function lateArrival(pid){
+  if(!liveWeek)return;
+  const week=D[SIDE].weeks[liveWeek];if(!week)return;
+  const p=gP(pid);if(!p)return;
+
+  // Find unscored rounds
+  const scoredRounds=new Set(
+    Object.values(D[SIDE].results||{}).filter(r=>r.weekId===liveWeek).map(r=>r.round)
+  );
+  const unscoredRounds=(week.rounds||[]).filter(rd=>!scoredRounds.has(rd.round));
+  if(!unscoredRounds.length){toast('No remaining rounds to add '+p.name+' to');return;}
+
+  // Find their sub label so we can replace it in rounds
+  const absences=getSessionAbsences();
+  const abIdx=absences.indexOf(pid);
+  const subLabel='Sub '+(abIdx+1);
+
+  // Replace the sub slot in each unscored round
+  let changed=0;
+  unscoredRounds.forEach(rd=>{
+    let updated=false;
+    (rd.courts||[]).forEach(c=>{
+      ['t1','t2'].forEach(team=>{
+        const idx=c[team].indexOf(subLabel);
+        if(idx===-1)return;
+        c[team][idx]=pid;
+        updated=true;
+        changed++;
+      });
+    });
+    if(updated) fbSet(SIDE+'/weeks/'+liveWeek+'/rounds',week.rounds);
+  });
+
+  // Remove from absences
+  const newAbs=absences.filter(id=>id!==pid);
+  setSessionAbsences(newAbs);
+  window._absPanelOpen=true;
+  toast(p.name+' added to '+unscoredRounds.length+' remaining round'+(unscoredRounds.length>1?'s':'')+'!');
+  renderScoreAbsencePanel();
+  renderRoundPills();
+  renderLiveCourts();
+}
+
 function loadLive(){
   const wid=$('live-sel').value;
   liveWeek=wid;liveRound=1;
+  renderScoreAbsencePanel();
   renderWeekActions();
   renderRoundPills();
   renderLiveCourts();
