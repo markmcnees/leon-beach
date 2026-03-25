@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260325233833">
+  <meta name="build-version" content="20260325163415">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4932,6 +4932,43 @@ function closeDual(){
 
   toast('Dual closed! Leon '+leonCourts+' – Opp '+oppCourts+' ('+(dualWin?'WIN':'LOSS')+')');
 }
+
+function applyLiveScoringToCounters(){
+  const today=td();
+  Object.entries(D.liveScoring||{}).forEach(([idx,live])=>{
+    if(!live||live.date!==today)return;
+    // Coach counters
+    const cUs=document.getElementById('ls-us-'+idx);
+    const cThem=document.getElementById('ls-them-'+idx);
+    if(cUs&&cThem){
+      if(cUs.tagName==='INPUT'){cUs.value=live.us;}else{cUs.textContent=live.us;}
+      if(cThem.tagName==='INPUT'){cThem.value=live.them;}else{cThem.textContent=live.them;}
+      if(live.scoredBy){
+        const card=document.getElementById('lc-card-'+idx);
+        if(card){
+          let lbl=card.querySelector('.live-scored-by');
+          if(!lbl){lbl=document.createElement('div');lbl.className='live-scored-by';lbl.style.cssText='font-size:10px;color:var(--gray);font-style:italic;text-align:center;margin-top:4px;';card.querySelector('.live-score-row')?.after(lbl);}
+          lbl.textContent='✎ '+live.scoredBy+' keeping score';
+        }
+      }
+    }
+    // Player counters
+    const pUs=document.getElementById('pp-us-'+idx);
+    const pThem=document.getElementById('pp-them-'+idx);
+    if(pUs&&pThem){
+      pUs.textContent=live.us;
+      pThem.textContent=live.them;
+      if(live.scoredBy){
+        const card=document.getElementById('pp-lc-'+idx);
+        if(card){
+          let lbl=card.querySelector('.live-scored-by');
+          if(!lbl){lbl=document.createElement('div');lbl.className='live-scored-by';lbl.style.cssText='font-size:10px;color:var(--gray);font-style:italic;text-align:center;margin-top:4px;';card.querySelector('.live-score-row')?.after(lbl);}
+          lbl.textContent='✎ '+live.scoredBy+' keeping score';
+        }
+      }
+    }
+  });
+}
 function renderLiveScoring(dateOverride,assignOverride){
   const date=dateOverride||td();
   const container=document.getElementById('live-courts-container');
@@ -5043,6 +5080,7 @@ function renderLiveScoring(dateOverride,assignOverride){
     <button class="btn btn-red" style="width:100%;padding:12px;font-size:15px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;" onclick="closeDual()">&#10003; Close Dual &amp; Save Result</button>
   </div>`;
   container.innerHTML=h;
+  applyLiveScoringToCounters();
 }
 
 if(!window._lsLiveDebounce)window._lsLiveDebounce={};
@@ -6581,6 +6619,7 @@ function renderPlayerLiveScoring(){
     </div></div>`;
   });
   container.innerHTML=h;
+  applyLiveScoringToCounters();
 }
 
 function ppLoadCourts(assignmentId){
