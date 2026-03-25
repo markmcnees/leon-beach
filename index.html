@@ -20,7 +20,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:6px;}
 .sync-dot.online{background:#4ade80;box-shadow:0 0 6px #4ade80;animation:pulse 2s infinite;}
 .sync-dot.offline{background:#ef4444;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}@keyframes switchSlideIn{from{transform:translateY(-100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
 .season-badge{background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:13px;padding:4px 14px;border-radius:20px;letter-spacing:2px;border:1px solid rgba(255,255,255,0.25);}
 .tabs{display:flex;gap:2px;background:rgba(0,0,0,0.15);border-radius:8px;padding:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260325143706">
+  <meta name="build-version" content="20260325121012">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4932,6 +4932,7 @@ function renderLiveScoring(dateOverride,assignOverride){
     // Score entry row
     h+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;margin-top:4px;">
       <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:10px;letter-spacing:1px;">SET ${sets.length+1}</div>
+      <span id="ls-setnum-${idx}" style="display:none;">${sets.length+1}</span>
       <div class="live-score-row">
         <div class="live-score-col">
           <div class="live-score-label">LEON</div>
@@ -4965,6 +4966,32 @@ function renderLiveScoring(dateOverride,assignOverride){
 }
 
 if(!window._lsLiveDebounce)window._lsLiveDebounce={};
+// ── Side switch alert ──────────────────────────────────────
+function checkSideSwitch(usId,themId,setnumId){
+  const usEl=document.getElementById(usId);
+  const themEl=document.getElementById(themId);
+  if(!usEl||!themEl)return;
+  const us=parseInt(usEl.tagName==='INPUT'?usEl.value:usEl.textContent)||0;
+  const them=parseInt(themEl.tagName==='INPUT'?themEl.value:themEl.textContent)||0;
+  const total=us+them;
+  if(total===0)return;
+  const setnumEl=document.getElementById(setnumId);
+  const setNum=setnumEl?parseInt(setnumEl.textContent)||1:1;
+  const interval=setNum>=3?5:7;
+  if(total%interval===0){switchSidesAlert(total,setNum,interval);}
+}
+function switchSidesAlert(total,setNum,interval){
+  const existing=document.getElementById('switch-sides-alert');
+  if(existing)existing.remove();
+  const div=document.createElement('div');
+  div.id='switch-sides-alert';
+  div.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#1e40af;color:#fff;text-align:center;padding:14px 16px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.35);animation:switchSlideIn 0.25s ease;cursor:pointer;';
+  div.innerHTML='<div style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:2px;">\u21c4 SWITCH SIDES</div>'
+    +'<div style="font-size:12px;font-weight:600;opacity:0.88;">Set '+setNum+' \u00b7 '+total+' total points (switch every '+interval+')</div>';
+  div.onclick=()=>div.remove();
+  document.body.appendChild(div);
+  setTimeout(()=>{if(div.parentNode)div.remove();},6000);
+}
 function lsAdj(id,delta){
   const el=document.getElementById(id);
   if(!el)return;
@@ -4974,6 +5001,10 @@ function lsAdj(id,delta){
   if(isInput){el.value=next;}else{el.textContent=next;}
   const inp=document.getElementById(id+'-inp');
   if(inp)inp.value=next;
+  // Side-switch check
+  {const mx=id.match(/^(ls|pp)-(us|them)-(\d+)$/);
+  if(mx){const pfx=mx[1],idx2=mx[3],partner=pfx+'-'+(mx[2]==='us'?'them':'us')+'-'+idx2;
+  checkSideSwitch(id,partner,pfx+'-setnum-'+idx2);}}
   if(currentRole==='coach'&&db&&window._loadedAssignment){
     const m=id.match(/(?:ls-us-|ls-them-|qls-a-|qls-b-)(\d+)/);
     if(m){const idx=parseInt(m[1]);if(window._lsLiveDebounce[idx])clearTimeout(window._lsLiveDebounce[idx]);window._lsLiveDebounce[idx]=setTimeout(()=>pushLiveScore(idx),600);}
@@ -5004,6 +5035,10 @@ function lsInpChange(id){
   const val=Math.max(0,parseInt(inp.value)||0);
   inp.value=val;
   el.textContent=val;
+  // Side-switch check
+  {const mx=id.match(/^(ls|pp)-(us|them)-(\d+)$/);
+  if(mx){const pfx=mx[1],idx2=mx[3],partner=pfx+'-'+(mx[2]==='us'?'them':'us')+'-'+idx2;
+  checkSideSwitch(id,partner,pfx+'-setnum-'+idx2);}}
 }
 
 function saveLiveSet(idx,p1,p2,date,court,subCourt,existingId,opponent,fbNode){
@@ -5117,6 +5152,7 @@ function refreshSingleCourtCard(idx, date, fbNode){
 
   inner+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;margin-top:4px;">
     <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:10px;letter-spacing:1px;">SET ${sets.length+1}</div>
+    <span id="ls-setnum-${idx}" style="display:none;">${sets.length+1}</span>
     <div class="live-score-row">
       <div class="live-score-col">
         <div class="live-score-label">LEON</div>
@@ -6419,6 +6455,7 @@ function renderPlayerLiveScoring(){
     // New set entry
     h+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;">
       <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:10px;letter-spacing:1px;">SET ${sets.length+1}</div>
+      <span id="pp-setnum-${idx}" style="display:none;">${sets.length+1}</span>
       <div class="live-score-row">
         <div class="live-score-col">
           <div class="live-score-label">LEON</div>
@@ -6440,7 +6477,7 @@ function renderPlayerLiveScoring(){
           </div>
         </div>
       </div>
-      <button class="pgd-stats-toggle" id="pp-st-toggle-${idx}" onclick="pgdToggleStatsSection('pp-st-${idx}')">＋ Add stats (optional)</button>
+      <button class="pgd-stats-toggle" id="pp-st-${idx}-stats-toggle" onclick="pgdToggleStatsSection('pp-st-${idx}')">＋ Add stats (optional)</button>
       <div id="pp-st-${idx}-stats-section" style="display:none;">
         <div style="font-size:11px;color:var(--gray);text-align:center;margin:8px 0 4px;">Tap +/− to count as you play</div>
         ${[c.p1,c.p2].filter(Boolean).map(pid2=>{const pObj=gP(pid2);return pgdStatBlockHTML(pid2,pObj?pObj.firstName:'Player','pp-st-${idx}');}).join('')}
@@ -6484,6 +6521,7 @@ function ppLoadCourts(assignmentId){
     if(sets.length){h+='<div style="margin-bottom:8px;padding:0 4px;">';sets.forEach((sv,si)=>{const win=(sv.scoreUs||0)>(sv.scoreThem||0);h+=`<span class="live-set-chip ${win?'win':'loss'}">S${si+1}: ${sv.scoreUs}-${sv.scoreThem} <button style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;" onclick="ppDelLiveSet('${matchId}','${fbNode}',${si})">✕</button></span>`;});h+='</div>';}
     h+=`<div style="background:var(--off-white);border-radius:8px;padding:10px;">
       <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:10px;">SET ${sets.length+1}</div>
+      <span id="pp-setnum-${idx}" style="display:none;">${sets.length+1}</span>
       <div class="live-score-row">
         <div class="live-score-col"><div class="live-score-label">LEON</div>
           <div class="ls-counter">
@@ -6501,7 +6539,7 @@ function ppLoadCourts(assignmentId){
             <button class="ls-btn ls-btn-minus" onclick="lsAdj('pp-them-${idx}',-1)">−</button>
           </div></div>
       </div>
-      <button class="pgd-stats-toggle" id="pp-st-toggle-${idx}" onclick="pgdToggleStatsSection('pp-st-${idx}')">＋ Add stats (optional)</button>
+      <button class="pgd-stats-toggle" id="pp-st-${idx}-stats-toggle" onclick="pgdToggleStatsSection('pp-st-${idx}')">＋ Add stats (optional)</button>
       <div id="pp-st-${idx}-stats-section" style="display:none;">
         <div style="font-size:11px;color:var(--gray);text-align:center;margin:8px 0 4px;">Tap +/− to count as you play</div>
         ${[c.p1,c.p2].filter(Boolean).map(pid2=>{const pObj=gP(pid2);return pgdStatBlockHTML(pid2,pObj?pObj.firstName:'Player','pp-st-${idx}');}).join('')}
