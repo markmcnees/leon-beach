@@ -6440,7 +6440,12 @@ function renderPlayerLiveScoring(){
           </div>
         </div>
       </div>
-      <button class="btn btn-blue btn-small" style="width:100%;margin-top:8px;" onclick="ppSaveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${today}',${c.court},'${matchId||''}','${assignment.opponent||''}','${fbNode}')">✓ Save Set — Court ${c.court}</button>
+      <button class="pgd-stats-toggle" id="pp-st-toggle-${idx}" onclick="pgdToggleStatsSection('pp-st-${idx}')">＋ Add stats (optional)</button>
+      <div id="pp-st-${idx}-stats-section" style="display:none;">
+        <div style="font-size:11px;color:var(--gray);text-align:center;margin:8px 0 4px;">Tap +/− to count as you play</div>
+        ${[c.p1,c.p2].filter(Boolean).map(pid2=>{const pObj=gP(pid2);return pgdStatBlockHTML(pid2,pObj?pObj.firstName:'Player','pp-st-${idx}');}).join('')}
+      </div>
+      <button class="btn btn-blue btn-small" style="width:100%;margin-top:8px;" onclick="ppSaveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${today}',${c.court},'${matchId||''}','${assignment.opponent||''}','${fbNode}','pp-st-${idx}')">✓ Save Set — Court ${c.court}</button>
     </div></div>`;
   });
   container.innerHTML=h;
@@ -6496,13 +6501,18 @@ function ppLoadCourts(assignmentId){
             <button class="ls-btn ls-btn-minus" onclick="lsAdj('pp-them-${idx}',-1)">−</button>
           </div></div>
       </div>
-      <button class="btn btn-blue btn-small" style="width:100%;margin-top:8px;" onclick="ppSaveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${a.date}',${c.court},'${matchId||''}','${a.opponent||''}','${fbNode}')">✓ Save Set — Court ${c.court}</button>
+      <button class="pgd-stats-toggle" id="pp-st-toggle-${idx}" onclick="pgdToggleStatsSection('pp-st-${idx}')">＋ Add stats (optional)</button>
+      <div id="pp-st-${idx}-stats-section" style="display:none;">
+        <div style="font-size:11px;color:var(--gray);text-align:center;margin:8px 0 4px;">Tap +/− to count as you play</div>
+        ${[c.p1,c.p2].filter(Boolean).map(pid2=>{const pObj=gP(pid2);return pgdStatBlockHTML(pid2,pObj?pObj.firstName:'Player','pp-st-${idx}');}).join('')}
+      </div>
+      <button class="btn btn-blue btn-small" style="width:100%;margin-top:8px;" onclick="ppSaveLiveSet(${idx},'${c.p1||''}','${c.p2||''}','${a.date}',${c.court},'${matchId||''}','${a.opponent||''}','${fbNode}','pp-st-${idx}')">✓ Save Set — Court ${c.court}</button>
     </div></div>`;
   });
   container.innerHTML=h;
 }
 
-function ppSaveLiveSet(idx,p1,p2,date,court,existingId,opponent,fbNode){
+function ppSaveLiveSet(idx,p1,p2,date,court,existingId,opponent,fbNode,statsPrefix){
   const usEl=document.getElementById('pp-us-'+idx);
   const themEl=document.getElementById('pp-them-'+idx);
   const us=parseInt(usEl?.textContent||0);
@@ -6512,7 +6522,15 @@ function ppSaveLiveSet(idx,p1,p2,date,court,existingId,opponent,fbNode){
   const node=fbNode||'gamedays';
   const matchList=node==='scrimmages'?D.scrimmages:D.gamedays;
   const pair=[p1,p2].filter(Boolean);
-  const stats={};pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,d:0,e:0};});
+  const statsOpen=statsPrefix&&document.getElementById(statsPrefix+'-stats-section')?.style.display!=='none';
+  const stats={};
+  pair.forEach(pid=>{
+    if(statsOpen&&pgdStats[pid]){
+      stats[pid]={k:pgdStats[pid].k||0,b:pgdStats[pid].b||0,a:pgdStats[pid].a||0,d:pgdStats[pid].d||0,e:pgdStats[pid].e||0};
+    }else{
+      stats[pid]={k:0,b:0,a:0,d:0,e:0};
+    }
+  });
   const newSet={scoreUs:us,scoreThem:them,stats,enteredBy:currentPlayerId||null};
   const opp=(opponent||'Opponent')+' CT'+court;
   if(existingId){
@@ -6525,6 +6543,7 @@ function ppSaveLiveSet(idx,p1,p2,date,court,existingId,opponent,fbNode){
     fbSet(node+'/'+id,{id,date,court:parseInt(court),pair,opponent:opp,sets:[newSet]});
   }
   toast((us>them?'✓ Win':'✗ Loss')+' — '+us+'-'+them+' saved · Court '+court);
+  pair.forEach(pid=>{delete pgdStats[pid];});
   // Reset just this court's counters
   if(usEl)usEl.textContent='0';
   if(themEl)themEl.textContent='0';
@@ -7031,7 +7050,14 @@ function renderLeonFans(){
   var todayAssign=Object.values(D.assignments||{}).find(function(a){return a.date===today;});
   var todayGD=gdByDate[today]||{};
   var liveScoring=D.liveScoring||{};
-  var hasActivity=todayAssign&&(Object.keys(todayGD).length>0||Object.keys(liveScoring).length>0);
+  var gameTimeReached=false;
+  if(todayAssign&&todayAssign.time){
+    var nowH=new Date().getHours(),nowM=new Date().getMinutes();
+    var tParts=todayAssign.time.split(':');
+    var gtH=parseInt(tParts[0]||0),gtM=parseInt(tParts[1]||0);
+    gameTimeReached=(nowH>gtH)||(nowH===gtH&&nowM>=gtM);
+  }
+  var hasActivity=todayAssign&&(gameTimeReached||Object.keys(todayGD).length>0||Object.keys(liveScoring).length>0);
 
   if(hasActivity){
     if(tc)tc.style.display='block';
@@ -7063,9 +7089,10 @@ function renderLeonFans(){
       });
       var lW2=courts2.filter(function(c){return (c.status==='done'||c.status==='live_with_history')&&c.sW>c.sL;}).length;
       var lL2=courts2.filter(function(c){return (c.status==='done'||c.status==='live_with_history')&&c.sL>c.sW;}).length;
+      var gameTimeDisp=todayAssign.time?' · '+todayAssign.time:'';
       var hdr2='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
         +'<div><div style="'+BN+';font-size:16px;color:'+DARK_RED+';">vs '+oppName2+'</div>'
-        +(schedT&&schedT.location?'<div style="font-size:11px;color:'+RED+';">\uD83D\uDCCD '+schedT.location+'</div>':'')
+        +(schedT&&schedT.location?'<div style="font-size:11px;color:'+RED+';">\uD83D\uDCCD '+schedT.location+gameTimeDisp+'</div>':(gameTimeDisp?'<div style="font-size:11px;color:'+RED+';">⏰'+gameTimeDisp+'</div>':''))
         +'</div><div style="'+BN+';font-size:22px;color:'+RED+';">'+lW2+' \u2013 '+lL2+'</div></div>';
       tcc.innerHTML=hdr2+courts2.map(function(c){
         var scoreHtml;
