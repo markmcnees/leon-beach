@@ -311,9 +311,13 @@ function renderToday(){
     }).join('');
 
     // Live in-progress score block
-    const liveBlock=hasLive?`<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:8px;padding:8px;background:rgba(230,121,0,0.08);border-radius:8px;border:1px solid rgba(230,121,0,0.25);">
-      <span style="font-size:10px;font-weight:700;color:#e67e00;letter-spacing:1px;">SET ${liveEntry.setNum||sets.length+1} • LIVE</span>
-      <span style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#8b0000;line-height:1;">${liveEntry.us} – ${liveEntry.them}</span>
+    const scoredByLabel=liveEntry&&liveEntry.scoredBy?`<span style="font-size:9px;color:#e67e00;opacity:0.8;margin-top:3px;display:block;text-align:center;">✎ ${liveEntry.scoredBy} keeping score</span>`:'';
+    const liveBlock=hasLive?`<div style="margin-top:8px;padding:8px;background:rgba(230,121,0,0.08);border-radius:8px;border:1px solid rgba(230,121,0,0.25);">
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
+        <span style="font-size:10px;font-weight:700;color:#e67e00;letter-spacing:1px;">SET ${liveEntry.setNum||sets.length+1} • LIVE</span>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#8b0000;line-height:1;">${liveEntry.us} – ${liveEntry.them}</span>
+      </div>
+      ${scoredByLabel}
     </div>`:'';
 
     const recStr=sets.length?`${sw}–${sl}`:'–';
