@@ -271,7 +271,7 @@ function renderToday(){
   // Tally scored courts (non-exhibition, courts 1-5)
   let leonCourts=0,oppCourts=0;
   courts.forEach(c=>{
-    if((c.court||0)>=6)return;
+    if((c.court||0)>=6||c.isExhibition||c.subCourt==='e')return;
     const m=findMatch(matchList,today,c.p1,c.p2);
     if(!m||!(m.sets||[]).length)return;
     const sw=(m.sets||[]).filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
@@ -286,8 +286,8 @@ function renderToday(){
   });
 
   // Build court cards
-  const scoredCourts=courts.filter(c=>(c.court||0)<6);
-  const exhibCourts=courts.filter(c=>(c.court||0)>=6);
+  const scoredCourts=courts.filter(c=>(c.court||0)<6&&!c.isExhibition&&c.subCourt!=='e');
+  const exhibCourts=courts.filter(c=>(c.court||0)>=6||c.isExhibition||c.subCourt==='e');
 
   function buildCourtCard(c,courtIdx){
     const m=findMatch(matchList,today,c.p1,c.p2);
