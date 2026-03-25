@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260325225755">
+  <meta name="build-version" content="20260325163415">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -6069,10 +6069,15 @@ function renderDuals(){
   // Merge structured duals + gameday-derived duals, deduplicate by date+opponent
   const gdDuals=buildDualsFromGamedays();
   const structuredDuals=D.duals||[];
-  // Index structured duals by date+opponent so we can skip gdDuals that are already covered
-  const structuredKeys=new Set(structuredDuals.map(d=>(d.date||'')+'||'+(d.opponent||'').toLowerCase()));
+  // For structured duals missing courts data, fill in from gameday-derived version
+  const enrichedStructured=structuredDuals.map(d=>{
+    if((d.courts||[]).length>0)return d;
+    const gdMatch=gdDuals.find(g=>(g.date||'')===(d.date||'')&&(g.opponent||'').toLowerCase()===(d.opponent||'').toLowerCase());
+    return gdMatch?{...d,courts:gdMatch.courts||[]}:d;
+  });
+  const structuredKeys=new Set(enrichedStructured.map(d=>(d.date||'')+'||'+(d.opponent||'').toLowerCase()));
   const merged=[
-    ...structuredDuals,
+    ...enrichedStructured,
     ...gdDuals.filter(d=>!structuredKeys.has((d.date||'')+'||'+(d.opponent||'').toLowerCase()))
   ].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
 
