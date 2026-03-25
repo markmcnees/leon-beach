@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260325231639">
+  <meta name="build-version" content="20260325163415">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -5051,17 +5051,19 @@ function lsAdj(id,delta){
   {const mx=id.match(/^(ls|pp)-(us|them)-(\d+)$/);
   if(mx){const pfx=mx[1],idx2=mx[3],partner=pfx+'-'+(mx[2]==='us'?'them':'us')+'-'+idx2;
   checkSideSwitch(id,partner,pfx+'-setnum-'+idx2);}}
-  if(currentRole==='coach'&&db&&window._loadedAssignment){
-    const m=id.match(/(?:ls-us-|ls-them-|qls-a-|qls-b-)(\d+)/);
+  if(db&&(window._loadedAssignment||currentRole==='player')){
+    const m=id.match(/(?:ls-us-|ls-them-|qls-a-|qls-b-|pp-us-|pp-them-)(\d+)/);
     if(m){const idx=parseInt(m[1]);if(window._lsLiveDebounce[idx])clearTimeout(window._lsLiveDebounce[idx]);window._lsLiveDebounce[idx]=setTimeout(()=>pushLiveScore(idx),600);}
   }
 }
 function pushLiveScore(idx){
-  if(!db||!window._loadedAssignment)return;
-  const a=window._loadedAssignment,date=a.date||td(),aType=a.type||'gameday';
+  if(!db)return;
+  const a=window._loadedAssignment||Object.values(D.assignments).find(x=>x.date===td());
+  if(!a)return;
+  const date=a.date||td(),aType=a.type||'gameday';
   const c=(a.courts||[])[idx];if(!c)return;
-  let usEl=document.getElementById('ls-us-'+idx)||document.getElementById('qls-a-'+idx);
-  let themEl=document.getElementById('ls-them-'+idx)||document.getElementById('qls-b-'+idx);
+  let usEl=document.getElementById('ls-us-'+idx)||document.getElementById('qls-a-'+idx)||document.getElementById('pp-us-'+idx);
+  let themEl=document.getElementById('ls-them-'+idx)||document.getElementById('qls-b-'+idx)||document.getElementById('pp-them-'+idx);
   if(!usEl||!themEl)return;
   const us=parseInt(usEl.tagName==='INPUT'?usEl.value:usEl.textContent)||0;
   const them=parseInt(themEl.tagName==='INPUT'?themEl.value:themEl.textContent)||0;
@@ -5072,7 +5074,8 @@ function pushLiveScore(idx){
     ?D.matches.find(m=>m.date===date&&(arrEq(m.team1||[],[c.p1,c.p2].filter(Boolean))||arrEq(m.team2||[],[c.p1,c.p2].filter(Boolean))))
     :matchList.find(m=>m.date===date&&arrEq(m.pair||[],[c.p1,c.p2].filter(Boolean)));
   const setNum=existing?(existing.sets||[]).length+1:1;
-  db.ref(DB_ROOT+'/live_scoring/'+idx).set({us,them,setNum,pairLabel,court:c.court,date,ts:Date.now()});
+  const scoredBy=currentPlayerId?((gP(currentPlayerId)||{}).firstName||'Player'):'Coach';
+  db.ref(DB_ROOT+'/live_scoring/'+idx).set({us,them,setNum,pairLabel,court:c.court,date,ts:Date.now(),scoredBy});
 }
 function lsInpChange(id){
   const inp=document.getElementById(id+'-inp');
@@ -6113,8 +6116,9 @@ function renderDuals(){
         const mid=c.id||'';
         const setsHtml=sets.map((s,si)=>{
           const win=(s.scoreUs||0)>(s.scoreThem||0);
+          const enteredByName=s.enteredBy?(gP(s.enteredBy)||{}).firstName||null:null;
           return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">
-            <span style="font-family:'Bebas Neue';font-size:13px;color:${win?'var(--green)':'var(--loss-red)'};">S${si+1}: ${s.scoreUs}-${s.scoreThem}</span>
+            <span style="font-family:'Bebas Neue';font-size:13px;color:${win?'var(--green)':'var(--loss-red)'};">S${si+1}: ${s.scoreUs}-${s.scoreThem}</span>${enteredByName?`<span style="font-size:9px;color:var(--gray);font-style:italic;">✎${enteredByName}</span>`:''}
             ${mid?`<button onclick="dhEditSet('${mid}',${si})" style="font-size:10px;padding:1px 5px;border:1px solid var(--gray-lighter);border-radius:3px;background:var(--white);color:var(--gray);cursor:pointer;">✎</button>
             <button onclick="dhDeleteSet('${mid}',${si})" style="font-size:10px;padding:1px 5px;border:1px solid var(--gray-lighter);border-radius:3px;background:var(--white);color:var(--gray);cursor:pointer;">✕</button>
             <span id="dh-edit-${mid}-${si}" style="display:none;align-items:center;gap:3px;">
