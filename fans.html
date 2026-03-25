@@ -170,7 +170,7 @@ const FB_CONFIG={apiKey:"AIzaSyC8Ue06XPvGXo1XTloewPvDRBWtK5tDAj8",authDomain:"le
 const DB_ROOT='leon_queens_matches';
 firebase.initializeApp(FB_CONFIG);
 const db=firebase.database();
-let D={players:[],gamedays:[],scrimmages:[],assignments:{},schedule:[]};
+let D={players:[],gamedays:[],scrimmages:[],assignments:{},schedule:[],liveScoring:{}};
 
 function td(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fD(s){if(!s)return'';return new Date(s+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});}
@@ -194,7 +194,14 @@ db.ref(DB_ROOT).on('value',snap=>{
   D.scrimmages=val.scrimmages?Object.values(val.scrimmages):[];
   D.assignments=val.assignments||{};
   D.schedule=val.schedule?Object.values(val.schedule):[];
+  D.liveScoring=val.live_scoring||{};
   render();
+});
+
+// Dedicated fast listener for in-progress scores
+db.ref(DB_ROOT+'/live_scoring').on('value',snap=>{
+  D.liveScoring=snap.val()||{};
+  renderToday();
 });
 
 function render(){renderRecord();renderToday();renderSchedule();}
@@ -282,23 +289,32 @@ function renderToday(){
   const scoredCourts=courts.filter(c=>(c.court||0)<6);
   const exhibCourts=courts.filter(c=>(c.court||0)>=6);
 
-  function buildCourtCard(c){
+  function buildCourtCard(c,courtIdx){
     const m=findMatch(matchList,today,c.p1,c.p2);
     const sets=m?m.sets||[]:[];
     const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
     const sl=sets.filter(s=>(s.scoreThem||0)>(s.scoreUs||0)).length;
     const matchDone=sw>=2||sl>=2;
     const isLive=sets.length>0&&!matchDone;
-    const cardClass=sw>=2?'won':sl>=2?'lost':isLive?'live':'';
 
-    // Set pills — all recorded sets shown, in-progress set gets live style
+    // Check for in-progress live score from coach's counter
+    const liveEntry=D.liveScoring[courtIdx]||D.liveScoring[String(courtIdx)];
+    const hasLive=!matchDone&&liveEntry&&liveEntry.date===today&&(liveEntry.us>0||liveEntry.them>0);
+
+    const cardClass=sw>=2?'won':sl>=2?'lost':(hasLive||isLive)?'live':'';
+
+    // Set pills
     const setPills=sets.map((s,i)=>{
       const w=(s.scoreUs||0)>(s.scoreThem||0);
       const l=(s.scoreThem||0)>(s.scoreUs||0);
-      // Last set that's not conclusive = live
-      const liveSet=!w&&!l;
-      return`<span class="set-pill ${liveSet?'live-set':w?'w':'l'}">S${i+1} ${s.scoreUs}–${s.scoreThem}</span>`;
+      return`<span class="set-pill ${w?'w':'l'}">S${i+1} ${s.scoreUs}–${s.scoreThem}</span>`;
     }).join('');
+
+    // Live in-progress score block
+    const liveBlock=hasLive?`<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:8px;padding:8px;background:rgba(230,121,0,0.08);border-radius:8px;border:1px solid rgba(230,121,0,0.25);">
+      <span style="font-size:10px;font-weight:700;color:#e67e00;letter-spacing:1px;">SET ${liveEntry.setNum||sets.length+1} • LIVE</span>
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#8b0000;line-height:1;">${liveEntry.us} – ${liveEntry.them}</span>
+    </div>`:'';
 
     const recStr=sets.length?`${sw}–${sl}`:'–';
     const recClass=sw>sl?'win':sl>sw?'loss':'pending';
@@ -310,12 +326,13 @@ function renderToday(){
         <div class="court-match-rec ${recClass}">${recStr}</div>
       </div>
       ${sets.length?`<div class="court-sets">${setPills}</div>`:''}
+      ${liveBlock}
     </div>`;
   }
 
-  const scoredHTML=scoredCourts.map(buildCourtCard).join('');
+  const scoredHTML=scoredCourts.map((c,i)=>buildCourtCard(c,courts.indexOf(c))).join('');
   const exhibHTML=exhibCourts.length
-    ?`<div class="exhib-label">Exhibition</div>${exhibCourts.map(buildCourtCard).join('')}`
+    ?`<div class="exhib-label">Exhibition</div>${exhibCourts.map((c,i)=>buildCourtCard(c,courts.indexOf(c))).join('')}`
     :'';
 
   // Header score: show dash until first score, then tally
