@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>South Walton Beach Volleyball Tracker</title>
+<title>Leon Beach Volleyball Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
-:root{--red:#005B34;--red-dark:#004526;--red-deeper:#002e19;--red-light:#1a7a4a;--red-bg:#e6f4ee;--black:#1a1a1a;--charcoal:#2d2d2d;--white:#ffffff;--off-white:#fafafa;--cream:#f7f4f0;--gold:#d4a843;--gold-light:#f0d98a;--gray:#6b7280;--gray-light:#d1d5db;--gray-lighter:#e8eaed;--green:#16a34a;--green-bg:#dcfce7;--loss-red:#991b1b;--blue:#4338ca;--blue-bg:#e0e7ff;--purple:#7c3aed;--purple-bg:#f3e8ff;--radius:10px;--shadow:0 2px 10px rgba(0,0,0,0.06);--shadow-lg:0 8px 30px rgba(0,0,0,0.12);}
+:root{--red:#e4002b;--red-dark:#b50022;--red-deeper:#8a001a;--red-light:#ff3354;--red-bg:#fce8ec;--black:#1a1a1a;--charcoal:#2d2d2d;--white:#ffffff;--off-white:#fafafa;--cream:#f7f4f0;--gold:#d4a843;--gold-light:#f0d98a;--gray:#6b7280;--gray-light:#d1d5db;--gray-lighter:#e8eaed;--green:#16a34a;--green-bg:#dcfce7;--loss-red:#991b1b;--blue:#4338ca;--blue-bg:#e0e7ff;--purple:#7c3aed;--purple-bg:#f3e8ff;--radius:10px;--shadow:0 2px 10px rgba(0,0,0,0.06);--shadow-lg:0 8px 30px rgba(0,0,0,0.12);}
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);min-height:100vh;-webkit-font-smoothing:antialiased;}
-.header{background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);padding:14px 20px 10px;position:relative;z-index:100;box-shadow:0 4px 24px rgba(0,91,52,0.4);}
+.header{background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);padding:14px 20px 10px;position:relative;z-index:100;box-shadow:0 4px 24px rgba(228,0,43,0.3);}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .header h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:26px;color:var(--white);letter-spacing:3px;display:flex;align-items:center;gap:8px;text-shadow:0 2px 8px rgba(0,0,0,0.2);}
 .header h1 .crown{font-size:22px;}
@@ -274,7 +274,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100dvh;background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
 .login-overlay.hidden{display:none;}
 .login-box{background:var(--white);border-radius:16px;padding:36px 28px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);text-align:center;}
-.login-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;color:var(--red);margin-bottom:4px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;color:var(--red);margin-bottom:4px;}
 .login-logo .crown{font-size:30px;}
 .login-sub{font-size:13px;color:var(--gray);margin-bottom:24px;letter-spacing:0.5px;}
 .login-toggle{display:flex;gap:2px;background:var(--gray-lighter);border-radius:8px;padding:2px;margin-bottom:20px;}
@@ -356,13 +356,13 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260327104712">
+  <meta name="build-version" content="20260325234320">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
-    <div class="login-logo" style="flex-direction:column;align-items:center;gap:6px;"><img src="seahawks-logo.png" style="height:64px;width:auto;" alt="Seahawks"><span>SW Beach</span></div>
+    <div class="login-logo" style="display:flex;flex-direction:column;align-items:center;gap:6px;"><img src="leon-logo.png" style="height:72px;width:auto;" alt="Leon"><span>Leon Beach</span></div>
     <div class="login-sub">2026 Beach Volleyball Season</div>
     <div class="login-toggle">
       <button class="login-toggle-btn active" onclick="switchLogin('coach')">Coach</button>
@@ -399,7 +399,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
     <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-lighter);text-align:center;">
       <button onclick="showLeonFans()" style="display:inline-flex;align-items:center;gap:6px;font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--white);border:none;cursor:pointer;padding:9px 20px;border-radius:8px;background:var(--red);transition:background 0.2s;" onmouseover="this.style.background='var(--red-dark)';" onmouseout="this.style.background='var(--red)';">
-        🏐 SW Beach Fan Page
+        🏐 Leon Beach Fan Page
       </button>
       <div style="font-size:11px;color:var(--red);font-weight:700;margin-top:6px;">Parents · Fans · Press — No login required</div>
     </div>
@@ -410,7 +410,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div id="app-wrapper" style="display:none;">
 <div class="header">
   <div class="header-top">
-    <h1><span class="crown"><img src="seahawks-logo.png" style="height:28px;width:auto;vertical-align:middle;" alt="SW"></span> SW Beach <span class="sync-dot" id="sync-dot"></span></h1>
+    <h1><span class="crown"><img src="leon-logo.png" style="height:28px;width:auto;vertical-align:middle;filter:brightness(0) invert(1);"></span> Leon Beach <span class="sync-dot" id="sync-dot"></span></h1>
     <div class="header-user">
       <span class="header-username" id="header-username"></span>
       <button class="logout-btn" onclick="logout()">Logout</button>
@@ -424,7 +424,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <button class="tab" data-tab="goals">Goals</button>
     <button class="tab" data-tab="scouts">Scouts</button>
     <button class="tab" data-tab="settings">Roster</button>
-    <button class="tab" onclick="window.location.href='https://markmcnees.github.io/south-walton/profiles.html'" style="border-left:1px solid rgba(255,255,255,0.15);">Profiles ↗</button>
+    <button class="tab" onclick="window.location.href='https://markmcnees.github.io/leon-beach/leon-queens-profiles.html'" style="border-left:1px solid rgba(255,255,255,0.15);">Profiles ↗</button>
   </div>
 </div>
 <div class="content" id="coach-content">
@@ -452,7 +452,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Time</label><input type="text" class="form-input" id="sched-time" placeholder="3:00pm" style="padding:8px;font-size:13px;"></div>
         </div>
         <div class="form-row" style="margin-bottom:8px;">
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">SW Score</label><input type="number" class="form-input" id="sched-us" placeholder="—" min="0" max="5" style="padding:8px;font-size:13px;"></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Leon Score</label><input type="number" class="form-input" id="sched-us" placeholder="—" min="0" max="5" style="padding:8px;font-size:13px;"></div>
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opp Score</label><input type="number" class="form-input" id="sched-them" placeholder="—" min="0" max="5" style="padding:8px;font-size:13px;"></div>
         </div>
         <button class="btn btn-primary btn-small" onclick="addScheduleGame()">Add Game</button>
@@ -497,7 +497,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div></div>
   </div>
 
-  <!-- ====== QUEENS (SW vs SW) ====== -->
+  <!-- ====== QUEENS (Leon vs Leon) ====== -->
   <div class="tab-content" id="tab-queens">
     <div class="card"><div class="card-title"><span class="bar"></span> Record Queens Match</div>
       <div class="form-row" style="margin-bottom:14px;">
@@ -552,7 +552,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
   </div>
 
-  <!-- ====== GAME DAY (SW vs External — Season) ====== -->
+  <!-- ====== GAME DAY (Leon vs External — Season) ====== -->
     <div class="tab-content" id="tab-gameday">
 <div class="card"><div class="card-title blue"><span class="bar"></span> 🤖 AI Pairing Recommendations</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">AI analyzes skills, match history, position compatibility, side preference, and court levels to suggest optimal pairings.</p>
@@ -608,7 +608,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label><input type="text" class="form-input" id="assign-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Courts</label>
             <select class="form-select" id="assign-courts" style="padding:8px;font-size:13px;">
-              <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="2">2</option><option value="1">1</option>
+              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
             </select></div>
         </div>
         <div id="assign-court-slots"></div>
@@ -617,19 +617,10 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
       <div id="assignments-list"></div>
     </div>
-<div class="card" id="pin-change-card">
-  <div class="card-title"><span class="bar"></span> 🔐 Change Coach PIN</div>
-  <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Update the PIN coaches use to access protected features.</p>
-  <div class="form-row" style="margin-bottom:8px;">
-    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Current PIN</label>
-      <input type="password" class="form-input" id="pin-current" placeholder="Current PIN" style="padding:8px;font-size:13px;"></div>
-    <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">New PIN</label>
-      <input type="password" class="form-input" id="pin-new" placeholder="New PIN (4+ digits)" style="padding:8px;font-size:13px;"></div>
-  </div>
-  <button class="btn btn-primary btn-small" onclick="changeCoachPin()">Update PIN</button>
-  <div id="pin-change-status" style="font-size:12px;margin-top:8px;"></div>
-</div>
-<div class="card" id="pin-change-card"><div class="card-title"><span class="bar"></span> 🔐 Change Coach PIN</div><p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Update the PIN coaches use to access protected features.</p><div class="form-row" style="margin-bottom:8px;"><div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Current PIN</label><input type="password" class="form-input" id="pin-current" placeholder="Current PIN" style="padding:8px;font-size:13px;"></div><div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">New PIN</label><input type="password" class="form-input" id="pin-new" placeholder="New PIN (4+ digits)" style="padding:8px;font-size:13px;"></div></div><button class="btn btn-primary btn-small" onclick="changeCoachPin()">Update PIN</button><div id="pin-change-status" style="font-size:12px;margin-top:8px;"></div></div>
+<div class="card"><div class="card-title blue"><span class="bar"></span> 📅 Past Court Lineups</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Court assignments from past duals and scrimmages, derived from match records.</p>
+      <div id="past-lineups-list"></div>
+    </div>
 <div class="card"><div class="card-title"><span class="bar"></span> Data Management</div>
       <div class="data-actions">
         <button class="btn btn-primary btn-small" id="export-excel">📊 Export Excel</button>
@@ -640,7 +631,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
     </div>
 <div class="card"><div class="card-title" style="color:var(--blue);"><span class="bar" style="background:var(--blue);"></span> 📸 Upload Court Assignment Sheet</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a court assignment sheet — SW's or the opponent's — and AI will extract the court pairings.</p>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a court assignment sheet — Leon's or the opponent's — and AI will extract the court pairings.</p>
       <div class="form-row" style="margin-bottom:8px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
           <input type="date" class="form-input" id="ca-date" style="padding:8px;font-size:13px;"></div>
@@ -654,7 +645,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
           <input type="text" class="form-input" id="ca-opp" placeholder="e.g. Lincoln" style="padding:8px;font-size:13px;"></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Whose Sheet?</label>
           <select class="form-select" id="ca-team" style="padding:8px;font-size:13px;">
-            <option value="leon">SW's Lineup</option>
+            <option value="leon">Leon's Lineup</option>
             <option value="opponent">Opponent's Lineup</option>
           </select></div>
       </div>
@@ -668,7 +659,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="form-row" style="margin-bottom:8px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Match Type</label>
           <select class="form-select" id="scan-type" style="padding:8px;font-size:13px;">
-            <option value="queens">Queens (SW vs SW)</option>
+            <option value="queens">Queens (Leon vs Leon)</option>
             <option value="gameday">Dual</option>
             <option value="scrimmage">Scrimmage</option>
           </select></div>
@@ -699,6 +690,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
       <div id="live-assignment-list" style="margin-bottom:12px;"></div>
       <div id="live-courts-container"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">Select an assignment above to load courts.</div></div>
+    <div id="shared-lineup-panel" style="display:none;background:#f0f7ff;border:1px solid #bcd6f5;border-radius:10px;padding:14px;margin-top:12px;"></div>
     </div>
 <div class="card" style="border:2px solid var(--charcoal);">
       <div class="card-title" style="color:var(--charcoal);"><span class="bar" style="background:var(--charcoal);"></span> 🔒 Coach Notes
@@ -744,7 +736,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
   </div>
 
-<!-- ====== SCRIMMAGE (SW vs External — Non-Season) ====== -->
+<!-- ====== SCRIMMAGE (Leon vs External — Non-Season) ====== -->
   <div class="tab-content" id="tab-scrimmage">
     <div class="card"><div class="card-title purple"><span class="bar"></span> New Scrimmage Match</div>
       <div class="form-row" style="margin-bottom:10px;">
@@ -1004,7 +996,6 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
     </div>
   </div>
-
 </div><!-- end player-portal -->
 
 <!-- EDIT MODAL -->
@@ -1042,39 +1033,200 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 // FIREBASE CONFIG
 // ============================================================
 const FB_CONFIG={apiKey:"AIzaSyC8Ue06XPvGXo1XTloewPvDRBWtK5tDAj8",authDomain:"leon-beach-volleyball.firebaseapp.com",databaseURL:"https://leon-beach-volleyball-default-rtdb.firebaseio.com",projectId:"leon-beach-volleyball",storageBucket:"leon-beach-volleyball.firebasestorage.app",messagingSenderId:"937804799976",appId:"1:937804799976:web:02121e68655b4febeb8e5d"};
-const DB_ROOT='south_walton_matches';
+const DB_ROOT='leon_queens_matches';
+
+// ── SHARED LINEUP — school name → Firebase key map ─────────────────────────
+const SCHOOL_KEY_MAP={
+  'Leon':'leon_queens_matches',
+  'Leon Beach':'leon_queens_matches',
+  'South Walton':'south_walton_matches',
+  'SW Beach':'south_walton_matches',
+  // Add new schools here as they join the platform
+};
+const MY_SCHOOL_KEY=DB_ROOT; // e.g. 'leon_queens_matches'
+
+function getSharedLineupKey(date, oppScheduleName){
+  const oppKey=SCHOOL_KEY_MAP[oppScheduleName];
+  if(!oppKey)return null; // opponent not on platform
+  const keys=[MY_SCHOOL_KEY, oppKey].sort();
+  return 'shared_lineups/'+date.replace(/-/g,'')+'_'+keys[0].replace('_matches','')+'_'+keys[1].replace('_matches','');
+}
+
+function getMyLineupSubKey(){
+  return MY_SCHOOL_KEY.replace('_matches','');
+}
+
+function getOppLineupSubKey(oppScheduleName){
+  const oppKey=SCHOOL_KEY_MAP[oppScheduleName];
+  if(!oppKey)return null;
+  return oppKey.replace('_matches','');
+}
+
+// ── Shared lineup Firebase listeners (per loaded assignment) ─────────────────
+let _sharedLineupListener=null;
+let _sharedLineupRef=null;
+
+function listenSharedLineup(date, oppName){
+  // Detach previous listener
+  if(_sharedLineupRef&&_sharedLineupListener){
+    _sharedLineupRef.off('value',_sharedLineupListener);
+    _sharedLineupRef=null; _sharedLineupListener=null;
+  }
+  const sharedKey=getSharedLineupKey(date, oppName);
+  if(!sharedKey||!db)return;
+  _sharedLineupRef=db.ref(sharedKey);
+  _sharedLineupListener=_sharedLineupRef.on('value',snap=>{
+    const val=snap.val()||{};
+    const oppSubKey=getOppLineupSubKey(oppName);
+    const mySubKey=getMyLineupSubKey();
+    // If opponent has released their lineup, auto-populate into the loaded assignment
+    if(oppSubKey&&val[oppSubKey]&&val[oppSubKey].released){
+      const oppCourts=val[oppSubKey].courts||{};
+      const a=window._loadedAssignment;
+      if(a){
+        // Build oppLineup array from their courts object
+        const oppLineup=Object.entries(oppCourts).map(([ct,c])=>({
+          court:parseInt(ct),
+          player1:c.p1||'',
+          player2:c.p2||'',
+          jersey1:c.j1||'',
+          jersey2:c.j2||''
+        }));
+        a.oppLineup=oppLineup;
+        // Re-render live scoring to show opponent names
+        const container=document.getElementById('live-courts-container');
+        if(container&&a.date)renderLiveScoring(a.date,a);
+        toast('Opponent lineup received from '+oppName+' ✓');
+      }
+    }
+    // Store draft status for UI
+    window._myLineupDraft=val[mySubKey]||null;
+    renderSharedLineupPanel(date, oppName, val);
+  });
+}
+
+function renderSharedLineupPanel(date, oppName, sharedVal){
+  const el=document.getElementById('shared-lineup-panel');
+  if(!el)return;
+  const sharedKey=getSharedLineupKey(date, oppName);
+  if(!sharedKey){
+    el.style.display='none';return;
+  }
+  el.style.display='block';
+  const mySubKey=getMyLineupSubKey();
+  const oppSubKey=getOppLineupSubKey(oppName);
+  const myData=sharedVal[mySubKey]||null;
+  const oppData=oppSubKey?sharedVal[oppSubKey]:null;
+  const myReleased=myData&&myData.released;
+  const oppReleased=oppData&&oppData.released;
+
+  let h=`<div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;color:var(--blue);margin-bottom:10px;">📋 SHARED LINEUP — vs ${oppName}</div>`;
+
+  // My status
+  h+=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">`;
+  if(!myData){
+    h+=`<span style="font-size:12px;color:var(--gray);">Your lineup: not posted</span>
+    <button class="btn btn-primary btn-small" onclick="saveLineupDraft('${date}','${oppName}')">💾 Save Draft</button>`;
+  } else if(!myReleased){
+    h+=`<span style="font-size:12px;color:var(--gold);font-weight:700;">✓ Draft saved</span>
+    <button class="btn btn-primary btn-small" onclick="saveLineupDraft('${date}','${oppName}')">↺ Update Draft</button>
+    <button class="btn btn-small" style="background:var(--green);color:#fff;border:none;" onclick="releaseLineup('${date}','${oppName}')">🚀 Release to ${oppName}</button>`;
+  } else {
+    h+=`<span style="font-size:12px;color:var(--green);font-weight:700;">✓ Released to ${oppName}</span>
+    <button class="btn btn-secondary btn-small" onclick="saveLineupDraft('${date}','${oppName}')">↺ Update</button>`;
+  }
+  h+=`</div>`;
+
+  // Opponent status
+  if(oppSubKey){
+    if(!oppData){
+      h+=`<div style="font-size:12px;color:var(--gray);padding:6px 0;">⏳ Waiting for ${oppName} to post their lineup...</div>`;
+    } else if(!oppReleased){
+      h+=`<div style="font-size:12px;color:var(--gold);padding:6px 0;">⏳ ${oppName} has a draft saved but hasn't released yet.</div>`;
+    } else {
+      h+=`<div style="font-size:12px;color:var(--green);padding:6px 0;">✓ ${oppName}'s lineup is live — auto-populated into courts above.</div>`;
+    }
+  }
+
+  el.innerHTML=h;
+}
+
+function saveLineupDraft(date, oppName){
+  const a=window._loadedAssignment;
+  if(!a||!db){toast('No assignment loaded');return;}
+  const sharedKey=getSharedLineupKey(date, oppName);
+  if(!sharedKey)return;
+  const mySubKey=getMyLineupSubKey();
+  // Build courts map from current assignment
+  const courts={};
+  (a.courts||[]).forEach(c=>{
+    if(!c.court)return;
+    const p1=gP(c.p1),p2=gP(c.p2);
+    courts[c.court]={
+      p1:p1?p1.firstName+' '+p1.lastName:'',
+      p2:p2?p2.firstName+' '+p2.lastName:'',
+      pid1:c.p1||'',pid2:c.p2||''
+    };
+  });
+  const existing=window._myLineupDraft;
+  db.ref(sharedKey+'/'+mySubKey).update({
+    courts,
+    released:existing?existing.released:false,
+    updatedAt:new Date().toISOString(),
+    school:MY_SCHOOL_KEY
+  });
+  toast('Lineup draft saved ✓');
+}
+
+function releaseLineup(date, oppName){
+  const sharedKey=getSharedLineupKey(date, oppName);
+  if(!sharedKey||!db)return;
+  const mySubKey=getMyLineupSubKey();
+  // Save draft first, then release
+  saveLineupDraft(date, oppName);
+  setTimeout(()=>{
+    db.ref(sharedKey+'/'+mySubKey+'/released').set(true);
+    toast('Lineup released to '+oppName+' ✓');
+  },400);
+}
+
 const COURTS=[1,2,3,4,5,6,7,8],CL={1:'Top',2:'Mid',3:'Dev',4:'Court 4',5:'Court 5',6:'Exhib',7:'Exhib',8:'Exhib'};
 const EXHIBITION_COURTS=new Set([6,7,8]);
 const CO={SR:0,JR:1,SO:2,FR:3};
 let db=null;
 
 const DEF_P=[
-  {id:'p01',firstName:'Annabelle',lastName:'Centeno',classYear:'SR',court:1,jersey:13},
-  {id:'p02',firstName:'Ella',lastName:'Driggers',classYear:'SR',court:1,jersey:11},
-  {id:'p03',firstName:'Kamryn',lastName:'Garcia',classYear:'SR',court:1,jersey:7},
-  {id:'p04',firstName:'Liz',lastName:'Risalvato',classYear:'SR',court:1,jersey:15},
-  {id:'p05',firstName:'Jordyn',lastName:'Swift',classYear:'SR',court:2,jersey:22},
-  {id:'p06',firstName:'Anna',lastName:'Titus',classYear:'SR',court:2,jersey:10},
-  {id:'p07',firstName:'Daisy',lastName:'Wilkinson',classYear:'SR',court:2,jersey:1},
-  {id:'p08',firstName:'Jillian',lastName:'Alexander',classYear:'JR',court:1,jersey:8},
-  {id:'p09',firstName:'Evelyn',lastName:'Brandman',classYear:'JR',court:2,jersey:17},
-  {id:'p10',firstName:'Sydney',lastName:'Downing',classYear:'JR',court:2,jersey:6},
-  {id:'p11',firstName:'Maci',lastName:'Jones',classYear:'JR',court:2,jersey:5},
-  {id:'p12',firstName:'Chloe',lastName:'Mallo',classYear:'JR',court:3,jersey:9},
-  {id:'p13',firstName:'Lindsay',lastName:'McMahan',classYear:'JR',court:3,jersey:23},
-  {id:'p14',firstName:'Corinne',lastName:"O'Connell",classYear:'JR',court:3,jersey:16},
-  {id:'p15',firstName:'Addi',lastName:'Wigley',classYear:'JR',court:3,jersey:18},
-  {id:'p16',firstName:'Krista',lastName:'Cliffe',classYear:'SO',court:2,jersey:24},
-  {id:'p17',firstName:'Ava',lastName:'Hummel',classYear:'SO',court:3,jersey:3},
-  {id:'p18',firstName:'Charlotte',lastName:'Brooks',classYear:'FR',court:3,jersey:21},
-  {id:'p19',firstName:'Amelia',lastName:'Hutson',classYear:'FR',court:3,jersey:4},
-  {id:'p20',firstName:'Evelyn',lastName:"O'Connell",classYear:'FR',court:3,jersey:20},
-  {id:'p21',firstName:'Tatum',lastName:'Sarro',classYear:'FR',court:3,jersey:2}
+  {id:'p01',firstName:'Riley',lastName:'Knipple',classYear:'SR',court:1,jersey:9},
+  {id:'p02',firstName:'Destyni',lastName:'Zuema',classYear:'SR',court:1,jersey:5},
+  {id:'p03',firstName:'Aubrey',lastName:'Brown',classYear:'JR',court:3,jersey:10},
+  {id:'p04',firstName:'Madi',lastName:'Bunker',classYear:'JR',court:3,jersey:2},
+  {id:'p05',firstName:'Eden',lastName:'Codd',classYear:'JR',court:2,jersey:7},
+  {id:'p06',firstName:'Kendall',lastName:'Cruse',classYear:'JR',court:2,jersey:8},
+  {id:'p07',firstName:'Aubri',lastName:'Moore',classYear:'JR',court:3,jersey:13},
+  {id:'p08',firstName:'Riley',lastName:'Perezluha',classYear:'JR',court:1,jersey:3},
+  {id:'p09',firstName:'Lizzie',lastName:'Roader',classYear:'JR',court:3,jersey:17},
+  {id:'p10',firstName:'Bentley',lastName:'Barnard',classYear:'SO',court:1,jersey:6},
+  {id:'p11',firstName:'Jazmin',lastName:'Burdick',classYear:'SO',court:2,jersey:4},
+  {id:'p12',firstName:'Madalynn',lastName:'Edenfield',classYear:'SO',court:3,jersey:11},
+  {id:'p13',firstName:'Jordyn',lastName:'Russell',classYear:'SO',court:1,jersey:15},
+  {id:'p14',firstName:'Leilani',lastName:'Winfrey',classYear:'SO',court:3,jersey:18},
+  {id:'p15',firstName:'Salem',lastName:'Ehrhardt',classYear:'FR',court:2,jersey:12},
+  {id:'p16',firstName:'Reagan',lastName:'Giles',classYear:'FR',court:2,jersey:1}
 ];
-const DEF_M=[];
+const DEF_M=[
+  {id:'m01',date:'2026-02-06',court:3,team1:['p07','p04'],team2:['p14','p03'],score1:21,score2:3},
+  {id:'m02',date:'2026-02-06',court:1,team1:['p01','p10'],team2:['p08','p13'],score1:21,score2:16},
+  {id:'m03',date:'2026-02-06',court:2,team1:['p05','p06'],team2:['p15','p16'],score1:21,score2:15},
+  {id:'m04',date:'2026-02-06',court:3,team1:['p09','p14'],team2:['p03','p07'],score1:21,score2:4},
+  {id:'m05',date:'2026-02-06',court:1,team1:['p01','p08'],team2:['p02','p10'],score1:21,score2:13},
+  {id:'m06',date:'2026-02-06',court:2,team1:['p16','p06'],team2:['p05','p12'],score1:21,score2:13},
+  {id:'m07',date:'2026-02-06',court:3,team1:['p09','p12'],team2:['p14','p04'],score1:21,score2:8},
+  {id:'m08',date:'2026-02-06',court:1,team1:['p02','p08'],team2:['p13','p10'],score1:21,score2:18},
+  {id:'m09',date:'2026-02-06',court:2,team1:['p15','p04'],team2:['p05','p06'],score1:21,score2:15}
+];
 
 let D={players:[],matches:[],planned:[],gamedays:[],scrimmages:[],schedule:[],standings:{},goals:{},assignments:{},duals:[],opponents:{},liveScoring:{},quizScores:{}};
-let profilesData={}; // from south_walton node for AI context
+let profilesData={}; // from leon_queens node for AI context
 let pgdNotes={}; // player self-notes per date: pgdNotes[pid][date]
 let _autoLoginDone=false;
 
@@ -1088,27 +1240,19 @@ function initFB(){
 }
 function setSS(on){const d=document.getElementById('sync-dot');d.className='sync-dot '+(on?'online':'offline');d.title=on?'Connected':'Offline';}
 function listenData(){if(!db)return;
-  db.ref('south_walton_matches/config/coachPin').once('value',function(snap){if(snap.val())window._coachPin=snap.val();});
-  db.ref('south_walton/quizScores').on('value',snap=>{D.quizScores=snap.val()||{};if(currentRole==='player')renderPlayerPortal();});
-  // Standings are shared with Leon (same area) - read from leon node
-  db.ref('leon_queens_matches/standings').on('value',snap=>{
-    D.standings=snap.val()||{};
-    if(currentTab==='dash')renderDash();
-  });
+  db.ref(DB_ROOT+'/config/coachPin').once('value',function(snap){if(snap.val())window._coachPin=snap.val();});
+  db.ref('leon_queens/quizScores').on('value',snap=>{D.quizScores=snap.val()||{};if(currentRole==='player')renderPlayerPortal();});
   db.ref(DB_ROOT).on('value',snap=>{
     const val=snap.val();
     const hasP=val&&val.players&&Object.keys(val.players).length>0;
-    const firstP=hasP?Object.values(val.players)[0]:null;
-    const swNames=new Set(["Annabelle", "Ella", "Kamryn", "Liz", "Jordyn", "Anna", "Daisy", "Jillian", "Evelyn", "Sydney", "Maci", "Chloe", "Lindsay", "Corinne", "Addi", "Krista", "Ava", "Charlotte", "Amelia", "Tatum"]);
-    const isPlaceholder=firstP&&!swNames.has(firstP.firstName);
-    if(hasP&&!isPlaceholder){
+    if(hasP){
       D.players=Object.values(val.players);
       D.matches=val.matches?Object.values(val.matches):[];
       D.planned=val.planned?Object.values(val.planned):[];
       D.gamedays=val.gamedays?Object.values(val.gamedays):[];
       D.scrimmages=val.scrimmages?Object.values(val.scrimmages):[];
       D.schedule=val.schedule?Object.values(val.schedule):[];
-      // D.standings handled by separate leon listener above
+      D.standings=val.standings||{};
       D.goals=val.goals||{};
       D.assignments=val.assignments||{};
       D.duals=val.duals?Object.values(val.duals):[];
@@ -1119,11 +1263,10 @@ function listenData(){if(!db)return;
       D.planned=[];D.gamedays=[];D.scrimmages=[];D.duals=[];
       seedDB();
     }
-    if(isPlaceholder){seedDB();}
     refreshCurrent();
     if(!_autoLoginDone){_autoLoginDone=true;autoLogin();}
   },err=>{console.error(err);setSS(false);});
-  db.ref('south_walton_passwords').on('value',s=>{passwords=s.val()||{};});
+  db.ref('leon_queens_passwords').on('value',s=>{passwords=s.val()||{};});
   db.ref(DB_ROOT+'/player_notes').on('value',s=>{
     const all=s.val()||{};
     // Restructure from [date][pid] → pgdNotes[pid][date]
@@ -1140,7 +1283,7 @@ function listenData(){if(!db)return;
     if(currentRole==='coach'){const t=document.querySelector('.tab.active');if(t&&t.dataset.tab==='scouts')renderScouts();}
     if(currentRole==='player')renderPlayerScouts();
   });
-  db.ref('south_walton').on('value',s=>{
+  db.ref('leon_queens').on('value',s=>{
     profilesData=s.val()||{};
     // Re-render player portal if active (to update rankings with skills/drills/verts)
     if(currentRole==='player')renderPlayerPortal();
@@ -1149,11 +1292,12 @@ function listenData(){if(!db)return;
   db.ref('.info/connected').on('value',s=>{setSS(s.val()===true);});
   db.ref(DB_ROOT+'/live_scoring').on('value',snap=>{
     D.liveScoring=snap.val()||{};
-    var fo=document.getElementById('sw-fans-overlay');
-    if(fo&&fo.style.display!=='none')renderSWFans();
+    var fo=document.getElementById('leon-fans-overlay');
+    if(fo&&fo.style.display!=='none')renderLeonFans();
     const today=td();
     Object.entries(D.liveScoring).forEach(([idx,live])=>{
       if(!live||live.date!==today)return;
+      // Coach view
       if(currentRole==='coach'&&window._loadedAssignment){
         const usEl=document.getElementById('ls-us-'+idx);
         const themEl=document.getElementById('ls-them-'+idx);
@@ -1168,6 +1312,7 @@ function listenData(){if(!db)return;
           }
         }
       }
+      // Player view — mirror coach view: update counters + show who's scoring
       if(currentRole==='player'){
         const usEl=document.getElementById('pp-us-'+idx);
         const themEl=document.getElementById('pp-them-'+idx);
@@ -1187,20 +1332,9 @@ function listenData(){if(!db)return;
 }
 function seedDB(){if(!db)return;
   const u={};
-  DEF_P.forEach(p=>{
-    u[DB_ROOT+'/players/'+p.id]=JSON.parse(JSON.stringify(p));
-    // Also seed profiles node so profiles.html has correct players
-    u['south_walton/players/'+p.id]=JSON.parse(JSON.stringify(p));
-  });
+  DEF_P.forEach(p=>{u[DB_ROOT+'/players/'+p.id]=JSON.parse(JSON.stringify(p));u['leon_queens/players/'+p.id]=JSON.parse(JSON.stringify(p));});
   DEF_M.forEach(m=>{u[DB_ROOT+'/matches/'+m.id]=JSON.parse(JSON.stringify(m));});
   db.ref().update(u);
-  // Clear any stale south_walton data except players
-  db.ref('south_walton/matches').remove();
-  db.ref('south_walton/gamedays').remove();
-  db.ref('south_walton/scrimmages').remove();
-  // Clear Leon's schedule data
-  db.ref(DB_ROOT+'/schedule').remove();
-  db.ref(DB_ROOT+'/duals').remove();
 }
 function fbSet(path,val){if(db)db.ref(DB_ROOT+'/'+path).set(val);}
 function fbRemove(path){if(db)db.ref(DB_ROOT+'/'+path).remove();}
@@ -1219,7 +1353,7 @@ function arrEq(a,b){if(!a||!b||a.length!==b.length)return false;const sa=[...a].
 function pmClass(v){return v>0?'pm-positive':v<0?'pm-negative':'pm-zero';}
 function pmStr(v){return(v>0?'+':'')+v;}
 
-// Queens stats (SW vs SW — each side gets their own score)
+// Queens stats (Leon vs Leon — each side gets their own score)
 function queensStats(pid,matches){
   let w=0,l=0,pf=0,pa=0;
   matches.forEach(m=>{
@@ -1235,7 +1369,7 @@ function queensStats(pid,matches){
 function extStats(pid,matchList){
   let setsW=0,setsL=0,pf=0,pa=0,k=0,b=0,a=0,d=0,e=0,totalSets=0,matchesPlayed=0;
   matchList.forEach(m=>{
-    const _pair=(m.pair||m.team1||[]);if(!_pair.includes(pid))return;
+    if(!(m.pair||[]).includes(pid))return;
     matchesPlayed++;
     (m.sets||[]).forEach(s=>{
       const su=s.scoreUs||0,st=s.scoreThem||0;
@@ -1317,7 +1451,7 @@ function renderSchedule(){
   if(!games.length){document.getElementById('dash-schedule').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No schedule data yet.</div>';return;}
   const today=td();
   let wins=0,losses=0;
-  games.forEach(g=>{if(g.type==='scrimmage')return;if(g.scoreUs!=null&&g.scoreThem!=null){g.scoreUs>g.scoreThem?wins++:losses++;}});
+  games.forEach(g=>{if(g.scoreUs!=null&&g.scoreThem!=null){if(g.type==='scrimmage')return;g.scoreUs>g.scoreThem?wins++:losses++;}});
   let h=`<div style="display:flex;gap:12px;margin-bottom:14px;">
     <div style="font-family:'Bebas Neue';font-size:22px;color:var(--green);">${wins}-${losses}</div>
     <div style="font-size:12px;color:var(--gray);align-self:center;">Season Record (Courts W-L)</div></div>`;
@@ -1371,17 +1505,17 @@ function addScheduleGame(){
 function delSchedule(id){fbRemove('schedule/'+id);toast('Removed');}
 
 function renderStandings(){
-  // SW's record from schedule
+  // Leon's record from schedule
   const games=[...D.schedule];
   let leonW=0,leonL=0;
-  const oppFromSchedule={}; // auto-compute opponent records vs South Walton
+  const oppFromSchedule={}; // auto-compute opponent records vs Leon
   games.forEach(g=>{
     if(g.scoreUs!=null&&g.scoreThem!=null){
       g.scoreUs>g.scoreThem?leonW++:leonL++;
       const opp=g.opponent||'';
       if(opp){
         if(!oppFromSchedule[opp])oppFromSchedule[opp]={w:0,l:0};
-        // Opponent's perspective: if SW won, opponent lost
+        // Opponent's perspective: if Leon won, opponent lost
         g.scoreUs>g.scoreThem?oppFromSchedule[opp].l++:oppFromSchedule[opp].w++;
       }
     }
@@ -1389,12 +1523,12 @@ function renderStandings(){
 
   // Merge: manual standings override auto-computed, but auto fills in if no manual entry
   const teams={};
-  // First add auto-computed from schedule (vs South Walton only)
+  // First add auto-computed from schedule (vs Leon only)
   Object.entries(oppFromSchedule).forEach(([name,rec])=>{teams[name]={w:rec.w,l:rec.l,auto:true};});
   // Then override with manually set records
   Object.entries(D.standings).forEach(([name,s])=>{teams[name]={w:s.w||0,l:s.l||0,auto:false};});
-  // South Walton always present
-  teams['South Walton']={w:leonW,l:leonL,auto:true};
+  // Leon always present
+  teams['Leon']={w:leonW,l:leonL,auto:true};
 
   // Sort by win %, then wins
   const sorted=Object.entries(teams).sort((a,b)=>{
@@ -1406,17 +1540,17 @@ function renderStandings(){
   let h='<div style="overflow-x:auto;"><table class="player-table" style="min-width:280px;"><thead><tr><th style="width:30px;">#</th><th>Team</th><th>W</th><th>L</th><th>Pct</th><th></th></tr></thead><tbody>';
   sorted.forEach(([name,s],i)=>{
     const pct=(s.w+s.l)>0?((s.w/(s.w+s.l))*100).toFixed(0)+'%':'—';
-    const isLeon=name==='South Walton';
+    const isLeon=name==='Leon';
     h+=`<tr style="${isLeon?'background:var(--red-bg);font-weight:700;':''}">
       <td style="font-family:'Bebas Neue';font-size:14px;color:var(--gray);">${i+1}</td>
-      <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦅':''}</td>
+      <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦁':''}</td>
       <td style="font-family:'Bebas Neue';font-size:16px;color:var(--green);">${s.w}</td>
       <td style="font-family:'Bebas Neue';font-size:16px;color:var(--loss-red);">${s.l}</td>
       <td style="font-family:'Bebas Neue';font-size:14px;">${pct}</td>
-      <td>${s.auto&&!isLeon?'<span style="font-size:9px;color:var(--gray);">vs South Walton</span>':''}</td></tr>`;
+      <td>${s.auto&&!isLeon?'<span style="font-size:9px;color:var(--gray);">vs Leon</span>':''}</td></tr>`;
   });
   h+='</tbody></table></div>';
-  if(Object.keys(oppFromSchedule).length)h+='<div style="font-size:10px;color:var(--gray);margin-top:6px;font-style:italic;">Records marked "vs South Walton" are auto-calculated from schedule. Update with full season records using the form below.</div>';
+  if(Object.keys(oppFromSchedule).length)h+='<div style="font-size:10px;color:var(--gray);margin-top:6px;font-style:italic;">Records marked "vs Leon" are auto-calculated from schedule. Update with full season records using the form below.</div>';
   document.getElementById('dash-standings').innerHTML=h;
   fetchMaxPrepsStandings(); // async — overlays with live MaxPreps data
 
@@ -1428,7 +1562,7 @@ function renderStandings(){
     const areaTeams=['Chiles','Lincoln','FSUS','Wakulla','Maclay','Community Christian','Godby','Rickards','St. John Paul II','Mosley','Sneads','South Walton','Gulf Breeze','Bishop Kenny'];
     areaTeams.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);});
     // Add any teams in standings that aren't in the default list
-    Object.keys(D.standings).forEach(t=>{if(!areaTeams.includes(t)&&t!=='South Walton'){const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);}});
+    Object.keys(D.standings).forEach(t=>{if(!areaTeams.includes(t)&&t!=='Leon'){const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);}});
     if(cur)sel.value=cur;
   }
   // Show add form for coaches only
@@ -1439,7 +1573,7 @@ function renderStandings(){
 // ============================================================
 // MAXPREPS LIVE STANDINGS FETCH
 // ============================================================
-const MAXPREPS_URL='https://www.maxpreps.com/fl/santa-rosa-beach/south-walton-seahawks/beach-volleyball/';
+const MAXPREPS_URL='https://www.maxpreps.com/fl/tallahassee/leon-lions/beach-volleyball/';
 const PROXY_BASE='https://leon-beach-ai.markmcnees-479.workers.dev/proxy';
 
 async function fetchMaxPrepsStandings(){
@@ -1559,7 +1693,7 @@ async function fetchMaxPrepsStandings(){
     const isLeon=/leon/i.test(name);
     h+=`<tr style="${isLeon?'background:var(--red-bg);font-weight:700;':''}">
       <td style="font-family:'Bebas Neue';font-size:14px;color:var(--gray);">${i+1}</td>
-      <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦅':''}</td>
+      <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦁':''}</td>
       <td style="font-family:'Bebas Neue';font-size:16px;color:var(--green);">${w}</td>
       <td style="font-family:'Bebas Neue';font-size:16px;color:var(--loss-red);">${l}</td>
       <td style="font-family:'Bebas Neue';font-size:14px;">${pct}</td></tr>`;
@@ -1569,38 +1703,6 @@ async function fetchMaxPrepsStandings(){
   el.innerHTML=h;
   if(st)st.textContent='';
 }
-function changeCoachPin(){
-  const cur=document.getElementById('pin-current').value.trim();
-  const nw=document.getElementById('pin-new').value.trim();
-  const st=document.getElementById('pin-change-status');
-  const stored=window._coachPin||'1234';
-  if(cur!==stored){st.style.color='var(--loss-red)';st.textContent='Current PIN is incorrect.';return;}
-  if(nw.length<4){st.style.color='var(--loss-red)';st.textContent='New PIN must be at least 4 digits.';return;}
-  window._coachPin=nw;
-  fbSet('config/coachPin',nw);
-  document.getElementById('pin-current').value='';
-  document.getElementById('pin-new').value='';
-  st.style.color='var(--green)';
-  st.textContent='PIN updated! New PIN: '+nw;
-  setTimeout(()=>{st.textContent='';},4000);
-}
-
-function changeCoachPin(){
-  const cur=document.getElementById('pin-current').value.trim();
-  const nw=document.getElementById('pin-new').value.trim();
-  const st=document.getElementById('pin-change-status');
-  const stored=window._coachPin||COACH_PIN;
-  if(cur!==stored){st.style.color='var(--loss-red)';st.textContent='Current PIN is incorrect.';return;}
-  if(nw.length<4){st.style.color='var(--loss-red)';st.textContent='New PIN must be at least 4 digits.';return;}
-  window._coachPin=nw;
-  fbSet('config/coachPin',nw);
-  document.getElementById('pin-current').value='';
-  document.getElementById('pin-new').value='';
-  st.style.color='var(--green)';
-  st.textContent='PIN updated! New PIN: '+nw;
-  setTimeout(()=>{st.textContent='';},4000);
-}
-
 function updateStanding(){
   const team=document.getElementById('stand-team').value;
   const w=parseInt(document.getElementById('stand-w').value)||0;
@@ -1684,7 +1786,7 @@ function renderPlayers(){
 }
 
 // ============================================================
-// QUEENS TAB (SW vs SW internal)
+// QUEENS TAB (Leon vs Leon)
 // ============================================================
 let qCourtFilter='all';
 function renderQueens(){
@@ -2005,6 +2107,8 @@ function remPlayer(id){const p=gP(id);if(!p)return;fbRemove('players/'+id);toast
 function refreshCurrent(){
   if(currentRole==='player'){renderPlayerPortal();return;}
   const t=document.querySelector('.tab.active');if(t)refreshTab(t.dataset.tab);
+  // Always refresh past lineups regardless of active tab
+  if(typeof renderPastLineups==='function')renderPastLineups();
   // Also update player login dropdown if on login screen
   if(!currentRole)populatePlayerLogin();
 }
@@ -2013,7 +2117,7 @@ function refreshTab(id){
     case'dashboard':renderDash();break;
     case'players':renderPlayers();break;
     case'queens':renderQueens();break;
-    case'gameday':renderExtMatches('gameday');buildAssignSlots();renderAssignments();break;
+    case'gameday':renderExtMatches('gameday');buildAssignSlots();renderAssignments();renderPastLineups();break;
     case'duals':renderDuals();if(typeof renderLiveAssignmentList==='function')renderLiveAssignmentList();break;
     case'scrimmage':renderExtMatches('scrimmage');break;
     case'goals':renderCoachGoals();break;
@@ -2165,8 +2269,8 @@ document.getElementById('set-modal').addEventListener('click',function(e){if(e.t
 // ============================================================
 // LOGIN SYSTEM
 // ============================================================
-const COACH_PIN='1234';
-const DEFAULT_PW='Sideout';
+const COACH_PIN='8675';
+const DEFAULT_PW='Pride2026';
 let passwords={};
 let currentRole=null; // 'coach' or 'player'
 let currentPlayerId=null;
@@ -2210,7 +2314,7 @@ function updatePinDots(){document.querySelectorAll('.login-pin-dot').forEach((d,
 
 function loginAsCoach(){
   currentRole='coach';currentPlayerId=null;
-  sessionStorage.setItem('swAuth',JSON.stringify({role:'coach'}));
+  sessionStorage.setItem('leonAuth',JSON.stringify({role:'coach'}));
   document.getElementById('login-overlay').classList.add('hidden');
   document.getElementById('app-wrapper').style.display='block';
   document.getElementById('coach-content').style.display='block';
@@ -2229,7 +2333,7 @@ function playerLogin(){
   if(pw!==storedPw&&pw!==DEV_PW){document.getElementById('pw-error').textContent='Incorrect password';return;}
   document.getElementById('pw-error').textContent='';
   currentRole='player';currentPlayerId=pid;
-  sessionStorage.setItem('swAuth',JSON.stringify({role:'player',pid}));
+  sessionStorage.setItem('leonAuth',JSON.stringify({role:'player',pid}));
   document.getElementById('login-overlay').classList.add('hidden');
   document.getElementById('app-wrapper').style.display='block';
   document.getElementById('coach-content').style.display='none';
@@ -2242,7 +2346,7 @@ function playerLogin(){
 }
 function logout(){
   currentRole=null;currentPlayerId=null;pinEntry='';
-  sessionStorage.removeItem('swAuth');
+  sessionStorage.removeItem('leonAuth');
   updatePinDots();
   document.getElementById('login-overlay').classList.remove('hidden');
   document.getElementById('app-wrapper').style.display='none';
@@ -2255,7 +2359,7 @@ function logout(){
 }
 function autoLogin(){
   try{
-    const auth=JSON.parse(sessionStorage.getItem('swAuth'));
+    const auth=JSON.parse(sessionStorage.getItem('leonAuth'));
     if(!auth)return;
     if(auth.role==='coach'){loginAsCoach();}
     else if(auth.role==='player'&&auth.pid){currentPlayerId=auth.pid;currentRole='player';
@@ -2281,7 +2385,7 @@ function changePassword(){
   if(cur!==storedPw){toast('Current password is incorrect');return;}
   if(!newPw||newPw.length<4){toast('New password must be at least 4 characters');return;}
   if(newPw!==confirm){toast('Passwords do not match');return;}
-  db.ref('south_walton_passwords/'+currentPlayerId).set(newPw);
+  db.ref('leon_queens_passwords/'+currentPlayerId).set(newPw);
   toast('Password updated!');
   document.getElementById('t-pw-current').value='';document.getElementById('t-pw-new').value='';document.getElementById('t-pw-confirm').value='';
 }
@@ -2584,7 +2688,7 @@ function renderPlayerStandings(){
   const teams={};
   Object.entries(oppFromSchedule).forEach(([name,rec])=>{teams[name]={w:rec.w,l:rec.l,auto:true};});
   Object.entries(D.standings).forEach(([name,s])=>{teams[name]={w:s.w||0,l:s.l||0,auto:false};});
-  teams['South Walton']={w:leonW,l:leonL,auto:true};
+  teams['Leon']={w:leonW,l:leonL,auto:true};
   const sorted=Object.entries(teams).sort((a,b)=>{
     const pctA=(a[1].w+a[1].l)>0?a[1].w/(a[1].w+a[1].l):0;
     const pctB=(b[1].w+b[1].l)>0?b[1].w/(b[1].w+b[1].l):0;
@@ -2594,10 +2698,10 @@ function renderPlayerStandings(){
   let h='<table class="player-table"><thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>Pct</th></tr></thead><tbody>';
   sorted.forEach(([name,s],i)=>{
     const pct=(s.w+s.l)>0?((s.w/(s.w+s.l))*100).toFixed(0)+'%':'—';
-    const isLeon=name==='South Walton';
+    const isLeon=name==='Leon';
     h+=`<tr style="${isLeon?'background:var(--red-bg);font-weight:700;':''}">
       <td style="font-family:'Bebas Neue';font-size:14px;color:var(--gray);">${i+1}</td>
-      <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦅':''}</td>
+      <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦁':''}</td>
       <td style="font-family:'Bebas Neue';font-size:16px;color:var(--green);">${s.w}</td>
       <td style="font-family:'Bebas Neue';font-size:16px;color:var(--loss-red);">${s.l}</td>
       <td style="font-family:'Bebas Neue';font-size:14px;">${pct}</td></tr>`;
@@ -2668,7 +2772,7 @@ function addPlayerGoal(){
   sel.value='';toast('Goal added!');
   try{
     const p=gP(pid);const pname=p?p.firstName+' '+p.lastName:pid;
-    const subj=encodeURIComponent('South Walton Seahawks — New Goal: '+pname);
+    const subj=encodeURIComponent('Leon Queens — New Goal: '+pname);
     const body=encodeURIComponent('Player: '+pname+'\nGoal: '+goalLabel+'\nDate: '+td()+'\n\nLog in to create an AI development plan.');
     const a=document.createElement('a');a.href='mailto:<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="94f9f5e6fff9f7faf1f1e7d4f3f9f5fdf8baf7fbf9">[email&#160;protected]</a>?subject='+subj+'&body='+body;a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);
   }catch(e){}
@@ -2739,24 +2843,26 @@ async function generateAIPlan(pid,gid){
   document.getElementById(loadingId).innerHTML='<div class="ai-loading"><div class="spinner"></div><div style="margin-top:8px;">AI is analyzing performance data...</div></div>';
 
   try{
-    const response=await fetch('https://south-walton-ai.markmcnees-479.workers.dev',{
+    const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:1000,
-        messages:[{role:'user',content:`You are an experienced high school beach volleyball coach creating a development plan for a player. Be encouraging but honest. Give specific, actionable steps. Keep it concise (3-5 paragraphs max).
+        messages:[{role:'user',content:`You are an experienced high school girls beach volleyball coach creating a personalized development plan. Be encouraging but honest. Use beach volleyball terminology only, never indoor volleyball terms.
+
+Formatting rules you must follow without exception: no markdown of any kind, no hashtags, no double asterisks, no em dashes, no bullet point symbols. Use plain sentences and paragraphs only. Add a blank line between every paragraph. End every plan with the sign-off: Coach Mark.
 
 PLAYER DATA:
 ${dataSummary}
 
 GOAL: ${goal.label}
 
-Write a personalized development plan for this player to achieve their goal. Include:
-1. An honest assessment of where they currently stand relative to this goal
-2. 3-4 specific things they need to work on (reference their actual stats/ratings)
-3. A realistic timeline
-4. Specific drills or actions they can take
+Write a personalized development plan in 4 to 6 paragraphs. Include:
+1. An honest assessment of where the player currently stands relative to this goal, referencing their actual stats and ratings.
+2. Three or four specific beach volleyball skills or habits to develop, with real numbers from their data.
+3. Specific beach volleyball drills or on-court actions to take.
+4. A realistic timeline.
 
 Speak directly to the player using "you" language. Be motivating but realistic. Reference their actual data points.`}]
       })
@@ -2797,7 +2903,7 @@ function approveGoal(pid,gid){
   const _ap=gP(pid);
   const _ag=D.goals?.[pid]?.[gid];
   notifyPlayer(pid,'plan',
-    'South Walton Seahawks — Your Training Plan is Ready',
+    'Leon Queens — Your Training Plan is Ready',
     'Hi '+(_ap?_ap.firstName:'there')+',\n\nCoach has approved your AI training plan for: '+(_ag?_ag.label||_ag.goalType:'your goal')+'.\n\nLog in to the app to view your personalized feedback and next steps.'
   );
 }
@@ -2818,41 +2924,11 @@ function renderPlayerProfileData(pid){
   const sk=profilesData?.skills?.[pid]||profilesData?.players?.[pid]?.skills||{};
   if(skillNames.some(k=>sk[k]>0)){
     let h='';skillNames.forEach(k=>{const v=sk[k]||0;
-      if(k==='courtSense'){
-        const quizAttempts=D.quizScores&&D.quizScores[pid]?Object.values(D.quizScores[pid]):[];
-        const latestQuiz=quizAttempts.length>0?quizAttempts.sort((a,b)=>b.date.localeCompare(a.date))[0]:null;
-        const quizVal=latestQuiz?Math.round((latestQuiz.score/latestQuiz.maxScore)*10*10)/10:0;
-        const coachVal=v||0;
-        const avgVal=Math.round(((coachVal+quizVal)/2)*10)/10;
-        h+=`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
-          <span style="font-size:12px;font-weight:600;min-width:100px;">Court Sense</span>
-          <div style="flex:1;">
-            <div style="display:flex;gap:8px;margin-bottom:4px;">
-              <div style="flex:1;background:rgba(0,0,0,0.04);border-radius:6px;padding:6px 8px;text-align:center;border:1px solid rgba(0,0,0,0.07);">
-                <div style="font-size:10px;font-weight:600;color:var(--gray);letter-spacing:1px;text-transform:uppercase;">Coach</div>
-                <div style="font-family:'Bebas Neue';font-size:22px;line-height:1;color:${skillColor(coachVal)};">${coachVal}</div>
-              </div>
-              <div style="flex:1;background:rgba(0,0,0,0.04);border-radius:6px;padding:6px 8px;text-align:center;border:1px solid rgba(0,0,0,0.07);">
-                <div style="font-size:10px;font-weight:600;color:var(--gray);letter-spacing:1px;text-transform:uppercase;">Quiz</div>
-                <div style="font-family:'Bebas Neue';font-size:22px;line-height:1;color:${quizVal>0?skillColor(quizVal):'var(--gray)'};">${quizVal>0?quizVal:'—'}</div>
-              </div>
-              <div style="flex:1;background:var(--red);border-radius:6px;padding:6px 8px;text-align:center;">
-                <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.8);letter-spacing:1px;text-transform:uppercase;">Average</div>
-                <div style="font-family:'Bebas Neue';font-size:22px;line-height:1;color:#fff;">${avgVal}</div>
-              </div>
-            </div>
-            <div style="height:8px;border-radius:4px;background:var(--gray-lighter);overflow:hidden;">
-              <div style="height:100%;border-radius:4px;width:${avgVal*10}%;background:${skillColor(avgVal)};"></div>
-            </div>
-          </div></div>`;
-      } else {
-        h+=`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
-          <span style="font-size:12px;font-weight:600;min-width:100px;text-transform:capitalize;">${skillLabels[k]}</span>
-          <div style="flex:1;height:8px;border-radius:4px;background:var(--gray-lighter);overflow:hidden;">
-            <div style="height:100%;border-radius:4px;width:${v*10}%;background:${skillColor(v)};"></div></div>
-          <span style="font-family:'Bebas Neue';font-size:14px;min-width:24px;text-align:right;color:${skillColor(v)}">${v}</span></div>`;
-      }
-    });
+      h+=`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
+        <span style="font-size:12px;font-weight:600;min-width:100px;text-transform:capitalize;">${skillLabels[k]}</span>
+        <div style="flex:1;height:8px;border-radius:4px;background:var(--gray-lighter);overflow:hidden;">
+          <div style="height:100%;border-radius:4px;width:${v*10}%;background:${skillColor(v)};"></div></div>
+        <span style="font-family:'Bebas Neue';font-size:14px;min-width:24px;text-align:right;color:${skillColor(v)}">${v}</span></div>`;});
     const avg=skillNames.reduce((s,k)=>s+(sk[k]||0),0)/skillNames.length;
     h+=`<div style="text-align:right;font-size:12px;color:var(--gray);margin-top:6px;">Average: <strong>${avg.toFixed(1)}</strong>/10</div>`;
     document.getElementById('pp-skills').innerHTML=h;
@@ -2923,11 +2999,11 @@ function playerGoalCollapse(gid){
   btn.textContent=hidden?'\u25b2 Collapse':'\u25bc Show Plan';
 }
 function archivePlayerGoal(pid,gid){
-  fbSet('goals/'+pid+'/'+gid+'/archived',true);
+  fbSet('goals/'+pid+'/'+gid+'/archivedPlayer',true);
   toast('Goal archived \u2014 find it in Past Goals any time');
 }
 function unarchivePlayerGoal(pid,gid){
-  fbSet('goals/'+pid+'/'+gid+'/archived',false);
+  fbSet('goals/'+pid+'/'+gid+'/archivedPlayer',false);
 }
 function renderPlayerGoals(){
   if(!currentPlayerId)return;
@@ -2938,8 +3014,8 @@ function renderPlayerGoals(){
     document.getElementById('pp-goals-list').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;"><div style="font-size:28px;margin-bottom:8px;">\ud83c\udfaf</div>No goals set yet \u2014 choose one from the dropdown below!</div>';
     return;
   }
-  const active=entries.filter(([,g])=>!g.archived);
-  const archived=entries.filter(([,g])=>g.archived);
+  const active=entries.filter(([,g])=>!(g.archivedPlayer??g.archived));
+  const archived=entries.filter(([,g])=>!!(g.archivedPlayer??g.archived));
   let h='';
   if(!active.length){
     h+='<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;"><div style="font-size:24px;margin-bottom:6px;">\ud83c\udfaf</div>All goals responded to \u2014 add a new one below or check Past Goals!</div>';
@@ -3028,12 +3104,12 @@ function combineGoals(pid){
   toast('Goals combined \u2713');
 }
 function archiveCoachGoal(pid,gid){
-  fbSet('goals/'+pid+'/'+gid+'/archived',true);
-  toast('Goal archived');
+  fbSet('goals/'+pid+'/'+gid+'/archivedCoach',true);
+  toast('Goal archived from your view — player can still see it');
 }
 function unarchiveCoachGoal(pid,gid){
-  fbSet('goals/'+pid+'/'+gid+'/archived',false);
-  toast('Goal restored');
+  fbSet('goals/'+pid+'/'+gid+'/archivedCoach',false);
+  toast('Goal restored to coach view');
 }
 function renderCoachGoals(){
   const filter=document.getElementById('goals-player-filter');
@@ -3058,9 +3134,11 @@ function renderCoachGoals(){
     const p=gP(pid);if(!p)return;
     const goals=D.goals[pid]||{};
     const allEntries=Object.entries(goals);
-    const active=allEntries.filter(([,g])=>!g.archived);
-    const archiveCount=allEntries.filter(([,g])=>g.archived).length;
+    const active=allEntries.filter(([,g])=>!(g.archivedCoach??g.archived));
+    const archiveCount=allEntries.filter(([,g])=>!!(g.archivedCoach??g.archived)).length;
     const entries=_showArchivedGoals?allEntries:active;
+    if(!entries.length&&!archiveCount)return;
+    if(!entries.length&&archiveCount&&!_showArchivedGoals)return;
     if(!entries.length)return;
     anyGoals=true;
     if(!_selectedGoals[pid])_selectedGoals[pid]=new Set();
@@ -3075,7 +3153,7 @@ function renderCoachGoals(){
       const approved=fb&&fb.status==='approved';
       const hasDraft=fb&&fb.status==='draft';
       const hasFeedback=!!fb;
-      const isArchived=!!g.archived;
+      const isArchived=!!(g.archivedCoach??g.archived);
       const canCombine=!approved&&!isArchived;
 
       h+=`<div class="goal-card ${approved?'approved':hasDraft?'draft':''}" style="${isArchived?'opacity:0.55;':''}">
@@ -3213,7 +3291,7 @@ async function generateAIPairings(){
   const contextDesc={
     gameday:'This is for a GAME DAY match against an external opponent. Prioritize the strongest possible pairings on each court. Court 1 gets the best pair, Court 2 next best, etc.',
     scrimmage:'This is for a SCRIMMAGE (non-season match). Mix up the pairings a bit to develop players and try new combinations, while still being competitive.',
-    queens:`This is QUEENS PRACTICE — internal SW vs SW. Generate ${numRounds} round${numRounds>1?'s':''} of matchups. ALL 16 players must be assigned every round, 4 per court (2 vs 2). In each round every player appears exactly once. ${numRounds>1?'Across rounds, vary the pairings so players get new partners and opponents each round — avoid repeating the same pair twice if possible.':''} Make each matchup competitive and balanced.`
+    queens:`This is QUEENS PRACTICE — internal Leon vs Leon. Generate ${numRounds} round${numRounds>1?'s':''} of matchups. ALL 16 players must be assigned every round, 4 per court (2 vs 2). In each round every player appears exactly once. ${numRounds>1?'Across rounds, vary the pairings so players get new partners and opponents each round — avoid repeating the same pair twice if possible.':''} Make each matchup competitive and balanced.`
   };
 
   const isQueens=context==='queens';
@@ -3223,7 +3301,7 @@ async function generateAIPairings(){
   const teamData=buildTeamDataForPairings();
 
   try{
-    const response=await fetch('https://south-walton-ai.markmcnees-479.workers.dev',{
+    const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
@@ -3399,7 +3477,7 @@ function exportExcel(){
   D.gamedays.forEach(m=>{
     const pair=(m.pair||[]).map(id=>{const p=gP(id);return p?p.firstName+' '+p.lastName:id;}).join(' & ');
     (m.sets||[]).forEach((s,i)=>{
-      const row={Date:m.date,Court:m.court,Pair:pair,Opponent:m.opponent||'',Set:i+1,SW:s.scoreUs,Opp:s.scoreThem,
+      const row={Date:m.date,Court:m.court,Pair:pair,Opponent:m.opponent||'',Set:i+1,Leon:s.scoreUs,Opp:s.scoreThem,
         Result:(s.scoreUs||0)>(s.scoreThem||0)?'W':'L'};
       (m.pair||[]).forEach(pid=>{const p=gP(pid);const st=s.stats?.[pid]||{};
         const name=p?p.firstName:'';row[name+' K']=st.k||0;row[name+' B']=st.b||0;row[name+' A']=st.a||0;row[name+' D']=st.d||0;row[name+' E']=st.e||0;});
@@ -3419,7 +3497,7 @@ function exportExcel(){
   D.scrimmages.forEach(m=>{
     const pair=(m.pair||[]).map(id=>{const p=gP(id);return p?p.firstName+' '+p.lastName:id;}).join(' & ');
     (m.sets||[]).forEach((s,i)=>{
-      scData.push({Date:m.date,Court:m.court,Pair:pair,Opponent:m.opponent||'',Set:i+1,SW:s.scoreUs,Opp:s.scoreThem,Result:(s.scoreUs||0)>(s.scoreThem||0)?'W':'L'});
+      scData.push({Date:m.date,Court:m.court,Pair:pair,Opponent:m.opponent||'',Set:i+1,Leon:s.scoreUs,Opp:s.scoreThem,Result:(s.scoreUs||0)>(s.scoreThem||0)?'W':'L'});
     });
   });
   if(scData.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(scData),'Scrimmages');
@@ -3442,7 +3520,7 @@ function exportExcel(){
 
   // Sheet 9: Schedule
   const schedData=[...D.schedule].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(g=>({
-    Date:g.date,Opponent:g.opponent||'',Location:g.location||'','SW Score':g.scoreUs??'','Opp Score':g.scoreThem??'',
+    Date:g.date,Opponent:g.opponent||'',Location:g.location||'','Leon Score':g.scoreUs??'','Opp Score':g.scoreThem??'',
     Result:g.scoreUs!=null&&g.scoreThem!=null?(g.scoreUs>g.scoreThem?'W':'L'):'',Time:g.time||''}));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(schedData),'Schedule');
 
@@ -3503,7 +3581,7 @@ Rules:
 - If a name is unclear, use best match from roster
 - Respond with ONLY the JSON array, no other text`;
       }
-      const response=await fetch('https://south-walton-ai.markmcnees-479.workers.dev',{
+      const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
           model:'claude-sonnet-4-20250514',max_tokens:2500,
@@ -3583,7 +3661,7 @@ Rules:
         result.innerHTML=h;
         window._caData={starters,alternates,count:starters.length,altCount:alternates.length,schoolName,isOpponent:true};
       }else{
-        // SW's lineup
+        // Leon's lineup
         const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
         function caPlayerOpts(selId){return '<option value="">Select</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (CT${pl.court})</option>`).join('');}
         // Check if assignment already exists for this date
@@ -3815,24 +3893,24 @@ document.getElementById('scan-file').addEventListener('change',async function(e)
 
     let typeInstructions='';
     if(matchType==='queens'){
-      typeInstructions=`These are Queens matches (SW internal practice). Each match has:
+      typeInstructions=`These are Queens matches (Leon vs Leon practice). Each match has:
 - Court number (1-8; courts 6-8 are exhibition and may have split pairs noted)
-- Team A: two SW players
-- Team B: two SW players
+- Team A: two Leon players
+- Team B: two Leon players
 - Score for each team
 - For split/exhibition courts, separate pairs may play Set 1 vs Set 2
 Return JSON array: [{"court":1,"team1":["p01","p02"],"team2":["p03","p04"],"score1":21,"score2":15},{"court":6,"team1":["p05","p06"],"team2":["p07","p08"],"score1":21,"score2":18,"isSplit":true,"splitSet2":{"team1":["p09","p10"],"team2":["p11","p12"]}}]`;
     }else{
-      typeInstructions=`These are ${matchType==='gameday'?'Game Day':'Scrimmage'} matches (SW vs external opponent). Each match has:
+      typeInstructions=`These are ${matchType==='gameday'?'Game Day':'Scrimmage'} matches (Leon vs external opponent). Each match has:
 - Court number
-- SW pair: two SW players
+- Leon pair: two Leon players
 - Opponent name (team + court)
 - Set scores (could be 2-3 sets)
 Return JSON array: [{"court":1,"pair":["p01","p02"],"opponent":"Chiles CT1","sets":[{"scoreUs":21,"scoreThem":15},{"scoreUs":21,"scoreThem":18}]}]`;
     }
 
     try{
-      const response=await fetch('https://south-walton-ai.markmcnees-479.workers.dev',{
+      const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
@@ -4432,7 +4510,7 @@ function openPlayerScoutSchool(key){
 // ============================================================
 // EMAIL NOTIFICATION HELPERS
 // ============================================================
-const COACH_EMAILS=['kevin.weaver@walton.k12.fl.us'];
+const COACH_EMAILS=['ecitron0730@gmail.com','markmcnees@gmail.com'];
 
 function notifyCoaches(subject,body){
   try{
@@ -4445,7 +4523,7 @@ function notifyCoaches(subject,body){
 function notifyPlayer(pid,notifType,subject,body){
   try{
     if(!db)return;
-    db.ref('south_walton_passwords/'+pid+'/emailPrefs').once('value',function(snap){
+    db.ref('leon_queens_passwords/'+pid+'/emailPrefs').once('value',function(snap){
       const prefs=snap.val()||{};
       if(!prefs.email)return;
       const map={assign:'notifAssign',plan:'notifPlan',cnote:'notifCnote',score:'notifScore'};
@@ -4460,7 +4538,7 @@ function notifyPlayer(pid,notifType,subject,body){
 
 function loadEmailPrefs(pid){
   if(!db||!pid)return;
-  db.ref('south_walton_passwords/'+pid+'/emailPrefs').once('value',function(snap){
+  db.ref('leon_queens_passwords/'+pid+'/emailPrefs').once('value',function(snap){
     const prefs=snap.val()||{};
     const el=document.getElementById('pp-email-addr');if(el)el.value=prefs.email||'';
     const m={'pp-notif-assign':'notifAssign','pp-notif-plan':'notifPlan','pp-notif-cnote':'notifCnote','pp-notif-score':'notifScore'};
@@ -4480,7 +4558,7 @@ function saveEmailPrefs(){
     notifScore:!!(document.getElementById('pp-notif-score')?document.getElementById('pp-notif-score').checked:false),
     updatedAt:td()
   };
-  db.ref('south_walton_passwords/'+pid+'/emailPrefs').set(prefs);
+  db.ref('leon_queens_passwords/'+pid+'/emailPrefs').set(prefs);
   toast('Email preferences saved!');
   const savedEl=document.getElementById('pp-email-saved');
   if(savedEl){savedEl.style.opacity='1';setTimeout(function(){savedEl.style.opacity='0';},2500);}
@@ -4585,6 +4663,78 @@ function renderAssignments(){
   container.innerHTML=h;
 }
 
+// ── Past Court Lineups (from gamedays + scrimmages) ──────────────────────────
+function renderPastLineups(){
+  const container=document.getElementById('past-lineups-list');
+  if(!container)return;
+  const today=td();
+
+  // Collect all past matches from gamedays + scrimmages
+  const allMatches=[
+    ...D.gamedays.map(m=>({...m,_src:'gameday'})),
+    ...(D.scrimmages||[]).map(m=>({...m,_src:'scrimmage'}))
+  ].filter(m=>m.date&&m.date<today);
+
+  if(!allMatches.length){
+    container.innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No past lineups found.</div>';
+    return;
+  }
+
+  // Clean opponent name helper
+  function cleanOpp(raw){
+    if(!raw)return'Unknown';
+    return raw.replace(/\s*(CT\s*\d+|Court\s*\d+|Exhibition|\s+\d+).*$/i,'').trim()||'Unknown';
+  }
+
+  // Group by date + cleaned opponent
+  const groups={};
+  allMatches.forEach(m=>{
+    const opp=cleanOpp(m.opponent);
+    const key=m.date+'||'+opp+'||'+m._src;
+    if(!groups[key])groups[key]={date:m.date,opponent:opp,type:m._src,courts:[]};
+    // Only add if court not already present
+    if(!groups[key].courts.find(c=>c.court===m.court)){
+      groups[key].courts.push({court:m.court||1,pair:m.pair||[]});
+    }
+  });
+
+  // Sort newest first
+  const sorted=Object.values(groups).sort((a,b)=>b.date.localeCompare(a.date));
+
+  let h='';
+  sorted.forEach(g=>{
+    const typeLabel=g.type==='scrimmage'?'🤝 Scrimmage':'🏐 Dual';
+    const typeColor=g.type==='scrimmage'?'var(--purple)':'var(--blue)';
+    const courtsOrdered=[...g.courts].sort((a,b)=>(a.court||0)-(b.court||0));
+    const id='plid-'+g.date+g.opponent.replace(/\s+/g,'');
+    h+=`<div style="border-left:4px solid ${typeColor};background:var(--gray-lighter);border-radius:8px;padding:12px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="const b=document.getElementById('${id}');b.style.display=b.style.display==='none'?'block':'none';">
+        <div>
+          <span style="font-family:'Bebas Neue';font-size:16px;">${fD(g.date)}</span>
+          <span style="font-size:12px;margin-left:6px;color:${typeColor};font-weight:700;">${typeLabel}</span>
+          <span style="font-size:12px;margin-left:4px;color:var(--gray);">vs ${g.opponent}</span>
+        </div>
+        <span style="color:var(--gray);font-size:12px;">${courtsOrdered.length} court${courtsOrdered.length!==1?'s':''} ▾</span>
+      </div>
+      <div id="${id}" style="display:none;margin-top:8px;">
+        ${courtsOrdered.map(c=>{
+          const p1=gP((c.pair||[])[0]),p2=gP((c.pair||[])[1]);
+          const n1=p1?p1.firstName+' '+p1.lastName.charAt(0)+'.':'TBD';
+          const n2=p2?p2.firstName+' '+p2.lastName.charAt(0)+'.':'TBD';
+          return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;">
+            <span class="court-badge court-${c.court}" style="font-size:11px;min-width:40px;text-align:center;">CT ${c.court}</span>
+            <span style="font-weight:700;">${n1}</span>
+            <span style="color:var(--gray);">&amp;</span>
+            <span style="font-weight:700;">${n2}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  container.innerHTML=h||'<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No past lineups found.</div>';
+}
+
+
 // Render player assignment in their schedule section
 function renderPlayerAssignment(pid){
   const today=td();
@@ -4643,7 +4793,7 @@ function runMigration(){
   if(!db)return;
   db.ref(DB_ROOT+'/_migrated_gamedays').once('value',snap=>{
     if(snap.val())return;
-    db.ref('south_walton_gamedays').once('value',gdSnap=>{
+    db.ref('leon_queens_gamedays').once('value',gdSnap=>{
       const gdData=gdSnap.val();
       const updates={};
       // Migrate old gameday node data
@@ -4673,7 +4823,7 @@ function runMigration(){
           });
         });
       }
-      // Seed placeholder (Game Day)
+      // Seed 2/24/2026 — Leon vs Community Christian School (Game Day)
       const ccs='Community Christian';
       const gd24=[
         {court:1,pair:['p01','p10'],opp:ccs+' CT1',sets:[{scoreUs:21,scoreThem:19},{scoreUs:16,scoreThem:21},{scoreUs:21,scoreThem:7}]},
@@ -4735,12 +4885,59 @@ function loadLiveCourts(id){
   if(!a){toast('Assignment not found');return;}
   window._loadedAssignment=a;
   renderLiveScoring(a.date,a);
+  // Start shared lineup listener if opponent is on platform
+  if(a.opponent&&SCHOOL_KEY_MAP[a.opponent]){
+    listenSharedLineup(a.date, a.opponent);
+  }
+}
+
+function closeDual(){
+  const a=window._loadedAssignment;
+  if(!a){toast('No assignment loaded');return;}
+  const date=a.date||td();
+  const opponent=a.opponent||'Opponent';
+  const aType=a.type||'gameday';
+  if(aType==='scrimmage'||aType==='queens'){toast('Close Dual is for season games only');return;}
+
+  // Count regulation courts (skip court 6+) from saved gameday records
+  let leonCourts=0,oppCourts=0;
+  const courts=(a.courts||[]).filter(c=>(c.court||0)<=5);
+  courts.forEach(c=>{
+    const m=D.gamedays.find(gd=>gd.date===date&&arrEq(gd.pair||[],[c.p1,c.p2].filter(Boolean)));
+    if(!m||(m.sets||[]).length===0)return;
+    const sets=m.sets||[];
+    const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
+    const sl=sets.length-sw;
+    if(sw>sl)leonCourts++;else if(sl>sw)oppCourts++;
+  });
+
+  const dualWin=leonCourts>oppCourts;
+  const loc=a.location||'home';
+
+  // Save to duals/ node
+  const dualId='dual-'+date+'-'+opponent.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const existing=D.duals.find(d=>d.date===date&&(d.opponent||'').toLowerCase()===opponent.toLowerCase());
+  const id=existing?existing.id:dualId;
+  fbSet('duals/'+id,{id,date,opponent,location:loc,leonCourts,oppCourts,dualWin,createdAt:existing?existing.createdAt:td()});
+
+  // Also update schedule entry if it exists
+  const schedMatch=(D.schedule||[]).find(g=>g.date===date&&(g.opponent||'').toLowerCase()===opponent.toLowerCase());
+  if(schedMatch){
+    fbSet('schedule/'+schedMatch.id+'/scoreUs',leonCourts);
+    fbSet('schedule/'+schedMatch.id+'/scoreThem',oppCourts);
+  }
+
+  // Clear live_scoring node
+  if(db)db.ref(DB_ROOT+'/live_scoring').remove();
+
+  toast('Dual closed! Leon '+leonCourts+' – Opp '+oppCourts+' ('+(dualWin?'WIN':'LOSS')+')');
 }
 
 function applyLiveScoringToCounters(){
   const today=td();
   Object.entries(D.liveScoring||{}).forEach(([idx,live])=>{
     if(!live||live.date!==today)return;
+    // Coach counters
     const cUs=document.getElementById('ls-us-'+idx);
     const cThem=document.getElementById('ls-them-'+idx);
     if(cUs&&cThem){
@@ -4755,6 +4952,7 @@ function applyLiveScoringToCounters(){
         }
       }
     }
+    // Player counters
     const pUs=document.getElementById('pp-us-'+idx);
     const pThem=document.getElementById('pp-them-'+idx);
     if(pUs&&pThem){
@@ -4770,38 +4968,6 @@ function applyLiveScoringToCounters(){
       }
     }
   });
-}
-
-function closeDual(){
-  const a=window._loadedAssignment;
-  if(!a){toast('No assignment loaded');return;}
-  const date=a.date||td();
-  const opponent=a.opponent||'Opponent';
-  const aType=a.type||'gameday';
-  if(aType==='scrimmage'||aType==='queens'){toast('Close Dual is for season games only');return;}
-  let leonCourts=0,oppCourts=0;
-  const courts=(a.courts||[]).filter(c=>(c.court||0)<=5);
-  courts.forEach(c=>{
-    const m=D.gamedays.find(gd=>gd.date===date&&arrEq(gd.pair||[],[c.p1,c.p2].filter(Boolean)));
-    if(!m||(m.sets||[]).length===0)return;
-    const sets=m.sets||[];
-    const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
-    const sl=sets.length-sw;
-    if(sw>sl)leonCourts++;else if(sl>sw)oppCourts++;
-  });
-  const dualWin=leonCourts>oppCourts;
-  const loc=a.location||'home';
-  const dualId='dual-'+date+'-'+opponent.toLowerCase().replace(/[^a-z0-9]/g,'');
-  const existing=D.duals.find(d=>d.date===date&&(d.opponent||'').toLowerCase()===opponent.toLowerCase());
-  const id=existing?existing.id:dualId;
-  fbSet('duals/'+id,{id,date,opponent,location:loc,leonCourts,oppCourts,dualWin,createdAt:existing?existing.createdAt:td()});
-  const schedMatch=(D.schedule||[]).find(g=>g.date===date&&(g.opponent||'').toLowerCase()===opponent.toLowerCase());
-  if(schedMatch){
-    fbSet('schedule/'+schedMatch.id+'/scoreUs',leonCourts);
-    fbSet('schedule/'+schedMatch.id+'/scoreThem',oppCourts);
-  }
-  if(db)db.ref(DB_ROOT+'/live_scoring').remove();
-  toast('Dual closed! Leon '+leonCourts+' – Opp '+oppCourts+' ('+(dualWin?'WIN':'LOSS')+')');
 }
 function renderLiveScoring(dateOverride,assignOverride){
   const date=dateOverride||td();
@@ -4882,7 +5048,7 @@ function renderLiveScoring(dateOverride,assignOverride){
       <span id="ls-setnum-${idx}" style="display:none;">${sets.length+1}</span>
       <div class="live-score-row">
         <div class="live-score-col">
-          <div class="live-score-label">SW</div>
+          <div class="live-score-label">LEON</div>
           <div class="ls-counter">
             <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-us-${idx}',1)">+</button>
             <input type="number" class="ls-inp" id="ls-us-${idx}" value="0" min="0" inputmode="numeric" pattern="[0-9]*" onchange="lsAdj('ls-us-${idx}',0)" style="">
@@ -4909,6 +5075,7 @@ function renderLiveScoring(dateOverride,assignOverride){
     h+='</div>';
   });
 
+  // Add Close Dual button at bottom
   h+=`<div style="margin-top:16px;padding:0 4px;">
     <button class="btn btn-red" style="width:100%;padding:12px;font-size:15px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;" onclick="closeDual()">&#10003; Close Dual &amp; Save Result</button>
   </div>`;
@@ -4952,11 +5119,12 @@ function lsAdj(id,delta){
   if(isInput){el.value=next;}else{el.textContent=next;}
   const inp=document.getElementById(id+'-inp');
   if(inp)inp.value=next;
+  // Side-switch check
   {const mx=id.match(/^(ls|pp)-(us|them)-(\d+)$/);
   if(mx){const pfx=mx[1],idx2=mx[3],partner=pfx+'-'+(mx[2]==='us'?'them':'us')+'-'+idx2;
   checkSideSwitch(id,partner,pfx+'-setnum-'+idx2);}}
-  if(currentRole==='coach'&&db&&window._loadedAssignment){
-    const m=id.match(/(?:ls-us-|ls-them-|qls-a-|qls-b-)(\d+)/);
+  if(db&&(window._loadedAssignment||currentRole==='player')){
+    const m=id.match(/(?:ls-us-|ls-them-|qls-a-|qls-b-|pp-us-|pp-them-)(\d+)/);
     if(m){const idx=parseInt(m[1]);if(window._lsLiveDebounce[idx])clearTimeout(window._lsLiveDebounce[idx]);window._lsLiveDebounce[idx]=setTimeout(()=>pushLiveScore(idx),600);}
   }
 }
@@ -4988,6 +5156,7 @@ function lsInpChange(id){
   const val=Math.max(0,parseInt(inp.value)||0);
   inp.value=val;
   el.textContent=val;
+  // Side-switch check
   {const mx=id.match(/^(ls|pp)-(us|them)-(\d+)$/);
   if(mx){const pfx=mx[1],idx2=mx[3],partner=pfx+'-'+(mx[2]==='us'?'them':'us')+'-'+idx2;
   checkSideSwitch(id,partner,pfx+'-setnum-'+idx2);}}
@@ -5051,7 +5220,7 @@ function delLiveSet(matchId,setIdx,fbNode){
 
 // ============================================================
 // ============================================================
-// QUEENS LIVE SCORING (SW vs SW from assignment)
+// QUEENS LIVE SCORING (Leon vs Leon from assignment)
 // ============================================================
 function refreshSingleCourtCard(idx, date, fbNode){
   // Re-render only the one court card that just saved — never touches other courts
@@ -5107,7 +5276,7 @@ function refreshSingleCourtCard(idx, date, fbNode){
     <span id="ls-setnum-${idx}" style="display:none;">${sets.length+1}</span>
     <div class="live-score-row">
       <div class="live-score-col">
-        <div class="live-score-label">SW</div>
+        <div class="live-score-label">LEON</div>
         <div class="ls-counter">
           <button class="ls-btn ls-btn-plus" onclick="lsAdj('ls-us-${idx}',1)">+</button>
           <input type="number" class="ls-inp" id="ls-us-${idx}" value="0" min="0" inputmode="numeric" pattern="[0-9]*" onchange="lsAdj('ls-us-${idx}',0)">
@@ -5437,11 +5606,11 @@ function switchPPTab(tab,btn){
   document.querySelectorAll('.pp-tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.pp-panel').forEach(p=>p.classList.remove('active'));
   if(tab==='scouts'){if(btn)btn.classList.add('active');document.getElementById('pp-panel-scouts').classList.add('active');renderPlayerScouts();return;}
+  if(tab==='learn'){if(btn)btn.classList.add('active');document.getElementById('pp-panel-learn').classList.add('active');renderPPQuizHistory();return;}
   if(btn)btn.classList.add('active');
   document.getElementById('pp-panel-'+tab).classList.add('active');
   if(tab==='live')renderPlayerLiveScoring();
   if(tab==='matches')renderPlayerMatches();
-  if(tab==='learn')renderPPQuizHistory();
 }
 
 // ============================================================
@@ -5580,7 +5749,7 @@ function pgdNewSetCardHTML(setNum,pair,prefix,isSpectator){
     <div style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:10px;">Set ${setNum}</div>
     <div class="pgd-score-grid">
       <div class="pgd-score-block">
-        <div class="pgd-score-label">SW</div>
+        <div class="pgd-score-label">LEON</div>
         <div class="pgd-score-ctrl">
           <button class="pgd-score-btn" onclick="pgdScoreAdj('${prefix}','us',-1)">−</button>
           <div class="pgd-score-num" id="${prefix}-us">0</div>
@@ -5864,7 +6033,7 @@ function pgdSaveNotes(){
 // ============================================================
 function getDualRecord(){
   let w=0,l=0;
-  // Dual W-L: from schedule (dual-level wins, exclude scrimmages)
+  // Dual W-L: from schedule (dual-level wins)
   (D.schedule||[]).forEach(g=>{if(g.type==='scrimmage')return;if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){parseInt(g.scoreUs)>parseInt(g.scoreThem)?w++:l++;}});
   // Also count from D.duals that have no matching schedule entry with scores
   (D.duals||[]).forEach(d=>{
@@ -5873,10 +6042,10 @@ function getDualRecord(){
     if(!hasSchedEntry){d.dualWin?w++:l++;}
   });
 
-  // Match W-L (court-level): sum scoreUs/scoreThem from schedule, exclude scrimmages
+  // Match W-L (court-level): sum scoreUs/scoreThem from schedule
+  // Schedule stores court scores per dual (e.g. 4-1 means Leon won 4 courts)
   let cw=0,cl=0;
   (D.schedule||[]).forEach(g=>{
-    if(g.type==='scrimmage')return;
     if(g.scoreUs!=null&&g.scoreThem!=null&&g.scoreUs!==''&&g.scoreThem!==''){
       cw+=parseInt(g.scoreUs)||0;
       cl+=parseInt(g.scoreThem)||0;
@@ -5975,6 +6144,7 @@ function renderDuals(){
   // Merge structured duals + gameday-derived duals, deduplicate by date+opponent
   const gdDuals=buildDualsFromGamedays();
   const structuredDuals=D.duals||[];
+  // For structured duals missing courts data, fill in from gameday-derived version
   const enrichedStructured=structuredDuals.map(d=>{
     if((d.courts||[]).length>0)return d;
     const gdMatch=gdDuals.find(g=>(g.date||'')===(d.date||'')&&(g.opponent||'').toLowerCase()===(d.opponent||'').toLowerCase());
@@ -6018,8 +6188,9 @@ function renderDuals(){
         const mid=c.id||'';
         const setsHtml=sets.map((s,si)=>{
           const win=(s.scoreUs||0)>(s.scoreThem||0);
+          const enteredByName=s.enteredBy?(gP(s.enteredBy)||{}).firstName||null:null;
           return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">
-            <span style="font-family:'Bebas Neue';font-size:13px;color:${win?'var(--green)':'var(--loss-red)'};">S${si+1}: ${s.scoreUs}-${s.scoreThem}</span>
+            <span style="font-family:'Bebas Neue';font-size:13px;color:${win?'var(--green)':'var(--loss-red)'};">S${si+1}: ${s.scoreUs}-${s.scoreThem}</span>${enteredByName?`<span style="font-size:9px;color:var(--gray);font-style:italic;">✎${enteredByName}</span>`:''}
             ${mid?`<button onclick="dhEditSet('${mid}',${si})" style="font-size:10px;padding:1px 5px;border:1px solid var(--gray-lighter);border-radius:3px;background:var(--white);color:var(--gray);cursor:pointer;">✎</button>
             <button onclick="dhDeleteSet('${mid}',${si})" style="font-size:10px;padding:1px 5px;border:1px solid var(--gray-lighter);border-radius:3px;background:var(--white);color:var(--gray);cursor:pointer;">✕</button>
             <span id="dh-edit-${mid}-${si}" style="display:none;align-items:center;gap:3px;">
@@ -6053,12 +6224,45 @@ function renderDuals(){
         </div>`;
       });
     }
+    // Copy lineup button
+    const allCourts=(d.courts||[]).sort((a,b)=>(a.court||0)-(b.court||0));
+    if(allCourts.length){
+      const dIdx=duals.indexOf(d);
+      h+=`<button class="btn btn-small" style="width:100%;margin-top:10px;background:var(--charcoal);color:#fff;border:none;" onclick="copyDualLineup(${dIdx})">📋 Copy Lineup</button>`;
+    }
     h+='</div>';
   });
   container.innerHTML=h;
+  // stash merged duals so copyDualLineup can access them
+  window._renderedDuals=duals;
 }
 
 let _delDualArmed={};
+function copyDualLineup(idx){
+  const duals=window._renderedDuals||[];
+  const d=duals[idx];
+  if(!d){toast('Lineup not found');return;}
+  const locLabel=d.location==='away'?'@ ':d.location==='neutral'?'(N) ':'vs ';
+  const header=fD(d.date)+' '+locLabel+(d.opponent||'TBD');
+  const lines=[header,''];
+  const courts=(d.courts||[]).slice().sort((a,b)=>(a.court||0)-(b.court||0));
+  const scored=courts.filter(c=>!c.isExhibition);
+  const exhib=courts.filter(c=>c.isExhibition);
+  scored.forEach(c=>{
+    const ids=c.pair||[];
+    const fmt=id=>{const p=gP(id);if(!p)return'TBD';return p.firstName+' '+p.lastName+(p.jersey!=null?' (#'+p.jersey+')':'');};
+    lines.push('Court '+c.court+': '+fmt(ids[0])+' / '+fmt(ids[1]));
+  });
+  if(exhib.length){
+    lines.push('');
+    exhib.forEach(c=>{
+      const ids=c.pair||[];
+      const fmt=id=>{const p=gP(id);if(!p)return'TBD';return p.firstName+' '+p.lastName+(p.jersey!=null?' (#'+p.jersey+')':'');};
+      lines.push('Court '+c.court+' (Exhibition): '+fmt(ids[0])+' / '+fmt(ids[1]));
+    });
+  }
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('Lineup copied ✓')).catch(()=>toast('Copy failed — try again'));
+}
 function openDualEditModal(id,opp,date,location){
   if(!id)return;
   document.getElementById('edit-modal-body').innerHTML=`
@@ -6128,13 +6332,13 @@ function initDualScanner(){
       const date=document.getElementById('dual-scan-date').value||td();
       const playerList=D.players.map(p=>p.firstName+' '+p.lastName+' ('+p.id+')').join(', ');
       try{
-        const response=await fetch('https://south-walton-ai.markmcnees-479.workers.dev',{
+        const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
             model:'claude-sonnet-4-20250514',max_tokens:2000,
             messages:[{role:'user',content:[
               {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
-              {type:'text',text:`You are reading a handwritten high school beach volleyball DUAL MATCH scoresheet for South Walton Seahawks.
+              {type:'text',text:`You are reading a handwritten high school beach volleyball DUAL MATCH scoresheet for Leon Queens.
 
 A dual has courts 1-5 counting toward the result. Courts 6+ are exhibition.
 There may be ONE or MULTIPLE duals on this sheet (each has a different opponent header e.g. "VS Destin W5-0").
@@ -6146,13 +6350,13 @@ COMMON ABBREVIATIONS:
 Reag/RP = Reagan Giles (p16) + Riley Perezluha (p08)
 Jord/Kend = Jordyn Russell (p13) + Kendall Cruse (p06)
 Dez/Am = Destyni Zuema (p02) + Aubri Moore (p07)
-Use first name initials or partial last names to match players
+Ri/Bent or R/Bent = Riley Knipple (p01) + Bentley Barnard (p10)
 Liz/Madi = Lizzie Roader (p09) + Madalynn Edenfield (p12)
 Salem/Jaz = Salem Ehrhardt (p15) + Jazmin Burdick (p11)
 Eden/Madalynn = Eden Codd (p05) + Madalynn Edenfield (p12)
 
-SCORE FORMAT: W21-18 W21-11 means SW won set1 21-18, won set2 21-11
-L19-21 means SW lost a set 19-21
+SCORE FORMAT: W21-18 W21-11 means Leon won set1 21-18, won set2 21-11
+L19-21 means Leon lost a set 19-21
 
 Return ONLY a JSON array, one element per dual:
 [{"opponent":"Destin","leonCourts":5,"oppCourts":0,"courts":[{"court":2,"pair":["p16","p08"],"sets":[{"scoreUs":21,"scoreThem":18},{"scoreUs":21,"scoreThem":11}],"isExhibition":false}]}]
@@ -6196,7 +6400,7 @@ function showDualReviewUI(duals,date,container){
           <select class="form-select" id="dr-${di}-loc" style="padding:8px;font-size:13px;"><option value="home">Home</option><option value="away">Away</option><option value="neutral">Neutral</option></select></div>
       </div>
       <div class="form-row" style="margin-bottom:10px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">SW Courts Won</label>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Leon Courts Won</label>
           <input type="number" class="form-input" id="dr-${di}-leon" value="${d.leonCourts||0}" min="0" max="7" style="padding:8px;font-size:13px;"></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opp Courts Won</label>
           <input type="number" class="form-input" id="dr-${di}-oppc" value="${d.oppCourts||0}" min="0" max="7" style="padding:8px;font-size:13px;"></div>
@@ -6387,7 +6591,7 @@ function renderPlayerLiveScoring(){
       <span id="pp-setnum-${idx}" style="display:none;">${sets.length+1}</span>
       <div class="live-score-row">
         <div class="live-score-col">
-          <div class="live-score-label">SW</div>
+          <div class="live-score-label">LEON</div>
           <div class="ls-counter">
             <button class="ls-btn ls-btn-plus" onclick="lsAdj('pp-us-${idx}',1)">+</button>
             <div class="ls-num" id="pp-us-${idx}">0</div>
@@ -6453,7 +6657,7 @@ function ppLoadCourts(assignmentId){
       <div style="font-size:11px;font-weight:700;color:var(--gray);margin-bottom:10px;">SET ${sets.length+1}</div>
       <span id="pp-setnum-${idx}" style="display:none;">${sets.length+1}</span>
       <div class="live-score-row">
-        <div class="live-score-col"><div class="live-score-label">SW</div>
+        <div class="live-score-col"><div class="live-score-label">LEON</div>
           <div class="ls-counter">
             <button class="ls-btn ls-btn-plus" onclick="lsAdj('pp-us-${idx}',1)">+</button>
             <div class="ls-num" id="pp-us-${idx}">0</div>
@@ -6836,9 +7040,7 @@ function nameToId(fullName){
 // ============================================================
 // SEED MISSING DUAL DATA (CCS, FSU HS, Mosley)
 // ============================================================
-function seedMissingDuals(){return;//SW
-return;//SW
-
+function seedMissingDuals(){return;//disabled
   if(!db){toast('Not connected');return;}
   const MISSING=[
     // Community Christian 2/24 — W 4-1
@@ -6904,14 +7106,14 @@ var _lfRefreshTimer=null;
 function showLeonFans(){
   var loginOl=document.getElementById('login-overlay');
   if(loginOl)loginOl.classList.add('hidden');
-  var ol=document.getElementById('sw-fans-overlay');
-  if(ol){ol.style.display='block';renderSWFans();}
+  var ol=document.getElementById('leon-fans-overlay');
+  if(ol){ol.style.display='block';renderLeonFans();}
   // Auto-refresh every 30 seconds while page is open
   if(_lfRefreshTimer)clearInterval(_lfRefreshTimer);
   _lfRefreshTimer=setInterval(function(){
-    var overlay=document.getElementById('sw-fans-overlay');
+    var overlay=document.getElementById('leon-fans-overlay');
     if(!overlay||overlay.style.display==='none'){clearInterval(_lfRefreshTimer);_lfRefreshTimer=null;return;}
-    renderSWFans();
+    renderLeonFans();
     // Flash the refresh indicator
     var dot=document.getElementById('lf-refresh-dot');
     if(dot){dot.style.opacity='1';setTimeout(function(){dot.style.opacity='0.4';},600);}
@@ -6919,7 +7121,7 @@ function showLeonFans(){
 }
 
 function hideLeonFans(){
-  var ol=document.getElementById('sw-fans-overlay');
+  var ol=document.getElementById('leon-fans-overlay');
   if(ol)ol.style.display='none';
   // Stop auto-refresh
   if(_lfRefreshTimer){clearInterval(_lfRefreshTimer);_lfRefreshTimer=null;}
@@ -6930,12 +7132,12 @@ function hideLeonFans(){
 }
 
 function lfManualRefresh(){
-  renderSWFans();
+  renderLeonFans();
   var dot=document.getElementById('lf-refresh-dot');
   if(dot){dot.style.opacity='1';setTimeout(function(){dot.style.opacity='0.4';},600);}
 }
 
-function renderSWFans(){
+function renderLeonFans(){
   var BN='font-family:"Bebas Neue",sans-serif';
   var WIN_C='#0a9e5c',LOSS_C='#e63946',RED='#e4002b',DARK_RED='#8b0000',GOLD='#d4a843';
   var today=td();
@@ -7177,7 +7379,7 @@ function submitLeonFanEmail(){
   try{
     if(db){
       var id='fe'+Date.now().toString(36);
-      db.ref('south_walton_matches/fan_emails/'+id).set({
+      db.ref('leon_queens_matches/fan_emails/'+id).set({
         email:email,
         notifResults:notifResults?notifResults.checked:true,
         notifSchedule:notifSchedule?notifSchedule.checked:true,
@@ -7214,18 +7416,18 @@ initDualScanner();
       const date=document.getElementById('sc-scan-date').value||td();
       const playerList=D.players.map(p=>p.firstName+' '+p.lastName+' ('+p.id+')').join(', ');
       try{
-        const response=await fetch('https://south-walton-ai.markmcnees-479.workers.dev',{
+        const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
             model:'claude-sonnet-4-20250514',max_tokens:2500,
             messages:[{role:'user',content:[
               {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
-              {type:'text',text:`You are reading a handwritten high school beach volleyball SCRIMMAGE scoresheet for South Walton Seahawks.
+              {type:'text',text:`You are reading a handwritten high school beach volleyball SCRIMMAGE scoresheet for Leon Queens.
 PLAYER ROSTER: ${playerList}
-Extract all court matchups and set scores. Each court has SW pair vs opponent pair.
+Extract all court matchups and set scores. Each court has Leon pair vs opponent pair.
 Return ONLY valid JSON: {"opponent":"team name or empty","courts":[{"court":1,"pair":["p01","p02"],"opponentPair":"Name & Name","sets":[{"scoreUs":21,"scoreThem":15}]}]}
 - Match player names to IDs from roster. pair = array of 2 player IDs.
-- scoreUs = SW score, scoreThem = opponent score.
+- scoreUs = Leon score, scoreThem = opponent score.
 - Respond with ONLY the JSON, no other text.`}
             ]}]
           })
@@ -7308,17 +7510,17 @@ function scScanSave(count,date){
       const date=document.getElementById('qs-scan-date').value||td();
       const playerList=D.players.map(p=>p.firstName+' '+p.lastName+' ('+p.id+')').join(', ');
       try{
-        const response=await fetch('https://south-walton-ai.markmcnees-479.workers.dev',{
+        const response=await fetch('https://leon-beach-ai.markmcnees-479.workers.dev',{
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
             model:'claude-sonnet-4-20250514',max_tokens:2500,
             messages:[{role:'user',content:[
               {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
-              {type:'text',text:`You are reading a handwritten QUEENS (SW internal) beach volleyball scoresheet.
+              {type:'text',text:`You are reading a handwritten QUEENS (Leon vs Leon internal) beach volleyball scoresheet.
 PLAYER ROSTER: ${playerList}
-Each court has Team A (2 players) vs Team B (2 players) — all SW players.
+Each court has Team A (2 players) vs Team B (2 players) — all Leon players.
 Return ONLY valid JSON: {"courts":[{"court":1,"team1":["p01","p02"],"team2":["p03","p04"],"score1":21,"score2":15}]}
-- Match names to IDs from roster. All players are SW Seahawks players.
+- Match names to IDs from roster. All players are Leon players.
 - score1 = Team A score (first pair), score2 = Team B score.
 - If multiple sets, include the final set score.
 - Respond with ONLY the JSON, no other text.`}
@@ -7397,8 +7599,21 @@ document.getElementById('assign-date').value=td();
 document.getElementById('cnote-date').value=td();
 initFB();
 setTimeout(runMigration,2000);
-// SW: Leon schedule seed removed
-
+setTimeout(function(){
+  if(!db)return;
+  db.ref('leon_queens_matches/schedule').once('value',function(snap){
+    var ex=snap.val()||{};var u={};
+    [{id:'sch01',date:'2026-02-24',opponent:'Community Christian',location:'home',scoreUs:4,scoreThem:1},{id:'sch02',date:'2026-02-26',opponent:'Wakulla',location:'home',scoreUs:4,scoreThem:1},{id:'sch03',date:'2026-02-26',opponent:'Sneads',location:'home',scoreUs:5,scoreThem:0},{id:'sch04',date:'2026-03-03',opponent:'Florida State University HS',location:'home',scoreUs:2,scoreThem:3},{id:'sch05',date:'2026-03-05',opponent:'Mosley',location:'home',scoreUs:3,scoreThem:2},{id:'sch06',date:'2026-03-09',opponent:'Chiles',location:'home',scoreUs:0,scoreThem:5},{id:'sch07',date:'2026-03-11',opponent:'Lincoln',location:'away',scoreUs:5,scoreThem:0},{id:'sch08',date:'2026-03-12',opponent:'Destin',location:'away',scoreUs:5,scoreThem:0},{id:'sch09',date:'2026-03-12',opponent:'South Walton',location:'away',scoreUs:1,scoreThem:4}].forEach(function(g){if(!ex[g.id]){u['leon_queens_matches/schedule/'+g.id]=g;}});
+    db.ref('leon_queens_matches/standings').once('value',function(snap2){
+      var exSt=snap2.val()||{};
+      if(Object.keys(exSt).length<5){var st={'Chiles':{w:7,l:0},'Lincoln':{w:4,l:3},'Florida State University HS':{w:4,l:2},'Wakulla':{w:3,l:3},'Mosley':{w:3,l:3},'Community Christian':{w:1,l:5},'Sneads':{w:1,l:4},'South Walton':{w:4,l:2},'Gulf Breeze':{w:4,l:1},'Destin':{w:2,l:3},'Maclay':{w:2,l:2},'Godby':{w:0,l:3}};Object.keys(st).forEach(function(t){u['leon_queens_matches/standings/'+t]=st[t];});}
+      db.ref('leon_queens_matches/_jerseys_seeded').once('value',function(snap3){
+        if(!snap3.val()){var j={p01:9,p02:5,p03:10,p04:2,p05:7,p06:8,p07:13,p08:3,p09:17,p10:6,p11:4,p12:11,p13:15,p14:18,p15:12,p16:1};Object.keys(j).forEach(function(pid){u['leon_queens_matches/players/'+pid+'/jersey']=j[pid];});u['leon_queens_matches/_jerseys_seeded']=true;}
+        if(Object.keys(u).length){db.ref().update(u,function(err){console.log(err?'Seed err':('Seed OK '+Object.keys(u).length));});}else{console.log('Seed: nothing missing');}
+      });
+    });
+  });
+},2500);
 function togglePPQuiz(){
   const pid=currentPlayerId;if(!pid)return;
   const wrap=document.getElementById('pp-quiz-frame-wrap');
@@ -7429,7 +7644,7 @@ window.addEventListener('message',function(e){
   if(!e.data||e.data.type!=='courtsenseScore')return;
   const {playerId,score,maxScore,date}=e.data;if(!playerId)return;
   const key=date.replace(/-/g,'')+'_'+Date.now();
-  db.ref('south_walton/quizScores/'+playerId+'/'+key).set({score,maxScore,date});
+  db.ref('leon_queens/quizScores/'+playerId+'/'+key).set({score,maxScore,date});
   const wrap=document.getElementById('pp-quiz-frame-wrap');
   const iframe=document.getElementById('pp-quiz-iframe');
   const btn=document.getElementById('pp-start-quiz-btn');
@@ -7440,11 +7655,11 @@ window.addEventListener('message',function(e){
 </script>
 
 <!-- LEON QUEENS FAN PAGE OVERLAY -->
-<div id="sw-fans-overlay" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#002e19 0%,#005B34 50%,#004526 100%);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+<div id="leon-fans-overlay" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#8b0000 0%,#e4002b 50%,#c0001f 100%);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
   <div style="max-width:480px;margin:0 auto;padding:16px 14px 40px;">
     <div style="text-align:center;padding:24px 0 12px;">
-      <div style="margin-bottom:8px;"><img src="seahawks-logo.png" style="height:80px;width:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));" alt="Seahawks"></div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:#fff;">South Walton Seahawks</div>
+      <div style="margin-bottom:8px;"><img src="leon-logo.png" style="height:80px;width:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));"></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:#fff;">Leon Beach</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.65);margin-top:2px;">Beach Volleyball &middot; 2026 Season</div>
       <div id="lf-record" style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#d4a843;margin-top:8px;"></div>
       <div style="margin-top:12px;display:flex;justify-content:center;gap:8px;">
@@ -7457,12 +7672,12 @@ window.addEventListener('message',function(e){
       </div>
     </div>
     <div id="lf-banner" style="border-radius:12px;padding:14px;margin-bottom:14px;"></div>
-    <div id="lf-today" style="display:none;background:#ffffff;border:2px solid #005B34;border-radius:14px;padding:14px;margin-bottom:14px;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#005B34;margin-bottom:10px;">&#x26A1; IN PROGRESS</div>
+    <div id="lf-today" style="display:none;background:#ffffff;border:2px solid #e4002b;border-radius:14px;padding:14px;margin-bottom:14px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#e4002b;margin-bottom:10px;">&#x26A1; IN PROGRESS</div>
       <div id="lf-today-courts"></div>
     </div>
     <div id="lf-upcoming-section" style="display:none;background:#ffffff;border:1px solid #f7a8b8;border-radius:14px;margin-bottom:14px;overflow:hidden;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#002e19;padding:12px 14px 8px;">Upcoming Games</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#8b0000;padding:12px 14px 8px;">Upcoming Games</div>
       <div id="lf-upcoming"></div>
     </div>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin-bottom:8px;">Season Results</div>
@@ -7488,7 +7703,7 @@ window.addEventListener('message',function(e){
             <input type="checkbox" id="lf-notif-schedule" checked style="width:14px;height:14px;accent-color:#d4a843;"> Schedule Updates
           </label>
         </div>
-        <button onclick="submitLeonFanEmail()" style="width:100%;padding:10px;background:#d4a843;color:#002e19;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;border:none;border-radius:8px;cursor:pointer;font-weight:700;">Subscribe</button>
+        <button onclick="submitLeonFanEmail()" style="width:100%;padding:10px;background:#d4a843;color:#8b0000;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;border:none;border-radius:8px;cursor:pointer;font-weight:700;">Subscribe</button>
         <div id="lf-email-error" style="color:#f87171;font-size:12px;margin-top:6px;text-align:center;"></div>
       </div>
     </div>
