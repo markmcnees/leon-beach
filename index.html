@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260327124944">
+  <meta name="build-version" content="20260325234320">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4943,7 +4943,26 @@ function closeDual(){
   // Clear live_scoring node
   if(db)db.ref(DB_ROOT+'/live_scoring').remove();
 
-  toast('Dual closed! Leon '+leonCourts+' – Opp '+oppCourts+' ('+(dualWin?'WIN':'LOSS')+')');
+  const resultMsg='Leon '+leonCourts+' – Opp '+oppCourts+' ('+(dualWin?'WIN':'LOSS')+')';
+  toast('Dual closed! '+resultMsg);
+
+  // Inline button feedback — visible right where the user is looking
+  const btn=document.getElementById('close-dual-btn');
+  const resultDiv=document.getElementById('close-dual-result');
+  if(btn){btn.textContent='\u2713 Saved!';btn.style.background='var(--green)';btn.disabled=true;}
+  if(resultDiv){
+    resultDiv.style.display='block';
+    resultDiv.style.background=dualWin?'var(--green-bg)':'#fee2e2';
+    resultDiv.style.color=dualWin?'var(--green)':'var(--loss-red)';
+    resultDiv.style.border='2px solid '+(dualWin?'var(--green)':'var(--loss-red)');
+    resultDiv.textContent='\u2713 '+resultMsg+' — Saved! Taking you to Duals...';
+  }
+
+  // Navigate to Duals tab after short delay
+  setTimeout(()=>{
+    const dualsTab=document.querySelector('.tab[data-tab="duals"]');
+    if(dualsTab)dualsTab.click();
+  },1200);
 }
 
 function applyLiveScoringToCounters(){
@@ -5090,7 +5109,8 @@ function renderLiveScoring(dateOverride,assignOverride){
 
   // Add Close Dual button at bottom
   h+=`<div style="margin-top:16px;padding:0 4px;">
-    <button class="btn btn-red" style="width:100%;padding:12px;font-size:15px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;" onclick="closeDual()">&#10003; Close Dual &amp; Save Result</button>
+    <button class="btn btn-red" id="close-dual-btn" style="width:100%;padding:12px;font-size:15px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;" onclick="closeDual()">&#10003; Close Dual &amp; Save Result</button>
+  <div id="close-dual-result" style="display:none;margin-top:10px;padding:12px;border-radius:8px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;"></div>
   </div>`;
   container.innerHTML=h;
   applyLiveScoringToCounters();
