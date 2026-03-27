@@ -4867,6 +4867,7 @@ function runMigration(){
 // LIVE SCORE ENTRY (Coach)
 // ============================================================
 function renderLiveAssignmentList(){
+  if(_dualCloseInProgress)return;
   const el=document.getElementById('live-assignment-list');if(!el)return;
   const today=td();
   const sorted=Object.values(D.assignments||{}).filter(a=>a.courts&&a.courts.length>0).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
@@ -4904,15 +4905,46 @@ function loadLiveCourts(id){
   }
 }
 
+let _dualCloseInProgress=false;
+
+function closeDualInlineMsg(msg,isError){
+  const btn=document.getElementById('close-dual-btn');
+  const resultDiv=document.getElementById('close-dual-result');
+  if(resultDiv){
+    resultDiv.style.display='block';
+    resultDiv.style.background=isError?'#fee2e2':'var(--green-bg)';
+    resultDiv.style.color=isError?'var(--loss-red)':'var(--green)';
+    resultDiv.style.border='2px solid '+(isError?'var(--loss-red)':'var(--green)');
+    resultDiv.textContent=msg;
+  }
+  toast(msg);
+  if(btn&&isError){btn.disabled=false;btn.textContent='\u2713 Close Dual & Save Result';btn.style.background='';}
+}
+
 function closeDual(){
-  const a=window._loadedAssignment;
-  if(!a){toast('No assignment loaded');return;}
+  const a=window._loadedAssignment||Object.values(D.assignments||{}).find(x=>x.date===td()&&x.type==='gameday');
+  const btn=document.getElementById('close-dual-btn');
+  const resultDiv=document.getElementById('close-dual-result');
+
+  if(!a){
+    closeDualInlineMsg('\u26a0 No assignment loaded — tap Load on an assignment first',true);
+    return;
+  }
   const date=a.date||td();
   const opponent=a.opponent||'Opponent';
   const aType=a.type||'gameday';
-  if(aType==='scrimmage'||aType==='queens'){toast('Close Dual is for season games only');return;}
+  if(aType==='scrimmage'||aType==='queens'){
+    closeDualInlineMsg('\u26a0 Close Dual is for official duals only',true);
+    return;
+  }
+  if(!db){
+    closeDualInlineMsg('\u26a0 Not connected — check internet and try again',true);
+    return;
+  }
 
-  // Count regulation courts (skip court 6+) from saved gameday records
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  if(resultDiv){resultDiv.style.display='none';}
+
   let leonCourts=0,oppCourts=0;
   const courts=(a.courts||[]).filter(c=>(c.court||0)<=5);
   courts.forEach(c=>{
@@ -4926,43 +4958,39 @@ function closeDual(){
 
   const dualWin=leonCourts>oppCourts;
   const loc=a.location||'home';
-
-  // Save to duals/ node
   const dualId='dual-'+date+'-'+opponent.toLowerCase().replace(/[^a-z0-9]/g,'');
   const existing=D.duals.find(d=>d.date===date&&(d.opponent||'').toLowerCase()===opponent.toLowerCase());
   const id=existing?existing.id:dualId;
-  fbSet('duals/'+id,{id,date,opponent,location:loc,leonCourts,oppCourts,dualWin,createdAt:existing?existing.createdAt:td()});
 
-  // Also update schedule entry if it exists
-  const schedMatch=(D.schedule||[]).find(g=>g.date===date&&(g.opponent||'').toLowerCase()===opponent.toLowerCase());
-  if(schedMatch){
-    fbSet('schedule/'+schedMatch.id+'/scoreUs',leonCourts);
-    fbSet('schedule/'+schedMatch.id+'/scoreThem',oppCourts);
-  }
-
-  // Clear live_scoring node
-  if(db)db.ref(DB_ROOT+'/live_scoring').remove();
-
-  const resultMsg='Leon '+leonCourts+' – Opp '+oppCourts+' ('+(dualWin?'WIN':'LOSS')+')';
-  toast('Dual closed! '+resultMsg);
-
-  // Inline button feedback — visible right where the user is looking
-  const btn=document.getElementById('close-dual-btn');
-  const resultDiv=document.getElementById('close-dual-result');
-  if(btn){btn.textContent='\u2713 Saved!';btn.style.background='var(--green)';btn.disabled=true;}
-  if(resultDiv){
-    resultDiv.style.display='block';
-    resultDiv.style.background=dualWin?'var(--green-bg)':'#fee2e2';
-    resultDiv.style.color=dualWin?'var(--green)':'var(--loss-red)';
-    resultDiv.style.border='2px solid '+(dualWin?'var(--green)':'var(--loss-red)');
-    resultDiv.textContent='\u2713 '+resultMsg+' — Saved! Taking you to Duals...';
-  }
-
-  // Navigate to Duals tab after short delay
-  setTimeout(()=>{
-    const dualsTab=document.querySelector('.tab[data-tab="duals"]');
-    if(dualsTab)dualsTab.click();
-  },1200);
+  _dualCloseInProgress=true;
+  db.ref(DB_ROOT+'/duals/'+id).set({id,date,opponent,location:loc,leonCourts,oppCourts,dualWin,createdAt:existing?existing.createdAt:td()})
+    .then(()=>{
+      const schedMatch=(D.schedule||[]).find(g=>g.date===date&&(g.opponent||'').toLowerCase()===opponent.toLowerCase());
+      if(schedMatch){
+        fbSet('schedule/'+schedMatch.id+'/scoreUs',leonCourts);
+        fbSet('schedule/'+schedMatch.id+'/scoreThem',oppCourts);
+      }
+      db.ref(DB_ROOT+'/live_scoring').remove();
+      const resultMsg='Leon '+leonCourts+' – Opp '+oppCourts+' ('+(dualWin?'WIN':'LOSS')+')';
+      if(btn){btn.textContent='\u2713 Saved!';btn.style.background='var(--green)';}
+      if(resultDiv){
+        resultDiv.style.display='block';
+        resultDiv.style.background=dualWin?'var(--green-bg)':'#fee2e2';
+        resultDiv.style.color=dualWin?'var(--green)':'var(--loss-red)';
+        resultDiv.style.border='2px solid '+(dualWin?'var(--green)':'var(--loss-red)');
+        resultDiv.textContent='\u2713 '+resultMsg+' — Saved!';
+      }
+      toast('Dual saved: '+resultMsg);
+      setTimeout(()=>{
+        _dualCloseInProgress=false;
+        const dualsTab=document.querySelector('.tab[data-tab="duals"]');
+        if(dualsTab)dualsTab.click();
+      },1500);
+    })
+    .catch(err=>{
+      _dualCloseInProgress=false;
+      closeDualInlineMsg('\u26a0 Save failed: '+err.message,true);
+    });
 }
 
 function applyLiveScoringToCounters(){
@@ -5002,6 +5030,7 @@ function applyLiveScoringToCounters(){
   });
 }
 function renderLiveScoring(dateOverride,assignOverride){
+  if(_dualCloseInProgress)return;
   const date=dateOverride||td();
   const container=document.getElementById('live-courts-container');
   const assignment=assignOverride||Object.values(D.assignments).find(a=>a.date===date);
