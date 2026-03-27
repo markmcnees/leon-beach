@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260327151759">
+  <meta name="build-version" content="20260327130931">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -4907,43 +4907,31 @@ function loadLiveCourts(id){
 
 let _dualCloseInProgress=false;
 
-function closeDualInlineMsg(msg,isError){
-  const btn=document.getElementById('close-dual-btn');
-  const resultDiv=document.getElementById('close-dual-result');
-  if(resultDiv){
-    resultDiv.style.display='block';
-    resultDiv.style.background=isError?'#fee2e2':'var(--green-bg)';
-    resultDiv.style.color=isError?'var(--loss-red)':'var(--green)';
-    resultDiv.style.border='2px solid '+(isError?'var(--loss-red)':'var(--green)');
-    resultDiv.textContent=msg;
-  }
-  toast(msg);
-  if(btn&&isError){btn.disabled=false;btn.textContent='\u2713 Close Dual & Save Result';btn.style.background='';}
-}
-
 function closeDual(){
-  const a=window._loadedAssignment||Object.values(D.assignments||{}).find(x=>x.date===td()&&x.type==='gameday');
+  const a=window._loadedAssignment||Object.values(D.assignments||{}).find(x=>x.type==='gameday');
   const btn=document.getElementById('close-dual-btn');
   const resultDiv=document.getElementById('close-dual-result');
 
-  if(!a){
-    closeDualInlineMsg('\u26a0 No assignment loaded — tap Load on an assignment first',true);
-    return;
+  function showResult(msg,isError){
+    if(resultDiv){
+      resultDiv.style.display='block';
+      resultDiv.style.background=isError?'#fee2e2':'var(--green-bg)';
+      resultDiv.style.color=isError?'var(--loss-red)':'var(--green)';
+      resultDiv.style.border='2px solid '+(isError?'var(--loss-red)':'var(--green)');
+      resultDiv.textContent=msg;
+    }
+    toast(msg);
+    if(btn&&isError){btn.disabled=false;btn.textContent='\u2713 Close Dual & Save Result';btn.style.background='';}
   }
+
+  if(!a){showResult('\u26a0 No assignment loaded',true);return;}
   const date=a.date||td();
   const opponent=a.opponent||'Opponent';
   const aType=a.type||'gameday';
-  if(aType==='scrimmage'||aType==='queens'){
-    closeDualInlineMsg('\u26a0 Close Dual is for official duals only',true);
-    return;
-  }
-  if(!db){
-    closeDualInlineMsg('\u26a0 Not connected — check internet and try again',true);
-    return;
-  }
+  if(aType==='scrimmage'||aType==='queens'){showResult('\u26a0 Official duals only',true);return;}
+  if(!db){showResult('\u26a0 Not connected',true);return;}
 
   if(btn){btn.disabled=true;btn.textContent='Saving...';}
-  if(resultDiv){resultDiv.style.display='none';}
 
   let leonCourts=0,oppCourts=0;
   const courts=(a.courts||[]).filter(c=>(c.court||0)<=5);
@@ -4962,35 +4950,24 @@ function closeDual(){
   const existing=D.duals.find(d=>d.date===date&&(d.opponent||'').toLowerCase()===opponent.toLowerCase());
   const id=existing?existing.id:dualId;
 
+  fbSet('duals/'+id,{id,date,opponent,location:loc,leonCourts,oppCourts,dualWin,createdAt:existing?existing.createdAt:td()});
+  const schedMatch=(D.schedule||[]).find(g=>g.date===date&&(g.opponent||'').toLowerCase()===opponent.toLowerCase());
+  if(schedMatch){
+    fbSet('schedule/'+schedMatch.id+'/scoreUs',leonCourts);
+    fbSet('schedule/'+schedMatch.id+'/scoreThem',oppCourts);
+  }
+  if(db)db.ref(DB_ROOT+'/live_scoring').remove();
+
+  const resultMsg='Leon '+leonCourts+'-'+oppCourts+' ('+(dualWin?'WIN':'LOSS')+')';
+  if(btn){btn.textContent='\u2713 Saved!';btn.style.background='var(--green)';}
+  showResult('\u2713 '+resultMsg+' saved!',false);
+
   _dualCloseInProgress=true;
-  db.ref(DB_ROOT+'/duals/'+id).set({id,date,opponent,location:loc,leonCourts,oppCourts,dualWin,createdAt:existing?existing.createdAt:td()})
-    .then(()=>{
-      const schedMatch=(D.schedule||[]).find(g=>g.date===date&&(g.opponent||'').toLowerCase()===opponent.toLowerCase());
-      if(schedMatch){
-        fbSet('schedule/'+schedMatch.id+'/scoreUs',leonCourts);
-        fbSet('schedule/'+schedMatch.id+'/scoreThem',oppCourts);
-      }
-      db.ref(DB_ROOT+'/live_scoring').remove();
-      const resultMsg='Leon '+leonCourts+' – Opp '+oppCourts+' ('+(dualWin?'WIN':'LOSS')+')';
-      if(btn){btn.textContent='\u2713 Saved!';btn.style.background='var(--green)';}
-      if(resultDiv){
-        resultDiv.style.display='block';
-        resultDiv.style.background=dualWin?'var(--green-bg)':'#fee2e2';
-        resultDiv.style.color=dualWin?'var(--green)':'var(--loss-red)';
-        resultDiv.style.border='2px solid '+(dualWin?'var(--green)':'var(--loss-red)');
-        resultDiv.textContent='\u2713 '+resultMsg+' — Saved!';
-      }
-      toast('Dual saved: '+resultMsg);
-      setTimeout(()=>{
-        _dualCloseInProgress=false;
-        const dualsTab=document.querySelector('.tab[data-tab="duals"]');
-        if(dualsTab)dualsTab.click();
-      },1500);
-    })
-    .catch(err=>{
-      _dualCloseInProgress=false;
-      closeDualInlineMsg('\u26a0 Save failed: '+err.message,true);
-    });
+  setTimeout(()=>{
+    _dualCloseInProgress=false;
+    const dualsTab=document.querySelector('.tab[data-tab="duals"]');
+    if(dualsTab)dualsTab.click();
+  },1800);
 }
 
 function applyLiveScoringToCounters(){
