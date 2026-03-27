@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260327105231">
+  <meta name="build-version" content="20260325234320">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -484,6 +484,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <button class="filter-btn" data-ptype="queens">Queens</button>
       <button class="filter-btn blue" data-ptype="gameday">Dual</button>
       <button class="filter-btn purple" data-ptype="scrimmage">Scrimmage</button>
+      <button class="filter-btn" data-ptype="exhibition" style="background:var(--white);color:#0e7a4d;border-color:#0e7a4d;">Exhibition</button>
     </div>
     <div class="filter-row" id="court-filter-players">
       <button class="filter-btn active" data-court="all">All</button>
@@ -822,6 +823,10 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 
     <!-- Season Summary -->
     <div class="card"><div class="card-title"><span class="bar"></span> My Season Summary</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;" id="pp-stat-toggle">
+        <button class="filter-btn active" id="pp-stat-official" onclick="ppSetStatView('official',this)" style="flex:1;text-align:center;">Official (CT 1-5)</button>
+        <button class="filter-btn" id="pp-stat-exhibition" onclick="ppSetStatView('exhibition',this)" style="flex:1;text-align:center;color:#0e7a4d;border-color:#0e7a4d;">Exhibition (CT 6+)</button>
+      </div>
       <div id="pp-summary"></div>
     </div>
 
@@ -1722,7 +1727,7 @@ function renderPlayers(){
   let cols;
   if(pType==='queens'){
     cols=[{k:'name',l:'Player'},{k:'court',l:'CT'},{k:'wins',l:'W'},{k:'losses',l:'L'},{k:'pct',l:'%'},{k:'diff',l:'+/-'}];
-  }else if(pType==='gameday'||pType==='scrimmage'){
+  }else if(pType==='gameday'||pType==='scrimmage'||pType==='exhibition'){
     cols=[{k:'name',l:'Player'},{k:'court',l:'CT'},{k:'sets',l:'Sets'},{k:'diff',l:'+/-'},{k:'k',l:'K'},{k:'b',l:'B'},{k:'a',l:'A'},{k:'d',l:'D'},{k:'e',l:'E'}];
   }else{
     cols=[{k:'name',l:'Player'},{k:'court',l:'CT'},{k:'qrec',l:'Q W-L'},{k:'qdiff',l:'Q +/-'},{k:'gdsets',l:'GD Sets'},{k:'gddiff',l:'GD +/-'},{k:'diff',l:'Total +/-'}];
@@ -1732,12 +1737,12 @@ function renderPlayers(){
     if(pSort.key===th.dataset.psort)pSort.dir=pSort.dir==='asc'?'desc':'asc';
     else{pSort.key=th.dataset.psort;pSort.dir='desc';}renderPlayers();});});
 
-  const list=pType==='gameday'?D.gamedays:pType==='scrimmage'?D.scrimmages:null;
+  const list=pType==='gameday'?D.gamedays:pType==='scrimmage'?D.scrimmages:pType==='exhibition'?(D.gamedays||[]).filter(m=>(m.court||0)>5):null;
   let rows=D.players.map(p=>{
     if(pType==='queens'){
       const s=queensStats(p.id,D.matches);
       return{p,s,sortVals:{name:p.lastName,court:p.court,wins:s.wins,losses:s.losses,pct:s.pct,diff:s.diff},gp:s.gp};
-    }else if(pType==='gameday'||pType==='scrimmage'){
+    }else if(pType==='gameday'||pType==='scrimmage'||pType==='exhibition'){
       const s=extStats(p.id,list);
       return{p,s,sortVals:{name:p.lastName,court:p.court,sets:s.sets,diff:s.diff,k:s.k,b:s.b,a:s.a,d:s.d,e:s.e},gp:s.sets};
     }else{
@@ -1761,7 +1766,7 @@ function renderPlayers(){
         <td><span class="court-badge court-${p.court}">${p.court}</span></td>
         <td>${s.wins}</td><td>${s.losses}</td><td>${s.gp>0?Math.round(s.pct)+'%':'—'}</td>
         <td class="plus-minus ${pmClass(s.diff)}">${s.gp>0?pmStr(s.diff):'—'}</td></tr>`;}).join('');
-  }else if(pType==='gameday'||pType==='scrimmage'){
+  }else if(pType==='gameday'||pType==='scrimmage'||pType==='exhibition'){
     tbody.innerHTML=rows.map(r=>{const p=r.p,s=r.s;
       return`<tr><td><span class="player-name">${p.firstName} ${p.lastName.charAt(0)}.</span></td>
         <td><span class="court-badge court-${p.court}">${p.court}</span></td>
@@ -2393,6 +2398,13 @@ function changePassword(){
 // ============================================================
 // PLAYER PORTAL RENDERING
 // ============================================================
+let ppStatView='official';
+function ppSetStatView(view,btn){
+  ppStatView=view;
+  document.querySelectorAll('#pp-stat-toggle .filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderPlayerPortal();
+}
 function renderPlayerPortal(){
   if(!currentPlayerId)return;
   const p=gP(currentPlayerId);
@@ -2402,9 +2414,10 @@ function renderPlayerPortal(){
   document.getElementById('pp-name').textContent=p.firstName+' '+p.lastName;
   document.getElementById('pp-meta').innerHTML=`${p.jersey!=null?'<span style="font-family:\'Bebas Neue\',sans-serif;font-size:16px;color:var(--red);margin-right:6px;">#'+p.jersey+'</span>':''}<span class="class-badge class-${p.classYear}">${p.classYear}</span> <span class="court-badge court-${p.court}">Court ${p.court} — ${CL[p.court]||''}</span>`;
 
-  // Summary stats — Dual (game day) only
+  // Summary stats — filtered by ppStatView
   const qs=queensStats(pid,D.matches);
-  const gs=extStats(pid,D.gamedays);
+  const _gdFiltered=ppStatView==='exhibition'?(D.gamedays||[]).filter(m=>(m.court||0)>5):(D.gamedays||[]).filter(m=>(m.court||0)<=5||!(m.court));
+  const gs=extStats(pid,_gdFiltered);
   const ss=extStats(pid,D.scrimmages);
   document.getElementById('pp-summary').innerHTML=`
     <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px;">
@@ -2419,7 +2432,7 @@ function renderPlayerPortal(){
       <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.d}</div><div class="stat-label">Digs</div></div>
       <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.e}</div><div class="stat-label">Errors</div></div>
     </div>
-    <div style="grid-column:1/-1;font-size:10px;color:var(--gray);text-align:center;margin-top:6px;letter-spacing:0.5px;">DUAL MATCHES ONLY</div>`;
+    <div style="grid-column:1/-1;font-size:10px;color:var(--gray);text-align:center;margin-top:6px;letter-spacing:0.5px;">${ppStatView==="exhibition"?"EXHIBITION MATCHES (CT 6+)":"OFFICIAL DUAL MATCHES (CT 1-5)"}</div>`;
 
   // ===== TEAM RANKINGS =====
   // Build stats for all players
