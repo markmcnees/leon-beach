@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260328013506">
+  <meta name="build-version" content="20260327155000">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -1509,6 +1509,15 @@ function addScheduleGame(){
 }
 function delSchedule(id){fbRemove('schedule/'+id);toast('Removed');}
 
+function normTeam(name){
+  const aliases={
+    'florida state university hs':'FSU HS',
+    'fsu high school':'FSU HS',
+    'florida state univ hs':'FSU HS',
+    'fsuhs':'FSU HS'
+  };
+  return aliases[(name||'').toLowerCase().trim()]||name;
+}
 function renderStandings(){
   // Leon's record from schedule
   const games=[...D.schedule];
@@ -1517,7 +1526,7 @@ function renderStandings(){
   games.forEach(g=>{
     if(g.scoreUs!=null&&g.scoreThem!=null){
       g.scoreUs>g.scoreThem?leonW++:leonL++;
-      const opp=g.opponent||'';
+      const opp=normTeam(g.opponent||'');
       if(opp){
         if(!oppFromSchedule[opp])oppFromSchedule[opp]={w:0,l:0};
         // Opponent's perspective: if Leon won, opponent lost
@@ -1531,7 +1540,7 @@ function renderStandings(){
   // First add auto-computed from schedule (vs Leon only)
   Object.entries(oppFromSchedule).forEach(([name,rec])=>{teams[name]={w:rec.w,l:rec.l,auto:true};});
   // Then override with manually set records
-  Object.entries(D.standings).forEach(([name,s])=>{teams[name]={w:s.w||0,l:s.l||0,auto:false};});
+  Object.entries(D.standings).forEach(([name,s])=>{teams[normTeam(name)]={w:s.w||0,l:s.l||0,auto:false};});
   // Leon always present
   teams['Leon']={w:leonW,l:leonL,auto:true};
 
