@@ -109,7 +109,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 /* PLAYER OPTIONAL STATS */
 .pgd-stats-toggle{width:100%;background:none;border:2px dashed var(--gray-lighter);border-radius:8px;padding:10px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gray);cursor:pointer;margin-top:10px;transition:all 0.2s;}
 .pgd-stats-toggle:hover,.pgd-stats-toggle.open{border-color:var(--blue);color:var(--blue);background:#dbeafe;}
-.pgd-stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;}
+.pgd-stats-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:10px;}
 .pgd-stat-col{text-align:center;}
 .pgd-stat-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gray);margin-bottom:4px;}
 .pgd-stat-label .stat-desc{display:block;font-size:9px;color:var(--gray-light);font-family:'Barlow',sans-serif;letter-spacing:0;font-weight:600;}
@@ -236,7 +236,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .set-add-form{background:var(--off-white);border:2px dashed var(--gray-lighter);border-radius:8px;padding:12px;margin-top:10px;}
 .set-add-form .form-label{font-size:12px;}
 .set-add-form .form-input,.set-add-form .form-select{padding:8px 10px;font-size:13px;}
-.stat-input-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px;}
+.stat-input-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px;}
 .stat-input-row label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:0.5px;color:var(--gray);text-align:center;display:block;}
 .stat-input-row input{width:100%;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-family:'Bebas Neue',sans-serif;font-size:16px;text-align:center;}
 .stat-input-row input:focus{outline:none;border-color:var(--red);}
@@ -488,10 +488,10 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
     <div class="filter-row" id="court-filter-players">
       <button class="filter-btn active" data-court="all">All</button>
-      <button class="filter-btn" data-court="1">CT 1</button><button class="filter-btn" data-court="2">CT 2</button>
-      <button class="filter-btn" data-court="3">CT 3</button><button class="filter-btn" data-court="4">CT 4</button>
-      <button class="filter-btn" data-court="5">CT 5</button><button class="filter-btn" data-court="6">CT 6</button>
-      <button class="filter-btn" data-court="7">CT 7</button><button class="filter-btn" data-court="8">CT 8</button>
+      <button class="filter-btn" data-court="1">Pair 1</button><button class="filter-btn" data-court="2">Pair 2</button>
+      <button class="filter-btn" data-court="3">Pair 3</button><button class="filter-btn" data-court="4">Pair 4</button>
+      <button class="filter-btn" data-court="5">Pair 5</button><button class="filter-btn" data-court="6">Pair 6</button>
+      <button class="filter-btn" data-court="7">Pair 7</button><button class="filter-btn" data-court="8">Pair 8</button>
     </div>
     <div class="card" style="padding:8px 12px;"><div class="table-wrap">
       <table class="player-table" id="players-table"><thead><tr id="players-thead"></tr></thead><tbody></tbody></table>
@@ -544,10 +544,10 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="card"><div class="card-title"><span class="bar"></span> Queens Match Log</div>
       <div class="filter-row" id="court-filter-queens">
         <button class="filter-btn active" data-qcourt="all">All</button>
-        <button class="filter-btn" data-qcourt="1">CT 1</button><button class="filter-btn" data-qcourt="2">CT 2</button>
-        <button class="filter-btn" data-qcourt="3">CT 3</button><button class="filter-btn" data-qcourt="4">CT 4</button>
-        <button class="filter-btn" data-qcourt="5">CT 5</button><button class="filter-btn" data-qcourt="6">CT 6</button>
-        <button class="filter-btn" data-qcourt="7">CT 7</button><button class="filter-btn" data-qcourt="8">CT 8</button>
+        <button class="filter-btn" data-qcourt="1">Pair 1</button><button class="filter-btn" data-qcourt="2">Pair 2</button>
+        <button class="filter-btn" data-qcourt="3">Pair 3</button><button class="filter-btn" data-qcourt="4">Pair 4</button>
+        <button class="filter-btn" data-qcourt="5">Pair 5</button><button class="filter-btn" data-qcourt="6">Pair 6</button>
+        <button class="filter-btn" data-qcourt="7">Pair 7</button><button class="filter-btn" data-qcourt="8">Pair 8</button>
       </div>
       <div id="queens-log"></div>
     </div>
@@ -787,7 +787,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   <!-- ====== ROSTER ====== -->
     <div class="tab-content" id="tab-settings">
 <div class="card"><div class="card-title"><span class="bar"></span> Player Roster</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Assign court levels. Changes sync in real time.</p><div id="roster-list"></div></div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Assign pair levels. Changes sync in real time.</p><div id="roster-list"></div></div>
 <div class="card"><div class="card-title"><span class="bar"></span> Add Player</div>
       <div class="form-row" style="margin-bottom:10px;"><input type="text" class="form-input" id="new-first" placeholder="First Name"><input type="text" class="form-input" id="new-last" placeholder="Last Name"></div>
       <div class="form-row" style="margin-bottom:10px;">
@@ -1372,7 +1372,7 @@ function queensStats(pid,matches){
 
 // External match stats (game day or scrimmage — both partners share score)
 function extStats(pid,matchList){
-  let setsW=0,setsL=0,pf=0,pa=0,k=0,b=0,a=0,d=0,e=0,totalSets=0,matchesPlayed=0;
+  let setsW=0,setsL=0,pf=0,pa=0,k=0,b=0,a=0,se=0,re=0,he=0,de=0,totalSets=0,matchesPlayed=0;
   matchList.forEach(m=>{
     if(!(m.pair||[]).includes(pid))return;
     matchesPlayed++;
@@ -1381,10 +1381,10 @@ function extStats(pid,matchList){
       pf+=su;pa+=st;totalSets++;
       su>st?setsW++:setsL++;
       const ps=s.stats?.[pid]||{};
-      k+=ps.k||0;b+=ps.b||0;a+=ps.a||0;d+=ps.d||0;e+=ps.e||0;
+      k+=ps.k||0;b+=ps.b||0;a+=ps.a||0;se+=ps.se||0;re+=ps.re||0;he+=ps.he||0;de+=ps.de||0;
     });
   });
-  return{setsWon:setsW,setsLost:setsL,diff:pf-pa,pf,pa,sets:totalSets,matches:matchesPlayed,k,b,a,d,e};
+  return{setsWon:setsW,setsLost:setsL,diff:pf-pa,pf,pa,sets:totalSets,matches:matchesPlayed,k,b,a,se,re,he,de};
 }
 
 // Combined stats for Players tab "All" view
@@ -1394,7 +1394,7 @@ function combinedStats(pid){
   const ss=extStats(pid,D.scrimmages);
   return{
     qWins:qs.wins,qLosses:qs.losses,qDiff:qs.diff,qGP:qs.gp,
-    gdSets:gs.sets,gdDiff:gs.diff,gdK:gs.k,gdB:gs.b,gdA:gs.a,gdD:gs.d,gdE:gs.e,
+    gdSets:gs.sets,gdDiff:gs.diff,gdK:gs.k,gdB:gs.b,gdA:gs.a,gdSE:gs.se,gdRE:gs.re,gdHE:gs.he,gdDE:gs.de,
     scSets:ss.sets,scDiff:ss.diff,
     totalDiff:qs.diff+gs.diff+ss.diff,
     totalGames:qs.gp+gs.matches+ss.matches
@@ -1735,11 +1735,11 @@ function renderPlayers(){
   const thead=document.getElementById('players-thead');
   let cols;
   if(pType==='queens'){
-    cols=[{k:'name',l:'Player'},{k:'court',l:'CT'},{k:'wins',l:'W'},{k:'losses',l:'L'},{k:'pct',l:'%'},{k:'diff',l:'+/-'}];
+    cols=[{k:'name',l:'Player'},{k:'court',l:'Pair'},{k:'wins',l:'W'},{k:'losses',l:'L'},{k:'pct',l:'%'},{k:'diff',l:'+/-'}];
   }else if(pType==='gameday'||pType==='scrimmage'||pType==='exhibition'){
-    cols=[{k:'name',l:'Player'},{k:'court',l:'CT'},{k:'sets',l:'Sets'},{k:'diff',l:'+/-'},{k:'k',l:'K'},{k:'b',l:'B'},{k:'a',l:'A'},{k:'d',l:'D'},{k:'e',l:'E'}];
+    cols=[{k:'name',l:'Player'},{k:'court',l:'Pair'},{k:'sets',l:'Sets'},{k:'diff',l:'+/-'},{k:'k',l:'K'},{k:'b',l:'B'},{k:'a',l:'A'},{k:'se',l:'SE'},{k:'re',l:'RE'},{k:'he',l:'HE'},{k:'de',l:'DE'}];
   }else{
-    cols=[{k:'name',l:'Player'},{k:'court',l:'CT'},{k:'qrec',l:'Q W-L'},{k:'qdiff',l:'Q +/-'},{k:'gdsets',l:'GD Sets'},{k:'gddiff',l:'GD +/-'},{k:'diff',l:'Total +/-'}];
+    cols=[{k:'name',l:'Player'},{k:'court',l:'Pair'},{k:'qrec',l:'Q W-L'},{k:'qdiff',l:'Q +/-'},{k:'gdsets',l:'GD Sets'},{k:'gddiff',l:'GD +/-'},{k:'diff',l:'Total +/-'}];
   }
   thead.innerHTML=cols.map(c=>`<th data-psort="${c.k}">${c.l} <span class="sort-arrow"></span></th>`).join('');
   thead.querySelectorAll('th[data-psort]').forEach(th=>{th.addEventListener('click',()=>{
@@ -1753,7 +1753,7 @@ function renderPlayers(){
       return{p,s,sortVals:{name:p.lastName,court:p.court,wins:s.wins,losses:s.losses,pct:s.pct,diff:s.diff},gp:s.gp};
     }else if(pType==='gameday'||pType==='scrimmage'||pType==='exhibition'){
       const s=extStats(p.id,list);
-      return{p,s,sortVals:{name:p.lastName,court:p.court,sets:s.sets,diff:s.diff,k:s.k,b:s.b,a:s.a,d:s.d,e:s.e},gp:s.sets};
+      return{p,s,sortVals:{name:p.lastName,court:p.court,sets:s.sets,diff:s.diff,k:s.k,b:s.b,a:s.a,se:s.se,re:s.re,he:s.he,de:s.de},gp:s.sets};
     }else{
       const c=combinedStats(p.id);
       return{p,c,sortVals:{name:p.lastName,court:p.court,qrec:c.qWins,qdiff:c.qDiff,gdsets:c.gdSets,gddiff:c.gdDiff,diff:c.totalDiff},gp:c.totalGames};
@@ -1781,7 +1781,7 @@ function renderPlayers(){
         <td><span class="court-badge court-${p.court}">${p.court}</span></td>
         <td>${s.sets}</td>
         <td class="plus-minus ${pmClass(s.diff)}">${s.sets>0?pmStr(s.diff):'—'}</td>
-        <td>${s.k}</td><td>${s.b}</td><td>${s.a}</td><td>${s.d}</td><td>${s.e}</td></tr>`;}).join('');
+        <td>${s.k}</td><td>${s.b}</td><td>${s.a}</td><td>${s.se}</td><td>${s.re}</td><td>${s.he}</td><td>${s.de}</td></tr>`;}).join('');
   }else{
     tbody.innerHTML=rows.map(r=>{const p=r.p,c=r.c;
       return`<tr><td><span class="player-name">${p.firstName} ${p.lastName.charAt(0)}.</span></td>
@@ -2001,8 +2001,10 @@ function openAddSet(matchId,type){
         <div><label>K</label><input type="number" id="as-k${i}" value="0" min="0"></div>
         <div><label>B</label><input type="number" id="as-b${i}" value="0" min="0"></div>
         <div><label>A</label><input type="number" id="as-a${i}" value="0" min="0"></div>
-        <div><label>D</label><input type="number" id="as-d${i}" value="0" min="0"></div>
-        <div><label>E</label><input type="number" id="as-e${i}" value="0" min="0"></div></div>`;
+        <div><label>SE</label><input type="number" id="as-se${i}" value="0" min="0"></div>
+        <div><label>RE</label><input type="number" id="as-re${i}" value="0" min="0"></div>
+        <div><label>HE</label><input type="number" id="as-he${i}" value="0" min="0"></div>
+        <div><label>DE</label><input type="number" id="as-de${i}" value="0" min="0"></div></div>`;
   });
   document.getElementById('set-modal-body').innerHTML=html;
   document.getElementById('set-modal-save').onclick=saveAddSet;
@@ -2021,8 +2023,10 @@ function saveAddSet(){
     stats[pid]={k:parseInt(document.getElementById('as-k'+i).value)||0,
       b:parseInt(document.getElementById('as-b'+i).value)||0,
       a:parseInt(document.getElementById('as-a'+i).value)||0,
-      d:parseInt(document.getElementById('as-d'+i).value)||0,
-      e:parseInt(document.getElementById('as-e'+i).value)||0};
+      se:parseInt(document.getElementById('as-se'+i).value)||0,
+      re:parseInt(document.getElementById('as-re'+i).value)||0,
+      he:parseInt(document.getElementById('as-he'+i).value)||0,
+      de:parseInt(document.getElementById('as-de'+i).value)||0};
   });
   const sets=m.sets?[...m.sets]:[];
   sets.push({scoreUs:su,scoreThem:st,stats});
@@ -2434,12 +2438,14 @@ function renderPlayerPortal(){
       <div class="stat-box"><div class="stat-number green">${gs.matches}</div><div class="stat-label">Matches</div></div>
       <div class="stat-box"><div class="stat-number ${pmClass(gs.diff)}">${gs.sets>0?pmStr(gs.diff):'—'}</div><div class="stat-label">Pts +/-</div></div>
     </div>
-    <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+    <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;">
       <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.k}</div><div class="stat-label">Kills</div></div>
       <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.a}</div><div class="stat-label">Aces</div></div>
       <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.b}</div><div class="stat-label">Blocks</div></div>
-      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.d}</div><div class="stat-label">Digs</div></div>
-      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.e}</div><div class="stat-label">Errors</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.se}</div><div class="stat-label">Srv Err</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.re}</div><div class="stat-label">Rcv Err</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.he}</div><div class="stat-label">Hit Err</div></div>
+      <div class="stat-box"><div class="stat-number" style="font-size:22px;">${gs.de}</div><div class="stat-label">Dig Err</div></div>
     </div>
     <div style="grid-column:1/-1;font-size:10px;color:var(--gray);text-align:center;margin-top:6px;letter-spacing:0.5px;">${ppStatView==="exhibition"?"EXHIBITION MATCHES (CT 6+)":"OFFICIAL DUAL MATCHES (CT 1-5)"}</div>`;
 
@@ -2812,7 +2818,7 @@ function getPlayerDataSummary(pid){
   let summary=`Player: ${p.firstName} ${p.lastName}\n`;
   summary+=`Class: ${p.classYear}, Court: ${p.court} (${CL[p.court]||''})\n`;
   summary+=`Queens record: ${qs.wins}-${qs.losses}, +/- ${qs.diff}\n`;
-  if(gs.sets>0)summary+=`Game Day: ${gs.setsWon}-${gs.setsLost} sets, +/- ${gs.diff}, ${gs.k}K ${gs.b}B ${gs.a}A ${gs.d}D ${gs.e}E\n`;
+  if(gs.sets>0)summary+=`Game Day: ${gs.setsWon}-${gs.setsLost} sets, +/- ${gs.diff}, ${gs.k}K ${gs.b}B ${gs.a}A ${gs.se}SE ${gs.re}RE ${gs.he}HE ${gs.de}DE\n`;
   if(ss.sets>0)summary+=`Scrimmage: ${ss.setsWon}-${ss.setsLost} sets, +/- ${ss.diff}\n`;
   // Rankings
   const allP=D.players.filter(x=>x.id);
@@ -3239,7 +3245,7 @@ function buildTeamDataForPairings(){
   const allDrillsAI=Object.values(profilesData?.starDrills||{});
   const allVertsAI=Object.values(profilesData?.jumpTests||profilesData?.verticals||{});
   let data='TEAM ROSTER & DATA:\n';
-  data+='Court levels: 1=Top, 2=Mid, 3=Dev, 4=Court 4, 5=Court 5\n\n';
+  data+='Pair levels: 1=Top, 2=Mid, 3=Dev, 4=Court 4, 5=Court 5\n\n';
   allP.forEach(p=>{
     const sk=profilesData?.skills?.[p.id]||profilesData?.players?.[p.id]?.skills||{};
     const qs=queensStats(p.id,D.matches);
@@ -3266,7 +3272,7 @@ function buildTeamDataForPairings(){
     }
     // Match stats
     if(qs.gp>0)data+=`, Queens: ${qs.wins}-${qs.losses} (${qs.diff>=0?'+':''}${qs.diff})`;
-    if(gs.sets>0)data+=`, GD: ${gs.setsWon}-${gs.setsLost} sets (${gs.diff>=0?'+':''}${gs.diff}), K:${gs.k} B:${gs.b} A:${gs.a} D:${gs.d} E:${gs.e}`;
+    if(gs.sets>0)data+=`, GD: ${gs.setsWon}-${gs.setsLost} sets (${gs.diff>=0?'+':''}${gs.diff}), K:${gs.k} B:${gs.b} A:${gs.a} SE:${gs.se} RE:${gs.re} HE:${gs.he} DE:${gs.de}`;
     if(ss.sets>0)data+=`, Scrim: ${ss.setsWon}-${ss.setsLost} sets`;
     data+='\n';
   });
@@ -3342,7 +3348,7 @@ ${isQueens?`QUEENS RULES:
 - Consider Queens match history to avoid repeated lopsided matchups`:`PAIRING RULES:
 - Each pair needs a hitter and a defender (or at least one versatile player)
 - Left side + right side preference is ideal
-- Consider their actual skills, match history together, and court level
+- Consider their actual skills, match history together, and pair level
 - For game day, put the strongest pair on Court 1
 - Each player can only be in ONE pair
 - You have 16 players total, assign the top ${numCourts*2} players to courts`}
@@ -3474,7 +3480,7 @@ function exportExcel(){
       // Match Stats
       'Queens W':qs.wins,'Queens L':qs.losses,'Queens +/-':qs.diff||'',
       'GD Sets W':gs.setsWon||'','GD Sets L':gs.setsLost||'','GD +/-':gs.diff||'',
-      'GD Kills':gs.k||'','GD Blocks':gs.b||'','GD Aces':gs.a||'','GD Digs':gs.d||'','GD Errors':gs.e||'',
+      'GD Kills':gs.k||'','GD Blocks':gs.b||'','GD Aces':gs.a||'','GD Srv Err':gs.se||'','GD Rcv Err':gs.re||'','GD Hit Err':gs.he||'','GD Dig Err':gs.de||'',
       'Scrim Sets W':ss.setsWon||'','Scrim Sets L':ss.setsLost||''
     };
   });
@@ -4061,7 +4067,7 @@ function confirmScan(){
         if(!usEl)break;
         const scoreUs=parseInt(usEl.value)||0;
         const scoreThem=parseInt(themEl.value)||0;
-        const stats={};pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,d:0,e:0};});
+        const stats={};pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,se:0,re:0,he:0,de:0};});
         sets.push({scoreUs,scoreThem,stats});
       }
       const id=gi(matchType==='gameday'?'gd':'sc');
@@ -4216,13 +4222,13 @@ if(!window._lseStats)window._lseStats={};
 
 function lseStatBlock(pid, label, idx){
   if(!window._lseStats[idx])window._lseStats[idx]={};
-  if(!window._lseStats[idx][pid])window._lseStats[idx][pid]={k:0,a:0,b:0,d:0,e:0};
+  if(!window._lseStats[idx][pid])window._lseStats[idx][pid]={k:0,a:0,b:0,se:0,re:0,he:0,de:0};
   const s=window._lseStats[idx][pid];
-  const stats=['k','a','b','d','e'];
-  const names=['Kills','Aces','Blocks','Digs','Errors'];
+  const stats=['k','a','b','se','re','he','de'];
+  const names=['Kills','Aces','Blocks','Srv Err','Rcv Err','Hit Err','Dig Err'];
   return `<div style="margin-bottom:10px;">
     <div style="font-size:11px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">${label}</div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
       ${stats.map((st,i)=>`<div style="text-align:center;">
         <div style="font-size:9px;font-weight:700;color:var(--gray);letter-spacing:0.5px;">${st.toUpperCase()}<br><span style="font-size:8px;font-weight:400;">${names[i]}</span></div>
         <button onclick="lseStatAdj(${idx},'${pid}','${st}',1)" style="width:100%;background:var(--blue);color:white;border:none;border-radius:4px;padding:4px;font-size:14px;cursor:pointer;margin-bottom:2px;">+</button>
@@ -4235,7 +4241,7 @@ function lseStatBlock(pid, label, idx){
 
 function lseStatAdj(idx,pid,stat,delta){
   if(!window._lseStats[idx])window._lseStats[idx]={};
-  if(!window._lseStats[idx][pid])window._lseStats[idx][pid]={k:0,a:0,b:0,d:0,e:0};
+  if(!window._lseStats[idx][pid])window._lseStats[idx][pid]={k:0,a:0,b:0,se:0,re:0,he:0,de:0};
   window._lseStats[idx][pid][stat]=Math.max(0,(window._lseStats[idx][pid][stat]||0)+delta);
   const el=document.getElementById('lse-'+idx+'-'+pid+'-'+stat);
   if(el)el.textContent=window._lseStats[idx][pid][stat];
@@ -4858,7 +4864,7 @@ function runMigration(){
       gd24.forEach(m=>{
         const id=gi('gd');
         const sets=m.sets.map(s=>{
-          const stats={};m.pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,d:0,e:0};});
+          const stats={};m.pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,se:0,re:0,he:0,de:0};});
           return{scoreUs:s.scoreUs,scoreThem:s.scoreThem,stats};
         });
         updates[DB_ROOT+'/gamedays/'+id]={id,date:'2026-02-24',court:m.court,pair:m.pair,opponent:m.opp,sets};
@@ -5225,7 +5231,7 @@ function saveLiveSet(idx,p1,p2,date,court,subCourt,existingId,opponent,fbNode){
   const statsOpen=document.getElementById('lse-stats-'+idx)?.style.display!=='none';
   const stats={};
   pair.forEach(pid=>{stats[pid]=statsOpen&&window._lseStats&&window._lseStats[idx]&&window._lseStats[idx][pid]
-    ?{...window._lseStats[idx][pid]}:{k:0,b:0,a:0,d:0,e:0};});
+    ?{...window._lseStats[idx][pid]}:{k:0,b:0,a:0,se:0,re:0,he:0,de:0};});
   const newSet={scoreUs:us,scoreThem:them,stats};
   const courtLabel=court+(subCourt?subCourt:'');
   const opp=(opponent||'Opponent')+' CT'+courtLabel;
@@ -5517,7 +5523,7 @@ function saveQueensLiveSet(idx,p1,p2,date,court){
   const statsOpen=document.getElementById('lse-stats-'+idx)?.style.display!=='none';
   const pair=[p1,p2].filter(Boolean);
   const stats={};
-  pair.forEach(pid=>{stats[pid]=statsOpen&&window._lseStats&&window._lseStats[idx]&&window._lseStats[idx][pid]?{...window._lseStats[idx][pid]}:{k:0,b:0,a:0,d:0,e:0};});
+  pair.forEach(pid=>{stats[pid]=statsOpen&&window._lseStats&&window._lseStats[idx]&&window._lseStats[idx][pid]?{...window._lseStats[idx][pid]}:{k:0,b:0,a:0,se:0,re:0,he:0,de:0};});
   const id=gi('qm');
   fbSet('matches/'+id,{id,date,court:parseInt(court),team1:[p1,p2].filter(Boolean),team2:[op1,op2].filter(Boolean),score1:sa,score2:sb,stats});
   toast((sa>sb?'✓ Win':'✗ Loss')+' saved — '+sa+'–'+sb);
@@ -5677,9 +5683,9 @@ function pgdResetStats(){pgdStats={};}
 
 // Helper: build a stat block for one player
 function pgdStatBlockHTML(pid,label,prefix){
-  const s=pgdStats[pid]||{k:0,a:0,b:0,d:0,e:0};
-  const stats=['k','a','b','d','e'];
-  const names=['Kills','Aces','Blocks','Digs','Errors'];
+  const s=pgdStats[pid]||{k:0,a:0,b:0,se:0,re:0,he:0,de:0};
+  const stats=['k','a','b','se','re','he','de'];
+  const names=['Kills','Aces','Blocks','Srv Err','Rcv Err','Hit Err','Dig Err'];
   return `<div class="pgd-player-stats-block">
     <div class="pgd-player-stats-label">${label}</div>
     <div class="pgd-stats-grid">
@@ -5723,7 +5729,7 @@ function pgdEditSetFormHTML(matchId,setIdx,s,pair,viewerPid,prefix){
   const p0=gP(pair[0]),p1=pair[1]?gP(pair[1]):null;
   const ps0=(s.stats||{})[pair[0]]||{};
   const ps1=p1?(s.stats||{})[pair[1]]||{}:{};
-  const statNames=['k','a','b','d','e'];
+  const statNames=['k','a','b','se','re','he','de'];
   return `<div class="pgd-set-edit-form">
     <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;color:var(--blue);margin-bottom:8px;">EDIT SET ${setIdx+1}</div>
     <div class="pgd-edit-score-row">
@@ -5771,7 +5777,7 @@ function pgdSaveEditSet(matchId,setIdx,pairStr,prefix){
   const them=parseInt(document.getElementById(prefix+'-et-'+setIdx).value);
   if(isNaN(us)||isNaN(them)){toast('Enter both scores');return;}
   if(us===them){toast('Scores cannot be tied');return;}
-  const statNames=['k','a','b','d','e'];
+  const statNames=['k','a','b','se','re','he','de'];
   const stats={};
   pair.forEach((pid2,pi)=>{
     const ps={};
@@ -5791,8 +5797,8 @@ function pgdSaveEditSet(matchId,setIdx,pairStr,prefix){
 // Helper: new set entry card (for own court or spectator court)
 function pgdNewSetCardHTML(setNum,pair,prefix,isSpectator){
   const p0=gP(pair[0]),p1=pair[1]?gP(pair[1]):null;
-  const statNames=['k','a','b','d','e'];
-  const statFullNames=['Kills','Aces','Blocks','Digs','Errors'];
+  const statNames=['k','a','b','se','re','he','de'];
+  const statFullNames=['Kills','Aces','Blocks','Srv Err','Rcv Err','Hit Err','Dig Err'];
   return `<div class="pgd-set-entry" id="${prefix}-new-set">
     <div style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:10px;">Set ${setNum}</div>
     <div class="pgd-score-grid">
@@ -5836,7 +5842,7 @@ function pgdScoreAdj(prefix,side,delta){
 }
 
 function pgdStatAdj(pid,stat,delta,prefix){
-  if(!pgdStats[pid])pgdStats[pid]={k:0,a:0,b:0,d:0,e:0};
+  if(!pgdStats[pid])pgdStats[pid]={k:0,a:0,b:0,se:0,re:0,he:0,de:0};
   pgdStats[pid][stat]=Math.max(0,(pgdStats[pid][stat]||0)+delta);
   const el=document.getElementById(prefix+'-'+pid+'-'+stat);
   if(el)el.textContent=pgdStats[pid][stat];
@@ -5863,7 +5869,7 @@ function pgdSubmitSet(prefix,pairStr){
   const statsOpen=document.getElementById(prefix+'-stats-section')?.style.display!=='none';
   const stats={};
   pair.forEach(pid2=>{
-    stats[pid2]=statsOpen&&pgdStats[pid2]?{...pgdStats[pid2]}:{k:0,a:0,b:0,d:0,e:0};
+    stats[pid2]=statsOpen&&pgdStats[pid2]?{...pgdStats[pid2]}:{k:0,a:0,b:0,se:0,re:0,he:0,de:0};
   });
   const newSet={scoreUs,scoreThem:scoreThem,stats,enteredBy:currentPlayerId||null,enteredAt:td()};
 
@@ -5891,8 +5897,8 @@ function pgdSubmitSet(prefix,pairStr){
   const win=scoreUs>scoreThem;
   toast((win?'✓ Win':'✗ Loss')+' saved — '+scoreUs+'-'+scoreThem);
   pgdPrefixScores[prefix]={us:0,them:0};
-  if(pgdStats[pair[0]])pgdStats[pair[0]]={k:0,a:0,b:0,d:0,e:0};
-  if(pgdStats[pair[1]])pgdStats[pair[1]]={k:0,a:0,b:0,d:0,e:0};
+  if(pgdStats[pair[0]])pgdStats[pair[0]]={k:0,a:0,b:0,se:0,re:0,he:0,de:0};
+  if(pgdStats[pair[1]])pgdStats[pair[1]]={k:0,a:0,b:0,se:0,re:0,he:0,de:0};
   setTimeout(renderPlayerGameDay,600);
 }
 
@@ -6518,7 +6524,7 @@ function confirmDualSave(){
         const already=D.gamedays.find(m=>m.date===date&&arrEq(m.pair||[],pair));
         if(!already){
           const mid=gi('gd');
-          const matchSets=sets.map(s=>{const stats={};pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,d:0,e:0};});return{...s,stats};});
+          const matchSets=sets.map(s=>{const stats={};pair.forEach(pid=>{stats[pid]={k:0,b:0,a:0,se:0,re:0,he:0,de:0};});return{...s,stats};});
           fbSet('gamedays/'+mid,{id:mid,date,court,pair,opponent:opponent+' CT'+court,sets:matchSets,isExhibition});
           matchesCreated++;
         }
@@ -6748,7 +6754,7 @@ function ppSaveLiveSet(idx,p1,p2,date,court,existingId,opponent,fbNode,statsPref
     if(statsOpen&&pgdStats[pid]){
       stats[pid]={k:pgdStats[pid].k||0,b:pgdStats[pid].b||0,a:pgdStats[pid].a||0,d:pgdStats[pid].d||0,e:pgdStats[pid].e||0};
     }else{
-      stats[pid]={k:0,b:0,a:0,d:0,e:0};
+      stats[pid]={k:0,b:0,a:0,se:0,re:0,he:0,de:0};
     }
   });
   const newSet={scoreUs:us,scoreThem:them,stats,enteredBy:currentPlayerId||null};
@@ -7126,7 +7132,7 @@ function seedMissingDuals(){return;//disabled
     });
     if(already){skipped++;return;}
     const id=gi('gd');
-    const stats={};m.pair.forEach(function(pid){stats[pid]={k:0,b:0,a:0,d:0,e:0};});
+    const stats={};m.pair.forEach(function(pid){stats[pid]={k:0,b:0,a:0,se:0,re:0,he:0,de:0};});
     const sets=m.sets.map(function(s){return{scoreUs:s.scoreUs,scoreThem:s.scoreThem,stats:JSON.parse(JSON.stringify(stats))};});
     u[DB_ROOT+'/gamedays/'+id]={id:id,date:m.date,court:m.court,pair:m.pair,opponent:m.opponent,sets:sets,isExhibition:m.isExhibition||false};
   });
