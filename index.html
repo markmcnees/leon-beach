@@ -4870,7 +4870,7 @@ function renderLiveAssignmentList(){
   if(_dualCloseInProgress)return;
   const el=document.getElementById('live-assignment-list');if(!el)return;
   const today=td();
-  const sorted=Object.values(D.assignments||{}).filter(a=>a.courts&&a.courts.length>0).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const sorted=Object.values(D.assignments||{}).filter(a=>a.courts&&a.courts.length>0&&(a.date||'')>=today).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   if(!sorted.length){el.innerHTML='<div style="color:var(--gray);font-size:13px;padding:8px 0;">No assignments yet. Use the Planner tab to create one.</div>';return;}
   const tL={gameday:'Dual',scrimmage:'Scrimmage',queens:'Queens'};
   const tC={gameday:'var(--blue)',scrimmage:'var(--purple)',queens:'var(--red)'};
