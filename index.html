@@ -23,7 +23,1082 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}@keyframes switchSlideIn{from{transform:translateY(-100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
 .season-badge{background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:13px;padding:4px 14px;border-radius:20px;letter-spacing:2px;border:1px solid rgba(255,255,255,0.25);}
 .tabs{display:flex;gap:2px;background:rgba(0,0,0,0.15);border-radius:8px;padding:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Leon Beach Volleyball Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+:root{--red:#e4002b;--red-dark:#b50022;--red-deeper:#8a001a;--red-light:#ff3354;--red-bg:#fce8ec;--black:#1a1a1a;--charcoal:#2d2d2d;--white:#ffffff;--off-white:#fafafa;--cream:#f7f4f0;--gold:#d4a843;--gold-light:#f0d98a;--gray:#6b7280;--gray-light:#d1d5db;--gray-lighter:#e8eaed;--green:#16a34a;--green-bg:#dcfce7;--loss-red:#991b1b;--blue:#4338ca;--blue-bg:#e0e7ff;--purple:#7c3aed;--purple-bg:#f3e8ff;--radius:10px;--shadow:0 2px 10px rgba(0,0,0,0.06);--shadow-lg:0 8px 30px rgba(0,0,0,0.12);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);min-height:100vh;-webkit-font-smoothing:antialiased;}
+.header{background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);padding:14px 20px 10px;position:relative;z-index:100;box-shadow:0 4px 24px rgba(228,0,43,0.3);}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.header h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:26px;color:var(--white);letter-spacing:3px;display:flex;align-items:center;gap:8px;text-shadow:0 2px 8px rgba(0,0,0,0.2);}
+.header h1 .crown{font-size:22px;}
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:6px;}
+.sync-dot.online{background:#4ade80;box-shadow:0 0 6px #4ade80;animation:pulse 2s infinite;}
+.sync-dot.offline{background:#ef4444;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}@keyframes switchSlideIn{from{transform:translateY(-100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.season-badge{background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:13px;padding:4px 14px;border-radius:20px;letter-spacing:2px;border:1px solid rgba(255,255,255,0.25);}
+.tabs{display:flex;gap:2px;background:rgba(0,0,0,0.15);border-radius:8px;padding:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;padding:8px 4px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:rgba(255,255,255,0.55);letter-spacing:1px;cursor:pointer;border-radius:6px;transition:all 0.2s ease;border:none;background:transparent;white-space:nowrap;min-width:0;}
+.tab.active{background:rgba(255,255,255,0.2);color:var(--white);}.tab:hover{color:var(--white);}
+.content{padding:16px;max-width:840px;margin:0 auto;}
+.tab-content{display:none;}.tab-content.active{display:block;}
+.card{background:var(--white);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.04);animation:fadeIn 0.25s ease;}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;color:var(--red);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-title .bar{width:4px;height:18px;border-radius:2px;background:var(--red);display:inline-block;}
+.card-title.blue{color:var(--blue);}.card-title.blue .bar{background:var(--blue);}
+.card-title.gold{color:var(--gold);}.card-title.gold .bar{background:var(--gold);}
+.dual-card{background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border-left:4px solid var(--gold);position:relative;}
+.dual-card.win{border-left-color:var(--green);}.dual-card.loss{border-left-color:var(--loss-red);}
+.dual-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.dual-result-badge{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;line-height:1;}
+.dual-result-badge.win{color:var(--green);}.dual-result-badge.loss{color:var(--loss-red);}
+.dual-court-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:13px;}
+.dual-court-row:last-child{border-bottom:none;}
+.dual-review-block{background:var(--off-white);border-radius:10px;padding:14px;margin-bottom:14px;}
+.card-title.purple{color:var(--purple);}.card-title.purple .bar{background:var(--purple);}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.stat-grid.cols-3{grid-template-columns:repeat(3,1fr);}
+.stat-box{text-align:center;padding:14px 8px;border-radius:8px;background:var(--off-white);border:1px solid var(--gray-lighter);}
+.stat-number{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--red);line-height:1;}
+.stat-number.green{color:var(--green);}.stat-number.blue{color:var(--blue);}.stat-number.purple{color:var(--purple);}
+.stat-label{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;}
+.court-badge{display:inline-block;font-family:'Bebas Neue',sans-serif;font-size:11px;padding:2px 8px;border-radius:4px;letter-spacing:1px;}
+.court-1{background:#fde2e8;color:var(--red-dark);}.court-2{background:#e0e7ff;color:#3730a3;}.court-3{background:#fef3c7;color:#92400e;}.court-4{background:#d1fae5;color:#065f46;}.court-5{background:#f3e8ff;color:#6b21a8;}.court-6{background:#fce7f3;color:#9d174d;}.court-7{background:#ecfdf5;color:#065f46;}.court-8{background:#fffbeb;color:#92400e;}
+/* LIVE SCORING */
+.live-court-card{background:var(--white);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--blue);}
+.live-court-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.live-pair-name{font-weight:700;font-size:14px;color:var(--black);}
+.live-opp-name{font-size:12px;color:var(--gray);margin-top:2px;}
+.live-score-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:8px;}
+.live-score-col{text-align:center;}
+.live-score-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gray);margin-bottom:3px;}
+.live-score-input{width:100%;padding:12px 4px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:28px;text-align:center;color:var(--black);background:var(--white);}
+.live-score-input:focus{outline:none;border-color:var(--blue);}
+.ls-counter{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.ls-num{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;min-width:70px;text-align:center;color:var(--black);}
+.ls-inp{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;width:100%;min-width:70px;text-align:center;color:var(--black);background:transparent;border:none;border-bottom:2px dashed transparent;outline:none;padding:0;cursor:default;-moz-appearance:textfield;}
+.ls-inp:focus{border-bottom-color:var(--blue);cursor:text;background:var(--blue-bg);border-radius:6px;}
+.ls-inp::-webkit-inner-spin-button,.ls-inp::-webkit-outer-spin-button{-webkit-appearance:none;}
+.ls-btn{width:100%;padding:10px 0;border-radius:10px;border:none;font-family:'Bebas Neue',sans-serif;font-size:28px;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:manipulation;transition:transform 0.08s,background 0.08s;}
+.ls-btn:active{transform:scale(0.92);}
+.ls-btn-plus{background:var(--blue);color:var(--white);}
+.ls-btn-plus:active{background:#1d4ed8;}
+.ls-btn-minus{background:var(--gray-lighter);color:var(--charcoal);}
+.ls-btn-minus:active{background:#d1d5db;}
+.live-set-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:13px;margin:2px;}
+.live-set-chip.win{background:var(--green-bg);color:var(--green);}.live-set-chip.loss{background:#fee2e2;color:var(--loss-red);}
+/* COACH NOTES */
+.cnote-tabs{display:flex;gap:4px;margin-bottom:12px;}
+.cnote-tab{flex:1;padding:8px 4px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;border:2px solid var(--gray-lighter);border-radius:6px;background:var(--white);color:var(--gray);cursor:pointer;transition:all 0.15s;}
+.cnote-tab.active{border-color:var(--charcoal);background:var(--charcoal);color:var(--white);}
+.cnote-section{display:none;}.cnote-section.active{display:block;}
+.cnote-player-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04);}
+.cnote-player-row:last-child{border-bottom:none;}
+.cnote-player-label{font-size:12px;font-weight:700;min-width:80px;padding-top:6px;color:var(--charcoal);}
+.cnote-textarea{flex:1;padding:8px 10px;border:1px solid var(--gray-lighter);border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;resize:vertical;min-height:52px;width:100%;}
+.cnote-textarea:focus{outline:none;border-color:var(--charcoal);}
+/* PLAYER PORTAL TABS */
+.pp-tab-bar{display:flex;gap:4px;margin-bottom:14px;background:var(--gray-lighter);border-radius:10px;padding:3px;}
+.pp-tab-btn{flex:1;padding:10px 8px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;border:none;background:transparent;color:var(--gray);cursor:pointer;border-radius:8px;transition:all 0.2s;}
+.pp-tab-btn.active{background:var(--white);color:var(--red);box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.pp-panel{display:none;}.pp-panel.active{display:block;}
+/* PLAYER GAME DAY */
+.pgd-assignment{background:linear-gradient(135deg,#1e40af 0%,#3730a3 100%);border-radius:var(--radius);padding:18px;margin-bottom:14px;color:var(--white);}
+.pgd-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;opacity:0.75;margin-bottom:4px;}
+.pgd-title{font-family:'Bebas Neue',sans-serif;font-size:22px;margin-bottom:6px;}
+.pgd-court-badge{display:inline-block;background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;border:1px solid rgba(255,255,255,0.3);}
+.pgd-set-entry{background:var(--off-white);border-radius:10px;padding:16px;margin-bottom:12px;border:2px solid var(--gray-lighter);}
+.pgd-score-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:14px;}
+.pgd-score-block{text-align:center;}
+.pgd-score-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--gray);margin-bottom:8px;}
+.pgd-score-ctrl{display:flex;align-items:center;justify-content:center;gap:6px;}
+.pgd-score-num{font-family:'Bebas Neue',sans-serif;font-size:48px;min-width:64px;text-align:center;line-height:1;}
+.pgd-score-btn{width:44px;height:44px;border-radius:10px;border:2px solid var(--gray-lighter);background:var(--white);font-size:24px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.1s;-webkit-user-select:none;user-select:none;touch-action:manipulation;}
+.pgd-score-btn:active{transform:scale(0.88);background:var(--gray-lighter);}
+.pgd-vs{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gray-light);letter-spacing:2px;text-align:center;}
+.pgd-set-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:14px;margin:3px;}
+.pgd-set-chip.win{background:var(--green-bg);color:var(--green);}.pgd-set-chip.loss{background:#fee2e2;color:var(--loss-red);}
+.pgd-notes-area{width:100%;padding:12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;resize:vertical;min-height:80px;box-sizing:border-box;}
+.pgd-notes-area:focus{outline:none;border-color:var(--blue);}
+/* PLAYER OPTIONAL STATS */
+.pgd-stats-toggle{width:100%;background:none;border:2px dashed var(--gray-lighter);border-radius:8px;padding:10px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gray);cursor:pointer;margin-top:10px;transition:all 0.2s;}
+.pgd-stats-toggle:hover,.pgd-stats-toggle.open{border-color:var(--blue);color:var(--blue);background:#dbeafe;}
+.pgd-stats-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:10px;}
+.pgd-stat-col{text-align:center;}
+.pgd-stat-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gray);margin-bottom:4px;}
+.pgd-stat-label .stat-desc{display:block;font-size:9px;color:var(--gray-light);font-family:'Barlow',sans-serif;letter-spacing:0;font-weight:600;}
+.pgd-stat-ctrl{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.pgd-stat-num{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;min-width:36px;text-align:center;}
+.pgd-stat-btn{width:36px;height:28px;border-radius:6px;border:1px solid var(--gray-lighter);background:var(--white);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-user-select:none;user-select:none;touch-action:manipulation;}
+.pgd-stat-btn:active{transform:scale(0.88);background:var(--gray-lighter);}
+/* SPECTATOR & EDIT */
+.pgd-player-stats-block{background:var(--off-white);border-radius:8px;padding:10px;margin-top:8px;}
+.pgd-player-stats-label{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;}
+.pgd-court-section{background:var(--white);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--blue);}
+.pgd-court-section.spectator{border-left-color:var(--purple);}
+.pgd-set-edit-form{background:#f0f9ff;border:2px solid var(--blue);border-radius:8px;padding:12px;margin:6px 0;}
+.pgd-edit-score-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px;}
+.pgd-edit-input{width:100%;padding:8px 4px;border:2px solid var(--gray-lighter);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:22px;text-align:center;}
+.pgd-edit-input:focus{outline:none;border-color:var(--blue);}
+.pgd-enteredby{font-size:10px;color:var(--gray);font-style:italic;margin-top:3px;}
+/* NOTIFICATION BANNER */
+.notif-banner{margin:0 0 14px;padding:14px 16px;border-radius:10px;border:2px solid var(--blue);background:#dbeafe;animation:fadeIn 0.3s ease;}
+.notif-banner.scrimmage{border-color:var(--purple);background:var(--purple-bg);}
+.notif-banner-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--blue);margin-bottom:4px;}
+.notif-banner.scrimmage .notif-banner-label{color:var(--purple);}
+.notif-banner-title{font-family:'Bebas Neue',sans-serif;font-size:18px;margin-bottom:4px;}
+.notif-banner-detail{font-size:13px;font-weight:700;}
+.class-badge{display:inline-block;font-size:10px;font-weight:800;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:0.5px;}
+.class-SR{background:var(--black);color:var(--white);}.class-JR{background:var(--red);color:var(--white);}.class-SO{background:var(--gold);color:var(--black);}.class-FR{background:var(--gray-light);color:var(--charcoal);}
+.player-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
+.player-table thead th{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--gray);padding:8px 6px;text-align:left;border-bottom:2px solid var(--gray-lighter);cursor:pointer;white-space:nowrap;user-select:none;}
+.player-table thead th:hover{color:var(--red);}.player-table thead th.sort-active{color:var(--red-dark);}
+.player-table thead th .sort-arrow{font-size:10px;margin-left:2px;}
+.player-table tbody td{padding:10px 6px;border-bottom:1px solid rgba(0,0,0,0.04);vertical-align:middle;}
+.player-table tbody tr:hover{background:var(--off-white);}
+.player-name{font-weight:700;color:var(--black);white-space:nowrap;}
+.plus-minus{font-family:'Bebas Neue',sans-serif;font-size:16px;}
+.pm-positive{color:var(--green);}.pm-negative{color:var(--loss-red);}.pm-zero{color:var(--gray);}
+.wl-record{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--black);}
+.filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.filter-btn{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:0.8px;padding:6px 14px;border-radius:20px;border:2px solid var(--gray-light);background:var(--white);color:var(--gray);cursor:pointer;transition:all 0.15s;}
+.filter-btn.active{border-color:var(--red);background:var(--red);color:var(--white);}.filter-btn:hover{border-color:var(--red);}
+.filter-btn.blue.active{border-color:var(--blue);background:var(--blue);color:var(--white);}.filter-btn.blue:hover{border-color:var(--blue);}
+.filter-btn.purple.active{border-color:var(--purple);background:var(--purple);color:var(--white);}.filter-btn.purple:hover{border-color:var(--purple);}
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;color:var(--charcoal);margin-bottom:5px;}
+.form-input,.form-select{width:100%;padding:11px 14px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--black);background:var(--white);transition:border-color 0.2s;-webkit-appearance:none;}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--red);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.team-section{padding:14px;border-radius:8px;margin-bottom:10px;}
+.team-section.team-a{background:#fef2f2;border:2px solid #fecaca;}
+.team-section.team-b{background:#f0f4ff;border:2px solid #c7d2fe;}
+.team-label{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;margin-bottom:10px;}
+.team-a .team-label{color:var(--red);}.team-b .team-label{color:var(--blue);}
+.vs-divider{text-align:center;font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gray-light);margin:4px 0;letter-spacing:3px;}
+.score-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;margin-top:8px;}
+.score-col{text-align:center;}
+.score-col-label{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.5px;margin-bottom:4px;}
+.score-col-label.label-a{color:var(--red);}.score-col-label.label-b{color:var(--blue);}
+.score-input{width:100%;padding:14px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:32px;text-align:center;color:var(--black);background:var(--white);transition:border-color 0.2s;}
+.score-input:focus{outline:none;border-color:var(--red);}
+.score-input-sm{padding:8px;font-size:22px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:13px 28px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;cursor:pointer;border:none;transition:all 0.2s;width:100%;}
+.btn-primary{background:var(--red);color:var(--white);}.btn-primary:hover{background:var(--red-dark);}
+.btn-blue{background:var(--blue);color:var(--white);}.btn-blue:hover{background:#3730a3;}
+.btn-purple{background:var(--purple);color:var(--white);}.btn-purple:hover{background:#6d28d9;}
+.btn-secondary{background:var(--off-white);color:var(--charcoal);border:2px solid var(--gray-lighter);}.btn-secondary:hover{background:var(--gray-lighter);}
+.btn-danger{background:var(--red-bg);color:var(--loss-red);font-size:13px;padding:8px 14px;}.btn-danger:hover{background:#fcd5d5;}
+.btn-success{background:var(--green);color:var(--white);}.btn-success:hover{background:#15803d;}
+.btn-small{padding:6px 12px;font-size:12px;width:auto;}
+.match-card{background:var(--white);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.05);position:relative;}
+.match-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.match-body{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;}
+.match-team{font-size:13px;font-weight:700;line-height:1.4;}
+.match-team.winner{color:var(--green);}.match-team.loser{color:var(--gray);}
+.match-team.left{text-align:left;}.match-team.right{text-align:right;}
+.match-score{font-family:'Bebas Neue',sans-serif;font-size:24px;text-align:center;white-space:nowrap;color:var(--black);letter-spacing:1px;}
+.match-date{font-size:12px;color:var(--gray);font-weight:600;}
+.match-actions{position:absolute;top:8px;right:8px;display:flex;gap:2px;}
+.match-action-btn{background:none;border:none;color:var(--gray-light);cursor:pointer;font-size:14px;padding:4px 6px;line-height:1;border-radius:4px;}
+.match-action-btn:hover{color:var(--red);background:var(--red-bg);}
+.match-action-btn.edit-btn:hover{color:var(--blue);background:var(--blue-bg);}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.active{display:flex;}
+.modal{background:var(--white);border-radius:14px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn 0.2s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--red);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{background:none;border:none;font-size:22px;color:var(--gray);cursor:pointer;padding:4px 8px;border-radius:4px;}.modal-close:hover{color:var(--red);background:var(--red-bg);}
+.modal-footer{display:flex;gap:10px;margin-top:18px;}.modal-footer .btn{flex:1;}
+.planned-card{background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--gray-light);position:relative;}
+.planned-card.completed{border-left-color:var(--green);opacity:0.7;}.planned-card.pending{border-left-color:var(--red);}
+.planned-matchup{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin:10px 0;}
+.planned-team{font-weight:700;font-size:14px;line-height:1.5;}.planned-team.left{text-align:left;}.planned-team.right{text-align:right;}
+.planned-vs{font-family:'Bebas Neue',sans-serif;color:var(--gray-light);font-size:16px;letter-spacing:2px;}
+.planned-score-entry{display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:end;margin-top:10px;}
+.planned-score-col{text-align:center;}
+.planned-score-col-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;margin-bottom:3px;}
+.planned-score-input{padding:10px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:24px;text-align:center;width:100%;background:var(--off-white);color:var(--black);}
+.planned-score-input:focus{outline:none;border-color:var(--red);background:var(--white);}
+.planned-save-btn{padding:10px 16px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:none;background:var(--green);color:var(--white);white-space:nowrap;align-self:end;}
+.planned-save-btn:hover{background:#15803d;}
+.planned-result{font-family:'Bebas Neue',sans-serif;font-size:22px;text-align:center;color:var(--black);letter-spacing:1px;margin-top:10px;}
+.date-filter{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+.date-filter input[type="date"]{padding:8px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--black);}
+.date-filter input:focus{outline:none;border-color:var(--red);}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--charcoal);color:var(--white);padding:12px 24px;border-radius:8px;font-weight:700;font-size:14px;box-shadow:var(--shadow-lg);z-index:1000;transition:transform 0.3s ease;white-space:nowrap;}.toast.show{transform:translateX(-50%) translateY(0);}
+.empty-state{text-align:center;padding:40px 20px;color:var(--gray);}.empty-state .emoji{font-size:40px;margin-bottom:12px;}.empty-state p{font-size:14px;line-height:1.6;}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -18px;padding:0 18px;}
+.roster-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04);flex-wrap:wrap;}.roster-item:last-child{border-bottom:none;}
+.roster-name{font-weight:700;flex:1;min-width:120px;}
+.court-select{padding:4px 8px;border:1px solid var(--gray-light);border-radius:4px;font-size:12px;font-family:'Barlow',sans-serif;}
+.data-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.plan-add-row{background:var(--off-white);border:2px dashed var(--gray-lighter);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+.ext-match-card{background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.05);position:relative;}
+.ext-match-card .ext-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.ext-match-card .ext-matchup{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.ext-match-card .ext-pair{font-weight:700;font-size:14px;}
+.ext-match-card .ext-vs{font-family:'Bebas Neue',sans-serif;color:var(--gray-light);font-size:14px;letter-spacing:2px;}
+.ext-match-card .ext-opp{font-weight:700;font-size:14px;color:var(--gray);}
+.set-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:13px;}
+.set-row:last-child{border-bottom:none;}
+.set-label{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;color:var(--gray);min-width:36px;}
+.set-score{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;}
+.set-score.win{color:var(--green);}.set-score.loss{color:var(--loss-red);}
+.set-stats-mini{font-size:11px;color:var(--gray);margin-left:auto;}
+.set-add-form{background:var(--off-white);border:2px dashed var(--gray-lighter);border-radius:8px;padding:12px;margin-top:10px;}
+.set-add-form .form-label{font-size:12px;}
+.set-add-form .form-input,.set-add-form .form-select{padding:8px 10px;font-size:13px;}
+.stat-input-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px;}
+.stat-input-row label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:0.5px;color:var(--gray);text-align:center;display:block;}
+.stat-input-row input{width:100%;padding:6px;border:1px solid var(--gray-lighter);border-radius:4px;font-family:'Bebas Neue',sans-serif;font-size:16px;text-align:center;}
+.stat-input-row input:focus{outline:none;border-color:var(--red);}
+.toggle-stats-btn{font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:'Barlow',sans-serif;font-weight:600;padding:4px 0;text-decoration:underline;}
+.ext-summary{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--gray-lighter);}
+.ext-summary-item{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.5px;}
+.section-divider{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;color:var(--gray);margin:14px 0 8px;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+/* Phone: coach portal + live scoring tweaks */
+@media(max-width:480px){
+  .header{padding:10px 14px 8px;}
+  .header h1{font-size:20px;letter-spacing:2px;}
+  .tab{font-size:10px;padding:7px 2px;letter-spacing:0.5px;}
+  .content{padding:10px;}
+  .card{padding:12px;}
+  .stat-grid{gap:6px;grid-template-columns:repeat(2,1fr);}
+  .stat-number{font-size:22px;}
+  .stat-label{font-size:9px;}
+  .player-table{font-size:12px;}
+  .player-table thead th{font-size:10px;padding:6px 4px;}
+  .player-table tbody td{padding:8px 4px;}
+  .match-score{font-size:20px;}
+  .match-team{font-size:12px;}
+  .planned-team{font-size:12px;}
+  .modal{padding:16px;}
+  .score-input{font-size:26px;padding:12px;}
+  /* Live Score Entry: bigger tap targets */
+  .ls-num{font-size:64px;}
+  .ls-inp{font-size:64px;}
+  .ls-btn{padding:16px 0;font-size:34px;border-radius:14px;}
+  .live-court-card{padding:16px;}
+  .live-score-row{gap:12px;}
+}
+/* LOGIN SCREEN */
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100dvh;background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-overlay.hidden{display:none;}
+.login-box{background:var(--white);border-radius:16px;padding:36px 28px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);text-align:center;}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;color:var(--red);margin-bottom:4px;}
+.login-logo .crown{font-size:30px;}
+.login-sub{font-size:13px;color:var(--gray);margin-bottom:24px;letter-spacing:0.5px;}
+.login-toggle{display:flex;gap:2px;background:var(--gray-lighter);border-radius:8px;padding:2px;margin-bottom:20px;}
+.login-toggle-btn{flex:1;padding:10px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;border:none;background:transparent;color:var(--gray);cursor:pointer;border-radius:6px;transition:all 0.2s;}
+.login-toggle-btn.active{background:var(--red);color:var(--white);}
+.login-section{display:none;}.login-section.active{display:block;}
+.login-pin-dots{display:flex;justify-content:center;gap:12px;margin:20px 0;}
+.login-pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--gray-light);background:transparent;transition:all 0.15s;}
+.login-pin-dot.filled{background:var(--red);border-color:var(--red);}
+.login-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto;}
+.login-numpad-btn{padding:14px;font-family:'Bebas Neue',sans-serif;font-size:22px;border:2px solid var(--gray-lighter);border-radius:10px;background:var(--white);color:var(--black);cursor:pointer;transition:all 0.15s;}
+.login-numpad-btn:hover{border-color:var(--red);background:var(--red-bg);}
+.login-numpad-btn:active{background:var(--red);color:var(--white);}
+.login-numpad-btn.empty{visibility:hidden;border:none;}
+.login-numpad-btn.backspace{font-size:16px;}
+.login-error{color:var(--loss-red);font-size:13px;font-weight:700;margin-top:10px;min-height:20px;}
+.login-player-select{margin:16px 0;}
+.login-player-select select{width:100%;padding:12px 14px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:15px;color:var(--black);background:var(--white);}
+.login-player-select select:focus{outline:none;border-color:var(--red);}
+.login-btn{width:100%;padding:14px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;border:none;background:var(--red);color:var(--white);transition:all 0.2s;margin-top:12px;}
+.login-btn:hover{background:var(--red-dark);}
+.login-btn:disabled{background:var(--gray-light);cursor:not-allowed;}
+/* HEADER USER INFO */
+.header-user{display:flex;align-items:center;gap:10px;}
+.header-username{font-family:'Bebas Neue',sans-serif;font-size:14px;color:rgba(255,255,255,0.9);letter-spacing:1px;}
+.logout-btn{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;padding:4px 12px;border-radius:4px;border:1px solid rgba(255,255,255,0.4);background:transparent;color:rgba(255,255,255,0.8);cursor:pointer;transition:all 0.15s;}
+.logout-btn:hover{background:rgba(255,255,255,0.15);color:var(--white);}
+/* PLAYER PORTAL */
+.player-portal{display:none;padding:16px;max-width:840px;margin:0 auto;}
+.player-portal.active{display:block;}
+.player-portal .pp-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--red);margin-bottom:2px;}
+.player-portal .pp-meta{font-size:13px;color:var(--gray);margin-bottom:16px;}
+.rank-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);}
+.rank-row:last-child{border-bottom:none;}
+.rank-label{font-size:12px;font-weight:600;color:var(--charcoal);min-width:90px;}
+.rank-bar-wrap{flex:1;position:relative;height:24px;background:var(--gray-lighter);border-radius:12px;overflow:hidden;}
+.rank-bar-fill{height:100%;border-radius:12px;transition:width 0.4s ease;min-width:4px;}
+.rank-bar-fill.top3{background:var(--green);}.rank-bar-fill.mid{background:var(--gold);}.rank-bar-fill.low{background:var(--gray-light);}
+.rank-position{font-family:'Bebas Neue',sans-serif;font-size:16px;min-width:60px;text-align:right;}
+.rank-position .ordinal{font-size:11px;font-weight:400;color:var(--gray);}
+.rank-value{font-size:12px;color:var(--gray);min-width:50px;text-align:right;}
+/* GOALS */
+.goal-card{background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border-left:4px solid var(--gold);position:relative;}
+.goal-card.approved{border-left-color:var(--green);}
+.goal-card.draft{border-left-color:var(--gray-light);}
+.goal-card .goal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.goal-card .goal-label{font-weight:700;font-size:14px;}
+.goal-card .goal-status{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:4px;}
+.goal-status.pending{background:var(--gray-lighter);color:var(--gray);}
+.goal-status.ai-ready{background:#fef3c7;color:#92400e;}
+.goal-status.approved{background:var(--green-bg);color:var(--green);}
+.goal-feedback{background:var(--off-white);border-radius:8px;padding:14px;margin-top:10px;font-size:13px;line-height:1.7;white-space:pre-wrap;}
+.goal-feedback .coach-stamp{font-size:11px;color:var(--gray);margin-top:8px;font-style:italic;}
+.goal-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.ai-loading{text-align:center;padding:20px;color:var(--gray);}
+.ai-loading .spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--gray-lighter);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* Phone: login screen */
+@media(max-width:480px){
+  .login-box{padding:24px 16px;max-width:100%;border-radius:12px;}
+  .login-logo{font-size:32px;}
+  .login-numpad{max-width:100%;gap:10px;}
+  .login-numpad-btn{padding:18px;font-size:26px;border-radius:12px;}
+  .login-pin-dot{width:20px;height:20px;}
+  .login-pin-dots{gap:18px;margin:24px 0;}
+  .login-toggle-btn{padding:12px 6px;font-size:14px;}
+  .login-btn{padding:16px;font-size:20px;}
+  .header-username{font-size:12px;}
+  /* Player portal: sticky bottom tab bar */
+  .pp-tab-bar{position:sticky;bottom:0;z-index:50;border-radius:0;
+    padding:4px;background:var(--white);
+    box-shadow:0 -2px 14px rgba(0,0,0,0.12);margin-bottom:0;}
+  .pp-tab-btn{padding:12px 4px;font-size:12px;letter-spacing:1px;}
+  .player-portal{padding:10px 10px 80px;}
+}
+@media(max-width:360px){
+  .header h1{font-size:17px;}
+  .tab{font-size:9px;}
+  .login-numpad-btn{padding:16px;font-size:22px;}
+}
+</style>
+  <meta name="build-version" content="20260328020848">
+</head>
+<body>
+<!-- LOGIN SCREEN -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo" style="display:flex;flex-direction:column;align-items:center;gap:6px;"><img src="leon-logo.png" style="height:72px;width:auto;" alt="Leon"><span>Leon Beach</span></div>
+    <div class="login-sub">2026 Beach Volleyball Season</div>
+    <div class="login-toggle">
+      <button class="login-toggle-btn active" onclick="switchLogin('coach')">Coach</button>
+      <button class="login-toggle-btn" onclick="switchLogin('player')">Player</button>
+    </div>
+    <div class="login-section active" id="login-coach">
+      <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--charcoal);margin-bottom:8px;">Enter Coach PIN</div>
+      <div class="login-pin-dots" id="pin-dots">
+        <div class="login-pin-dot"></div><div class="login-pin-dot"></div>
+        <div class="login-pin-dot"></div><div class="login-pin-dot"></div>
+      </div>
+      <div class="login-numpad" id="numpad">
+        <button class="login-numpad-btn" onclick="pinPress('1')">1</button>
+        <button class="login-numpad-btn" onclick="pinPress('2')">2</button>
+        <button class="login-numpad-btn" onclick="pinPress('3')">3</button>
+        <button class="login-numpad-btn" onclick="pinPress('4')">4</button>
+        <button class="login-numpad-btn" onclick="pinPress('5')">5</button>
+        <button class="login-numpad-btn" onclick="pinPress('6')">6</button>
+        <button class="login-numpad-btn" onclick="pinPress('7')">7</button>
+        <button class="login-numpad-btn" onclick="pinPress('8')">8</button>
+        <button class="login-numpad-btn" onclick="pinPress('9')">9</button>
+        <button class="login-numpad-btn empty"></button>
+        <button class="login-numpad-btn" onclick="pinPress('0')">0</button>
+        <button class="login-numpad-btn backspace" onclick="pinBack()">⌫</button>
+      </div>
+      <div class="login-error" id="pin-error"></div>
+    </div>
+    <div class="login-section" id="login-player">
+      <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--charcoal);margin-bottom:8px;">Select Your Name</div>
+      <div class="login-player-select"><select id="login-player-select"><option value="">— Choose Player —</option></select></div>
+      <input type="password" style="width:100%;padding:12px 14px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:15px;margin-top:8px;" id="login-pw" placeholder="Enter Password">
+      <div class="login-error" id="pw-error"></div>
+      <button class="login-btn" id="player-login-btn" onclick="playerLogin()">View My Stats</button>
+    </div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-lighter);text-align:center;">
+      <button onclick="showLeonFans()" style="display:inline-flex;align-items:center;gap:6px;font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--white);border:none;cursor:pointer;padding:9px 20px;border-radius:8px;background:var(--red);transition:background 0.2s;" onmouseover="this.style.background='var(--red-dark)';" onmouseout="this.style.background='var(--red)';">
+        🏐 Leon Beach Fan Page
+      </button>
+      <div style="font-size:11px;color:var(--red);font-weight:700;margin-top:6px;">Parents · Fans · Press — No login required</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app-wrapper" style="display:none;">
+<div class="header">
+  <div class="header-top">
+    <h1><span class="crown"><img src="leon-logo.png" style="height:28px;width:auto;vertical-align:middle;filter:brightness(0) invert(1);"></span> Leon Beach <span class="sync-dot" id="sync-dot"></span></h1>
+    <div class="header-user">
+      <span class="header-username" id="header-username"></span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="players">Players</button>
+    <button class="tab" data-tab="gameday">Planner</button>
+    <button class="tab" data-tab="duals">Duals</button>
+    <button class="tab" data-tab="goals">Goals</button>
+    <button class="tab" data-tab="scouts">Scouts</button>
+    <button class="tab" data-tab="settings">Roster</button>
+    <button class="tab" onclick="window.location.href='https://markmcnees.github.io/leon-beach/leon-queens-profiles.html'" style="border-left:1px solid rgba(255,255,255,0.15);">Profiles ↗</button>
+  </div>
+</div>
+<div class="content" id="coach-content">
+
+  <!-- ====== DASHBOARD ====== -->
+    <div class="tab-content active" id="tab-dashboard">
+<div class="card"><div class="card-title"><span class="bar"></span> Season Overview</div>
+      <div class="stat-grid cols-3">
+        <div class="stat-box"><div class="stat-number" style="color:var(--red);" id="dash-dual-rec">0-0</div><div class="stat-label">Dual W-L</div></div>
+        <div class="stat-box"><div class="stat-number" style="color:var(--red);" id="dash-courts-rec">0-0</div><div class="stat-label">Match W-L</div></div>
+        <div class="stat-box"><div class="stat-number" style="color:var(--red);" id="dash-sets-rec">0-0</div><div class="stat-label">Sets W-L</div></div>
+      </div>
+    </div>
+<div class="card"><div class="card-title"><span class="bar"></span> Season Schedule <span style="font-size:11px;color:var(--gray);font-family:'Barlow';font-weight:600;letter-spacing:0;margin-left:8px;">via MaxPreps</span></div>
+      <div id="dash-schedule"></div>
+      <div id="dash-schedule-add" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-lighter);">
+        <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Add Game</div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label><input type="date" class="form-input" id="sched-date" style="padding:8px;font-size:13px;"></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent</label><input type="text" class="form-input" id="sched-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Location</label>
+            <select class="form-select" id="sched-loc" style="padding:8px;font-size:13px;"><option value="home">Home</option><option value="away">Away</option><option value="neutral">Neutral</option></select></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Time</label><input type="text" class="form-input" id="sched-time" placeholder="3:00pm" style="padding:8px;font-size:13px;"></div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Leon Score</label><input type="number" class="form-input" id="sched-us" placeholder="—" min="0" max="5" style="padding:8px;font-size:13px;"></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opp Score</label><input type="number" class="form-input" id="sched-them" placeholder="—" min="0" max="5" style="padding:8px;font-size:13px;"></div>
+        </div>
+        <button class="btn btn-primary btn-small" onclick="addScheduleGame()">Add Game</button>
+      </div>
+    </div>
+<div class="card"><div class="card-title"><span class="bar"></span> Area Standings<span id="maxpreps-status" style="font-size:10px;font-weight:400;font-family:'Barlow',sans-serif;color:var(--gray);margin-left:8px;letter-spacing:0;"></span></div>
+      <div id="dash-standings"></div>
+      <div id="dash-standings-add" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-lighter);">
+        <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Update Team Record</div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Team</label>
+            <select class="form-select" id="stand-team" style="padding:8px;font-size:13px;"></select></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Wins</label><input type="number" class="form-input" id="stand-w" min="0" style="padding:8px;font-size:13px;" value="0"></div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Losses</label><input type="number" class="form-input" id="stand-l" min="0" style="padding:8px;font-size:13px;" value="0"></div>
+          <div class="form-group" style="margin-bottom:0;"><button class="btn btn-primary btn-small" style="margin-top:22px;" onclick="updateStanding()">Update</button></div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+<!-- ====== PLAYERS ====== -->
+  <div class="tab-content" id="tab-players">
+    <div class="filter-row" id="type-filter-players">
+      <button class="filter-btn active" data-ptype="all">All</button>
+      <button class="filter-btn" data-ptype="queens">Queens</button>
+      <button class="filter-btn blue" data-ptype="gameday">Dual</button>
+      <button class="filter-btn purple" data-ptype="scrimmage">Scrimmage</button>
+      <button class="filter-btn" data-ptype="exhibition" style="background:var(--white);color:#0e7a4d;border-color:#0e7a4d;">Exhibition</button>
+    </div>
+    
+    <div class="card" style="padding:8px 12px;"><div class="table-wrap">
+      <table class="player-table" id="players-table"><thead><tr id="players-thead"></tr></thead><tbody></tbody></table>
+    </div></div>
+  </div>
+
+  <!-- ====== QUEENS (Leon vs Leon) ====== -->
+  <div class="tab-content" id="tab-queens">
+    <div class="card"><div class="card-title"><span class="bar"></span> Record Queens Match</div>
+      <div class="form-row" style="margin-bottom:14px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label><input type="date" class="form-input" id="q-date"></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Court</label>
+          <select class="form-select" id="q-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option><option value="6">Court 6 — Exhib</option><option value="7">Court 7 — Exhib</option><option value="8">Court 8 — Exhib</option></select></div></div>
+      <div id="q-split-pairs" style="display:none;"></div>
+      <div class="team-section team-a"><div class="team-label">Team A</div>
+        <div class="form-row"><select class="form-select" id="q-a1"><option value="">Player 1</option></select><select class="form-select" id="q-a2"><option value="">Player 2</option></select></div></div>
+      <div class="vs-divider">VS</div>
+      <div class="team-section team-b"><div class="team-label">Team B</div>
+        <div class="form-row"><select class="form-select" id="q-b1"><option value="">Player 1</option></select><select class="form-select" id="q-b2"><option value="">Player 2</option></select></div></div>
+      <div id="q-split-toggle" style="display:none;margin-top:10px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--purple);cursor:pointer;">
+          <input type="checkbox" id="q-is-split" style="width:16px;height:16px;accent-color:var(--purple);" onchange="toggleSplitQ()">
+          🔀 Split Match — different pairs for Set 2
+        </label>
+      </div>
+      <div id="q-split-extra" style="display:none;margin-top:10px;padding:10px;background:#f5f3ff;border-radius:8px;border:1px solid #c4b5fd;">
+        <div style="font-family:'Bebas Neue';font-size:12px;letter-spacing:1px;color:var(--purple);margin-bottom:8px;">SET 2 — DIFFERENT PAIRS</div>
+        <div class="team-section team-a" style="margin-bottom:6px;"><div class="team-label">Set 2 — Team A</div>
+          <div class="form-row"><select class="form-select" id="q-s2a1"><option value="">Player 1</option></select><select class="form-select" id="q-s2a2"><option value="">Player 2</option></select></div></div>
+        <div class="vs-divider" style="margin:4px 0;">VS</div>
+        <div class="team-section team-b"><div class="team-label">Set 2 — Team B</div>
+          <div class="form-row"><select class="form-select" id="q-s2b1"><option value="">Player 1</option></select><select class="form-select" id="q-s2b2"><option value="">Player 2</option></select></div></div>
+      </div>
+      <div class="score-row">
+        <div class="score-col"><div class="score-col-label label-a">Team A</div><input type="number" class="score-input" id="q-sa" placeholder="0" min="0" max="99"></div>
+        <span class="score-dash">—</span>
+        <div class="score-col"><div class="score-col-label label-b">Team B</div><input type="number" class="score-input" id="q-sb" placeholder="0" min="0" max="99"></div></div>
+      <div style="margin-top:16px;"><button class="btn btn-primary" id="save-queens">Save Match</button></div>
+    </div>
+    <div class="card" style="border:2px solid var(--gold);">
+      <div class="card-title gold"><span class="bar" style="background:var(--gold);"></span> 📷 Upload Queens Scoresheet</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Photograph a handwritten Queens scoresheet. AI reads all court matchups and set scores then creates the match entries.</p>
+      <div class="form-group"><label class="form-label" style="font-size:11px;">Match Date</label>
+        <input type="date" class="form-input" id="qs-scan-date" style="padding:8px;font-size:13px;"></div>
+      <input type="file" id="qs-scan-file" accept="image/*" style="display:none;">
+      <button class="btn btn-small" style="width:100%;background:var(--gold);color:var(--black);border:none;font-size:15px;padding:12px;" onclick="document.getElementById('qs-scan-file').click();">&#128248; Take Photo or Upload Scoresheet</button>
+      <div id="qs-scan-preview" style="margin-top:10px;"></div>
+      <div id="qs-scan-result" style="margin-top:10px;"></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> Queens Match Log</div>
+      <div class="filter-row" id="court-filter-queens">
+        <button class="filter-btn active" data-qcourt="all">All</button>
+        <button class="filter-btn" data-qcourt="1">Pair 1</button><button class="filter-btn" data-qcourt="2">Pair 2</button>
+        <button class="filter-btn" data-qcourt="3">Pair 3</button><button class="filter-btn" data-qcourt="4">Pair 4</button>
+        <button class="filter-btn" data-qcourt="5">Pair 5</button><button class="filter-btn" data-qcourt="6">Pair 6</button>
+        <button class="filter-btn" data-qcourt="7">Pair 7</button><button class="filter-btn" data-qcourt="8">Pair 8</button>
+      </div>
+      <div id="queens-log"></div>
+    </div>
+  </div>
+
+  <!-- ====== GAME DAY (Leon vs External — Season) ====== -->
+    <div class="tab-content" id="tab-gameday">
+<div class="card"><div class="card-title blue"><span class="bar"></span> 🤖 AI Pairing Recommendations</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">AI analyzes skills, match history, position compatibility, side preference, and court levels to suggest optimal pairings.</p>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Courts to fill</label>
+          <select class="form-select" id="ai-pair-courts" style="padding:8px;font-size:13px;">
+            <option value="1">1 court</option><option value="2">2 courts</option><option value="3">3 courts</option><option value="4">4 courts</option><option value="5">5 courts</option><option value="6">6 courts</option><option value="7">7 courts</option><option value="8">8 courts</option>
+          </select></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Context</label>
+          <select class="form-select" id="ai-pair-context" style="padding:8px;font-size:13px;" onchange="document.getElementById('ai-pair-rounds-row').style.display=this.value==='queens'?'block':'none'">
+            <option value="gameday">Dual (strongest pairings)</option>
+            <option value="scrimmage">Scrimmage (mix it up)</option>
+            <option value="queens">Queens Practice (competitive balance)</option>
+          </select></div>
+      </div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label>
+          <input type="date" class="form-select" id="ai-pair-date" style="padding:8px;font-size:13px;"></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Location</label>
+          <select class="form-select" id="ai-pair-location" style="padding:8px;font-size:13px;">
+            <option>Tom Brown</option><option>Northside</option><option>4 Oaks</option><option>Away</option>
+          </select></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Time</label>
+          <input type="time" class="form-select" id="ai-pair-time" style="padding:8px;font-size:13px;"></div>
+      </div>
+      <div id="ai-pair-rounds-row" style="display:none;margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Rounds / Games</label>
+          <select class="form-select" id="ai-pair-rounds" style="padding:8px;font-size:13px;">
+            <option value="1">1 round</option>
+            <option value="2">2 rounds — different partners each</option>
+            <option value="3">3 rounds — full rotation</option>
+            <option value="4">4 rounds</option>
+          </select>
+          <div style="font-size:11px;color:var(--gray);margin-top:4px;">Each round re-mixes all partners so players get new matchups</div>
+        </div>
+      </div>
+      <button class="btn btn-blue btn-small" onclick="generateAIPairings()" id="ai-pair-btn" style="width:100%;">🤖 Generate Pairings</button>
+      <div id="ai-pairings-result" style="margin-top:12px;"></div>
+    </div>
+<div class="card"><div class="card-title blue"><span class="bar"></span> 📋 Planner</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Set lineups for duals and practice. Players see their assignment in their portal.</p>
+      <div style="background:var(--off-white);border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Create Assignment</div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label><input type="date" class="form-input" id="assign-date" style="padding:8px;font-size:13px;"></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
+            <select class="form-select" id="assign-type" style="padding:8px;font-size:13px;">
+              <option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
+            </select></div>
+        </div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label><input type="text" class="form-input" id="assign-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Courts</label>
+            <select class="form-select" id="assign-courts" style="padding:8px;font-size:13px;">
+              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+            </select></div>
+        </div>
+        <div id="assign-court-slots"></div>
+        <div id="assign-notes-section" style="margin-top:8px;"></div>
+        <button class="btn btn-blue btn-small" style="width:100%;margin-top:10px;" onclick="saveAssignment()">Save Assignment</button>
+      <div style="text-align:center;margin:10px 0 4px;font-size:11px;color:var(--gray);letter-spacing:0.5px;">— OR —</div>
+      <button class="btn btn-secondary btn-small" style="width:100%;" onclick="document.getElementById('ca-file').click()">📸 Scan a Court Assignment Sheet</button>
+      </div>
+      <div id="assignments-list"></div>
+    </div>
+<div class="card"><div class="card-title blue"><span class="bar"></span> 📅 Past Court Lineups</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Court assignments from past duals and scrimmages, derived from match records.</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+      <input type="date" id="lineup-search-date" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Date" oninput="filterPastLineups()">
+      <input type="text" id="lineup-search-opp" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Opponent" oninput="filterPastLineups()">
+      <input type="text" id="lineup-search-player" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Player name" oninput="filterPastLineups()">
+    </div>
+    <div id="past-lineups-list"></div>
+    </div>
+<div class="card"><div class="card-title"><span class="bar"></span> Data Management</div>
+      <div class="data-actions">
+        <button class="btn btn-primary btn-small" id="export-excel">📊 Export Excel</button>
+        <button class="btn btn-secondary btn-small" id="export-data">Export JSON</button>
+        <button class="btn btn-secondary btn-small" id="import-data-btn">Import JSON</button>
+        <input type="file" id="import-data" accept=".json" style="display:none;">
+        <button class="btn btn-danger btn-small" id="clear-matches">Clear All Matches</button>
+      </div>
+    </div>
+
+<div class="card"><div class="card-title"><span class="bar"></span> 📷 Upload Scoresheet</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a handwritten scoresheet and AI will read it and create the match entries.</p>
+      <div class="form-row" style="margin-bottom:8px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Match Type</label>
+          <select class="form-select" id="scan-type" style="padding:8px;font-size:13px;">
+            <option value="queens">Queens (Leon vs Leon)</option>
+            <option value="gameday">Dual</option>
+            <option value="scrimmage">Scrimmage</option>
+          </select></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
+          <input type="date" class="form-input" id="scan-date" style="padding:8px;font-size:13px;"></div>
+      </div>
+      <input type="file" id="scan-file" accept="image/*" style="display:none;">
+      <button class="btn btn-secondary btn-small" style="width:100%;" onclick="document.getElementById('scan-file').click();">📷 Take Photo or Upload Image</button>
+      <div id="scan-preview" style="margin-top:10px;"></div>
+      <div id="scan-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+<!-- ====== DUALS ====== -->
+    <!-- ====== DUALS ====== -->
+  <div class="tab-content" id="tab-duals">
+
+<div class="card" style="border:2px solid var(--blue);">
+      <div class="card-title blue"><span class="bar"></span> 🏐 Live Score Entry
+        <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Auto-loads today's assignment</span>
+      </div>
+      <div id="live-assignment-list" style="margin-bottom:12px;"></div>
+      <div id="live-courts-container"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">Select an assignment above to load courts.</div></div>
+    <div id="shared-lineup-panel" style="display:none;background:#f0f7ff;border:1px solid #bcd6f5;border-radius:10px;padding:14px;margin-top:12px;"></div>
+    <div id="dual-sheet-card" style="display:none;" class="card"><div class="card-title blue"><span class="bar"></span> 📋 Dual Sheet</div><div id="dual-sheet-container"></div></div>
+    </div>
+<div class="card" style="border:2px solid var(--charcoal);">
+      <div class="card-title" style="color:var(--charcoal);"><span class="bar" style="background:var(--charcoal);"></span> 🔒 Coach Notes
+        <span style="font-size:11px;font-weight:400;letter-spacing:0;font-family:'Barlow',sans-serif;color:var(--gray);margin-left:6px;">Private — coaches only</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <input type="date" class="form-input" id="cnote-date" style="max-width:180px;padding:8px 12px;">
+        <button class="btn btn-secondary btn-small" onclick="loadCoachNotes()" style="white-space:nowrap;">Load Notes</button>
+      </div>
+      <div class="cnote-tabs">
+        <button class="cnote-tab active" onclick="switchCnote('game',this)">📋 Game</button>
+        <button class="cnote-tab" onclick="switchCnote('players',this)">👤 Players</button>
+        <button class="cnote-tab" onclick="switchCnote('pairs',this)">🤝 Pairs</button>
+      </div>
+      <div class="cnote-section active" id="cnote-game">
+        <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">Game Summary &amp; General Notes</label>
+        <textarea class="cnote-textarea" id="cnote-game-text" rows="4" placeholder="Overall performance, strategy observations, conditions, key moments..."></textarea>
+        <button class="btn btn-secondary btn-small" style="margin-top:8px;" onclick="saveCoachNote('game')">Save Game Notes</button>
+        <span id="cnote-game-saved" style="font-size:11px;color:var(--green);margin-left:8px;opacity:0;transition:opacity 0.4s;" id="cnote-game-saved">✓ Saved</span>
+      </div>
+      <div class="cnote-section" id="cnote-players">
+        <div id="cnote-players-list"><div style="color:var(--gray);font-size:13px;">Load notes for a date first.</div></div>
+      </div>
+      <div class="cnote-section" id="cnote-pairs">
+        <div id="cnote-pairs-list"><div style="color:var(--gray);font-size:13px;">Load notes for a date first.</div></div>
+      </div>
+    </div>
+<div class="card" style="border:2px solid var(--gold);">
+      <div class="card-title gold"><span class="bar" style="background:var(--gold);"></span> Upload Dual Scoresheet</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Photograph the handwritten scoresheet after a dual. AI reads the opponent, pairings, and all set scores — then automatically creates the dual record and individual match entries for player stats.</p>
+      <div class="form-group">
+        <label class="form-label" style="font-size:11px;">Match Date</label>
+        <input type="date" class="form-input" id="dual-scan-date" style="padding:8px;font-size:13px;">
+      </div>
+      <input type="file" id="dual-scan-file" accept="image/*" style="display:none;">
+      <button class="btn btn-small" style="width:100%;background:var(--gold);color:var(--black);border:none;font-size:15px;padding:12px;" onclick="document.getElementById('dual-scan-file').click();">&#128248; Take Photo or Upload Scoresheet</button>
+      <div id="dual-scan-preview" style="margin-top:10px;"></div>
+      <div id="dual-scan-result" style="margin-top:10px;"></div>
+    </div>
+<div class="card">
+      <div class="card-title"><span class="bar"></span> Dual History</div>
+      <div id="duals-list"><div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.<br>Upload a scoresheet above to get started!</p></div></div>
+    </div>
+  </div>
+
+<!-- ====== SCRIMMAGE (Leon vs External — Non-Season) ====== -->
+  <div class="tab-content" id="tab-scrimmage">
+    <div class="card"><div class="card-title purple"><span class="bar"></span> New Scrimmage Match</div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label><input type="date" class="form-input" id="sc-date"></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Court</label>
+          <select class="form-select" id="sc-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option><option value="6">Court 6 — Exhib</option><option value="7">Court 7 — Exhib</option><option value="8">Court 8 — Exhib</option></select></div></div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Player 1</label><select class="form-select" id="sc-p1"><option value="">Select</option></select></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Player 2</label><select class="form-select" id="sc-p2"><option value="">Select</option></select></div></div>
+      <div class="form-group" style="margin-bottom:10px;"><label class="form-label">Opponent</label><input type="text" class="form-input" id="sc-opp" placeholder="e.g. Lincoln CT3"></div>
+      <button class="btn btn-purple" id="save-sc-match">Create Match</button>
+    </div>
+    <div class="card"><div class="card-title purple"><span class="bar"></span> Scrimmage Matches</div>
+      <div class="date-filter"><label style="font-size:13px;font-weight:700;">Date:</label><input type="date" id="sc-filter-date" class="form-input" style="max-width:180px;padding:8px 12px;"></div>
+      <div id="sc-matches-list"></div>
+    </div>
+    <div class="card" style="border:2px solid var(--purple);">
+      <div class="card-title purple"><span class="bar"></span> 📷 Upload Scrimmage Scoresheet</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Photograph the handwritten scoresheet. AI reads the pairings and set scores then creates individual match entries.</p>
+      <div class="form-group"><label class="form-label" style="font-size:11px;">Match Date</label>
+        <input type="date" class="form-input" id="sc-scan-date" style="padding:8px;font-size:13px;"></div>
+      <input type="file" id="sc-scan-file" accept="image/*" style="display:none;">
+      <button class="btn btn-small" style="width:100%;background:var(--purple);color:var(--white);border:none;font-size:15px;padding:12px;" onclick="document.getElementById('sc-scan-file').click();">&#128248; Take Photo or Upload Scoresheet</button>
+      <div id="sc-scan-preview" style="margin-top:10px;"></div>
+      <div id="sc-scan-result" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- ====== GOALS (Coach) ====== -->
+  <div class="tab-content" id="tab-goals">
+    <div class="card"><div class="card-title" style="color:var(--gold);"><span class="bar" style="background:var(--gold);"></span> Player Goals & AI Development Plans</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:14px;">Review player goals. Generate AI performance plans, edit them, and approve before players see the feedback.</p>
+      <div class="filter-row"><select class="form-select" id="goals-player-filter" style="max-width:250px;"><option value="all">All Players</option></select></div>
+      <div id="coach-goals-list"></div>
+    </div>
+  </div>
+
+  <!-- ====== SCOUTS ====== -->
+  <div class="tab-content" id="tab-scouts">
+    <div class="card"><div class="card-title" style="color:#0369a1;"><span class="bar" style="background:#0369a1;"></span> 🕵️ Opponent Scouting</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Opponent player notes accumulated across all duals. Scan a lineup sheet to add players.</p>
+      <div id="scouts-school-list"><div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;">No opponents scouted yet. Scan an opponent lineup sheet from the Planner tab.</div></div>
+    </div>
+    <div id="scouts-detail-panel" style="display:none;"></div>
+  </div>
+
+  <!-- ====== ROSTER ====== -->
+    <div class="tab-content" id="tab-settings">
+<div class="card"><div class="card-title"><span class="bar"></span> Player Roster</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Assign pair levels. Changes sync in real time.</p><div id="roster-list"></div></div>
+<div class="card"><div class="card-title"><span class="bar"></span> Add Player</div>
+      <div class="form-row" style="margin-bottom:10px;"><input type="text" class="form-input" id="new-first" placeholder="First Name"><input type="text" class="form-input" id="new-last" placeholder="Last Name"></div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <input type="number" class="form-input" id="new-jersey" placeholder="Jersey #" min="0" max="99" style="max-width:110px;">
+        <select class="form-select" id="new-class"><option value="FR">Freshman</option><option value="SO">Sophomore</option><option value="JR">Junior</option><option value="SR">Senior</option></select>
+        <select class="form-select" id="new-court"><option value="1">Court 1</option><option value="2">Court 2</option><option value="3">Court 3</option><option value="4">Court 4</option><option value="5">Court 5</option><option value="6">Court 6 — Exhib</option><option value="7">Court 7 — Exhib</option><option value="8">Court 8 — Exhib</option></select></div>
+      <button class="btn btn-secondary" id="add-player">Add Player</button></div>
+  </div>
+
+</div>
+<!-- PLAYER PORTAL (shown when logged in as player) -->
+<div class="player-portal" id="player-portal">
+  <!-- Header -->
+  <div class="card">
+    <div class="pp-name" id="pp-name"></div>
+    <div class="pp-meta" id="pp-meta"></div>
+  </div>
+
+  <!-- Notification banner -->
+  <div id="pp-notif-banner"></div>
+
+  <!-- Tab bar: My Stats | Live Score Entry | My Matches -->
+  <div class="pp-tab-bar">
+    <button class="pp-tab-btn active" onclick="switchPPTab('stats',this)">📊 My Stats</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('live',this)">🏐 Live Score Entry</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('scouts',this)">🕵️ Scouts</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('matches',this)">📋 My Matches</button>
+    <button class="pp-tab-btn" onclick="switchPPTab('learn',this)">🎓 Learn</button>
+  </div>
+
+  <!-- ══ MY STATS PANEL ══ -->
+  <div class="pp-panel active" id="pp-panel-stats">
+
+    <!-- Season Summary -->
+    <div class="card"><div class="card-title"><span class="bar"></span> My Season Summary</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;" id="pp-stat-toggle">
+        <button class="filter-btn active" id="pp-stat-official" onclick="ppSetStatView('official',this)" style="flex:1;text-align:center;">Official (CT 1-5)</button>
+        <button class="filter-btn" id="pp-stat-exhibition" onclick="ppSetStatView('exhibition',this)" style="flex:1;text-align:center;color:#0e7a4d;border-color:#0e7a4d;">Exhibition (CT 6+)</button>
+      </div>
+      <div id="pp-summary"></div>
+    </div>
+
+    <!-- Goals (moved here) -->
+    <div class="card"><div class="card-title" style="color:var(--gold);"><span class="bar" style="background:var(--gold);"></span> My Goals &amp; Development Plan</div>
+      <div id="pp-goals-list"></div>
+      <div style="margin-top:14px;border-top:1px solid var(--gray-lighter);padding-top:14px;">
+        <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Add a Goal</div>
+        <select class="form-select" id="pp-goal-select" style="margin-bottom:8px;">
+          <option value="">— Choose a Goal —</option>
+          <optgroup label="🏐 Court Goals">
+            <option value="court1">Move up to Court 1</option>
+            <option value="court2">Move up to Court 2</option>
+            <option value="court3">Earn starting spot on Court 3</option>
+            <option value="hold_court">Hold my current court assignment</option>
+          </optgroup>
+          <optgroup label="🎓 College Goals">
+            <option value="d1">Play D1 college beach volleyball</option>
+            <option value="d2">Play D2 college beach volleyball</option>
+            <option value="naia">Play NAIA/JUCO beach volleyball</option>
+            <option value="college_any">Play college beach volleyball (any level)</option>
+          </optgroup>
+          <optgroup label="📈 Skill Goals">
+            <option value="skill_serving">Improve my serving</option>
+            <option value="skill_passing">Improve my passing</option>
+            <option value="skill_setting">Improve my setting</option>
+            <option value="skill_hitting">Improve my hitting</option>
+            <option value="skill_blocking">Improve my blocking</option>
+            <option value="skill_defense">Improve my defense</option>
+            <option value="skill_court_sense">Improve court sense &amp; IQ</option>
+            <option value="skill_communication">Improve on-court communication</option>
+          </optgroup>
+          <optgroup label="⚡ Performance Goals">
+            <option value="star_drill">Improve star drill time</option>
+            <option value="vertical">Increase my vertical jump</option>
+            <option value="jump_serve">Develop a jump serve</option>
+            <option value="consistency">Become more consistent</option>
+            <option value="both_sides">Learn to play both sides</option>
+            <option value="versatile">Be more versatile (hitter + defender)</option>
+          </optgroup>
+          <optgroup label="👑 Leadership Goals">
+            <option value="captain">Become team captain</option>
+            <option value="leader">Be a vocal leader on court</option>
+            <option value="teammate">Be a better teammate &amp; communicator</option>
+            <option value="mentor">Mentor younger players</option>
+          </optgroup>
+          <optgroup label="🏆 Season Goals">
+            <option value="starter">Earn a starting position</option>
+            <option value="most_improved">Be most improved player</option>
+            <option value="win_pct">Improve my win percentage</option>
+            <option value="positive_diff">Finish season with positive +/-</option>
+          </optgroup>
+        </select>
+        <button class="btn btn-primary btn-small" style="background:var(--gold);width:100%;" onclick="addPlayerGoal()">Set This Goal</button>
+      </div>
+    </div>
+
+    <!-- Coach Notes (moved here) -->
+    <div class="card"><div class="card-title"><span class="bar"></span> Coach Notes</div>
+      <div id="pp-notes"></div>
+    </div>
+
+    <!-- Rankings -->
+    <div class="card"><div class="card-title"><span class="bar"></span> My Team Rankings</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">How you stack up against your teammates</p>
+      <div id="pp-rankings"></div>
+    </div>
+
+    <!-- Skills -->
+    <div class="card"><div class="card-title"><span class="bar"></span> My Skills</div>
+      <div id="pp-skills"></div>
+    </div>
+
+    <!-- Star Drill -->
+    <div class="card"><div class="card-title"><span class="bar"></span> My Star Drill Times</div>
+      <div id="pp-drills"></div>
+    </div>
+
+    <!-- Verticals -->
+    <div class="card"><div class="card-title"><span class="bar"></span> My Verticals</div>
+      <div id="pp-verts"></div>
+    </div>
+
+    <!-- Season Schedule -->
+    <div class="card"><div class="card-title"><span class="bar"></span> Season Schedule</div>
+      <div id="pp-assignment" style="margin-bottom:12px;"></div>
+      <div id="pp-schedule"></div>
+    </div>
+
+    <!-- Area Standings -->
+    <div class="card"><div class="card-title"><span class="bar"></span> Area Standings</div>
+      <div id="pp-standings"></div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card"><div class="card-title"><span class="bar"></span> Change Password</div>
+      <div style="padding:4px;">
+        <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-current" placeholder="Current Password">
+        <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-new" placeholder="New Password">
+        <input type="password" style="width:100%;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:8px;" id="t-pw-confirm" placeholder="Confirm New Password">
+        <button class="btn btn-primary btn-small" onclick="changePassword()">Update Password</button>
+      </div>
+    </div>
+
+    <!-- Email Notifications -->
+    <div class="card" style="border-top:3px solid var(--blue);">
+      <div class="card-title" style="color:var(--blue);"><span class="bar" style="background:var(--blue);"></span> &#x1F4E7; Email Notifications</div>
+      <div style="padding:4px;">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:10px;">Get notified about assignments, coach feedback, and game results.</div>
+        <input type="email" id="pp-email-addr" placeholder="your@email.com" style="width:100%;box-sizing:border-box;padding:10px 12px;border:2px solid var(--gray-lighter);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:12px;">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="pp-notif-assign" style="width:16px;height:16px;accent-color:var(--blue);"> Court assignments &amp; lineup updates
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="pp-notif-plan" style="width:16px;height:16px;accent-color:var(--blue);"> Training plan approved by coach
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="pp-notif-cnote" style="width:16px;height:16px;accent-color:var(--blue);"> New coach notes for me
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="pp-notif-score" style="width:16px;height:16px;accent-color:var(--blue);"> Game results posted
+          </label>
+        </div>
+        <button class="btn btn-blue btn-small" onclick="saveEmailPrefs(); loadEmailPrefs(currentPlayerId);" style="width:100%;">Save Preferences</button>
+        <div id="pp-email-saved" style="text-align:center;font-size:12px;color:var(--green);margin-top:6px;opacity:0;transition:opacity 0.3s;">&#x2713; Saved!</div>
+      </div>
+    </div>
+
+  </div><!-- end pp-panel-stats -->
+
+  <!-- ══ LIVE SCORE ENTRY PANEL ══ -->
+  <div class="pp-panel" id="pp-panel-live">
+    <div class="card" style="border:2px solid var(--blue);">
+      <div class="card-title blue"><span class="bar"></span> 🏐 Live Score Entry
+        <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Today's courts</span>
+      </div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Use +/− to keep score live, or type a number to correct. Each court saves independently.</p>
+      <div id="pp-live-courts"><div style="text-align:center;color:var(--gray);font-size:13px;padding:20px;">Loading today's assignment...</div></div>
+    </div>
+  </div>
+
+  <!-- ══ MY MATCHES PANEL ══ -->
+  <div class="pp-panel" id="pp-panel-matches">
+    <div class="card"><div class="card-title blue"><span class="bar"></span> My Match Results</div>
+      <div id="pp-gameday"></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="bar"></span> My Queens Matches</div>
+      <div id="pp-queens"></div>
+    </div>
+    <div class="card"><div class="card-title purple"><span class="bar"></span> My Scrimmage Results</div>
+      <div id="pp-scrimmage"></div>
+    </div>
+  </div>
+
+  <!-- ══ SCOUTS PANEL ══ -->
+  <div class="pp-panel" id="pp-panel-scouts">
+    <div class="card"><div class="card-title" style="color:#0369a1;"><span class="bar" style="background:#0369a1;"></span> 🕵️ Opponent Scouting</div>
+      <div id="pp-scouts-list"><div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;">No opponents scouted yet.</div></div>
+    </div>
+    <div id="pp-scouts-detail" style="display:none;"></div>
+  </div>
+
+  <div class="pp-panel" id="pp-panel-learn">
+    <div class="card">
+      <div class="card-title" style="color:var(--red);"><span class="bar"></span> 🎓 CourtSense IQ</div>
+      <p style="font-size:13px;color:var(--gray);margin-bottom:12px;line-height:1.5;">Test your beach volleyball court knowledge. Your score averages with your coach rating for Court Sense.</p>
+      <div id="pp-quiz-history" style="margin-bottom:14px;"></div>
+      <button class="btn btn-primary" id="pp-start-quiz-btn" onclick="togglePPQuiz()" style="width:100%;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:10px;">TAKE COURTSENSE IQ QUIZ</button>
+      <div id="pp-quiz-frame-wrap" style="display:none;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,0.1);">
+        <iframe id="pp-quiz-iframe" src="" style="width:100%;height:720px;border:none;display:block;"></iframe>
+      </div>
+    </div>
+  </div>
+</div><!-- end player-portal -->
+
+<!-- EDIT MODAL -->
+<!-- ASSIGNMENT EDIT MODAL -->
+<div class="modal-overlay" id="assign-edit-modal">
+  <div class="modal" style="max-width:480px;width:100%;max-height:90vh;overflow-y:auto;">
+    <div class="modal-title" id="assign-edit-title">Edit Assignment <button class="modal-close" onclick="closeAssignEditModal()">&#x2715;</button></div>
+    <div id="assign-edit-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeAssignEditModal()">Cancel</button>
+      <button class="btn btn-secondary" onclick="addAssignEditCourt()" style="background:var(--off-white);color:var(--charcoal);">+ Court</button>
+      <button class="btn btn-blue" onclick="saveAssignEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal"><div class="modal-title">Edit Match <button class="modal-close" onclick="closeEdit()">✕</button></div>
+    <div id="edit-modal-body"></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeEdit()">Cancel</button><button class="btn btn-primary" id="edit-save">Save Changes</button></div>
+  </div>
+</div>
+<!-- SET STATS MODAL -->
+<div class="modal-overlay" id="set-modal">
+  <div class="modal"><div class="modal-title" id="set-modal-title">Add Set <button class="modal-close" onclick="closeSetModal()">✕</button></div>
+    <div id="set-modal-body"></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeSetModal()">Cancel</button><button class="btn btn-blue" id="set-modal-save">Save Set</button></div>
+  </div>
+</div>
+</div><!-- end app-wrapper -->
+<div class="toast" id="toast"></div>
+
+
+    <!-- Hidden inputs for court assignment scanner -->
+    <input type="file" id="ca-file" accept="image/*" capture="environment" style="display:none;">
+    <input type="date" id="ca-date" style="display:none;">
+    <input type="text" id="ca-opp" style="display:none;">
+    <select id="ca-type" style="display:none;"><option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option></select>
+    <select id="ca-team" style="display:none;"><option value="mine">My Sheet</option><option value="opponent">Opponent's Sheet</option></select>
+    <div id="ca-preview" style="display:none;"></div>
+    <div id="ca-result" style="margin-top:10px;"></div>
+<script>
+window.SCHOOL_CONFIG={schoolName:'Leon Queens',shortName:'Leon',abbrev:'LEON',displayName:'Leon Beach',title:'Leon Beach Volleyball Tracker',coachPin:'8675',defaultPw:'Pride2026',fbConfig:{apiKey:'AIzaSyC8Ue06XPvGXo1XTloewPvDRBWtK5tDAj8',authDomain:'leon-beach-volleyball.firebaseapp.com',databaseURL:'https://leon-beach-volleyball-default-rtdb.firebaseio.com',projectId:'leon-beach-volleyball',storageBucket:'leon-beach-volleyball.firebasestorage.app',messagingSenderId:'937804799976',appId:'1:937804799976:web:02121e68655b4febeb8e5d'},dbRoots:{matches:'leon_queens_matches',profiles:'leon_queens',passwords:'leon_queens_passwords'},logo:'leon-logo.png',logoAlt:'Leon',colors:{primary:'#e4002b',primaryDark:'#b50022',primaryDeeper:'#8a001a',primaryLight:'#ff3354',primaryBg:'#fce8ec'},aiProxyUrl:'https://beach-volleyball-ai.markmcnees-479.workers.dev',maxPrepsUrl:'https://www.maxpreps.com/fl/tallahassee/leon-lions/beach-volleyball/',profilesUrl:'https://markmcnees.github.io/leon-beach/leon-queens-profiles.html',courtsenseUrl:'https://markmcnees.github.io/leon-beach/courtsense.html',myStandingsKey:'Leon',exportPrefix:'leon_queens_',legacyMigration:true};
+</script>
+<script src="https://cdn.jsdelivr.net/gh/markmcnees/beach-app-core@main/app.js"></script>
+
+<div id="school-fans-overlay" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#8b0000 0%,#e4002b 50%,#c0001f 100%);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <div style="max-width:480px;margin:0 auto;padding:16px 14px 40px;">
+    <div style="text-align:center;padding:24px 0 12px;">
+      <div style="margin-bottom:8px;"><img src="leon-logo.png" style="height:80px;width:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));"></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:#fff;">Leon Beach</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.65);margin-top:2px;">Beach Volleyball &middot; 2026 Season</div>
+      <div id="lf-record" style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#d4a843;margin-top:8px;"></div>
+      <div style="margin-top:12px;display:flex;justify-content:center;gap:8px;">
+        <button onclick="hideLeonFans()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:7px 18px;border-radius:20px;cursor:pointer;">&#x2715; Close</button>
+        <button onclick="lfManualRefresh()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:7px 14px;border-radius:20px;cursor:pointer;">&#x21BA; Refresh</button>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <span id="lf-refresh-dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ade80;opacity:0.4;transition:opacity 0.3s;animation:pulse 2s infinite;"></span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.45);letter-spacing:1px;">LIVE &middot; AUTO-UPDATES EVERY 30s</span>
+      </div>
+    </div>
+    <div id="lf-banner" style="border-radius:12px;padding:14px;margin-bottom:14px;"></div>
+    <div id="lf-today" style="display:none;background:#ffffff;border:2px solid #e4002b;border-radius:14px;padding:14px;margin-bottom:14px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#e4002b;margin-bottom:10px;">&#x26A1; IN PROGRESS</div>
+      <div id="lf-today-courts"></div>
+    </div>
+    <div id="lf-upcoming-section" style="display:none;background:#ffffff;border:1px solid #f7a8b8;border-radius:14px;margin-bottom:14px;overflow:hidden;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#8b0000;padding:12px 14px 8px;">Upcoming Games</div>
+      <div id="lf-upcoming"></div>
+    </div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin-bottom:8px;">Season Results</div>
+    <div id="lf-results"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin:16px 0 8px;">Roster</div>
+    <div id="lf-roster"></div>
+
+    <!-- Email Opt-In -->
+    <div id="lf-email-section" style="margin-top:24px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:18px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff;margin-bottom:4px;">&#x1F4E7; Stay Updated</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-bottom:14px;">Get notified about game results and schedule changes.</div>
+      <div id="lf-email-success" style="display:none;text-align:center;padding:10px;background:rgba(74,222,128,0.15);border-radius:8px;border:1px solid rgba(74,222,128,0.4);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:#4ade80;">&#x2713; You&rsquo;re signed up!</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:2px;">We&rsquo;ll keep you in the loop.</div>
+      </div>
+      <div id="lf-email-form">
+        <input type="email" id="lf-email-input" placeholder="your@email.com" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:#fff;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:10px;outline:none;" />
+        <div style="display:flex;gap:16px;margin-bottom:12px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.75);cursor:pointer;">
+            <input type="checkbox" id="lf-notif-results" checked style="width:14px;height:14px;accent-color:#d4a843;"> Game Results
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.75);cursor:pointer;">
+            <input type="checkbox" id="lf-notif-schedule" checked style="width:14px;height:14px;accent-color:#d4a843;"> Schedule Updates
+          </label>
+        </div>
+        <button onclick="submitLeonFanEmail()" style="width:100%;padding:10px;background:#d4a843;color:#8b0000;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;border:none;border-radius:8px;cursor:pointer;font-weight:700;">Subscribe</button>
+        <div id="lf-email-error" style="color:#f87171;font-size:12px;margin-top:6px;text-align:center;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>
+
 .tab{flex:1;padding:8px 4px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:rgba(255,255,255,0.55);letter-spacing:1px;cursor:pointer;border-radius:6px;transition:all 0.2s ease;border:none;background:transparent;white-space:nowrap;min-width:0;}
 .tab.active{background:rgba(255,255,255,0.2);color:var(--white);}.tab:hover{color:var(--white);}
 .content{padding:16px;max-width:840px;margin:0 auto;}
