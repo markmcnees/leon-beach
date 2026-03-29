@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260329130535">
+  <meta name="build-version" content="20260328020848">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -620,7 +620,12 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
 <div class="card"><div class="card-title blue"><span class="bar"></span> 📅 Past Court Lineups</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Court assignments from past duals and scrimmages, derived from match records.</p>
-      <div id="past-lineups-list"></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+      <input type="date" id="lineup-search-date" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Date" oninput="filterPastLineups()">
+      <input type="text" id="lineup-search-opp" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Opponent" oninput="filterPastLineups()">
+      <input type="text" id="lineup-search-player" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Player name" oninput="filterPastLineups()">
+    </div>
+    <div id="past-lineups-list"></div>
     </div>
 <div class="card"><div class="card-title"><span class="bar"></span> Data Management</div>
       <div class="data-actions">
@@ -692,6 +697,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div id="live-assignment-list" style="margin-bottom:12px;"></div>
       <div id="live-courts-container"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">Select an assignment above to load courts.</div></div>
     <div id="shared-lineup-panel" style="display:none;background:#f0f7ff;border:1px solid #bcd6f5;border-radius:10px;padding:14px;margin-top:12px;"></div>
+    <div id="dual-sheet-card" style="display:none;" class="card"><div class="card-title blue"><span class="bar"></span> 📋 Dual Sheet</div><div id="dual-sheet-container"></div></div>
     </div>
 <div class="card" style="border:2px solid var(--charcoal);">
       <div class="card-title" style="color:var(--charcoal);"><span class="bar" style="background:var(--charcoal);"></span> 🔒 Coach Notes
@@ -1036,7 +1042,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <script>
 window.SCHOOL_CONFIG={schoolName:'Leon Queens',shortName:'Leon',abbrev:'LEON',displayName:'Leon Beach',title:'Leon Beach Volleyball Tracker',coachPin:'8675',defaultPw:'Pride2026',fbConfig:{apiKey:'AIzaSyC8Ue06XPvGXo1XTloewPvDRBWtK5tDAj8',authDomain:'leon-beach-volleyball.firebaseapp.com',databaseURL:'https://leon-beach-volleyball-default-rtdb.firebaseio.com',projectId:'leon-beach-volleyball',storageBucket:'leon-beach-volleyball.firebasestorage.app',messagingSenderId:'937804799976',appId:'1:937804799976:web:02121e68655b4febeb8e5d'},dbRoots:{matches:'leon_queens_matches',profiles:'leon_queens',passwords:'leon_queens_passwords'},logo:'leon-logo.png',logoAlt:'Leon',colors:{primary:'#e4002b',primaryDark:'#b50022',primaryDeeper:'#8a001a',primaryLight:'#ff3354',primaryBg:'#fce8ec'},aiProxyUrl:'https://beach-volleyball-ai.markmcnees-479.workers.dev',maxPrepsUrl:'https://www.maxpreps.com/fl/tallahassee/leon-lions/beach-volleyball/',profilesUrl:'https://markmcnees.github.io/leon-beach/leon-queens-profiles.html',courtsenseUrl:'https://markmcnees.github.io/leon-beach/courtsense.html',myStandingsKey:'Leon',exportPrefix:'leon_queens_',legacyMigration:true};
 </script>
-<script src="https://cdn.jsdelivr.net/gh/markmcnees/beach-app-core@v1.0.2/app.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/markmcnees/beach-app-core@v1.0.3/app.js"></script>
 
 <div id="school-fans-overlay" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#8b0000 0%,#e4002b 50%,#c0001f 100%);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
   <div style="max-width:480px;margin:0 auto;padding:16px 14px 40px;">
