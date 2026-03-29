@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260329115903">
+  <meta name="build-version" content="20260328020848">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -1075,4 +1075,59 @@ window.SCHOOL_CONFIG = {
 };
 </script>
 <script src="https://cdn.jsdelivr.net/gh/markmcnees/beach-app-core@v1.0.1/app.js"></script>
+
+<div id="leon-fans-overlay" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#8b0000 0%,#e4002b 50%,#c0001f 100%);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <div style="max-width:480px;margin:0 auto;padding:16px 14px 40px;">
+    <div style="text-align:center;padding:24px 0 12px;">
+      <div style="margin-bottom:8px;"><img src="leon-logo.png" style="height:80px;width:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));"></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:#fff;">Leon Beach</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.65);margin-top:2px;">Beach Volleyball &middot; 2026 Season</div>
+      <div id="lf-record" style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#d4a843;margin-top:8px;"></div>
+      <div style="margin-top:12px;display:flex;justify-content:center;gap:8px;">
+        <button onclick="hideLeonFans()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:7px 18px;border-radius:20px;cursor:pointer;">&#x2715; Close</button>
+        <button onclick="lfManualRefresh()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;padding:7px 14px;border-radius:20px;cursor:pointer;">&#x21BA; Refresh</button>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <span id="lf-refresh-dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ade80;opacity:0.4;transition:opacity 0.3s;animation:pulse 2s infinite;"></span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.45);letter-spacing:1px;">LIVE &middot; AUTO-UPDATES EVERY 30s</span>
+      </div>
+    </div>
+    <div id="lf-banner" style="border-radius:12px;padding:14px;margin-bottom:14px;"></div>
+    <div id="lf-today" style="display:none;background:#ffffff;border:2px solid #e4002b;border-radius:14px;padding:14px;margin-bottom:14px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#e4002b;margin-bottom:10px;">&#x26A1; IN PROGRESS</div>
+      <div id="lf-today-courts"></div>
+    </div>
+    <div id="lf-upcoming-section" style="display:none;background:#ffffff;border:1px solid #f7a8b8;border-radius:14px;margin-bottom:14px;overflow:hidden;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#8b0000;padding:12px 14px 8px;">Upcoming Games</div>
+      <div id="lf-upcoming"></div>
+    </div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin-bottom:8px;">Season Results</div>
+    <div id="lf-results"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin:16px 0 8px;">Roster</div>
+    <div id="lf-roster"></div>
+
+    <!-- Email Opt-In -->
+    <div id="lf-email-section" style="margin-top:24px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:18px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff;margin-bottom:4px;">&#x1F4E7; Stay Updated</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-bottom:14px;">Get notified about game results and schedule changes.</div>
+      <div id="lf-email-success" style="display:none;text-align:center;padding:10px;background:rgba(74,222,128,0.15);border-radius:8px;border:1px solid rgba(74,222,128,0.4);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:#4ade80;">&#x2713; You&rsquo;re signed up!</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:2px;">We&rsquo;ll keep you in the loop.</div>
+      </div>
+      <div id="lf-email-form">
+        <input type="email" id="lf-email-input" placeholder="your@email.com" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:#fff;font-family:'Barlow',sans-serif;font-size:14px;margin-bottom:10px;outline:none;" />
+        <div style="display:flex;gap:16px;margin-bottom:12px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.75);cursor:pointer;">
+            <input type="checkbox" id="lf-notif-results" checked style="width:14px;height:14px;accent-color:#d4a843;"> Game Results
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.75);cursor:pointer;">
+            <input type="checkbox" id="lf-notif-schedule" checked style="width:14px;height:14px;accent-color:#d4a843;"> Schedule Updates
+          </label>
+        </div>
+        <button onclick="submitLeonFanEmail()" style="width:100%;padding:10px;background:#d4a843;color:#8b0000;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;border:none;border-radius:8px;cursor:pointer;font-weight:700;">Subscribe</button>
+        <div id="lf-email-error" style="color:#f87171;font-size:12px;margin-top:6px;text-align:center;"></div>
+      </div>
+    </div>
+  </div>
+</div>
 </body></html>
