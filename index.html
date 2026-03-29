@@ -356,7 +356,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260329145100">
+  <meta name="build-version" content="20260328020848">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -486,13 +486,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <button class="filter-btn purple" data-ptype="scrimmage">Scrimmage</button>
       <button class="filter-btn" data-ptype="exhibition" style="background:var(--white);color:#0e7a4d;border-color:#0e7a4d;">Exhibition</button>
     </div>
-    <div class="filter-row" id="court-filter-players">
-      <button class="filter-btn active" data-court="all">All</button>
-      <button class="filter-btn" data-court="1">Pair 1</button><button class="filter-btn" data-court="2">Pair 2</button>
-      <button class="filter-btn" data-court="3">Pair 3</button><button class="filter-btn" data-court="4">Pair 4</button>
-      <button class="filter-btn" data-court="5">Pair 5</button><button class="filter-btn" data-court="6">Pair 6</button>
-      <button class="filter-btn" data-court="7">Pair 7</button><button class="filter-btn" data-court="8">Pair 8</button>
-    </div>
+    
     <div class="card" style="padding:8px 12px;"><div class="table-wrap">
       <table class="player-table" id="players-table"><thead><tr id="players-thead"></tr></thead><tbody></tbody></table>
     </div></div>
@@ -615,6 +609,8 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <div id="assign-court-slots"></div>
         <div id="assign-notes-section" style="margin-top:8px;"></div>
         <button class="btn btn-blue btn-small" style="width:100%;margin-top:10px;" onclick="saveAssignment()">Save Assignment</button>
+      <div style="text-align:center;margin:10px 0 4px;font-size:11px;color:var(--gray);letter-spacing:0.5px;">— OR —</div>
+      <button class="btn btn-secondary btn-small" style="width:100%;" onclick="document.getElementById('ca-file').click()">📸 Scan a Court Assignment Sheet</button>
       </div>
       <div id="assignments-list"></div>
     </div>
@@ -636,30 +632,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <button class="btn btn-danger btn-small" id="clear-matches">Clear All Matches</button>
       </div>
     </div>
-<div class="card"><div class="card-title" style="color:var(--blue);"><span class="bar" style="background:var(--blue);"></span> 📸 Upload Court Assignment Sheet</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a court assignment sheet — Leon's or the opponent's — and AI will extract the court pairings.</p>
-      <div class="form-row" style="margin-bottom:8px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
-          <input type="date" class="form-input" id="ca-date" style="padding:8px;font-size:13px;"></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
-          <select class="form-select" id="ca-type" style="padding:8px;font-size:13px;">
-            <option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
-          </select></div>
-      </div>
-      <div class="form-row" style="margin-bottom:8px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label>
-          <input type="text" class="form-input" id="ca-opp" placeholder="e.g. Lincoln" style="padding:8px;font-size:13px;"></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Whose Sheet?</label>
-          <select class="form-select" id="ca-team" style="padding:8px;font-size:13px;">
-            <option value="leon">Leon's Lineup</option>
-            <option value="opponent">Opponent's Lineup</option>
-          </select></div>
-      </div>
-      <input type="file" id="ca-file" accept="image/*" style="display:none;">
-      <button class="btn btn-blue btn-small" style="width:100%;" onclick="document.getElementById('ca-file').click();">📸 Take Photo or Upload Court Sheet</button>
-      <div id="ca-preview" style="margin-top:10px;"></div>
-      <div id="ca-result" style="margin-top:10px;"></div>
-    </div>
+
 <div class="card"><div class="card-title"><span class="bar"></span> 📷 Upload Scoresheet</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a handwritten scoresheet and AI will read it and create the match entries.</p>
       <div class="form-row" style="margin-bottom:8px;">
