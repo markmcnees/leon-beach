@@ -969,7 +969,7 @@ Return ONLY a valid JSON array — no explanation, no markdown:
   ...${totalRounds} rounds total
 ]
 
-Use the exact player IDs provided. Return only the JSON array.`;
+Use the exact player IDs provided. CRITICAL: NEVER use "?" or any placeholder string for a player slot — every single slot in t1 and t2 must be a real player ID from the list above. If you are unsure of an assignment, use any valid player ID rather than "?". Return only the JSON array.`;
 
   try{
     const res=await fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json'},
@@ -983,6 +983,12 @@ Use the exact player IDs provided. Return only the JSON array.`;
       parsed=JSON.parse(clean.slice(s,e+1));
     }catch(pe){
       $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">Couldn't parse AI response — the AI response may have been cut off or malformed. Tap Retry to try again.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
+      return;
+    }
+    // Validate: no "?" or empty placeholders in any player slot
+    const hasPlaceholder=parsed.some(rd=>(rd.courts||[]).some(ct=>[...(ct.t1||[]),...(ct.t2||[])].some(id=>!id||id.trim()==='?')));
+    if(hasPlaceholder){
+      $('week-detail').innerHTML='<div style="color:var(--loss);font-size:13px;padding:12px;">AI returned placeholder names instead of real players -- tap Retry to regenerate.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">Retry</button></div>';
       return;
     }
     fbSet(SIDE+'/weeks/'+wid+'/rounds',parsed);
