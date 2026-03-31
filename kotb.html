@@ -1059,7 +1059,10 @@ Use the exact player IDs provided. CRITICAL: NEVER use "?" or any placeholder st
       return;
     }
     // Heal first (fixes '?' and invalid slots), then validate
+    console.log('[KotB] Pool IDs:', pool.map(p=>p.id));
+    console.log('[KotB] Raw AI slots (pre-heal):', parsed.flatMap(rd=>(rd.courts||[]).flatMap(ct=>[...ct.t1,...ct.t2])));
     parsed=healSchedule(parsed,pool,pCounts,oCounts,TARGET_GAMES);
+    console.log('[KotB] Post-heal slots:', parsed.flatMap(rd=>(rd.courts||[]).flatMap(ct=>[...ct.t1,...ct.t2])));
     const hasPlaceholder=parsed.some(rd=>(rd.courts||[]).some(ct=>[...(ct.t1||[]),...(ct.t2||[])].some(id=>!id||id.trim()==='?')));
     if(hasPlaceholder){
       $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">AI returned placeholder names instead of real players -- tap Retry to regenerate.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
