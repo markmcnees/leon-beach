@@ -139,7 +139,7 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
 .overlay.on{display:flex;}
 .modal{background:var(--white);border-radius:20px 20px 0 0;padding:20px 16px 40px;width:100%;max-width:540px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg);}
 .mtitle{font-family:'Bebas Neue';font-size:18px;letter-spacing:1.5px;color:var(--primary);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
-.mclose{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);padding:4px;}
+.mclose{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);padding:10px 12px;margin:-10px -12px 0 0;}
 
 /* ── MISC ── */
 .empty{text-align:center;padding:40px 20px;color:var(--gray);}
@@ -336,7 +336,7 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
 </div><!-- /content -->
 
 <!-- PIN MODAL -->
-<div class="overlay" id="pin-modal">
+<div class="overlay" id="pin-modal" onclick="if(event.target===this)closeModal('pin-modal')">
   <div class="modal" style="border-radius:20px 20px 0 0;max-width:340px;margin:0 auto;">
     <div class="mtitle"><span id="pin-modal-title">Admin PIN</span><button class="mclose" onclick="closeModal('pin-modal')">✕</button></div>
     <div style="text-align:center;padding:8px 0 16px;">
@@ -971,8 +971,8 @@ async function genNight(){
   // Auto-label absent players as Sub 1, Sub 2, etc.
   let subCounter=0;
   const subPlayers=absences.map(abPid=>{
-    const existing=null; // session-based, no named subs stored
-    const subName='Sub '+(++subCounter);
+    const namedSub=(week.subs||[]).find(s=>s.forPlayerId===abPid);
+    const subName=namedSub&&namedSub.name?namedSub.name:'Sub '+(++subCounter);
     return {id:subName,name:subName,isSub:true,forId:abPid};
   });
   const pool=[...present,...subPlayers];
@@ -1124,6 +1124,7 @@ function renderScoreAbsencePanel(){
     <div id="abs-panel-body" style="display:none;padding:10px 14px;">
       <div style="font-size:12px;color:var(--gray);margin-bottom:10px;">Tap to mark a player absent. Their spot fills as Sub 1, Sub 2, etc. when the schedule generates.</div>`;
 
+  const savedSubs=week.subs||[];
   let subN=0;
   players.forEach(p=>{
     const isAbs=absences.includes(p.id);
@@ -1139,7 +1140,8 @@ function renderScoreAbsencePanel(){
       <button onclick="toggleScoreAbsence('${p.id}')" style="background:${isAbs?'#fee2e2':'var(--gray-lighter)'};color:${isAbs?'#b91c1c':'var(--gray)'};border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">
         ${isAbs?'✕ Absent':'Absent'}
       </button>
-    </div>`;
+    </div>
+    ${isAbs?`<div style="padding:6px 0 4px 2px;"><input class="inp" placeholder="Sub name (optional)" value="${savedSubs.find(x=>x.forPlayerId===p.id)?.name||''}" oninput="saveScoreSubName('${p.id}',this.value)" style="font-size:13px;padding:8px 12px;"></div>`:''}`;
   });
 
   h+=`<div style="padding-top:10px;font-size:12px;color:var(--gray);">${absentCount} absent · ${players.length-absentCount} playing tonight</div>
@@ -1160,6 +1162,15 @@ function toggleAbsPanel(){
   body.style.display=open?'block':'none';
   if(arrow)arrow.textContent=open?'▴':'▾';
   window._absPanelOpen=open;
+}
+
+function saveScoreSubName(pid, name){
+  if(!liveWeek)return;
+  const week=D[SIDE].weeks[liveWeek];if(!week)return;
+  let subs=(week.subs||[]).filter(s=>s.forPlayerId!==pid);
+  const trimmed=name.trim();
+  if(trimmed) subs.push({name:trimmed,forPlayerId:pid});
+  fbSet(SIDE+'/weeks/'+liveWeek+'/subs',subs.length?subs:null);
 }
 
 function toggleScoreAbsence(pid){
