@@ -1167,10 +1167,42 @@ function toggleAbsPanel(){
 function saveScoreSubName(pid, name){
   if(!liveWeek)return;
   const week=D[SIDE].weeks[liveWeek];if(!week)return;
+  // Find the old ID this absent player's sub slot has in the current rounds
+  const absences=getSessionAbsences();
+  let counter=0;
+  let oldId=null;
+  for(const abPid of absences){
+    const prev=(week.subs||[]).find(s=>s.forPlayerId===abPid);
+    const prevName=prev&&prev.name?prev.name:'Sub '+(++counter);
+    if(abPid===pid){oldId=prevName;break;}
+  }
+  // Compute new sub counter position for this player (for blank-name fallback)
+  let counter2=0;
+  let newId=null;
+  for(const abPid of absences){
+    const prev=(week.subs||[]).find(s=>s.forPlayerId===abPid);
+    // In the new state, this player has no named sub if name is blank
+    const willHaveName=abPid===pid?name.trim():prev&&prev.name;
+    if(!willHaveName)counter2++;
+    if(abPid===pid){newId=name.trim()||'Sub '+counter2;break;}
+  }
+  // Save subs list
   let subs=(week.subs||[]).filter(s=>s.forPlayerId!==pid);
   const trimmed=name.trim();
   if(trimmed) subs.push({name:trimmed,forPlayerId:pid});
   fbSet(SIDE+'/weeks/'+liveWeek+'/subs',subs.length?subs:null);
+  // If a schedule exists and the ID changed, patch the rounds live
+  if(oldId&&newId&&oldId!==newId&&week.rounds&&week.rounds.length){
+    const updatedRounds=week.rounds.map(rd=>({
+      ...rd,
+      courts:(rd.courts||[]).map(ct=>({
+        ...ct,
+        t1:(ct.t1||[]).map(id=>id===oldId?newId:id),
+        t2:(ct.t2||[]).map(id=>id===oldId?newId:id)
+      }))
+    }));
+    fbSet(SIDE+'/weeks/'+liveWeek+'/rounds',updatedRounds);
+  }
 }
 
 function toggleScoreAbsence(pid){
