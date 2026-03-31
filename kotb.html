@@ -1067,6 +1067,8 @@ Use the exact player IDs provided. CRITICAL: NEVER use "?" or any placeholder st
       return;
     }
     fbSet(SIDE+'/weeks/'+wid+'/rounds',parsed);
+    // Update in-memory D immediately so Score tab renders without waiting for Firebase roundtrip
+    if(D[SIDE]&&D[SIDE].weeks&&D[SIDE].weeks[wid]) D[SIDE].weeks[wid].rounds=parsed;
     toast('Schedule generated! ✓');
     loadWeekDetail();
   }catch(err){
