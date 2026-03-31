@@ -888,6 +888,77 @@ async function genNightFromScore(){
 }
 
 // ─── AI SCHEDULE GENERATION ───
+// --- SCHEDULE HEALER ---
+function healSchedule(parsed,pool,pCounts,oCounts,TARGET_GAMES){
+  const validIds=pool.map(p=>p.id);
+  const poolSet=new Set(validIds);
+
+  function countGames(sched){
+    const c={};validIds.forEach(id=>c[id]=0);
+    sched.forEach(rd=>(rd.courts||[]).forEach(ct=>[...(ct.t1||[]),...(ct.t2||[])].forEach(id=>{if(c[id]!=null)c[id]++;})));
+    return c;
+  }
+
+  function pickBest(candidates,partnerIds,oppIds,gameCounts){
+    return candidates.slice().sort((a,b)=>{
+      const sc=id=>(gameCounts[id]||0)*1+partnerIds.reduce((s,q)=>s+(pCounts[id]&&pCounts[id][q]!=null?pCounts[id][q]:0)*3,0)+oppIds.reduce((s,q)=>s+(oCounts[id]&&oCounts[id][q]!=null?oCounts[id][q]:0)*2,0);
+      return sc(a)-sc(b);
+    })[0];
+  }
+
+  // Pass 1: fix "?" / invalid / missing slots per round
+  parsed.forEach(rd=>{
+    const roundUsed=new Set();
+    (rd.courts||[]).forEach(ct=>[...(ct.t1||[]),...(ct.t2||[])].forEach(id=>{if(poolSet.has(id)&&id!=='?')roundUsed.add(id);}));
+    const sittingSet=new Set((rd.sitting||[]).filter(id=>poolSet.has(id)));
+    (rd.courts||[]).forEach(ct=>{
+      const fixTeam=(team,other)=>team.forEach((id,i)=>{
+        if(!id||id.trim()==='?'||!poolSet.has(id)){
+          const available=validIds.filter(pid=>!roundUsed.has(pid));
+          if(!available.length)return;
+          const partner=team.filter((_,j)=>j!==i&&poolSet.has(_)&&_&&_.trim()!=='?');
+          const gc=countGames(parsed);
+          const chosen=pickBest(available,partner,(other||[]).filter(q=>poolSet.has(q)),gc);
+          if(!chosen)return;
+          team[i]=chosen;roundUsed.add(chosen);sittingSet.delete(chosen);
+        }
+      });
+      fixTeam(ct.t1,ct.t2||[]);
+      fixTeam(ct.t2,ct.t1||[]);
+    });
+    rd.sitting=[...sittingSet];
+  });
+
+  // Pass 2: enforce TARGET_GAMES per player
+  for(let iter=0;iter<50;iter++){
+    const counts=countGames(parsed);
+    const under=validIds.filter(id=>counts[id]<TARGET_GAMES);
+    const over=validIds.filter(id=>counts[id]>TARGET_GAMES);
+    if(!under.length&&!over.length)break;
+    let swapped=false;
+    for(const uid of under){
+      for(const rd of parsed){
+        if(!(rd.sitting||[]).includes(uid))continue;
+        for(const ct of(rd.courts||[])){
+          for(const team of[ct.t1,ct.t2]){
+            for(let i=0;i<team.length;i++){
+              if(over.includes(team[i])){
+                const swapId=team[i];
+                rd.sitting=rd.sitting.filter(s=>s!==uid);
+                rd.sitting.push(swapId);
+                team[i]=uid;
+                swapped=true;break;
+              }
+            }if(swapped)break;
+          }if(swapped)break;
+        }if(swapped)break;
+      }if(swapped)break;
+    }
+    if(!swapped)break;
+  }
+  return parsed;
+}
+
 async function genNight(){
   const wid=$('week-sel').value;
   if(!wid){toast('Select a week first');return;}
@@ -969,6 +1040,8 @@ Return ONLY a valid JSON array — no explanation, no markdown:
   ...${totalRounds} rounds total
 ]
 
+VERIFICATION: Before returning, mentally count how many times each player ID appears across all t1+t2 arrays. Every player must appear exactly ${TARGET_GAMES} times. Adjust sitting lists until this is true for every player.
+
 Use the exact player IDs provided. CRITICAL: NEVER use "?" or any placeholder string for a player slot — every single slot in t1 and t2 must be a real player ID from the list above. If you are unsure of an assignment, use any valid player ID rather than "?". Return only the JSON array.`;
 
   try{
@@ -985,12 +1058,7 @@ Use the exact player IDs provided. CRITICAL: NEVER use "?" or any placeholder st
       $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">Couldn't parse AI response — the AI response may have been cut off or malformed. Tap Retry to try again.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
       return;
     }
-    // Validate: no "?" or empty placeholders in any player slot
-    const hasPlaceholder=parsed.some(rd=>(rd.courts||[]).some(ct=>[...(ct.t1||[]),...(ct.t2||[])].some(id=>!id||id.trim()==='?')));
-    if(hasPlaceholder){
-      $('week-detail').innerHTML='<div style="color:var(--loss);font-size:13px;padding:12px;">AI returned placeholder names instead of real players -- tap Retry to regenerate.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">Retry</button></div>';
-      return;
-    }
+        parsed=healSchedule(parsed,pool,pCounts,oCounts,TARGET_GAMES);
     fbSet(SIDE+'/weeks/'+wid+'/rounds',parsed);
     toast('Schedule generated! ✓');
     loadWeekDetail();
