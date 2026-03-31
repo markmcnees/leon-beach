@@ -1058,12 +1058,14 @@ Use the exact player IDs provided. CRITICAL: NEVER use "?" or any placeholder st
       $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">Couldn't parse AI response — the AI response may have been cut off or malformed. Tap Retry to try again.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
       return;
     }
+    // Heal first (fixes '?' and invalid slots), then validate
+    parsed=healSchedule(parsed,pool,pCounts,oCounts,TARGET_GAMES);
     const hasPlaceholder=parsed.some(rd=>(rd.courts||[]).some(ct=>[...(ct.t1||[]),...(ct.t2||[])].some(id=>!id||id.trim()==='?')));
     if(hasPlaceholder){
       $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">AI returned placeholder names instead of real players -- tap Retry to regenerate.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
+      toast('Schedule had bad slots -- please retry');
       return;
     }
-        parsed=healSchedule(parsed,pool,pCounts,oCounts,TARGET_GAMES);
     fbSet(SIDE+'/weeks/'+wid+'/rounds',parsed);
     toast('Schedule generated! ✓');
     loadWeekDetail();
