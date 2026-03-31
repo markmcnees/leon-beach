@@ -1192,16 +1192,23 @@ function saveScoreSubName(pid, name){
   if(trimmed) subs.push({name:trimmed,forPlayerId:pid});
   fbSet(SIDE+'/weeks/'+liveWeek+'/subs',subs.length?subs:null);
   // If a schedule exists and the ID changed, patch the rounds live
-  if(oldId&&newId&&oldId!==newId&&week.rounds&&week.rounds.length){
-    const updatedRounds=week.rounds.map(rd=>({
-      ...rd,
-      courts:(rd.courts||[]).map(ct=>({
-        ...ct,
-        t1:(ct.t1||[]).map(id=>id===oldId?newId:id),
-        t2:(ct.t2||[]).map(id=>id===oldId?newId:id)
-      }))
-    }));
-    fbSet(SIDE+'/weeks/'+liveWeek+'/rounds',updatedRounds);
+  if(newId&&week.rounds&&week.rounds.length){
+    // Check if oldId exists in rounds; if not, fall back to '?' (legacy AI placeholder)
+    const allSlots=week.rounds.flatMap(rd=>(rd.courts||[]).flatMap(ct=>[...(ct.t1||[]),...(ct.t2||[])]));
+    const validRegistered=new Set(Object.values(D[SIDE].players||{}).filter(p=>p&&p.name).map(p=>p.id));
+    const effectiveOld=allSlots.includes(oldId)?oldId
+      :allSlots.find(id=>!validRegistered.has(id)&&id!==newId)||oldId;
+    if(effectiveOld&&effectiveOld!==newId){
+      const updatedRounds=week.rounds.map(rd=>({
+        ...rd,
+        courts:(rd.courts||[]).map(ct=>({
+          ...ct,
+          t1:(ct.t1||[]).map(id=>id===effectiveOld?newId:id),
+          t2:(ct.t2||[]).map(id=>id===effectiveOld?newId:id)
+        }))
+      }));
+      fbSet(SIDE+'/weeks/'+liveWeek+'/rounds',updatedRounds);
+    }
   }
 }
 
