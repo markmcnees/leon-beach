@@ -1058,6 +1058,11 @@ Use the exact player IDs provided. CRITICAL: NEVER use "?" or any placeholder st
       $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">Couldn't parse AI response — the AI response may have been cut off or malformed. Tap Retry to try again.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
       return;
     }
+    const hasPlaceholder=parsed.some(rd=>(rd.courts||[]).some(ct=>[...(ct.t1||[]),...(ct.t2||[])].some(id=>!id||id.trim()==='?')));
+    if(hasPlaceholder){
+      $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">AI returned placeholder names instead of real players -- tap Retry to regenerate.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
+      return;
+    }
         parsed=healSchedule(parsed,pool,pCounts,oCounts,TARGET_GAMES);
     fbSet(SIDE+'/weeks/'+wid+'/rounds',parsed);
     toast('Schedule generated! ✓');
@@ -1226,7 +1231,7 @@ function renderWeekActions(){
   if(!week){acts.style.display='none';return;}
   acts.style.display='block';
   if(week.cancelled){
-    acts.innerHTML=`<div style="background:#fee2e2;border-radius:10px;padding:12px 14px;text-align:center;"><div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--loss);margin-bottom:4px;">Night Cancelled</div><div style="font-size:13px;color:#b91c1c;">Season extended by 1 week.</div></div>`;
+    acts.innerHTML=`<div style="background:#fee2e2;border-radius:10px;padding:12px 14px;text-align:center;"><div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--loss);margin-bottom:4px;">Night Cancelled</div><div style="font-size:13px;color:#b91c1c;margin-bottom:10px;">Season extended by 1 week.</div><button onclick="promptUncancelNight()" style="padding:8px 20px;background:#b91c1c;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">Uncancel Night</button></div>`;
     return;
   }
   if(week.skipped){
@@ -1718,6 +1723,7 @@ function pinTap(v){
       $('pin-modal').classList.remove('on');
       _pinEntry='';updatePinDots();
       if(_pinAction==='cancel') doCancelNight();
+      else if(_pinAction==='uncancel') doUncancelNight();
       else if(_pinAction==='closeseason') doCloseSeason();
       else if(_pinAction==='addplayer') _doAddPlayer();
       else if(_pinAction==='planner') _openPlanner();
@@ -1741,17 +1747,33 @@ function _openPlanner(){
 function updatePinDots(){for(let i=0;i<4;i++){const d=$('pd'+i);if(d)d.classList.toggle('filled',i<_pinEntry.length);}}
 function doCancelNight(){
   if(!liveWeek)return;
-  if(!confirm('Are you sure? This action will wipe out the whole evening\'s scores and extend the season by one week. This cannot be undone.'))return;
-  fbSet(SIDE+'/weeks/'+liveWeek+'/cancelled',true);
+  if(!confirm('Are you sure? This will mark the night as cancelled and extend the season by one week. You can undo this with Uncancel Night.'))return;
   const allW=Object.values(D[SIDE].weeks||{}).sort((a,b)=>a.weekNum-b.weekNum);
   const last=allW[allW.length-1];
+  let makeupId=null;
   if(last){
     const ld=new Date(last.date+'T12:00:00');ld.setDate(ld.getDate()+7);
     const ds=ld.getFullYear()+'-'+String(ld.getMonth()+1).padStart(2,'0')+'-'+String(ld.getDate()).padStart(2,'0');
     const nid='w'+(last.weekNum+1);
+    makeupId=nid;
     fbSet(SIDE+'/weeks/'+nid,{id:nid,weekNum:last.weekNum+1,date:ds,absences:[],subs:null,rounds:null,skipped:false,cancelled:false});
   }
-  toast('Night cancelled — new week added.');
+  fbSet(SIDE+'/weeks/'+liveWeek+'/cancelled',true);
+  if(makeupId)fbSet(SIDE+'/weeks/'+liveWeek+'/cancelMakeupId',makeupId);
+  toast('Night cancelled -- new week added.');
+}
+
+function promptUncancelNight(){_pinAction='uncancel';_pinEntry='';updatePinDots();$('pin-modal').style.display='flex';}
+
+function doUncancelNight(){
+  if(!liveWeek)return;
+  const week=D[SIDE].weeks[liveWeek];
+  if(!week||!week.cancelled)return;
+  const makeupId=week.cancelMakeupId;
+  fbDel(SIDE+'/weeks/'+liveWeek+'/cancelled');
+  fbDel(SIDE+'/weeks/'+liveWeek+'/cancelMakeupId');
+  if(makeupId)fbDel(SIDE+'/weeks/'+makeupId);
+  toast('Night restored!');
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
