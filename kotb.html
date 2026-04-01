@@ -1457,9 +1457,6 @@ function renderWeekActions(){
   }
   const hasSchedule=week.rounds&&week.rounds.length>0;
   acts.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap;">'
-    +(hasSchedule
-      ?`<button class="btn btn-g btn-sm" style="flex:1;" onclick="promptGenSchedule(true)">🔄 Regenerate Schedule</button>`
-      :`<button class="btn btn-a" style="flex:1;" onclick="promptGenSchedule(true)">🤖 Generate Tonight's Schedule</button>`)
     +`<button class="btn btn-sm cancel-btn" onclick="promptCancelNight()">🌧 Cancel Night</button>`
     +'</div>';
 }
