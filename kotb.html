@@ -286,7 +286,7 @@ select.inp{-webkit-appearance:none;appearance:none;background-image:url("data:im
         </select>
         <button class="btn btn-p btn-sm" onclick="openAbsModal()">Absences / Subs</button>
       </div>
-      <button class="btn btn-a btn-w" style="margin-bottom:12px;" onclick="genNight()">🤖 Generate Tonight's Schedule</button>
+      <button class="btn btn-a btn-w" style="margin-bottom:12px;" onclick="promptGenSchedule(false)">🤖 Generate Tonight's Schedule</button>
       <div id="week-detail"></div>
     </div>
 
@@ -404,6 +404,7 @@ const AI_URL  = 'https://leon-beach-ai.markmcnees-479.workers.dev';
 let db = null;
 let SIDE = 'kings';
 let _pendingRoundsUpdate = null;
+let _genFromScore = false;
 let tab  = 'standings';
 let sortK = {key:'diff', dir:'desc'};
 let liveWeek = null;
@@ -883,6 +884,27 @@ function saveAbsences(){
   loadWeekDetail();
 }
 
+// ─── SCHEDULE GENERATION PIN PROTECTION ───
+function promptGenSchedule(fromScore){
+  _genFromScore = !!fromScore;
+  _pinAction = 'genschedule';
+  _pinEntry = '';
+  updatePinDots();
+  $('pin-error').textContent = '';
+  $('pin-modal-title').textContent = 'Admin PIN — Generate Schedule';
+  $('pin-modal').classList.add('on');
+}
+async function doGenScheduleAction(){
+  if(_genFromScore){
+    if(!liveWeek){toast('Select a week first');return;}
+    const weekSel=$('week-sel');if(weekSel)weekSel.value=liveWeek;
+    await genNight();
+    renderWeekActions();renderRoundPills();renderLiveCourts();
+  } else {
+    await genNight();
+  }
+}
+
 // ─── SCORE TAB SCHEDULE GENERATION ───
 async function genNightFromScore(){
   if(!liveWeek){toast('Select a week first');return;}
@@ -1305,8 +1327,8 @@ function renderWeekActions(){
   const hasSchedule=week.rounds&&week.rounds.length>0;
   acts.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap;">'
     +(hasSchedule
-      ?`<button class="btn btn-g btn-sm" style="flex:1;" onclick="genNightFromScore()">🔄 Regenerate Schedule</button>`
-      :`<button class="btn btn-a" style="flex:1;" onclick="genNightFromScore()">🤖 Generate Tonight's Schedule</button>`)
+      ?`<button class="btn btn-g btn-sm" style="flex:1;" onclick="promptGenSchedule(true)">🔄 Regenerate Schedule</button>`
+      :`<button class="btn btn-a" style="flex:1;" onclick="promptGenSchedule(true)">🤖 Generate Tonight's Schedule</button>`)
     +`<button class="btn btn-sm cancel-btn" onclick="promptCancelNight()">🌧 Cancel Night</button>`
     +'</div>';
 }
@@ -1790,7 +1812,8 @@ function pinTap(v){
     if(_pinEntry===ADMIN_PIN){
       $('pin-modal').classList.remove('on');
       _pinEntry='';updatePinDots();
-      if(_pinAction==='cancel') doCancelNight();
+      if(_pinAction==='genschedule') doGenScheduleAction();
+      else if(_pinAction==='cancel') doCancelNight();
       else if(_pinAction==='uncancel') doUncancelNight();
       else if(_pinAction==='closeseason') doCloseSeason();
       else if(_pinAction==='addplayer') _doAddPlayer();
