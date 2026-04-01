@@ -406,6 +406,7 @@ let SIDE = 'kings';
 let _pendingRoundsUpdate = null;
 let _genFromScore = false;
 let _editCourtCtx = null;
+let _plannerUnlocked = false;
 let tab  = 'standings';
 let sortK = {key:'diff', dir:'desc'};
 let liveWeek = null;
@@ -589,6 +590,7 @@ function initTabs(){
         window._pendingTab=t;
         return;
       }
+      _plannerUnlocked = false;
       document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
       document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
       t.classList.add('on');
@@ -895,6 +897,7 @@ function saveAbsences(){
 // ─── SCHEDULE GENERATION PIN PROTECTION ───
 function promptGenSchedule(fromScore){
   _genFromScore = !!fromScore;
+  if(_plannerUnlocked && !fromScore){ genNight(); return; }
   _pinAction = 'genschedule';
   _pinEntry = '';
   updatePinDots();
@@ -916,6 +919,7 @@ async function doGenScheduleAction(){
 // ─── EDIT COURT PLAYERS (PLANNER) ───
 function promptEditCourtPlayers(wid, roundNum, courtIdx){
   _editCourtCtx = {wid, roundNum, courtIdx};
+  if(_plannerUnlocked){ openEditCourtModal(); return; }
   _pinAction = 'editcourt';
   _pinEntry = '';
   updatePinDots();
@@ -1913,6 +1917,7 @@ function _openPlanner(){
   t.classList.add('on');
   tab='planner';
   $('pane-planner').classList.add('on');
+  _plannerUnlocked = true;
   refreshTab('planner');
   window._pendingTab=null;
 }
