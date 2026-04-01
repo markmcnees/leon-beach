@@ -406,7 +406,6 @@ let SIDE = 'kings';
 let _pendingRoundsUpdate = null;
 let _genFromScore = false;
 let _editCourtCtx = null;
-let _plannerUnlocked = false;
 let tab  = 'standings';
 let sortK = {key:'diff', dir:'desc'};
 let liveWeek = null;
@@ -590,7 +589,6 @@ function initTabs(){
         window._pendingTab=t;
         return;
       }
-      _plannerUnlocked = false;
       document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
       document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
       t.classList.add('on');
@@ -835,7 +833,30 @@ function loadWeekDetail(){
   } else {
     h+=`<div class="empty"><div class="eico">🤖</div><p class="etxt">No schedule yet. Tap Generate Tonight's Schedule above.</p></div>`;
   }
+  if(week.rounds&&week.rounds.length){
+    h+=`<button onclick="promptClearSchedule('${wid}')" style="margin-top:12px;width:100%;padding:10px;background:#fee2e2;color:var(--loss);border:1.5px solid #fca5a5;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">🗑 Clear Schedule</button>`;
+  }
   cont.innerHTML=h;
+}
+
+// ─── CLEAR SCHEDULE ───
+function promptClearSchedule(wid){
+  if(_plannerUnlocked){
+    if(confirm('Clear the schedule for this week? This cannot be undone.')) doClearSchedule(wid);
+    return;
+  }
+  _editCourtCtx = {wid, roundNum:null, courtIdx:null};
+  _pinAction = 'clearschedule';
+  _pinEntry = '';
+  updatePinDots();
+  $('pin-error').textContent = '';
+  $('pin-modal-title').textContent = 'Admin PIN — Clear Schedule';
+  $('pin-modal').classList.add('on');
+}
+function doClearSchedule(wid){
+  fbDel(SIDE+'/weeks/'+wid+'/rounds');
+  toast('Schedule cleared.');
+  loadWeekDetail();
 }
 
 // ─── ABSENCE MODAL ───
@@ -897,7 +918,6 @@ function saveAbsences(){
 // ─── SCHEDULE GENERATION PIN PROTECTION ───
 function promptGenSchedule(fromScore){
   _genFromScore = !!fromScore;
-  if(_plannerUnlocked && !fromScore){ genNight(); return; }
   _pinAction = 'genschedule';
   _pinEntry = '';
   updatePinDots();
@@ -919,7 +939,6 @@ async function doGenScheduleAction(){
 // ─── EDIT COURT PLAYERS (PLANNER) ───
 function promptEditCourtPlayers(wid, roundNum, courtIdx){
   _editCourtCtx = {wid, roundNum, courtIdx};
-  if(_plannerUnlocked){ openEditCourtModal(); return; }
   _pinAction = 'editcourt';
   _pinEntry = '';
   updatePinDots();
@@ -1896,7 +1915,8 @@ function pinTap(v){
     if(_pinEntry===ADMIN_PIN){
       $('pin-modal').classList.remove('on');
       _pinEntry='';updatePinDots();
-      if(_pinAction==='genschedule') doGenScheduleAction();
+      if(_pinAction==='clearschedule'){ doClearSchedule(_editCourtCtx.wid); }
+      else if(_pinAction==='genschedule') doGenScheduleAction();
       else if(_pinAction==='editcourt'){ openEditCourtModal(); }
       else if(_pinAction==='cancel') doCancelNight();
       else if(_pinAction==='uncancel') doUncancelNight();
@@ -1917,7 +1937,6 @@ function _openPlanner(){
   t.classList.add('on');
   tab='planner';
   $('pane-planner').classList.add('on');
-  _plannerUnlocked = true;
   refreshTab('planner');
   window._pendingTab=null;
 }
