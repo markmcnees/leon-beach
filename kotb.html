@@ -405,6 +405,7 @@ let db = null;
 let SIDE = 'kings';
 let _pendingRoundsUpdate = null;
 let _genFromScore = false;
+let _editCourtCtx = null;
 let tab  = 'standings';
 let sortK = {key:'diff', dir:'desc'};
 let liveWeek = null;
@@ -814,10 +815,17 @@ function loadWeekDetail(){
   if(week.rounds&&week.rounds.length){
     week.rounds.forEach(rd=>{
       h+=`<div class="rblock"><div class="rtitle">Round ${rd.round}</div>`;
-      (rd.courts||[]).forEach(c=>{
+      (rd.courts||[]).forEach((c,cidx)=>{
         const t1=c.t1.map(id=>pN(id)).join(' & ');
         const t2=c.t2.map(id=>pN(id)).join(' & ');
-        h+=`<div class="crow"><span class="cbadge">CT ${c.court}</span><span style="flex:1;">${t1}</span><span style="color:var(--gray);padding:0 4px;">vs</span><span style="flex:1;text-align:right;">${t2}</span></div>`;
+        const hasQ=c.t1.concat(c.t2).some(id=>pN(id)==='?');
+        h+=`<div class="crow" style="align-items:center;">
+          <span class="cbadge">CT ${c.court}</span>
+          <span style="flex:1;">${t1}</span>
+          <span style="color:var(--gray);padding:0 4px;">vs</span>
+          <span style="flex:1;text-align:right;">${t2}</span>
+          <button onclick="promptEditCourtPlayers('${wid}',${rd.round},${cidx})" style="margin-left:8px;padding:4px 8px;font-size:11px;background:${hasQ?'var(--loss)':'var(--gray)'};color:#fff;border:none;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0;">${hasQ?'⚠️ Fix':'✏️'}</button>
+        </div>`;
       });
       if(rd.sitting&&rd.sitting.length) h+=`<div class="sit">Sitting: ${rd.sitting.map(id=>pN(id)).join(', ')}</div>`;
       h+=`</div>`;
@@ -903,6 +911,78 @@ async function doGenScheduleAction(){
   } else {
     await genNight();
   }
+}
+
+// ─── EDIT COURT PLAYERS (PLANNER) ───
+function promptEditCourtPlayers(wid, roundNum, courtIdx){
+  _editCourtCtx = {wid, roundNum, courtIdx};
+  _pinAction = 'editcourt';
+  _pinEntry = '';
+  updatePinDots();
+  $('pin-error').textContent = '';
+  $('pin-modal-title').textContent = 'Admin PIN — Edit Court';
+  $('pin-modal').classList.add('on');
+}
+function openEditCourtModal(){
+  const {wid, roundNum, courtIdx} = _editCourtCtx;
+  const week = D[SIDE].weeks[wid];
+  if(!week){toast('Week not found');return;}
+  const rd = (week.rounds||[]).find(r=>r.round===roundNum);
+  if(!rd){toast('Round not found');return;}
+  const court = rd.courts[courtIdx];
+  if(!court){toast('Court not found');return;}
+  const players = Object.values(D[SIDE].players||{})
+    .filter(p=>p&&p.name&&p.active!==false)
+    .sort((a,b)=>a.name.localeCompare(b.name));
+
+  $('edit-court-title').textContent = `Edit Court \u2014 Round ${roundNum} Court ${court.court}`;
+
+  let h = `<div style="font-size:13px;color:var(--gray);margin-bottom:14px;">Select the correct registered players for each slot. Changes save directly to the schedule.</div>`;
+
+  ['Team 1','Team 2'].forEach((label,ti)=>{
+    const team = ti===0 ? court.t1 : court.t2;
+    h += `<div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--primary);margin:14px 0 8px;">${label}</div>`;
+    team.forEach((pid,pi)=>{
+      const knownPlayer = players.find(p=>p.id===pid);
+      const unknownBadge = knownPlayer ? '' : ` <span style="color:var(--loss);">(fix this)</span>`;
+      const opts = players.map(p=>`<option value="${p.id}"${p.id===pid?' selected':''}>${p.name}</option>`).join('');
+      const unknownOpt = knownPlayer ? '' : `<option value="${pid}" selected>? (unknown)</option>`;
+      h += `<div style="margin-bottom:10px;">
+        <label style="font-size:11px;letter-spacing:1px;color:var(--gray);display:block;margin-bottom:4px;">PLAYER ${pi+1}${unknownBadge}</label>
+        <select data-team="${ti}" data-slot="${pi}" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;background:#fff;color:#222;">
+          ${unknownOpt}${opts}
+        </select>
+      </div>`;
+    });
+  });
+
+  if(rd.sitting&&rd.sitting.length){
+    h += `<div style="font-size:12px;color:var(--gray);margin-top:10px;padding-top:10px;border-top:1px solid #eee;">Sitting this round: ${rd.sitting.map(id=>pN(id)).join(', ')}</div>`;
+  }
+
+  $('edit-court-body').innerHTML = h;
+  $('edit-court-modal').classList.add('on');
+}
+
+function saveEditCourt(){
+  const {wid, roundNum, courtIdx} = _editCourtCtx;
+  const week = D[SIDE].weeks[wid];
+  if(!week){toast('Week not found');return;}
+  const rounds = JSON.parse(JSON.stringify(week.rounds||[]));
+  const rdIdx = rounds.findIndex(r=>r.round===roundNum);
+  if(rdIdx===-1){toast('Round not found');return;}
+  const court = rounds[rdIdx].courts[courtIdx];
+  $('edit-court-body').querySelectorAll('select').forEach(sel=>{
+    const ti = parseInt(sel.dataset.team);
+    const pi = parseInt(sel.dataset.slot);
+    if(ti===0) court.t1[pi]=sel.value;
+    else court.t2[pi]=sel.value;
+  });
+  rounds[rdIdx].courts[courtIdx] = court;
+  fbSet(SIDE+'/weeks/'+wid+'/rounds', rounds);
+  closeModal('edit-court-modal');
+  toast('Court updated!');
+  loadWeekDetail();
 }
 
 // ─── SCORE TAB SCHEDULE GENERATION ───
@@ -1813,6 +1893,7 @@ function pinTap(v){
       $('pin-modal').classList.remove('on');
       _pinEntry='';updatePinDots();
       if(_pinAction==='genschedule') doGenScheduleAction();
+      else if(_pinAction==='editcourt'){ openEditCourtModal(); }
       else if(_pinAction==='cancel') doCancelNight();
       else if(_pinAction==='uncancel') doUncancelNight();
       else if(_pinAction==='closeseason') doCloseSeason();
@@ -1872,5 +1953,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   initFB();
 });
 </script>
+
+<!-- EDIT COURT PLAYERS MODAL -->
+<div class="overlay" id="edit-court-modal" onclick="if(event.target===this)closeModal('edit-court-modal')">
+  <div class="modal">
+    <div class="mtitle"><span id="edit-court-title">Edit Court Players</span><button class="mclose" onclick="closeModal('edit-court-modal')">✕</button></div>
+    <div id="edit-court-body"></div>
+    <button class="btn btn-p btn-w" style="margin-top:16px;" onclick="saveEditCourt()">✅ Save Changes</button>
+  </div>
+</div>
 </body>
 </html>
