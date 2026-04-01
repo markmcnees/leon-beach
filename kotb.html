@@ -1043,7 +1043,9 @@ function healSchedule(parsed,pool,pCounts,oCounts,TARGET_GAMES){
     (rd.courts||[]).forEach(ct=>{
       const fixTeam=(team,other)=>team.forEach((id,i)=>{
         if(!id||id.trim()==='?'||!poolSet.has(id)){
-          const available=validIds.filter(pid=>!roundUsed.has(pid));
+          let available=validIds.filter(pid=>!roundUsed.has(pid));
+          // Fallback: if all court slots are full, steal from sitting list
+          if(!available.length) available=[...sittingSet];
           if(!available.length)return;
           const partner=team.filter((_,j)=>j!==i&&poolSet.has(_)&&_&&_.trim()!=='?');
           const gc=countGames(parsed);
@@ -1129,9 +1131,14 @@ async function genNight(){
 
   $('week-detail').innerHTML='<div class="ai-load"><div class="spin"></div><div>AI is building tonight\'s rotation...</div></div>';
 
-  const playerList=pool.map(p=>p.id+':'+p.name+(p.isSub?' (SUB for '+pN(p.forId)+')':'')).join(', ');
-  const pSummary=pool.map(p=>`${p.name}(${p.id}) partnered with: ${Object.entries(pCounts[p.id]||{}).filter(([,c])=>c>0).map(([id,c])=>pN(id)||id+' x'+c).join(', ')||'nobody yet'}`).join('\n');
-  const oSummary=pool.map(p=>`${p.name}(${p.id}) faced: ${Object.entries(oCounts[p.id]||{}).filter(([,c])=>c>0).map(([id,c])=>pN(id)||id+' x'+c).join(', ')||'nobody yet'}`).join('\n');
+  // Build short IDs (P1..PN) so the AI doesn't have to track Firebase keys
+  const shortId={};   // realId -> shortId
+  const shortIdRev={}; // shortId -> realId
+  pool.forEach((p,i)=>{ const sid='P'+(i+1); shortId[p.id]=sid; shortIdRev[sid]=p.id; });
+
+  const playerList=pool.map(p=>shortId[p.id]+':'+p.name+(p.isSub?' (SUB for '+pN(p.forId)+')':'')).join(', ');
+  const pSummary=pool.map(p=>`${p.name}(${shortId[p.id]}) partnered with: ${Object.entries(pCounts[p.id]||{}).filter(([,c])=>c>0).map(([id,c])=>pN(id)||id+' x'+c).join(', ')||'nobody yet'}`).join('\n');
+  const oSummary=pool.map(p=>`${p.name}(${shortId[p.id]}) faced: ${Object.entries(oCounts[p.id]||{}).filter(([,c])=>c>0).map(([id,c])=>pN(id)||id+' x'+c).join(', ')||'nobody yet'}`).join('\n');
 
   // Rounds needed so every player gets exactly 6 games
   const TARGET_GAMES=6;
@@ -1165,13 +1172,13 @@ RULES:
 
 Return ONLY a valid JSON array — no explanation, no markdown:
 [
-  {"round":1,"courts":[{"court":1,"t1":["id1","id2"],"t2":["id3","id4"]},{"court":2,"t1":["id5","id6"],"t2":["id7","id8"]}],"sitting":["id9","id10"]},
+  {"round":1,"courts":[{"court":1,"t1":["P1","P2"],"t2":["P3","P4"]},{"court":2,"t1":["P5","P6"],"t2":["P7","P8"]}],"sitting":["P9","P10"]},
   ...${totalRounds} rounds total
 ]
 
 VERIFICATION: Before returning, mentally count how many times each player ID appears across all t1+t2 arrays. Every player must appear exactly ${TARGET_GAMES} times. Adjust sitting lists until this is true for every player.
 
-Use the exact player IDs provided. CRITICAL: NEVER use "?" or any placeholder string for a player slot — every single slot in t1 and t2 must be a real player ID from the list above. If you are unsure of an assignment, use any valid player ID rather than "?". Return only the JSON array.`;
+Use ONLY the short IDs (P1, P2, P3...) exactly as listed above. CRITICAL: NEVER use "?" or any placeholder — every slot in t1 and t2 must be one of the P-codes from the player list. If unsure, use any valid P-code rather than "?". Return only the JSON array.`;
 
   try{
     const res=await fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json'},
@@ -1183,6 +1190,27 @@ Use the exact player IDs provided. CRITICAL: NEVER use "?" or any placeholder st
       const clean=text.replace(/```json|```/g,'').trim();
       const s=clean.indexOf('['),e=clean.lastIndexOf(']');
       parsed=JSON.parse(clean.slice(s,e+1));
+      // Convert short IDs (P1..PN) back to real IDs, and fix any name-as-ID usage
+      const nameToId={};
+      pool.forEach(p=>{ nameToId[p.name.toLowerCase().trim()]=p.id; });
+      parsed.forEach(rd=>{
+        (rd.courts||[]).forEach(ct=>{
+          ['t1','t2'].forEach(team=>{
+            ct[team]=(ct[team]||[]).map(sid=>{
+              if(shortIdRev[sid]) return shortIdRev[sid];            // P1..PN -> real ID
+              const byName=nameToId[String(sid).toLowerCase().trim()];
+              if(byName) return byName;                               // name -> real ID
+              return sid;                                             // pass through (healer will catch)
+            });
+          });
+        });
+        rd.sitting=(rd.sitting||[]).map(sid=>{
+          if(shortIdRev[sid]) return shortIdRev[sid];
+          const byName=nameToId[String(sid).toLowerCase().trim()];
+          if(byName) return byName;
+          return sid;
+        });
+      });
     }catch(pe){
       $('week-detail').innerHTML=`<div style="color:var(--loss);font-size:13px;padding:12px;">Couldn't parse AI response — the AI response may have been cut off or malformed. Tap Retry to try again.<br><button onclick="genNight()" style="margin-top:10px;padding:8px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
       return;
