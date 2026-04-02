@@ -966,6 +966,51 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="coach-player-overlay" onclick="if(event.target===this)coachClosePlayer()">
+  <div id="coach-player-modal" style="background:var(--white);border-radius:16px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:0;">
+    <div style="background:var(--primary);color:#fff;padding:16px 20px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div id="cpm-name" style="font-family:'Bebas Neue';font-size:22px;letter-spacing:1px;"></div>
+        <div id="cpm-meta" style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+      </div>
+      <button onclick="coachClosePlayer()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:16px;">✕</button>
+    </div>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:20px;">
+      <div>
+        <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">⭐ Skills (1–10)</div>
+        <div id="cpm-skills"></div>
+        <button class="btn btn-red btn-small" style="width:100%;margin-top:10px;" onclick="coachSaveSkills()">Save Skills</button>
+      </div>
+      <div style="border-top:1px solid var(--gray-lighter);padding-top:16px;">
+        <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">⏱ Star Drill</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input type="date" id="cpm-drill-date" class="form-input" style="flex:1;padding:8px;font-size:13px;">
+          <input type="number" id="cpm-drill-time" class="form-input" placeholder="Time (sec)" step="0.1" min="0" style="flex:1;padding:8px;font-size:13px;">
+          <button class="btn btn-blue btn-small" onclick="coachAddDrill()">Add</button>
+        </div>
+        <div id="cpm-drill-history"></div>
+      </div>
+      <div style="border-top:1px solid var(--gray-lighter);padding-top:16px;">
+        <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">📏 Verticals</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <input type="date" id="cpm-vert-date" class="form-input" style="flex:1;min-width:120px;padding:8px;font-size:13px;">
+          <input type="text" id="cpm-vert-sr" class="form-input" placeholder="Standing Reach" style="flex:1;min-width:120px;padding:8px;font-size:13px;">
+          <input type="text" id="cpm-vert-bj" class="form-input" placeholder="Block Jump" style="flex:1;min-width:120px;padding:8px;font-size:13px;">
+          <input type="text" id="cpm-vert-aj" class="form-input" placeholder="Approach Jump" style="flex:1;min-width:120px;padding:8px;font-size:13px;">
+        </div>
+        <button class="btn btn-blue btn-small" style="width:100%;" onclick="coachAddVertical()">Add Measurement</button>
+        <div id="cpm-vert-history" style="margin-top:8px;"></div>
+      </div>
+      <div style="border-top:1px solid var(--gray-lighter);padding-top:16px;">
+        <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">📝 Coach Notes</div>
+        <input type="date" id="cpm-note-date" class="form-input" style="width:100%;padding:8px;font-size:13px;margin-bottom:6px;">
+        <textarea id="cpm-note-text" class="form-input" placeholder="Add a note..." rows="3" style="width:100%;padding:8px;font-size:13px;resize:vertical;margin-bottom:6px;"></textarea>
+        <button class="btn btn-blue btn-small" style="width:100%;" onclick="coachAddNote()">Save Note</button>
+        <div id="cpm-note-history" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="edit-modal">
   <div class="modal"><div class="modal-title">Edit Match <button class="modal-close" onclick="closeEdit()">✕</button></div>
     <div id="edit-modal-body"></div>
@@ -1882,22 +1927,23 @@ function renderPlayers(){
   });
 
   const tbody=document.querySelector('#players-table tbody');
+  const pNameCell=(p)=>currentRole==='coach'?`<span class="player-name" style="cursor:pointer;text-decoration:underline dotted;color:var(--red);" onclick="coachOpenPlayer('${p.id}')">${p.firstName} ${p.lastName.charAt(0)}.</span>`:`<span class="player-name">${p.firstName} ${p.lastName.charAt(0)}.</span>`;
   if(pType==='queens'){
     tbody.innerHTML=rows.map(r=>{const p=r.p,s=r.s;
-      return`<tr><td><span class="player-name">${p.firstName} ${p.lastName.charAt(0)}.</span></td>
+      return`<tr><td>${pNameCell(p)}</td>
         <td><span class="court-badge court-${p.court}">${p.court}</span></td>
         <td>${s.wins}</td><td>${s.losses}</td><td>${s.gp>0?Math.round(s.pct)+'%':'—'}</td>
         <td class="plus-minus ${pmClass(s.diff)}">${s.gp>0?pmStr(s.diff):'—'}</td></tr>`;}).join('');
   }else if(pType==='gameday'||pType==='scrimmage'){
     tbody.innerHTML=rows.map(r=>{const p=r.p,s=r.s;
-      return`<tr><td><span class="player-name">${p.firstName} ${p.lastName.charAt(0)}.</span></td>
+      return`<tr><td>${pNameCell(p)}</td>
         <td><span class="court-badge court-${p.court}">${p.court}</span></td>
         <td>${s.sets}</td>
         <td class="plus-minus ${pmClass(s.diff)}">${s.sets>0?pmStr(s.diff):'—'}</td>
         <td>${s.k}</td><td>${s.b}</td><td>${s.a}</td><td>${s.se}</td><td>${s.re}</td><td>${s.he}</td><td>${s.de}</td></tr>`;}).join('');
   }else{
     tbody.innerHTML=rows.map(r=>{const p=r.p,c=r.c;
-      return`<tr><td><span class="player-name">${p.firstName} ${p.lastName.charAt(0)}.</span></td>
+      return`<tr><td>${pNameCell(p)}</td>
         <td><span class="court-badge court-${p.court}">${p.court}</span></td>
         <td class="wl-record">${c.qWins}-${c.qLosses}</td>
         <td class="plus-minus ${pmClass(c.qDiff)}">${c.qGP>0?pmStr(c.qDiff):'—'}</td>
@@ -3125,6 +3171,101 @@ function renderPlayerProfileData(pid){
         <div style="font-size:11px;color:var(--gray);font-weight:600;">${fD(n.date)}</div>
         <div style="font-size:13px;margin-top:2px;line-height:1.5;">${n.text}</div></div>`).join('');
   }else{document.getElementById('pp-notes').innerHTML='<div style="color:var(--gray);font-size:13px;text-align:center;padding:12px;">No coach notes yet.</div>';}
+}
+
+
+// ============================================================
+// COACH PLAYER PROFILE MODAL
+// ============================================================
+function coachOpenPlayer(pid){
+  const p=gP(pid);if(!p)return;
+  const CL_LABELS={1:'Top',2:'Mid',3:'Dev',4:'Court 4',5:'Court 5'};
+  const overlay=document.getElementById('coach-player-overlay');
+  if(!overlay)return;
+  document.getElementById('cpm-name').textContent=p.firstName+' '+p.lastName;
+  document.getElementById('cpm-meta').innerHTML=`<span class="class-badge class-${p.classYear}">${p.classYear}</span> <span class="court-badge court-${p.court}">PG ${p.court} — ${CL_LABELS[p.court]||''}</span>`;
+  const SKILL_KEYS=['serving','passing','setting','hitting','blocking','defense','courtSense','communication'];
+  const SKILL_LABELS={serving:'Serving',passing:'Passing',setting:'Setting',hitting:'Hitting',blocking:'Blocking',defense:'Defense',courtSense:'Court Sense',communication:'Communication'};
+  const sk=profilesData?.skills?.[pid]||profilesData?.players?.[pid]?.skills||{};
+  let skillsHtml='';
+  SKILL_KEYS.forEach(k=>{const v=sk[k]||0;
+    skillsHtml+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;">
+      <span style="font-size:12px;font-weight:600;min-width:105px;">${SKILL_LABELS[k]}</span>
+      <input type="range" id="cpm-skill-${k}" min="0" max="10" step="1" value="${v}" style="flex:1;" oninput="document.getElementById('cpm-sv-${k}').textContent=this.value">
+      <span id="cpm-sv-${k}" style="font-family:'Bebas Neue';font-size:16px;min-width:20px;text-align:right;">${v||'—'}</span>
+    </div>`;});
+  document.getElementById('cpm-skills').innerHTML=skillsHtml;
+  const t=td();
+  ['cpm-drill-date','cpm-vert-date','cpm-note-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=t;});
+  coachRenderDrillHistory(pid);coachRenderVertHistory(pid);coachRenderNoteHistory(pid);
+  overlay.dataset.pid=pid;overlay.classList.add('active');
+}
+function coachClosePlayer(){const o=document.getElementById('coach-player-overlay');if(o)o.classList.remove('active');}
+function coachSaveSkills(){
+  const overlay=document.getElementById('coach-player-overlay');const pid=overlay?.dataset.pid;if(!pid)return;
+  const SKILL_KEYS=['serving','passing','setting','hitting','blocking','defense','courtSense','communication'];
+  const skills={};SKILL_KEYS.forEach(k=>{skills[k]=parseInt(document.getElementById('cpm-skill-'+k)?.value)||0;});
+  db.ref('leon_queens'+'/skills/'+pid).set(skills);toast('Skills saved!');
+}
+function coachAddDrill(){
+  const overlay=document.getElementById('coach-player-overlay');const pid=overlay?.dataset.pid;if(!pid)return;
+  const date=document.getElementById('cpm-drill-date')?.value;
+  const timeVal=parseFloat(document.getElementById('cpm-drill-time')?.value);
+  if(!date||isNaN(timeVal)||timeVal<=0){toast('Enter date and time');return;}
+  const id='sd-'+pid+'-'+Date.now();
+  db.ref('leon_queens'+'/starDrills/'+id).set({id,playerId:pid,player:pid,date,time:timeVal});
+  document.getElementById('cpm-drill-time').value='';toast('Drill time added!');
+  setTimeout(()=>coachRenderDrillHistory(pid),600);
+}
+function coachRenderDrillHistory(pid){
+  const el=document.getElementById('cpm-drill-history');if(!el)return;
+  const drills=Object.values(profilesData?.starDrills||{}).filter(d=>d.playerId===pid||d.player===pid).sort((a,b)=>b.date.localeCompare(a.date));
+  if(!drills.length){el.innerHTML='<div style="color:var(--gray);font-size:12px;text-align:center;padding:8px;">No times yet</div>';return;}
+  const best=Math.min(...drills.map(d=>d.time));
+  el.innerHTML=drills.map(d=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.05);font-size:13px;">
+    <span style="color:var(--gray);">${fD(d.date)}</span>
+    <span style="font-family:'Bebas Neue';font-size:15px;color:${d.time===best?'var(--green)':'inherit'};">${d.time.toFixed(1)}s${d.time===best?' ★':''}</span>
+  </div>`).join('');
+}
+function coachAddVertical(){
+  const overlay=document.getElementById('coach-player-overlay');const pid=overlay?.dataset.pid;if(!pid)return;
+  const date=document.getElementById('cpm-vert-date')?.value;
+  const sr=document.getElementById('cpm-vert-sr')?.value.trim();
+  const bj=document.getElementById('cpm-vert-bj')?.value.trim();
+  const aj=document.getElementById('cpm-vert-aj')?.value.trim();
+  if(!date||(!sr&&!bj&&!aj)){toast('Enter date and at least one measurement');return;}
+  const id='jt-'+pid+'-'+Date.now();
+  db.ref('leon_queens'+'/jumpTests/'+id).set({id,playerId:pid,player:pid,date,standingReach:sr||null,blockJump:bj||null,approachJump:aj||null});
+  ['cpm-vert-sr','cpm-vert-bj','cpm-vert-aj'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  toast('Vertical added!');setTimeout(()=>coachRenderVertHistory(pid),600);
+}
+function coachRenderVertHistory(pid){
+  const el=document.getElementById('cpm-vert-history');if(!el)return;
+  const verts=Object.values(profilesData?.jumpTests||profilesData?.verticals||{}).filter(v=>v.playerId===pid||v.player===pid).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(!verts.length){el.innerHTML='<div style="color:var(--gray);font-size:12px;text-align:center;padding:8px;">No measurements yet</div>';return;}
+  el.innerHTML=verts.map(v=>`<div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05);font-size:12px;">
+    <div style="color:var(--gray);font-weight:600;margin-bottom:2px;">${fD(v.date)}</div>
+    <div style="display:flex;gap:14px;">${v.standingReach?`<span>Reach: <strong>${v.standingReach}</strong></span>`:''}${v.blockJump?`<span>Block: <strong>${v.blockJump}</strong></span>`:''}${v.approachJump?`<span>Approach: <strong>${v.approachJump}</strong></span>`:''}</div>
+  </div>`).join('');
+}
+function coachAddNote(){
+  const overlay=document.getElementById('coach-player-overlay');const pid=overlay?.dataset.pid;if(!pid)return;
+  const date=document.getElementById('cpm-note-date')?.value;
+  const text=document.getElementById('cpm-note-text')?.value.trim();
+  if(!date||!text){toast('Enter date and note');return;}
+  const id='note-'+pid+'-'+Date.now();
+  db.ref('leon_queens'+'/notes/'+id).set({id,playerId:pid,player:pid,date,text,coachName:'Coach'});
+  document.getElementById('cpm-note-text').value='';toast('Note saved!');
+  setTimeout(()=>coachRenderNoteHistory(pid),600);
+}
+function coachRenderNoteHistory(pid){
+  const el=document.getElementById('cpm-note-history');if(!el)return;
+  const notes=Object.values(profilesData?.notes||{}).filter(n=>n.playerId===pid||n.player===pid).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(!notes.length){el.innerHTML='<div style="color:var(--gray);font-size:12px;text-align:center;padding:8px;">No notes yet</div>';return;}
+  el.innerHTML=notes.map(n=>`<div style="padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05);">
+    <div style="font-size:11px;color:var(--gray);font-weight:600;">${fD(n.date)}</div>
+    <div style="font-size:13px;margin-top:2px;line-height:1.5;">${n.text}</div>
+  </div>`).join('');
 }
 
 function renderPlayerGoals(){
