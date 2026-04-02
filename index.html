@@ -610,7 +610,17 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <div id="assign-notes-section" style="margin-top:8px;"></div>
         <button class="btn btn-blue btn-small" style="width:100%;margin-top:10px;" onclick="saveAssignment()">Save Assignment</button>
       <div style="text-align:center;margin:10px 0 4px;font-size:11px;color:var(--gray);letter-spacing:0.5px;">— OR —</div>
-      <button class="btn btn-secondary btn-small" style="width:100%;" onclick="document.getElementById('ca-file').click()">📸 Scan a Court Assignment Sheet</button>
+      <div style="margin-bottom:6px;">
+        <div style="font-size:11px;font-weight:700;color:var(--gray);letter-spacing:1px;margin-bottom:6px;">SCAN ASSIGNMENT SHEET</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <button id="ca-toggle-mine" class="btn btn-primary btn-small" style="flex:1;" onclick="setCaTeam('mine')">My Sheet</button>
+          <button id="ca-toggle-opp" class="btn btn-secondary btn-small" style="flex:1;" onclick="setCaTeam('opponent')">Opponent's Sheet</button>
+        </div>
+        <div id="ca-opp-wrap" style="display:none;margin-bottom:8px;">
+          <input id="ca-opp" type="text" class="form-input" placeholder="Opponent school name" style="width:100%;font-size:13px;padding:8px;">
+        </div>
+        <button class="btn btn-secondary btn-small" style="width:100%;" onclick="document.getElementById('ca-file').click()">📸 Scan Sheet</button>
+      </div>
       </div>
       <div id="assignments-list"></div>
     </div>
@@ -1008,7 +1018,6 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <!-- Hidden inputs for court assignment scanner -->
     <input type="file" id="ca-file" accept="image/*" capture="environment" style="display:none;">
     <input type="date" id="ca-date" style="display:none;">
-    <input type="text" id="ca-opp" style="display:none;">
     <select id="ca-type" style="display:none;"><option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option></select>
     <select id="ca-team" style="display:none;"><option value="mine">My Sheet</option><option value="opponent">Opponent's Sheet</option></select>
     <div id="ca-preview" style="display:none;"></div>
