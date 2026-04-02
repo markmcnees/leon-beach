@@ -976,6 +976,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <button onclick="coachClosePlayer()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:16px;">✕</button>
     </div>
     <div style="padding:16px 20px;display:flex;flex-direction:column;gap:20px;">
+      <div style="border-top:1px solid var(--gray-lighter);padding-top:16px;"><div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">📊 Team Rankings</div><div id="cpm-rankings"></div></div>
       <div>
         <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">⭐ Skills (1–10)</div>
         <div id="cpm-skills"></div>
@@ -3197,7 +3198,7 @@ function coachOpenPlayer(pid){
   document.getElementById('cpm-skills').innerHTML=skillsHtml;
   const t=td();
   ['cpm-drill-date','cpm-vert-date','cpm-note-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=t;});
-  coachRenderDrillHistory(pid);coachRenderVertHistory(pid);coachRenderNoteHistory(pid);
+  coachRenderDrillHistory(pid);coachRenderVertHistory(pid);coachRenderNoteHistory(pid);coachRenderRankings(pid);
   overlay.dataset.pid=pid;overlay.classList.add('active');
 }
 function coachClosePlayer(){const o=document.getElementById('coach-player-overlay');if(o)o.classList.remove('active');}
@@ -3241,13 +3242,36 @@ function coachAddVertical(){
 }
 function coachRenderVertHistory(pid){
   const el=document.getElementById('cpm-vert-history');if(!el)return;
+  const pp=profilesData?.players?.[pid]||{};
   const verts=Object.values(profilesData?.jumpTests||profilesData?.verticals||{}).filter(v=>v.playerId===pid||v.player===pid).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  if(!verts.length){el.innerHTML='<div style="color:var(--gray);font-size:12px;text-align:center;padding:8px;">No measurements yet</div>';return;}
-  el.innerHTML=verts.map(v=>`<div style="padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05);font-size:12px;">
-    <div style="color:var(--gray);font-weight:600;margin-bottom:2px;">${fD(v.date)}</div>
-    <div style="display:flex;gap:14px;">${v.standingReach?`<span>Reach: <strong>${v.standingReach}</strong></span>`:''}${v.blockJump?`<span>Block: <strong>${v.blockJump}</strong></span>`:''}${v.approachJump?`<span>Approach: <strong>${v.approachJump}</strong></span>`:''}</div>
-  </div>`).join('');
+  let h='';
+  // Show height from player profile
+  if(pp.height){
+    h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:13px;"><span style="color:var(--gray);font-weight:600;">Height</span><span style="font-weight:700;">${pp.height}</span></div>`;
+  }
+  if(verts.length){
+    const v=verts[0];
+    const sr=v.standingReach||v.reach||'';
+    const bj=v.blockJump||v.block||v.blockJumpTouch||'';
+    const aj=v.approachJump||v.approach||v.approachJumpTouch||'';
+    if(sr)h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:13px;"><span style="color:var(--gray);font-weight:600;">Standing Reach</span><span style="font-weight:700;">${sr}</span></div>`;
+    if(bj)h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:13px;"><span style="color:var(--gray);font-weight:600;">Block Jump</span><span style="font-weight:700;">${bj}</span></div>`;
+    if(aj)h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:13px;"><span style="color:var(--gray);font-weight:600;">Approach Jump</span><span style="font-weight:700;">${aj}</span></div>`;
+    h+=`<div style="font-size:11px;color:var(--gray);margin-top:4px;">Measured ${fD(v.date)}${verts.length>1?' · '+verts.length+' measurements on record':''}</div>`;
+    if(verts.length>1){
+      h+='<details style="margin-top:8px;"><summary style="font-size:11px;color:var(--gray);cursor:pointer;">Show all measurements</summary>';
+      h+=verts.map(v=>`<div style="padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:12px;">
+        <div style="color:var(--gray);font-weight:600;">${fD(v.date)}</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">${v.standingReach?`<span>Reach: <strong>${v.standingReach}</strong></span>`:''}${v.blockJump?`<span>Block: <strong>${v.blockJump}</strong></span>`:''}${v.approachJump?`<span>App: <strong>${v.approachJump}</strong></span>`:''}</div>
+      </div>`).join('');
+      h+='</details>';
+    }
+  }else if(!pp.height){
+    h='<div style="color:var(--gray);font-size:12px;text-align:center;padding:8px;">No measurements yet</div>';
+  }
+  el.innerHTML=h;
 }
+
 function coachAddNote(){
   const overlay=document.getElementById('coach-player-overlay');const pid=overlay?.dataset.pid;if(!pid)return;
   const date=document.getElementById('cpm-note-date')?.value;
@@ -3258,6 +3282,58 @@ function coachAddNote(){
   document.getElementById('cpm-note-text').value='';toast('Note saved!');
   setTimeout(()=>coachRenderNoteHistory(pid),600);
 }
+function coachRenderRankings(pid){
+  const el=document.getElementById('cpm-rankings');if(!el)return;
+  const allPlayers=D.players.filter(pl=>pl.id);
+  function ordinal(n){const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
+  function rankHTML(label,arr,pid,fmt){
+    const pos=arr.findIndex(r=>r.id===pid);if(pos===-1)return'';
+    const total=arr.length,rank=pos+1;
+    const pct=total>1?((total-rank)/(total-1))*100:100;
+    const myVal=arr[pos].val;
+    const barClass=rank<=3?'top3':rank<=Math.ceil(total/2)?'mid':'low';
+    const valStr=fmt?fmt(myVal):(myVal>0?'+'+myVal:''+myVal);
+    return`<div class="rank-row"><span class="rank-label">${label}</span><div class="rank-bar-wrap"><div class="rank-bar-fill ${barClass}" style="width:${Math.max(8,pct)}%"></div></div><span class="rank-value">${valStr}</span><span class="rank-position">${ordinal(rank)} <span class="ordinal">of ${total}</span></span></div>`;
+  }
+  function parseHeight(s){if(!s)return 0;s=String(s);const m=s.match(/(\d+)\D+(\d+)/);if(!m)return 0;return parseInt(m[1])*12+(parseInt(m[2])||0);}
+  const qRanks=allPlayers.map(pl=>{const s=queensStats(pl.id,D.matches);return{id:pl.id,val:s.diff,gp:s.gp};}).filter(r=>r.gp>0).sort((a,b)=>b.val-a.val);
+  const qWinRanks=allPlayers.map(pl=>{const s=queensStats(pl.id,D.matches);return{id:pl.id,val:s.pct,gp:s.gp};}).filter(r=>r.gp>0).sort((a,b)=>b.val-a.val);
+  const gdRanks=allPlayers.map(pl=>{const s=extStats(pl.id,D.gamedays);return{id:pl.id,val:s.diff,sets:s.sets};}).filter(r=>r.sets>0).sort((a,b)=>b.val-a.val);
+  const gdKillRanks=allPlayers.map(pl=>{const s=extStats(pl.id,D.gamedays);return{id:pl.id,val:s.k,sets:s.sets};}).filter(r=>r.sets>0).sort((a,b)=>b.val-a.val);
+  const gdAceRanks=allPlayers.map(pl=>{const s=extStats(pl.id,D.gamedays);return{id:pl.id,val:s.a,sets:s.sets};}).filter(r=>r.sets>0).sort((a,b)=>b.val-a.val);
+  const totalRanks=allPlayers.map(pl=>{const q=queensStats(pl.id,D.matches),g=extStats(pl.id,D.gamedays),s=extStats(pl.id,D.scrimmages);return{id:pl.id,val:q.diff+g.diff+s.diff,gp:q.gp+g.matches+s.matches};}).filter(r=>r.gp>0).sort((a,b)=>b.val-a.val);
+  let h='<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--gray);margin:4px 0 8px;">Match Stats</div>';
+  h+=rankHTML('Queens +/-',qRanks,pid);h+=rankHTML('Queens Win%',qWinRanks,pid,v=>Math.round(v)+'%');
+  h+=rankHTML('Game Day +/-',gdRanks,pid);h+=rankHTML('GD Kills',gdKillRanks,pid,v=>''+v);h+=rankHTML('GD Aces',gdAceRanks,pid,v=>''+v);h+=rankHTML('Overall +/-',totalRanks,pid);
+  // Athleticism
+  h+='<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--gray);margin:16px 0 8px;">Athleticism</div>';
+  const drillBests={};Object.values(profilesData?.starDrills||{}).forEach(d=>{const id=d.playerId||d.player;if(id&&(!drillBests[id]||d.time<drillBests[id]))drillBests[id]=d.time;});
+  const drillRanks=Object.entries(drillBests).map(([id,val])=>({id,val})).sort((a,b)=>a.val-b.val);
+  const drillPos=drillRanks.findIndex(r=>r.id===pid);
+  if(drillPos>=0){const total=drillRanks.length,rank=drillPos+1,pct=total>1?((total-rank)/(total-1))*100:100,barClass=rank<=3?'top3':rank<=Math.ceil(total/2)?'mid':'low';
+    h+=`<div class="rank-row"><span class="rank-label">Star Drill</span><div class="rank-bar-wrap"><div class="rank-bar-fill ${barClass}" style="width:${Math.max(8,pct)}%"></div></div><span class="rank-value">${drillBests[pid].toFixed(1)}s</span><span class="rank-position">${ordinal(rank)} <span class="ordinal">of ${total}</span></span></div>`;}
+  const vertData=profilesData?.jumpTests||profilesData?.verticals||{};
+  const vertBests={},blockBests={},reachBests={};
+  Object.values(vertData).forEach(v=>{const id=v.playerId||v.player;if(!id)return;
+    const ai=parseHeight(v.approachJump||v.approach||v.approachJumpTouch||'');if(ai&&(!vertBests[id]||ai>vertBests[id].inches))vertBests[id]={inches:ai,display:v.approachJump||v.approach||v.approachJumpTouch};
+    const bi=parseHeight(v.blockJump||v.block||v.blockJumpTouch||'');if(bi&&(!blockBests[id]||bi>blockBests[id].inches))blockBests[id]={inches:bi,display:v.blockJump||v.block||v.blockJumpTouch};
+    const ri=parseHeight(v.standingReach||v.reach||'');if(ri&&(!reachBests[id]||ri>reachBests[id].inches))reachBests[id]={inches:ri,display:v.standingReach||v.reach};});
+  function jumpRankHTML(label,bests){const arr=Object.entries(bests).map(([id,v])=>({id,val:v.inches,display:v.display})).sort((a,b)=>b.val-a.val);const pos=arr.findIndex(r=>r.id===pid);if(pos<0)return'';const total=arr.length,rank=pos+1,pct=total>1?((total-rank)/(total-1))*100:100,barClass=rank<=3?'top3':rank<=Math.ceil(total/2)?'mid':'low';return`<div class="rank-row"><span class="rank-label">${label}</span><div class="rank-bar-wrap"><div class="rank-bar-fill ${barClass}" style="width:${Math.max(8,pct)}%"></div></div><span class="rank-value">${arr[pos].display}</span><span class="rank-position">${ordinal(rank)} <span class="ordinal">of ${total}</span></span></div>`;}
+  h+=jumpRankHTML('Approach Jump',vertBests);h+=jumpRankHTML('Block Jump',blockBests);h+=jumpRankHTML('Standing Reach',reachBests);
+  const heightData={};allPlayers.forEach(pl=>{const pp=profilesData?.players?.[pl.id]||{};const hi=parseHeight(pp.height||'');if(hi)heightData[pl.id]={inches:hi,display:pp.height};});
+  h+=jumpRankHTML('Height',heightData);
+  // Skills
+  h+='<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--gray);margin:16px 0 8px;">Skills</div>';
+  const SKILL_KEYS=['serving','passing','setting','hitting','blocking','defense','courtSense','communication'];
+  const SKILL_LABELS={serving:'Serving',passing:'Passing',setting:'Setting',hitting:'Hitting',blocking:'Blocking',defense:'Defense',courtSense:'Court Sense',communication:'Communication'};
+  const playerSkills={};
+  allPlayers.forEach(pl=>{const sk=profilesData?.skills?.[pl.id]||profilesData?.players?.[pl.id]?.skills||{};if(SKILL_KEYS.some(k=>sk[k]>0))playerSkills[pl.id]=sk;});
+  const avgSkillRanks=Object.entries(playerSkills).map(([id,sk])=>({id,val:SKILL_KEYS.reduce((s,k)=>s+(sk[k]||0),0)/SKILL_KEYS.length})).sort((a,b)=>b.val-a.val);
+  h+=rankHTML('Avg Skill Rating',avgSkillRanks,pid,v=>v.toFixed(1));
+  SKILL_KEYS.forEach(sk=>{const arr=Object.entries(playerSkills).map(([id,skills])=>({id,val:skills[sk]||0})).filter(r=>r.val>0).sort((a,b)=>b.val-a.val);if(arr.length>1)h+=rankHTML(SKILL_LABELS[sk],arr,pid,v=>''+v);});
+  el.innerHTML=h||'<div style="color:var(--gray);font-size:13px;text-align:center;padding:16px;">Rankings will appear as data is recorded.</div>';
+}
+
 function coachRenderNoteHistory(pid){
   const el=document.getElementById('cpm-note-history');if(!el)return;
   const notes=Object.values(profilesData?.notes||{}).filter(n=>n.playerId===pid||n.player===pid).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
