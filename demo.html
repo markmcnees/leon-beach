@@ -560,7 +560,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="form-row" style="margin-bottom:10px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Courts to fill</label>
           <select class="form-select" id="ai-pair-courts" style="padding:8px;font-size:13px;">
-            <option value="3">3 courts</option><option value="4">4 courts</option><option value="5">5 courts</option><option value="6">6 courts</option><option value="7">7 courts</option><option value="8">8 courts</option><option value="2">2 courts</option><option value="1">1 court</option>
+            <option value="1">1 court</option><option value="2">2 courts</option><option value="3">3 courts</option><option value="4">4 courts</option><option value="5">5 courts</option><option value="6">6 courts</option><option value="7">7 courts</option><option value="8">8 courts</option>
           </select></div>
         <div class="form-group" style="margin-bottom:0;"><label class="form-label">Context</label>
           <select class="form-select" id="ai-pair-context" style="padding:8px;font-size:13px;" onchange="document.getElementById('ai-pair-rounds-row').style.display=this.value==='queens'?'block':'none'">
@@ -599,7 +599,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label><input type="text" class="form-input" id="assign-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Courts</label>
             <select class="form-select" id="assign-courts" style="padding:8px;font-size:13px;">
-              <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="2">2</option><option value="1">1</option>
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
             </select></div>
         </div>
         <div id="assign-court-slots"></div>
@@ -2222,7 +2222,7 @@ function renderRoster(){
     html+=`<div class="roster-item" id="ritem-${p.id}"><span class="class-badge class-${p.classYear}">${p.classYear}</span>
       <span class="roster-name" id="rname-${p.id}">${p.firstName} ${p.lastName}</span>
       <input type="number" min="0" max="99" placeholder="#" title="Jersey #" value="${p.jersey||''}" style="width:52px;padding:4px 6px;border:1px solid var(--gray-lighter);border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:15px;text-align:center;color:var(--charcoal);" onchange="updJersey('${p.id}',this.value)">
-      <select class="court-select" onchange="updCt('${p.id}',this.value)">${COURTS.map(c=>`<option value="${c}" ${p.court===c?'selected':''}>CT ${c}</option>`).join('')}</select>
+      <select class="court-select" onchange="updCt('${p.id}',this.value)">${COURTS.map(c=>`<option value="${c}" ${p.court===c?'selected':''}>PG ${c}</option>`).join('')}</select>
       <button class="btn btn-small" onclick="editPlayerName('${p.id}')" style="padding:4px 8px;font-size:10px;background:var(--blue);color:var(--white);">✎</button>
       <button class="btn btn-danger btn-small" onclick="remPlayer('${p.id}')" style="padding:4px 8px;font-size:10px;">✕</button></div>`;});
   document.getElementById('roster-list').innerHTML=html;
@@ -3184,7 +3184,7 @@ function renderCoachGoals(){
     if(!entries.length)return;
 
     h+=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--charcoal);margin:16px 0 8px;">
-      ${p.firstName} ${p.lastName} <span class="court-badge court-${p.court}">CT${p.court}</span> <span class="class-badge class-${p.classYear}">${p.classYear}</span></div>`;
+      ${p.firstName} ${p.lastName} <span class="court-badge court-${p.court}">PG${p.court}</span> <span class="class-badge class-${p.classYear}">${p.classYear}</span></div>`;
 
     entries.forEach(([gid,g])=>{
       const fb=g.aiFeedback;
@@ -3640,7 +3640,7 @@ Rules:
       }else{
         // Leon's lineup
         const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
-        function caPlayerOpts(selId){return '<option value="">Select</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (CT${pl.court})</option>`).join('');}
+        function caPlayerOpts(selId){return '<option value="">Select</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (PG${pl.court})</option>`).join('');}
         // Check if assignment already exists for this date
         const caDate=document.getElementById('ca-date').value||td();
         const existingAssign=Object.values(D.assignments).find(a=>a.date===caDate);
@@ -3832,7 +3832,7 @@ IMPORTANT: Respond with ONLY the JSON array, no other text. If you can't read so
 
       // Show parsed results for review — EDITABLE
       const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
-      function playerOpts(selId){return sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (CT${pl.court})</option>`).join('');}
+      function playerOpts(selId){return sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (PG${pl.court})</option>`).join('');}
 
       let h='<div style="font-family:\'Bebas Neue\';font-size:14px;letter-spacing:1px;margin-bottom:8px;color:var(--green);">✓ Found '+parsed.length+' match(es) — edit if needed</div>';
       parsed.forEach((m,i)=>{
@@ -4035,7 +4035,7 @@ function openAssignEditModal(id){
   titleEl.style.color=tC[a.type||'gameday']||'var(--red)';
   const sortedP=[...D.players].sort((x,y)=>x.court-y.court||x.lastName.localeCompare(y.lastName));
   function pOpts(val){
-    return'<option value="">\u2014</option>'+sortedP.map(p=>`<option value="${p.id}" ${p.id===val?'selected':''}>${p.firstName} ${p.lastName.charAt(0)}. (CT${p.court})</option>`).join('');
+    return'<option value="">\u2014</option>'+sortedP.map(p=>`<option value="${p.id}" ${p.id===val?'selected':''}>${p.firstName} ${p.lastName.charAt(0)}. (PG${p.court})</option>`).join('');
   }
   let h=`<div class="form-row" style="margin-bottom:10px;">
     <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
@@ -4663,7 +4663,7 @@ function addAssignEditCourt(){
   const nextCt=i+1;
   const sortedP=[...D.players].sort((x,y)=>x.court-y.court||x.lastName.localeCompare(y.lastName));
   function pOpts(){
-    return'<option value="">\u2014</option>'+sortedP.map(p=>`<option value="${p.id}">${p.firstName} ${p.lastName.charAt(0)}. (CT${p.court})</option>`).join('');
+    return'<option value="">\u2014</option>'+sortedP.map(p=>`<option value="${p.id}">${p.firstName} ${p.lastName.charAt(0)}. (PG${p.court})</option>`).join('');
   }
   const div=document.createElement('div');
   div.style.cssText='background:var(--off-white);border-radius:8px;padding:10px;margin-bottom:8px;';
@@ -5374,7 +5374,7 @@ function buildPlayerNotesUI(){
   sorted.forEach(p=>{
     const val=(coachNotesData.players||{})[p.id]||'';
     h+=`<div class="cnote-player-row">
-      <div class="cnote-player-label">${p.firstName}<br><span style="font-weight:400;color:var(--gray);font-size:10px;">${p.classYear} · CT${p.court}</span></div>
+      <div class="cnote-player-label">${p.firstName}<br><span style="font-weight:400;color:var(--gray);font-size:10px;">${p.classYear} · PG${p.court}</span></div>
       <textarea class="cnote-textarea" id="cnpn-${p.id}" rows="2" placeholder="Notes on ${p.firstName}..." onblur="autoSavePlayerNote('${p.id}')">${val}</textarea>
     </div>`;
   });
@@ -6106,7 +6106,7 @@ RULES: court 1-5 isExhibition:false, court 6+ isExhibition:true. Include ALL cou
 
 function showDualReviewUI(duals,date,container){
   const sorted=[...D.players].sort((a,b)=>a.court-b.court||a.lastName.localeCompare(b.lastName));
-  function playerOpts(selId){return'<option value="">Select Player</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (CT${pl.court})</option>`).join('');}
+  function playerOpts(selId){return'<option value="">Select Player</option>'+sorted.map(pl=>`<option value="${pl.id}" ${pl.id===selId?'selected':''}>${pl.firstName} ${pl.lastName.charAt(0)}. (PG${pl.court})</option>`).join('');}
   let h=`<div style="font-family:'Bebas Neue';font-size:15px;letter-spacing:1px;margin-bottom:10px;color:var(--green);">Found ${duals.length} dual(s) — review and save</div>`;
   h+=`<div style="font-size:12px;color:var(--gray);margin-bottom:14px;padding:8px 12px;background:#fffbeb;border-radius:6px;border-left:3px solid var(--gold);">Saving creates the dual record AND individual Game Day match entries so player stats update automatically.</div>`;
   duals.forEach((d,di)=>{
@@ -6499,7 +6499,7 @@ function editAIPairings(){
   }
   function playerOpts(rawVal=''){
     const val=matchPlayer(rawVal);
-    return'<option value="">Select Player</option>'+sortedPlayers.map(p=>`<option value="${p.firstName} ${p.lastName}" ${(p.firstName+' '+p.lastName)===val?'selected':''}>${p.firstName} ${p.lastName} (CT${p.court})</option>`).join('');
+    return'<option value="">Select Player</option>'+sortedPlayers.map(p=>`<option value="${p.firstName} ${p.lastName}" ${(p.firstName+' '+p.lastName)===val?'selected':''}>${p.firstName} ${p.lastName} (PG${p.court})</option>`).join('');
   }
   let h=`<div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--blue);margin-bottom:12px;">EDIT PAIRINGS</div>`;
   // Date + opponent + type fields
