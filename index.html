@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Leon Beach Volleyball Tracker</title>
+<title>South Walton Beach Volleyball Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
-:root{--red:#e4002b;--red-dark:#b50022;--red-deeper:#8a001a;--red-light:#ff3354;--red-bg:#fce8ec;--black:#1a1a1a;--charcoal:#2d2d2d;--white:#ffffff;--off-white:#fafafa;--cream:#f7f4f0;--gold:#d4a843;--gold-light:#f0d98a;--gray:#6b7280;--gray-light:#d1d5db;--gray-lighter:#e8eaed;--green:#16a34a;--green-bg:#dcfce7;--loss-red:#991b1b;--blue:#4338ca;--blue-bg:#e0e7ff;--purple:#7c3aed;--purple-bg:#f3e8ff;--radius:10px;--shadow:0 2px 10px rgba(0,0,0,0.06);--shadow-lg:0 8px 30px rgba(0,0,0,0.12);}
+:root{--red:#005B34;--red-dark:#004526;--red-deeper:#002e19;--red-light:#1a7a4a;--red-bg:#e6f4ee;--black:#1a1a1a;--charcoal:#2d2d2d;--white:#ffffff;--off-white:#fafafa;--cream:#f7f4f0;--gold:#d4a843;--gold-light:#f0d98a;--gray:#6b7280;--gray-light:#d1d5db;--gray-lighter:#e8eaed;--green:#16a34a;--green-bg:#dcfce7;--loss-red:#991b1b;--blue:#4338ca;--blue-bg:#e0e7ff;--purple:#7c3aed;--purple-bg:#f3e8ff;--radius:10px;--shadow:0 2px 10px rgba(0,0,0,0.06);--shadow-lg:0 8px 30px rgba(0,0,0,0.12);}
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);min-height:100vh;-webkit-font-smoothing:antialiased;}
-.header{background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);padding:14px 20px 10px;position:relative;z-index:100;box-shadow:0 4px 24px rgba(228,0,43,0.3);}
+.header{background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);padding:14px 20px 10px;position:relative;z-index:100;box-shadow:0 4px 24px rgba(0,91,52,0.4);}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .header h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:26px;color:var(--white);letter-spacing:3px;display:flex;align-items:center;gap:8px;text-shadow:0 2px 8px rgba(0,0,0,0.2);}
 .header h1 .crown{font-size:22px;}
@@ -274,7 +277,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100dvh;background:linear-gradient(135deg,var(--red-deeper) 0%,var(--red) 50%,var(--red-dark) 100%);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
 .login-overlay.hidden{display:none;}
 .login-box{background:var(--white);border-radius:16px;padding:36px 28px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);text-align:center;}
-.login-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;color:var(--red);margin-bottom:4px;}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;color:var(--red);margin-bottom:4px;display:flex;flex-direction:column;align-items:center;gap:6px;}
 .login-logo .crown{font-size:30px;}
 .login-sub{font-size:13px;color:var(--gray);margin-bottom:24px;letter-spacing:0.5px;}
 .login-toggle{display:flex;gap:2px;background:var(--gray-lighter);border-radius:8px;padding:2px;margin-bottom:20px;}
@@ -356,13 +359,13 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
   .login-numpad-btn{padding:16px;font-size:22px;}
 }
 </style>
-  <meta name="build-version" content="20260328020848">
+  <meta name="build-version" content="20260314030338">
 </head>
 <body>
 <!-- LOGIN SCREEN -->
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
-    <div class="login-logo" style="display:flex;flex-direction:column;align-items:center;gap:6px;"><img src="leon-logo.png" style="height:72px;width:auto;" alt="Leon"><span>Leon Beach</span></div>
+    <div class="login-logo" style="flex-direction:column;align-items:center;gap:6px;"><img src="seahawks-logo.png" style="height:64px;width:auto;" alt="Seahawks"><span>SW Beach</span></div>
     <div class="login-sub">2026 Beach Volleyball Season</div>
     <div class="login-toggle">
       <button class="login-toggle-btn active" onclick="switchLogin('coach')">Coach</button>
@@ -399,7 +402,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
     <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-lighter);text-align:center;">
       <button onclick="showLeonFans()" style="display:inline-flex;align-items:center;gap:6px;font-family:'Bebas Neue';font-size:14px;letter-spacing:1.5px;color:var(--white);border:none;cursor:pointer;padding:9px 20px;border-radius:8px;background:var(--red);transition:background 0.2s;" onmouseover="this.style.background='var(--red-dark)';" onmouseout="this.style.background='var(--red)';">
-        🏐 Leon Beach Fan Page
+        🏐 SW Beach Fan Page
       </button>
       <div style="font-size:11px;color:var(--red);font-weight:700;margin-top:6px;">Parents · Fans · Press — No login required</div>
     </div>
@@ -410,7 +413,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 <div id="app-wrapper" style="display:none;">
 <div class="header">
   <div class="header-top">
-    <h1><span class="crown"><img src="leon-logo.png" style="height:28px;width:auto;vertical-align:middle;filter:brightness(0) invert(1);"></span> Leon Beach <span class="sync-dot" id="sync-dot"></span></h1>
+    <h1><span class="crown"><img src="seahawks-logo.png" style="height:28px;width:auto;vertical-align:middle;" alt="SW"></span> SW Beach <span class="sync-dot" id="sync-dot"></span></h1>
     <div class="header-user">
       <span class="header-username" id="header-username"></span>
       <button class="logout-btn" onclick="logout()">Logout</button>
@@ -452,7 +455,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Time</label><input type="text" class="form-input" id="sched-time" placeholder="3:00pm" style="padding:8px;font-size:13px;"></div>
         </div>
         <div class="form-row" style="margin-bottom:8px;">
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Leon Score</label><input type="number" class="form-input" id="sched-us" placeholder="—" min="0" max="5" style="padding:8px;font-size:13px;"></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">SW Score</label><input type="number" class="form-input" id="sched-us" placeholder="—" min="0" max="5" style="padding:8px;font-size:13px;"></div>
           <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opp Score</label><input type="number" class="form-input" id="sched-them" placeholder="—" min="0" max="5" style="padding:8px;font-size:13px;"></div>
         </div>
         <button class="btn btn-primary btn-small" onclick="addScheduleGame()">Add Game</button>
@@ -492,7 +495,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div></div>
   </div>
 
-  <!-- ====== QUEENS (Leon vs Leon) ====== -->
+  <!-- ====== QUEENS (SW vs SW) ====== -->
   <div class="tab-content" id="tab-queens">
     <div class="card"><div class="card-title"><span class="bar"></span> Record Queens Match</div>
       <div class="form-row" style="margin-bottom:14px;">
@@ -547,7 +550,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
   </div>
 
-  <!-- ====== GAME DAY (Leon vs External — Season) ====== -->
+  <!-- ====== GAME DAY (SW vs External — Season) ====== -->
     <div class="tab-content" id="tab-gameday">
 <div class="card"><div class="card-title blue"><span class="bar"></span> 🤖 AI Pairing Recommendations</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">AI analyzes skills, match history, position compatibility, side preference, and court levels to suggest optimal pairings.</p>
@@ -624,15 +627,8 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
       <div id="assignments-list"></div>
     </div>
-<div class="card"><div class="card-title blue"><span class="bar"></span> 📅 Past Court Lineups</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Court assignments from past duals and scrimmages, derived from match records.</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-      <input type="date" id="lineup-search-date" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Date" oninput="filterPastLineups()">
-      <input type="text" id="lineup-search-opp" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Opponent" oninput="filterPastLineups()">
-      <input type="text" id="lineup-search-player" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Player name" oninput="filterPastLineups()">
-    </div>
-    <div id="past-lineups-list"></div>
-    </div>
+
+<div class="card" id="pin-change-card"><div class="card-title"><span class="bar"></span> 🔐 Change Coach PIN</div><p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Update the PIN coaches use to access protected features.</p><div class="form-row" style="margin-bottom:8px;"><div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Current PIN</label><input type="password" class="form-input" id="pin-current" placeholder="Current PIN" style="padding:8px;font-size:13px;"></div><div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">New PIN</label><input type="password" class="form-input" id="pin-new" placeholder="New PIN (4+ digits)" style="padding:8px;font-size:13px;"></div></div><button class="btn btn-primary btn-small" onclick="changeCoachPin()">Update PIN</button><div id="pin-change-status" style="font-size:12px;margin-top:8px;"></div></div>
 <div class="card"><div class="card-title"><span class="bar"></span> Data Management</div>
       <div class="data-actions">
         <button class="btn btn-primary btn-small" id="export-excel">📊 Export Excel</button>
@@ -648,7 +644,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div class="form-row" style="margin-bottom:8px;">
         <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Match Type</label>
           <select class="form-select" id="scan-type" style="padding:8px;font-size:13px;">
-            <option value="queens">Queens (Leon vs Leon)</option>
+            <option value="queens">Queens (SW vs SW)</option>
             <option value="gameday">Dual</option>
             <option value="scrimmage">Scrimmage</option>
           </select></div>
@@ -664,12 +660,23 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 
 <!-- ====== DUALS ====== -->
     <!-- ====== DUALS ====== -->
-  <div class="tab-content" id="tab-duals">
+  <div class="tab-content" 
+<div class="card"><div class="card-title blue"><span class="bar"></span> 📅 Past Court Lineups</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Court assignments from past duals and scrimmages, derived from match records.</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+        <input type="date" id="lineup-search-date" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Date" oninput="filterPastLineups()">
+        <input type="text" id="lineup-search-opp" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Opponent" oninput="filterPastLineups()">
+        <input type="text" id="lineup-search-player" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Player name" oninput="filterPastLineups()">
+      </div>
+      <div id="past-lineups-list"></div>
+    </div>
+<div id="tab-duals">
 
 <div class="card" style="border:2px solid var(--blue);">
       <div class="card-title blue"><span class="bar"></span> 🏐 Live Score Entry
         <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Auto-loads today's assignment</span>
       </div>
+      <div id="next-match-banner" style="display:none;"></div>
       <div id="live-assignment-list" style="margin-bottom:12px;"></div>
       <div id="live-courts-container"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">Select an assignment above to load courts.</div></div>
     <div id="shared-lineup-panel" style="display:none;background:#f0f7ff;border:1px solid #bcd6f5;border-radius:10px;padding:14px;margin-top:12px;"></div>
@@ -719,7 +726,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
   </div>
 
-<!-- ====== SCRIMMAGE (Leon vs External — Non-Season) ====== -->
+<!-- ====== SCRIMMAGE (SW vs External — Non-Season) ====== -->
   <div class="tab-content" id="tab-scrimmage">
     <div class="card"><div class="card-title purple"><span class="bar"></span> New Scrimmage Match</div>
       <div class="form-row" style="margin-bottom:10px;">
@@ -983,6 +990,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       </div>
     </div>
   </div>
+
 </div><!-- end player-portal -->
 
 <!-- EDIT MODAL -->
@@ -1008,16 +1016,12 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <button onclick="coachClosePlayer()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:16px;">✕</button>
     </div>
     <div style="padding:16px 20px;display:flex;flex-direction:column;gap:20px;">
-
-      <!-- SKILLS -->
       <div style="border-top:1px solid var(--gray-lighter);padding-top:16px;"><div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">📊 Team Rankings</div><div id="cpm-rankings"></div></div>
       <div>
         <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">⭐ Skills (1–10)</div>
         <div id="cpm-skills"></div>
         <button class="btn btn-red btn-small" style="width:100%;margin-top:10px;" onclick="coachSaveSkills()">Save Skills</button>
       </div>
-
-      <!-- STAR DRILL -->
       <div style="border-top:1px solid var(--gray-lighter);padding-top:16px;">
         <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">⏱ Star Drill</div>
         <div style="display:flex;gap:8px;margin-bottom:8px;">
@@ -1027,8 +1031,6 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         </div>
         <div id="cpm-drill-history"></div>
       </div>
-
-      <!-- VERTICALS -->
       <div style="border-top:1px solid var(--gray-lighter);padding-top:16px;">
         <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">📏 Verticals</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
@@ -1040,8 +1042,6 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <button class="btn btn-blue btn-small" style="width:100%;" onclick="coachAddVertical()">Add Measurement</button>
         <div id="cpm-vert-history" style="margin-top:8px;"></div>
       </div>
-
-      <!-- NOTES -->
       <div style="border-top:1px solid var(--gray-lighter);padding-top:16px;">
         <div style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;color:var(--gray);margin-bottom:8px;">📝 Coach Notes</div>
         <input type="date" id="cpm-note-date" class="form-input" style="width:100%;padding:8px;font-size:13px;margin-bottom:6px;">
@@ -1049,7 +1049,6 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <button class="btn btn-blue btn-small" style="width:100%;" onclick="coachAddNote()">Save Note</button>
         <div id="cpm-note-history" style="margin-top:10px;"></div>
       </div>
-
     </div>
   </div>
 </div>
@@ -1078,15 +1077,15 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div id="ca-preview" style="display:none;"></div>
     <div id="ca-result" style="margin-top:10px;"></div>
 <script>
-window.SCHOOL_CONFIG={schoolName:'Leon Queens',shortName:'Leon',abbrev:'LEON',displayName:'Leon Beach',title:'Leon Beach Volleyball Tracker',coachPin:'8675',defaultPw:'Pride2026',fbConfig:{apiKey:'AIzaSyC8Ue06XPvGXo1XTloewPvDRBWtK5tDAj8',authDomain:'leon-beach-volleyball.firebaseapp.com',databaseURL:'https://leon-beach-volleyball-default-rtdb.firebaseio.com',projectId:'leon-beach-volleyball',storageBucket:'leon-beach-volleyball.firebasestorage.app',messagingSenderId:'937804799976',appId:'1:937804799976:web:02121e68655b4febeb8e5d'},dbRoots:{matches:'leon_queens_matches',profiles:'leon_queens',passwords:'leon_queens_passwords'},logo:'leon-logo.png',logoAlt:'Leon',colors:{primary:'#e4002b',primaryDark:'#b50022',primaryDeeper:'#8a001a',primaryLight:'#ff3354',primaryBg:'#fce8ec'},aiProxyUrl:'https://beach-volleyball-ai.markmcnees-479.workers.dev',maxPrepsUrl:'https://www.maxpreps.com/fl/tallahassee/leon-lions/beach-volleyball/',profilesUrl:'https://markmcnees.github.io/leon-beach/leon-queens-profiles.html',courtsenseUrl:'https://markmcnees.github.io/leon-beach/courtsense.html',myStandingsKey:'Leon',homeVenue:'Tom Brown',teamEmoji:'🦁',exportPrefix:'leon_queens_',legacyMigration:true};
+window.SCHOOL_CONFIG={schoolName:'South Walton Seahawks',shortName:'South Walton',abbrev:'SW',displayName:'SW Beach',title:'South Walton Beach Volleyball Tracker',coachPin:'1234',defaultPw:'Sideout',fbConfig:{apiKey:'AIzaSyC8Ue06XPvGXo1XTloewPvDRBWtK5tDAj8',authDomain:'leon-beach-volleyball.firebaseapp.com',databaseURL:'https://leon-beach-volleyball-default-rtdb.firebaseio.com',projectId:'leon-beach-volleyball',storageBucket:'leon-beach-volleyball.firebasestorage.app',messagingSenderId:'937804799976',appId:'1:937804799976:web:02121e68655b4febeb8e5d'},dbRoots:{matches:'south_walton_matches',profiles:'south_walton',passwords:'south_walton_passwords'},logo:'seahawks-logo.png',logoAlt:'Seahawks',colors:{primary:'#005B34',primaryDark:'#004026',primaryDeeper:'#002918',primaryLight:'#1a8a56',primaryBg:'#e6f2ec'},aiProxyUrl:'https://beach-volleyball-ai.markmcnees-479.workers.dev',maxPrepsUrl:'https://www.maxpreps.com/fl/santa-rosa-beach/south-walton-seahawks/beach-volleyball/',profilesUrl:'https://markmcnees.github.io/south-walton/profiles.html',courtsenseUrl:'https://markmcnees.github.io/leon-beach/courtsense.html',myStandingsKey:'South Walton',homeVenue:'Grayton Beach',teamEmoji:'🦅',exportPrefix:'south_walton_',legacyMigration:false};
 </script>
 <script src="https://cdn.jsdelivr.net/gh/markmcnees/beach-app-core@main/app.js"></script>
 
-<div id="school-fans-overlay" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#8b0000 0%,#e4002b 50%,#c0001f 100%);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+<div id="school-fans-overlay" style="display:none;position:fixed;inset:0;background:linear-gradient(160deg,#002e19 0%,#005B34 50%,#004526 100%);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
   <div style="max-width:480px;margin:0 auto;padding:16px 14px 40px;">
     <div style="text-align:center;padding:24px 0 12px;">
-      <div style="margin-bottom:8px;"><img src="leon-logo.png" style="height:80px;width:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));"></div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:#fff;">Leon Beach</div>
+      <div style="margin-bottom:8px;"><img src="seahawks-logo.png" style="height:80px;width:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));" alt="Seahawks"></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:#fff;">South Walton Seahawks</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.65);margin-top:2px;">Beach Volleyball &middot; 2026 Season</div>
       <div id="lf-record" style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#d4a843;margin-top:8px;"></div>
       <div style="margin-top:12px;display:flex;justify-content:center;gap:8px;">
@@ -1099,12 +1098,12 @@ window.SCHOOL_CONFIG={schoolName:'Leon Queens',shortName:'Leon',abbrev:'LEON',di
       </div>
     </div>
     <div id="lf-banner" style="border-radius:12px;padding:14px;margin-bottom:14px;"></div>
-    <div id="lf-today" style="display:none;background:#ffffff;border:2px solid #e4002b;border-radius:14px;padding:14px;margin-bottom:14px;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#e4002b;margin-bottom:10px;">&#x26A1; IN PROGRESS</div>
+    <div id="lf-today" style="display:none;background:#ffffff;border:2px solid #005B34;border-radius:14px;padding:14px;margin-bottom:14px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#005B34;margin-bottom:10px;">&#x26A1; IN PROGRESS</div>
       <div id="lf-today-courts"></div>
     </div>
     <div id="lf-upcoming-section" style="display:none;background:#ffffff;border:1px solid #f7a8b8;border-radius:14px;margin-bottom:14px;overflow:hidden;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#8b0000;padding:12px 14px 8px;">Upcoming Games</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:#002e19;padding:12px 14px 8px;">Upcoming Games</div>
       <div id="lf-upcoming"></div>
     </div>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.9);margin-bottom:8px;">Season Results</div>
@@ -1130,7 +1129,7 @@ window.SCHOOL_CONFIG={schoolName:'Leon Queens',shortName:'Leon',abbrev:'LEON',di
             <input type="checkbox" id="lf-notif-schedule" checked style="width:14px;height:14px;accent-color:#d4a843;"> Schedule Updates
           </label>
         </div>
-        <button onclick="submitLeonFanEmail()" style="width:100%;padding:10px;background:#d4a843;color:#8b0000;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;border:none;border-radius:8px;cursor:pointer;font-weight:700;">Subscribe</button>
+        <button onclick="submitLeonFanEmail()" style="width:100%;padding:10px;background:#d4a843;color:#002e19;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;border:none;border-radius:8px;cursor:pointer;font-weight:700;">Subscribe</button>
         <div id="lf-email-error" style="color:#f87171;font-size:12px;margin-top:6px;text-align:center;"></div>
       </div>
     </div>
