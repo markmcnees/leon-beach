@@ -28,6 +28,10 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .tabs{display:flex;gap:2px;background:rgba(0,0,0,0.15);border-radius:8px;padding:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
 .tab{flex:1;padding:8px 4px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:rgba(255,255,255,0.55);letter-spacing:1px;cursor:pointer;border-radius:6px;transition:all 0.2s ease;border:none;background:transparent;white-space:nowrap;min-width:0;}
+.mode-bar{display:flex;gap:6px;padding:6px 8px 0;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2px;}
+.mode-btn{flex:1;padding:7px 8px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;border:none;border-radius:6px 6px 0 0;cursor:pointer;transition:all 0.2s;color:rgba(255,255,255,0.5);background:transparent;}
+.mode-btn.active{background:rgba(255,255,255,0.15);color:#fff;}
+.sub-tabs{display:flex;padding:4px 8px;gap:4px;}
 .tab.active{background:rgba(255,255,255,0.2);color:var(--white);}.tab:hover{color:var(--white);}
 .content{padding:16px;max-width:840px;margin:0 auto;}
 .tab-content{display:none;}.tab-content.active{display:block;}
@@ -420,14 +424,21 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
   </div>
   <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="dashboard">Dashboard</button>
-    <button class="tab" data-tab="players">Players</button>
-    <button class="tab" data-tab="gameday">Planner</button>
-    <button class="tab" data-tab="duals">Duals</button>
-    <button class="tab" data-tab="goals">Goals</button>
-    <button class="tab" data-tab="scouts">Scouts</button>
-    <button class="tab" data-tab="settings">Roster</button>
-
+    <div class="mode-bar" id="mode-bar">
+      <button class="mode-btn active" id="mode-gameday" onclick="switchMode('gameday')">🏐 Game Day</button>
+      <button class="mode-btn" id="mode-manage" onclick="switchMode('manage')">⚙️ Manage</button>
+    </div>
+    <div class="sub-tabs" id="sub-tabs-gameday">
+      <button class="tab active" data-tab="duals">Live Scoring</button>
+      <button class="tab" data-tab="gameday">Planner</button>
+    </div>
+    <div class="sub-tabs" id="sub-tabs-manage" style="display:none;">
+      <button class="tab" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="players">Players</button>
+      <button class="tab" data-tab="goals">Goals</button>
+      <button class="tab" data-tab="scouts">Scouts</button>
+      <button class="tab" data-tab="settings">Roster</button>
+    </div>
   </div>
 </div>
 <div class="content" id="coach-content">
