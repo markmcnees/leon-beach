@@ -26,10 +26,10 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .tabs::-webkit-scrollbar{display:none;}
 .tab{flex:1;padding:8px 4px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:rgba(255,255,255,0.55);letter-spacing:1px;cursor:pointer;border-radius:6px;transition:all 0.2s ease;border:none;background:transparent;white-space:nowrap;min-width:0;}
 .mode-bar{display:flex;gap:8px;padding:8px 12px 0;border-bottom:1px solid rgba(255,255,255,0.15);margin-bottom:4px;}
-.mode-btn{flex:1;padding:9px 12px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;border:none;border-radius:8px 8px 0 0;cursor:pointer;transition:all 0.2s;color:rgba(255,255,255,0.55);background:transparent;min-width:0;}
-.mode-btn.active{background:rgba(255,255,255,0.18);color:#fff;font-size:16px;}
+.mode-btn{flex:1;padding:9px 12px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;border:none;border-radius:8px 8px 0 0;cursor:pointer;transition:all 0.2s;color:rgba(255,255,255,0.55);background:transparent;white-space:nowrap;min-width:0;}
+.mode-btn.active{background:rgba(255,255,255,0.18);color:#fff;}
 .sub-tabs{display:flex;padding:6px 12px 6px;gap:6px;}
-.sub-tabs .tab{flex:1;padding:9px 8px;font-size:13px;letter-spacing:1px;border-radius:8px;}
+.sub-tabs .tab{flex:1;padding:9px 8px;font-size:13px;letter-spacing:1px;border-radius:8px;text-align:center;}
 .tab.active{background:rgba(255,255,255,0.2);color:var(--white);}.tab:hover{color:var(--white);}
 .content{padding:16px;max-width:840px;margin:0 auto;}
 .tab-content{display:none;}.tab-content.active{display:block;}
@@ -429,6 +429,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     <div class="sub-tabs" id="sub-tabs-gameday">
       <button class="tab active" data-tab="duals">Live Scoring</button>
       <button class="tab" data-tab="gameday">Planner</button>
+      <button class="tab" data-tab="dualhistory">Dual History</button>
     </div>
     <div class="sub-tabs" id="sub-tabs-manage" style="display:none;">
       <button class="tab" data-tab="dashboard">Dashboard</button>
@@ -561,6 +562,17 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 
   <!-- ====== GAME DAY (Leon vs External — Season) ====== -->
     <div class="tab-content" id="tab-gameday">
+<div class="card"><div class="card-title blue"><span class="bar"></span> 📋 Planner</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Set lineups for duals and practice. Players see their assignment in their portal.</p>
+      <div style="background:var(--off-white);border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Create Assignment</div>
+        <div class="form-row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label><input type="date" class="form-input" id="assign-date" style="padding:8px;font-size:13px;"></div>
+          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
+            <select class="form-select" id="assign-type" style="padding:8px;font-size:13px;">
+              <option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
+            </select></div>
+        </div>
 <div class="card"><div class="card-title blue"><span class="bar"></span> 🤖 AI Pairing Recommendations</div>
       <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">AI analyzes skills, match history, position compatibility, side preference, and court levels to suggest optimal pairings.</p>
       <div class="form-row" style="margin-bottom:10px;">
@@ -575,76 +587,6 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
             <option value="queens">Queens Practice (competitive balance)</option>
           </select></div>
       </div>
-      <div class="form-row" style="margin-bottom:10px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date</label>
-          <input type="date" class="form-select" id="ai-pair-date" style="padding:8px;font-size:13px;"></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Location</label>
-          <select class="form-select" id="ai-pair-location" style="padding:8px;font-size:13px;">
-            <option>Tom Brown</option><option>Northside</option><option>4 Oaks</option><option>Away</option>
-          </select></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Time</label>
-          <input type="time" class="form-select" id="ai-pair-time" style="padding:8px;font-size:13px;"></div>
-      </div>
-      <div id="ai-pair-rounds-row" style="display:none;margin-bottom:10px;">
-        <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">Rounds / Games</label>
-          <select class="form-select" id="ai-pair-rounds" style="padding:8px;font-size:13px;">
-            <option value="1">1 round</option>
-            <option value="2">2 rounds — different partners each</option>
-            <option value="3">3 rounds — full rotation</option>
-            <option value="4">4 rounds</option>
-          </select>
-          <div style="font-size:11px;color:var(--gray);margin-top:4px;">Each round re-mixes all partners so players get new matchups</div>
-        </div>
-      </div>
-      <button class="btn btn-blue btn-small" onclick="generateAIPairings()" id="ai-pair-btn" style="width:100%;">🤖 Generate Pairings</button>
-      <div id="ai-pairings-result" style="margin-top:12px;"></div>
-    </div>
-<div class="card"><div class="card-title blue"><span class="bar"></span> 📋 Planner</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Set lineups for duals and practice. Players see their assignment in their portal.</p>
-      <div style="background:var(--off-white);border-radius:8px;padding:14px;margin-bottom:14px;">
-        <div style="font-family:'Bebas Neue';font-size:13px;letter-spacing:1px;color:var(--charcoal);margin-bottom:8px;">Create Assignment</div>
-        <div class="form-row" style="margin-bottom:8px;">
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label><input type="date" class="form-input" id="assign-date" style="padding:8px;font-size:13px;"></div>
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Type</label>
-            <select class="form-select" id="assign-type" style="padding:8px;font-size:13px;">
-              <option value="gameday">Dual</option><option value="scrimmage">Scrimmage</option><option value="queens">Queens</option>
-            </select></div>
-        </div>
-        <div class="form-row" style="margin-bottom:8px;">
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Opponent (Game Day)</label><input type="text" class="form-input" id="assign-opp" placeholder="e.g. Chiles" style="padding:8px;font-size:13px;"></div>
-          <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Courts</label>
-            <select class="form-select" id="assign-courts" style="padding:8px;font-size:13px;">
-              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
-            </select></div>
-        </div>
-        <div id="assign-court-slots"></div>
-        <div id="assign-notes-section" style="margin-top:8px;"></div>
-        <button class="btn btn-blue btn-small" style="width:100%;margin-top:10px;" onclick="saveAssignment()">Save Assignment</button>
-      <div style="text-align:center;margin:10px 0 4px;font-size:11px;color:var(--gray);letter-spacing:0.5px;">— OR —</div>
-      <div style="margin-bottom:6px;">
-        <div style="font-size:11px;font-weight:700;color:var(--gray);letter-spacing:1px;margin-bottom:6px;">SCAN ASSIGNMENT SHEET</div>
-        <div style="display:flex;gap:6px;margin-bottom:8px;">
-          <button id="ca-toggle-mine" class="btn btn-primary btn-small" style="flex:1;" onclick="setCaTeam('mine')">My Sheet</button>
-          <button id="ca-toggle-opp" class="btn btn-secondary btn-small" style="flex:1;" onclick="setCaTeam('opponent')">Opponent's Sheet</button>
-        </div>
-        <div id="ca-opp-wrap" style="display:none;margin-bottom:8px;">
-          <input id="ca-opp" type="text" class="form-input" placeholder="Opponent school name" style="width:100%;font-size:13px;padding:8px;">
-        </div>
-        <button class="btn btn-secondary btn-small" style="width:100%;" onclick="document.getElementById('ca-file').click()">📸 Scan Sheet</button>
-      </div>
-      </div>
-      <div id="assignments-list"></div>
-    </div>
-<div class="card"><div class="card-title blue"><span class="bar"></span> 📅 Past Court Lineups</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Court assignments from past duals and scrimmages, derived from match records.</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-      <input type="date" id="lineup-search-date" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Date" oninput="filterPastLineups()">
-      <input type="text" id="lineup-search-opp" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Opponent" oninput="filterPastLineups()">
-      <input type="text" id="lineup-search-player" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Player name" oninput="filterPastLineups()">
-    </div>
-    <div id="past-lineups-list"></div>
-    </div>
 <div class="card"><div class="card-title"><span class="bar"></span> Data Management</div>
       <div class="data-actions">
         <button class="btn btn-primary btn-small" id="export-excel">📊 Export Excel</button>
@@ -653,31 +595,11 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <input type="file" id="import-data" accept=".json" style="display:none;">
         <button class="btn btn-danger btn-small" id="clear-matches">Clear All Matches</button>
       </div>
-    </div>
-
-<div class="card"><div class="card-title"><span class="bar"></span> 📷 Upload Scoresheet</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Take a photo of a handwritten scoresheet and AI will read it and create the match entries.</p>
-      <div class="form-row" style="margin-bottom:8px;">
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Match Type</label>
-          <select class="form-select" id="scan-type" style="padding:8px;font-size:13px;">
-            <option value="queens">Queens (Leon vs Leon)</option>
-            <option value="gameday">Dual</option>
-            <option value="scrimmage">Scrimmage</option>
-          </select></div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Date</label>
-          <input type="date" class="form-input" id="scan-date" style="padding:8px;font-size:13px;"></div>
-      </div>
-      <input type="file" id="scan-file" accept="image/*" style="display:none;">
-      <button class="btn btn-secondary btn-small" style="width:100%;" onclick="document.getElementById('scan-file').click();">📷 Take Photo or Upload Image</button>
-      <div id="scan-preview" style="margin-top:10px;"></div>
-      <div id="scan-result" style="margin-top:10px;"></div>
-    </div>
+<div class="card" id="pin-change-card"><div class="card-title"><span class="bar"></span> 🔐 Change Coach PIN</div><p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Update the PIN coaches use to access protected features.</p><div class="form-row" style="margin-bottom:8px;"><div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">Current PIN</label><input type="password" class="form-input" id="pin-current" placeholder="Current PIN" style="padding:8px;font-size:13px;"></div><div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:11px;">New PIN</label><input type="password" class="form-input" id="pin-new" placeholder="New PIN (4+ digits)" style="padding:8px;font-size:13px;"></div></div><button class="btn btn-primary btn-small" onclick="changeCoachPin()">Update PIN</button><div id="pin-change-status" style="font-size:12px;margin-top:8px;"></div></div>
   </div>
 
-<!-- ====== DUALS ====== -->
-    <!-- ====== DUALS ====== -->
+<!-- ====== DUALS / LIVE SCORING ====== -->
   <div class="tab-content active" id="tab-duals">
-
 <div class="card" style="border:2px solid var(--blue);">
       <div class="card-title blue"><span class="bar"></span> 🏐 Live Score Entry
         <span style="font-size:11px;font-weight:400;color:var(--gray);letter-spacing:0;font-family:'Barlow',sans-serif;margin-left:6px;">Auto-loads today's assignment</span>
@@ -705,7 +627,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
         <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">Game Summary &amp; General Notes</label>
         <textarea class="cnote-textarea" id="cnote-game-text" rows="4" placeholder="Overall performance, strategy observations, conditions, key moments..."></textarea>
         <button class="btn btn-secondary btn-small" style="margin-top:8px;" onclick="saveCoachNote('game')">Save Game Notes</button>
-        <span id="cnote-game-saved" style="font-size:11px;color:var(--green);margin-left:8px;opacity:0;transition:opacity 0.4s;" id="cnote-game-saved">✓ Saved</span>
+        <span id="cnote-game-saved" style="font-size:11px;color:var(--green);margin-left:8px;opacity:0;transition:opacity 0.4s;">✓ Saved</span>
       </div>
       <div class="cnote-section" id="cnote-players">
         <div id="cnote-players-list"><div style="color:var(--gray);font-size:13px;">Load notes for a date first.</div></div>
@@ -726,9 +648,22 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
       <div id="dual-scan-preview" style="margin-top:10px;"></div>
       <div id="dual-scan-result" style="margin-top:10px;"></div>
     </div>
+  </div>
+
+<!-- ====== DUAL HISTORY ====== -->
+  <div class="tab-content" id="tab-dualhistory">
+<div class="card"><div class="card-title blue"><span class="bar"></span> 📅 Past Court Lineups</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Court assignments from past duals and scrimmages, derived from match records.</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+        <input type="date" id="lineup-search-date" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Date" oninput="filterPastLineups()">
+        <input type="text" id="lineup-search-opp" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Opponent" oninput="filterPastLineups()">
+        <input type="text" id="lineup-search-player" class="form-input" style="flex:1;min-width:120px;font-size:12px;" placeholder="Player name" oninput="filterPastLineups()">
+      </div>
+      <div id="past-lineups-list"></div>
+    </div>
 <div class="card">
       <div class="card-title"><span class="bar"></span> Dual History</div>
-      <div id="duals-list"><div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.<br>Upload a scoresheet above to get started!</p></div></div>
+      <div id="duals-list"><div class="empty-state"><div class="emoji">&#127942;</div><p>No dual matches recorded yet.<br>Upload a scoresheet to get started!</p></div></div>
     </div>
   </div>
 
