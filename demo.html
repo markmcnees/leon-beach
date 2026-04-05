@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Sand Sharks — Demo</title>
@@ -521,7 +520,7 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div></div>
   </div>
 
-  <!-- ====== QUEENS (Leon vs Leon) ====== -->
+  <!-- ====== QUEENS (Leon vs Sand Sharks) ====== -->
   <div class="tab-content" id="tab-queens">
     <div class="card"><div class="card-title"><span class="bar"></span> Record Queens Match</div>
       <div class="form-row" style="margin-bottom:14px;">
@@ -1584,6 +1583,7 @@ function initFB(){
     document.body.insertBefore(dc,b.nextSibling);
     _DEMO.loadInto(D);
     profilesData=_DEMO.getProfiles();
+    setTimeout(function(){try{renderDash();}catch(e){}},100);
     _DEMO.onUpdate(function(){
       profilesData=_DEMO.getProfiles();
       _DEMO.loadInto(D);
@@ -1849,8 +1849,9 @@ function renderStandings(){
   Object.entries(oppFromSchedule).forEach(([name,rec])=>{teams[name]={w:rec.w,l:rec.l,auto:true};});
   // Then override with manually set records
   Object.entries(D.standings).forEach(([name,s])=>{teams[name]={w:s.w||0,l:s.l||0,auto:false};});
-  // Leon always present
-  teams['Leon']={w:leonW,l:leonL,auto:true};
+  // Home team always present
+  const myTeamName='Sand Sharks';
+  teams[myTeamName]={w:leonW,l:leonL,auto:true};
 
   // Sort by win %, then wins
   const sorted=Object.entries(teams).sort((a,b)=>{
@@ -1862,14 +1863,14 @@ function renderStandings(){
   let h='<div style="overflow-x:auto;"><table class="player-table" style="min-width:280px;"><thead><tr><th style="width:30px;">#</th><th>Team</th><th>W</th><th>L</th><th>Pct</th><th></th></tr></thead><tbody>';
   sorted.forEach(([name,s],i)=>{
     const pct=(s.w+s.l)>0?((s.w/(s.w+s.l))*100).toFixed(0)+'%':'—';
-    const isLeon=name==='Leon';
+    const isLeon=name===myTeamName;
     h+=`<tr style="${isLeon?'background:var(--red-bg);font-weight:700;':''}">
       <td style="font-family:'Bebas Neue';font-size:14px;color:var(--gray);">${i+1}</td>
-      <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦁':''}</td>
+      <td style="${isLeon?'color:var(--red);':''}font-weight:700;">${name}${isLeon?' 🦈':''}</td>
       <td style="font-family:'Bebas Neue';font-size:16px;color:var(--green);">${s.w}</td>
       <td style="font-family:'Bebas Neue';font-size:16px;color:var(--loss-red);">${s.l}</td>
       <td style="font-family:'Bebas Neue';font-size:14px;">${pct}</td>
-      <td>${s.auto&&!isLeon?'<span style="font-size:9px;color:var(--gray);">vs Leon</span>':''}</td></tr>`;
+      <td>${s.auto&&!isLeon?'<span style="font-size:9px;color:var(--gray);">vs Sand Sharks</span>':''}</td></tr>`;
   });
   h+='</tbody></table></div>';
   if(Object.keys(oppFromSchedule).length)h+='<div style="font-size:10px;color:var(--gray);margin-top:6px;font-style:italic;">Records marked "vs Leon" are auto-calculated from schedule. Update with full season records using the form below.</div>';
