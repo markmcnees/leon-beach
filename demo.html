@@ -33,7 +33,12 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
 .sync-dot.offline{background:#ef4444;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
 .season-badge{background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:13px;padding:4px 14px;border-radius:20px;letter-spacing:2px;border:1px solid rgba(255,255,255,0.25);}
-.tabs{display:flex;gap:2px;background:rgba(0,0,0,0.15);border-radius:8px;padding:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tabs{display:flex;flex-direction:column;gap:2px;background:rgba(0,0,0,0.15);border-radius:8px;padding:2px;}
+.mode-bar{display:flex;gap:8px;padding:8px 12px 0;border-bottom:1px solid rgba(255,255,255,0.15);margin-bottom:4px;}
+.mode-btn{flex:1;padding:9px 12px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1.5px;border:none;border-radius:8px 8px 0 0;cursor:pointer;transition:all 0.2s;color:rgba(255,255,255,0.55);background:transparent;white-space:nowrap;min-width:0;}
+.mode-btn.active{background:rgba(255,255,255,0.18);color:#fff;}
+.sub-tabs{display:flex;padding:6px 12px 6px;gap:6px;}
+.sub-tabs .tab{flex:1;padding:9px 8px;font-size:13px;letter-spacing:1px;border-radius:8px;text-align:center;}
 .tabs::-webkit-scrollbar{display:none;}
 .tab{flex:1;padding:8px 4px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:rgba(255,255,255,0.55);letter-spacing:1px;cursor:pointer;border-radius:6px;transition:all 0.2s ease;border:none;background:transparent;white-space:nowrap;min-width:0;}
 .tab.active{background:rgba(255,255,255,0.2);color:var(--white);}.tab:hover{color:var(--white);}
@@ -428,14 +433,22 @@ body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--black);
     </div>
   </div>
   <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="dashboard">Dashboard</button>
-    <button class="tab" data-tab="players">Players</button>
-    <button class="tab" data-tab="gameday">Planner</button>
-    <button class="tab" data-tab="duals">Duals</button>
-    <button class="tab" data-tab="goals">Goals</button>
-    <button class="tab" data-tab="scouts">Scouts</button>
-    <button class="tab" data-tab="settings">Roster</button>
-    <button class="tab" style="border-left:1px solid rgba(255,255,255,0.15);opacity:0.4;cursor:default;" title="Profiles not available in demo mode">Profiles ↗</button>
+    <div class="mode-bar" id="mode-bar">
+      <button class="mode-btn active" id="mode-gameday" onclick="switchMode('gameday')">🏐 Game Day</button>
+      <button class="mode-btn" id="mode-manage" onclick="switchMode('manage')">⚙️ Manage</button>
+    </div>
+    <div class="sub-tabs" id="sub-tabs-gameday">
+      <button class="tab active" data-tab="duals">Live Scoring</button>
+      <button class="tab" data-tab="gameday">Planner</button>
+    </div>
+    <div class="sub-tabs" id="sub-tabs-manage" style="display:none;">
+      <button class="tab" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="players">Players</button>
+      <button class="tab" data-tab="goals">Goals</button>
+      <button class="tab" data-tab="scouts">Scouts</button>
+      <button class="tab" data-tab="settings">Roster</button>
+      <button class="tab" style="opacity:0.4;cursor:default;" title="Profiles not available in demo mode">Profiles ↗</button>
+    </div>
   </div>
 </div>
 <div class="content" id="coach-content">
@@ -1549,6 +1562,7 @@ const DEF_M=[
 ];
 
 let D={players:[],matches:[],planned:[],gamedays:[],scrimmages:[],schedule:[],standings:{},goals:{},assignments:{},duals:[],opponents:{}};
+var _dualCloseInProgress=false;
 let profilesData={}; // from leon_queens node for AI context
 let pgdNotes={}; // player self-notes per date: pgdNotes[pid][date]
 let _autoLoginDone=false;
@@ -2288,13 +2302,36 @@ function refreshCurrent(){
   // Also update player login dropdown if on login screen
   if(!currentRole)populatePlayerLogin();
 }
+function switchMode(mode){
+  const gdBar=document.getElementById('sub-tabs-gameday');
+  const mgBar=document.getElementById('sub-tabs-manage');
+  const gdBtn=document.getElementById('mode-gameday');
+  const mgBtn=document.getElementById('mode-manage');
+  if(!gdBar||!mgBar)return;
+  if(mode==='gameday'){
+    gdBar.style.display='flex';mgBar.style.display='none';
+    if(gdBtn)gdBtn.classList.add('active');
+    if(mgBtn)mgBtn.classList.remove('active');
+    const activeGD=gdBar.querySelector('.tab.active');
+    if(!activeGD){const first=gdBar.querySelector('.tab');if(first)first.click();}
+    else{refreshTab(activeGD.dataset.tab);}
+  }else{
+    gdBar.style.display='none';mgBar.style.display='flex';
+    if(mgBtn)mgBtn.classList.add('active');
+    if(gdBtn)gdBtn.classList.remove('active');
+    const activeMG=mgBar.querySelector('.tab.active');
+    if(!activeMG){const first=mgBar.querySelector('.tab');if(first)first.click();}
+    else{refreshTab(activeMG.dataset.tab);}
+  }
+}
+
 function refreshTab(id){
   switch(id){
     case'dashboard':renderDash();break;
     case'players':renderPlayers();break;
     case'queens':renderQueens();break;
     case'gameday':renderExtMatches('gameday');buildAssignSlots();renderAssignments();break;
-    case'duals':renderDuals();break;
+    case'duals':renderDuals();renderLiveAssignmentList();break;
     case'scrimmage':renderExtMatches('scrimmage');break;
     case'goals':renderCoachGoals();break;
     case'scouts':renderScouts();break;
@@ -2307,9 +2344,12 @@ function refreshTab(id){
 // ============================================================
 // Tab navigation
 document.querySelectorAll('.tab').forEach(t=>{t.addEventListener('click',()=>{
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  const parent=t.closest('.sub-tabs')||document.getElementById('tabs');
+  (parent?parent.querySelectorAll('.tab'):document.querySelectorAll('.tab')).forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+  t.classList.add('active');
+  const tc=document.getElementById('tab-'+t.dataset.tab);
+  if(tc)tc.classList.add('active');
   refreshTab(t.dataset.tab);});});
 
 // Players tab filters
@@ -5126,6 +5166,77 @@ function loadLiveCourts(id){
   renderLiveScoring(a.date,a);
 }
 
+function closeDual(){
+  const a=window._loadedAssignment||Object.values(D.assignments||{}).find(x=>x.type==='gameday');
+  const btn=document.getElementById('close-dual-btn');
+  const resultDiv=document.getElementById('close-dual-result');
+  function showResult(msg,isError){
+    if(resultDiv){
+      resultDiv.style.display='block';
+      resultDiv.style.background=isError?'#fee2e2':'var(--green-bg)';
+      resultDiv.style.color=isError?'var(--loss-red)':'var(--green)';
+      resultDiv.style.border='2px solid '+(isError?'var(--loss-red)':'var(--green)');
+      resultDiv.textContent=msg;
+    }
+    toast(msg);
+    if(btn&&isError){btn.disabled=false;btn.textContent='✓ Close Dual & Save Result';btn.style.background='';}
+  }
+  if(!a){showResult('⚠ No assignment loaded',true);return;}
+  const date=a.date||td();
+  const opponent=a.opponent||'Opponent';
+  const aType=a.type||'gameday';
+  if(aType==='scrimmage'||aType==='queens'){showResult('⚠ Official duals only',true);return;}
+  if(!db){showResult('⚠ Not connected',true);return;}
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  let myCourts=0,oppCourts=0;
+  const courts=(a.courts||[]).filter(c=>(c.court||0)<=5);
+  courts.forEach(c=>{
+    const m=D.gamedays.find(gd=>gd.date===date&&arrEq(gd.pair||[],[c.p1,c.p2].filter(Boolean)));
+    if(!m||(m.sets||[]).length===0)return;
+    const sets=m.sets||[];
+    const sw=sets.filter(s=>(s.scoreUs||0)>(s.scoreThem||0)).length;
+    const sl=sets.length-sw;
+    if(sw>sl)myCourts++;else if(sl>sw)oppCourts++;
+  });
+  const dualWin=myCourts>oppCourts;
+  const loc=a.location||'home';
+  const dualId='dual-'+date+'-'+opponent.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const existing=D.duals.find(d=>d.date===date&&(d.opponent||'').toLowerCase()===opponent.toLowerCase());
+  const id=existing?existing.id:dualId;
+  fbSet('duals/'+id,{id,date,opponent,location:loc,leonCourts:myCourts,oppCourts,dualWin,createdAt:existing?existing.createdAt:td()});
+  const schedMatch=(D.schedule||[]).find(g=>g.date===date&&(g.opponent||'').toLowerCase()===opponent.toLowerCase());
+  if(schedMatch){
+    fbSet('schedule/'+schedMatch.id+'/scoreUs',myCourts);
+    fbSet('schedule/'+schedMatch.id+'/scoreThem',oppCourts);
+  }
+  if(db)db.ref(DB_ROOT+'/live_scoring').remove();
+  const winner=dualWin?(SC.shortName||'Us'):opponent;
+  const resultMsg=winner+' wins '+myCourts+'-'+oppCourts;
+  if(btn){btn.textContent='✓ Saved!';btn.style.background='var(--green)';}
+  showResult('✓ '+resultMsg+' saved!',false);
+  _dualCloseInProgress=true;
+  setTimeout(()=>{
+    _dualCloseInProgress=false;
+    const today=td();
+    const nextToday=Object.values(D.assignments||{})
+      .filter(x=>x.date===today&&x.type==='gameday'&&x.id!==id&&(x.courts||[]).length>0)
+      .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+    const dualsTab=document.querySelector('.tab[data-tab="duals"]');
+    if(dualsTab)dualsTab.click();
+    if(nextToday.length){
+      setTimeout(()=>{
+        const next=nextToday[0];
+        const banner=document.getElementById('next-match-banner');
+        if(banner){
+          banner.style.display='block';
+          const nid=next.id||'';const nopp=next.opponent||'Next Match';const ntime=next.time?' at '+next.time:'';
+          banner.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;background:var(--blue-bg);border:2px solid var(--blue);border-radius:10px;margin-bottom:12px;"><span style="font-weight:600;">Next match ready: <strong>'+nopp+'</strong>'+ntime+'</span><button class="btn btn-blue btn-small" onclick="loadLiveCourts(&quot;'+nid+'&quot;);document.getElementById(&quot;next-match-banner&quot;).style.display=&quot;none&quot;;">▶ Load '+nopp+'</button></div>';
+        }
+      },300);
+    }
+  },1800);
+}
+
 function renderLiveScoring(dateOverride,assignOverride){
   const date=dateOverride||td();
   const container=document.getElementById('live-courts-container');
@@ -5224,6 +5335,11 @@ function renderLiveScoring(dateOverride,assignOverride){
     </div>`;
     h+='</div>';
   });
+
+  if(aType==='gameday'){
+    h+='<button class="btn btn-red" id="close-dual-btn" style="width:100%;padding:12px;font-size:15px;font-family:\'Bebas Neue\',sans-serif;letter-spacing:1px;margin-top:8px;" onclick="closeDual()">&#10003; Close Dual &amp; Save Result</button>';
+    h+='<div id="close-dual-result" style="display:none;margin-top:10px;padding:12px;border-radius:8px;text-align:center;font-family:\'Bebas Neue\',sans-serif;font-size:16px;letter-spacing:1px;"></div>';
+  }
 
   container.innerHTML=h;
 }
