@@ -1575,12 +1575,7 @@ function initFB(){
     b.style.cssText='background:#f59e0b;color:#000;text-align:center;padding:7px 12px;font-family:Bebas Neue,sans-serif;font-size:13px;letter-spacing:2px;position:sticky;top:0;z-index:9999;';
     b.textContent='⚡ DEMO MODE — Sand Sharks — Nothing saves — Resets on refresh ⚡';
     document.body.prepend(b);
-    // Demo date controls bar
-    const dc=document.createElement('div');
-    dc.style.cssText='background:#023e8a;color:#fff;text-align:center;padding:8px 16px;display:flex;align-items:center;justify-content:center;gap:12px;font-family:Barlow,sans-serif;font-size:13px;flex-wrap:wrap;';
-    const tod=new Date().toISOString().slice(0,10);
-    dc.innerHTML='<strong style="font-family:Bebas Neue,sans-serif;letter-spacing:1px;">Demo Dual Date:</strong><input type="date" id="demo-date-picker" value="'+tod+'" style="padding:4px 8px;border:1px solid #90e0ef;border-radius:6px;font-size:13px;background:#0077b6;color:#fff;cursor:pointer;"><button onclick="applyDemoDate()" style="padding:5px 14px;background:#00b4d8;color:#000;border:none;border-radius:6px;font-family:Bebas Neue,sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;">Apply</button><span style="font-size:11px;opacity:0.7;">Set which date has today\'s dual</span>';
-    document.body.insertBefore(dc,b.nextSibling);
+
     _DEMO.loadInto(D);
     profilesData=_DEMO.getProfiles();
     setTimeout(function(){try{renderDash();}catch(e){}},100);
@@ -7098,18 +7093,7 @@ function seedMissingDuals(){
   });
 }
 
-function applyDemoDate(){
-  const picker=document.getElementById('demo-date-picker');
-  if(!picker||!picker.value){toast('Pick a date first');return;}
-  const d=picker.value;
-  if(typeof _DEMO!=='undefined'&&_DEMO.setDualDate){
-    _DEMO.setDualDate(d);
-    const liveDate=document.getElementById('live-date');
-    if(liveDate)liveDate.value=d;
-    toast('Demo dual date: '+d);
-    refreshCurrent();
-  }
-}
+
 
 // ============================================================
 // INIT
